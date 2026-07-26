@@ -4,14 +4,20 @@ set -euo pipefail
 # Replaces `git subtree pull --prefix docs/curriculum` (REQ 0022, chatdox-curriculum).
 # Subtree kept causing large add/add conflicts on pull, and pulled the entire HQ repo
 # (QA/, SETUP/, TIPS/, prompts/, internal/, service-desk tooling, etc.) even though
-# this app only ever reads three specific folders. This instead exports the exact
-# git-tracked snapshot of chatdox-curriculum at a given ref and mirrors ONLY the
-# folders actually used at runtime, under hq/ so it's clear this content is
+# this app only ever reads a handful of specific folders. This instead exports the
+# exact git-tracked snapshot of chatdox-curriculum at a given ref and mirrors ONLY
+# the folders actually used at runtime, under hq/ so it's clear this content is
 # provided by HQ (chatdox-curriculum) and not owned/authored by DEV:
 #
 #   HQ docs/                 -> DEV hq/chatdox/
 #   HQ claudox/               -> DEV hq/claudox/
+#   HQ aistart/               -> DEV hq/aistart/
 #   HQ service-desk/requests/ -> DEV hq/service-desk/
+#
+# Each product's folder needs its own sync_one line below -- this is the one
+# remaining spot that isn't Product.pluck(:code)-driven (see
+# leedox_multi_product_platform_stage5_r1 result.md; full automation left to
+# backlog 006).
 #
 # No shared git history, no subtree merge machinery, no unused content. Commit the
 # result in this repo like any other change.
@@ -154,6 +160,7 @@ restore_mtimes() {
 echo "Syncing chatdox-curriculum ($REF), runtime folders only:"
 sync_one "docs" "$PROJECT_ROOT/hq/chatdox"
 sync_one "claudox" "$PROJECT_ROOT/hq/claudox"
+sync_one "aistart" "$PROJECT_ROOT/hq/aistart"
 sync_one "service-desk/requests" "$PROJECT_ROOT/hq/service-desk"
 
 echo "Dry run: $DRY_RUN_MODE"

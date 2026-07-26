@@ -1,0 +1,13 @@
+# Product structure for "AI, 오늘부터 시작" (product_code: aistart),
+# read by ProductContent::FilesystemSource. This product is designed to be
+# fully free/public — all 5 episodes are guest-accessible, no login or
+# license required (see leedox_multi_product_platform_stage5_r1 request).
+phases:
+  - key: part_1
+    label: "전체"
+    title: "AI, 오늘부터 시작"
+    description: "AI를 처음 쓰는 사람이 오늘 바로 시작할 수 있도록 돕는 5화짜리 무료 입문 가이드."
+    range: "1..5"
+chapter_range: "1..5"
+guest_chapter_limit: 5
+trial_chapter_limit: 5

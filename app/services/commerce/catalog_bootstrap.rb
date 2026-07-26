@@ -10,6 +10,20 @@ module Commerce
         name: "Claudox",
         tagline: "Claude를 팀에 합류시켜 실제로 협업한 기록을 그대로 따라가는 콘텐츠",
         landing_page_path: "/claudox"
+      },
+      # Free, always-guest-accessible content (see hq/aistart/content_meta.yml
+      # -- guest/trial limits both cover all 5 chapters). Not for sale: no
+      # ProductOffer entries below, no tagline/landing_page_path (an empty
+      # landing_page_path already makes the /pricing card omit its "자세히
+      # 보기" link -- proven in stage 4). sale_enabled stays false like every
+      # other product's initial state here, and must stay false permanently
+      # for this one specifically -- flipping it on would expose a checkout
+      # page with zero offers to choose from, since Commerce::Sales.enabled_for?
+      # only checks active/sale_enabled, not offer existence.
+      "aistart" => {
+        name: "AI, 오늘부터 시작",
+        tagline: nil,
+        landing_page_path: nil
       }
     }.freeze
     CHATDOX_OFFERS = [

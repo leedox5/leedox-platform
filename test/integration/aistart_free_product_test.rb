@@ -1,0 +1,69 @@
+require "test_helper"
+
+# Real end-to-end validation of stage 5 (the final step of the multi-product
+# platform generalization): a genuine, HQ-authored product ("aistart", 5 free
+# chapters) registered purely via Commerce::CatalogBootstrap + a
+# sync_curriculum.sh content pull -- zero ProductContent/DocPolicy/
+# ChapterProgress/dashboard/pricing code changes. See
+# leedox_multi_product_platform_stage5_r1 result.md.
+class AistartFreeProductTest < ActionDispatch::IntegrationTest
+  setup do
+    Commerce::CatalogBootstrap.call!
+    @aistart = Product.find_by!(code: "aistart")
+  end
+
+  test "all 5 chapters are readable while signed out, with no login/license required" do
+    get "/content/aistart"
+    assert_response :success
+    assert_match(/1\.\s*오늘, AI와 첫 만남/, response.body)
+    assert_match(/5\.\s*오늘의 첫 결과물/, response.body)
+
+    (1..5).each do |n|
+      id = n.to_s.rjust(2, "0")
+      get "/content/aistart/#{id}"
+      assert_response :success
+    end
+
+    get "/content/aistart/06"
+    assert_response :not_found
+    assert_match(/아직 공개되지 않은 챕터입니다/, response.body)
+  end
+
+  test "aistart appears on the dashboard for a signed-in user with 5/5 always accessible, no purchase implied" do
+    user = User.create!(name: "테스트 유저", email: "aistart-dashboard@example.com", password: "password123")
+    post user_session_path, params: { user: { email: user.email, password: "password123" } }
+
+    get dashboard_path
+    assert_response :success
+
+    doc = Nokogiri::HTML(response.body)
+    section = doc.css("section[aria-label]").find { |s| s["aria-label"].include?(@aistart.name) }
+    assert section, "expected a dashboard block for aistart with zero registration code"
+    assert_match(%r{5\s*/\s*5}, section.text)
+  end
+
+  test "aistart shows up on /pricing as a graceful placeholder, with no purchase link and no crash" do
+    get pricing_path
+    assert_response :success
+
+    doc = Nokogiri::HTML(response.body)
+    card = doc.css("article").find { |c| c.text.include?(@aistart.name) }
+    assert card, "expected a pricing card for aistart"
+    assert_match(/가격 준비 중/, card.text)
+    assert_nil card.at_css("a"), "no landing_page_path was set, so there should be no dangling detail link"
+  end
+
+  test "checkout for aistart shows the same graceful not-ready screen as any other sale_enabled: false product" do
+    get billing_checkout_path("aistart")
+    assert_response :success
+    assert_match(/신규 결제를 준비하고 있습니다/, response.body)
+  end
+
+  test "mypage does not error for a user with no license/order history on a free, offer-less product" do
+    user = User.create!(name: "테스트 유저", email: "aistart-mypage@example.com", password: "password123")
+    post user_session_path, params: { user: { email: user.email, password: "password123" } }
+
+    get mypage_path
+    assert_response :success
+  end
+end
