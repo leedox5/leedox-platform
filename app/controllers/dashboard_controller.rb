@@ -17,7 +17,11 @@ class DashboardController < ApplicationController
 
   def build_product_dashboard(product)
     source = CHAPTER_SOURCES[product.code]
-    chapters = source ? source.all : []
+    # Claudox.all also returns appendix chapters (kind: :appendix) -- they're
+    # outside the 20-chapter story flow and explicitly excluded from progress
+    # tracking, so they don't belong in this count. Curriculum's chapters have
+    # no :kind key at all, so this reject is a no-op for Chatdox.
+    chapters = (source ? source.all : []).reject { |chapter| chapter[:kind] == :appendix }
     total = chapters.size
 
     completed_ids = current_user.chapter_progresses

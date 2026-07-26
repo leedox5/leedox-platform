@@ -26,11 +26,19 @@ class ChapterProgressesController < ApplicationController
   private
 
   def find_chapter
-    if params[:product_code] == "claudox"
+    chapter = if params[:product_code] == "claudox"
       Claudox.find(params[:chapter_id])
     else
       Curriculum.find(params[:chapter_id])&.merge(product_code: "chatdox")
     end
+
+    # Appendix chapters are excluded from progress tracking -- the UI never
+    # renders the button, but without this check a crafted request would
+    # still reach ChapterProgress#update!, which rejects chapter_id outside
+    # 1..20 via a validation error (an unhandled 500, not a clean 404).
+    return nil if chapter&.dig(:kind) == :appendix
+
+    chapter
   end
 
   def redirect_path(chapter)

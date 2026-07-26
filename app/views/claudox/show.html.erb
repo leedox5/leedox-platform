@@ -25,34 +25,27 @@
 
               <div class="space-y-1 border-t border-gray-100 p-2">
                 <% phase[:chapters].each do |chapter| %>
-                  <% is_current = chapter[:id] == @current_id %>
+                  <%= render "claudox/sidebar_chapter_row", chapter: chapter, current_id: @current_id %>
+                <% end %>
+              </div>
+            </details>
+          <% end %>
 
-                  <% if chapter[:available] && chapter[:accessible] %>
-                    <%= link_to claudox_chapter_path(chapter[:id]),
-                          class: "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors #{
-                            is_current ? 'bg-blue-50 font-semibold text-blue-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                          }" do %>
-                      <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-xs <%= is_current ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500' %>">
-                        <%= chapter[:id] %>
-                      </span>
-                      <span class="leading-tight"><%= chapter[:title] %></span>
-                    <% end %>
-                  <% elsif chapter[:available] %>
-                    <div class="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-sm opacity-50">
-                      <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-gray-100 text-xs text-gray-400">
-                        🔒
-                      </span>
-                      <span class="leading-tight text-gray-400"><%= chapter[:title] %></span>
-                    </div>
-                  <% else %>
-                    <div class="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-sm opacity-50">
-                      <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-gray-100 text-xs text-gray-400">
-                        <%= chapter[:id] %>
-                      </span>
-                      <span class="leading-tight text-gray-400"><%= chapter[:title] %></span>
-                      <span class="ml-auto text-xs text-gray-300">예정</span>
-                    </div>
-                  <% end %>
+          <% if @appendix_chapters.any? %>
+            <% appendix_open = @appendix_chapters.any? { |chapter| chapter[:id] == @current_id } %>
+            <details class="group overflow-hidden rounded-xl border border-gray-200 bg-white" <%= "open" if appendix_open %>>
+              <summary class="flex cursor-pointer list-none items-center gap-2 px-3 py-2 hover:bg-gray-50">
+                <div class="min-w-0 flex-1">
+                  <p class="text-[11px] font-semibold uppercase tracking-wide text-amber-600">부록</p>
+                  <p class="truncate text-sm font-medium text-gray-800">특별판</p>
+                </div>
+
+                <span class="text-xs text-gray-400 transition-transform group-open:rotate-180">⌄</span>
+              </summary>
+
+              <div class="space-y-1 border-t border-gray-100 p-2">
+                <% @appendix_chapters.each do |chapter| %>
+                  <%= render "claudox/sidebar_chapter_row", chapter: chapter, current_id: @current_id %>
                 <% end %>
               </div>
             </details>
@@ -82,7 +75,7 @@
           ) %>
         </div>
 
-        <% if user_signed_in? %>
+        <% if user_signed_in? && @current_chapter[:kind] != :appendix %>
           <div class="mt-10 rounded-lg border border-gray-200 bg-gray-50 p-5">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -111,9 +104,10 @@
           </div>
         <% end %>
 
-        <% current_index = @chapters.index { |chapter| chapter[:id] == @current_id } %>
-        <% prev_chapter = @chapters[0...current_index].reverse.find { |chapter| chapter[:available] && chapter[:accessible] } %>
-        <% next_chapter = @chapters[(current_index + 1)..].find { |chapter| chapter[:available] && chapter[:accessible] } %>
+        <% same_kind_chapters = @chapters.select { |chapter| chapter[:kind] == @current_chapter[:kind] } %>
+        <% current_index = same_kind_chapters.index { |chapter| chapter[:id] == @current_id } %>
+        <% prev_chapter = same_kind_chapters[0...current_index].reverse.find { |chapter| chapter[:available] && chapter[:accessible] } %>
+        <% next_chapter = same_kind_chapters[(current_index + 1)..].find { |chapter| chapter[:available] && chapter[:accessible] } %>
         <div class="mt-16 flex justify-between border-t border-gray-100 pt-8">
           <% if prev_chapter %>
             <%= link_to claudox_chapter_path(prev_chapter[:id]), class: "flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600" do %>

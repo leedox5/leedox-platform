@@ -54,6 +54,17 @@ class ProductEntitlementTest < ActiveSupport::TestCase
     assert_not Entitlements::ProductAccess.allowed?(user: @user, product_code: "claudox")
   end
 
+  test "Claudox appendix chapters (90..99) require a license -- guest/trial previews never reach them" do
+    trial_user = User.create!(name: "테스트 유저", email: "trial-appendix@example.com", password: "password123")
+
+    assert_not DocPolicy.new(nil, chapter("claudox", 90)).view?
+    assert_not DocPolicy.new(trial_user, chapter("claudox", 90)).view?
+
+    today = @at.in_time_zone(KST).to_date
+    create_license(@user, @claudox, starts_on: today, last_on: today + 1.month - 1.day)
+    assert DocPolicy.new(@user, chapter("claudox", 90)).view?
+  end
+
   private
 
   def chapter(product_code, number)

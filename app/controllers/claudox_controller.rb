@@ -6,6 +6,7 @@ class ClaudoxController < ApplicationController
   def index
     @chapters = available_chapters
     @phase_chapters = chapters_by_phase(@chapters)
+    @appendix_chapters = appendix_chapters(@chapters)
   end
 
   def image
@@ -15,6 +16,7 @@ class ClaudoxController < ApplicationController
   def show
     @chapters = available_chapters
     @phase_chapters = chapters_by_phase(@chapters)
+    @appendix_chapters = appendix_chapters(@chapters)
     @current_id = params[:id].to_s.rjust(2, "0")
     @current_chapter = @chapters.find { |chapter| chapter[:id] == @current_id }
 
@@ -52,6 +54,12 @@ class ClaudoxController < ApplicationController
         total_count: phase_chapters.size
       )
     end
+  end
+
+  # Appendices (90..99) sit outside the Part 1/2/3 story flow, so they don't
+  # belong in chapters_by_phase's ranges -- they get their own flat list.
+  def appendix_chapters(chapters)
+    chapters.select { |chapter| chapter[:kind] == :appendix }
   end
 
   def strip_leading_heading(raw_markdown)

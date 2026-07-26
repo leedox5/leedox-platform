@@ -1,6 +1,13 @@
 class Claudox
   CLAUDOX_PATH = Rails.root.join("hq/claudox")
 
+  # Regular 20-chapter story flow vs. out-of-flow "appendix" specials
+  # (90..99 -- follows the existing 1~20-outside convention used by
+  # 88_progress.md/97_commands.md, but unlike those trackers, appendices are
+  # narrative chapters meant to be read).
+  CHAPTER_RANGE = 1..20
+  APPENDIX_RANGE = 90..99
+
   PHASES = [
     {
       key: "part_1",
@@ -37,14 +44,16 @@ class Claudox
   def self.all
     Dir.glob(CLAUDOX_PATH.join("[0-9][0-9]_*.md")).sort.filter_map do |file_path|
       id = File.basename(file_path, ".md").split("_", 2).first
-      next unless (1..20).cover?(id.to_i)
+      kind = chapter_kind(id.to_i)
+      next unless kind
 
       {
         id: id,
         slug: File.basename(file_path, ".md"),
         title: extract_title(file_path),
         product_code: "claudox",
-        available: true
+        available: true,
+        kind: kind
       }
     end
   end
@@ -64,4 +73,12 @@ class Claudox
     File.basename(file_path, ".md").tr("_", " ")
   end
   private_class_method :extract_title
+
+  def self.chapter_kind(chapter_number)
+    return :chapter if CHAPTER_RANGE.cover?(chapter_number)
+    return :appendix if APPENDIX_RANGE.cover?(chapter_number)
+
+    nil
+  end
+  private_class_method :chapter_kind
 end

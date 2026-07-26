@@ -748,10 +748,10 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     doc = Nokogiri::HTML(response.body)
     phase_list = doc.at_css("div.space-y-4")
     labels = phase_list.css("summary div.min-w-0 p.text-xs").map(&:text)
-    assert_equal [ "Part 1", "Part 2", "Part 3" ], labels
+    assert_equal [ "Part 1", "Part 2", "Part 3", "부록" ], labels
 
     titles = phase_list.css("summary h2").map(&:text)
-    assert_equal [ "입문", "중급", "고급" ], titles
+    assert_equal [ "입문", "중급", "고급", "특별판" ], titles
 
     assert_match(/관계 맺기와 기본 협업 규칙 — Claudox와 처음 만나 이름을 정하고, 작업 규칙과 기억 체계를 세우는 단계\./, response.body)
     assert_match(/실제 개발 워크플로우 — 폴더 구조부터 코드 리뷰, 테스트, Git\/PR까지 엔지니어링 작업을 함께 처리하는 단계\./, response.body)

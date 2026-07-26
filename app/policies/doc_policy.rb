@@ -1,4 +1,10 @@
 class DocPolicy < ApplicationPolicy
+  # Ranges a paid license unlocks. 90..99 is Claudox's appendix range --
+  # harmless for Chatdox since DocsController#show only ever resolves chapter
+  # ids "01".."20" via Curriculum.find, so this policy is never even reached
+  # for a Chatdox chapter number outside that range.
+  LICENSED_CHAPTER_RANGES = [ 1..20, 90..99 ].freeze
+
   def chapter_number
     chapter_id = record.is_a?(Hash) ? record[:id] : record
     chapter_id.to_s.to_i
@@ -22,7 +28,7 @@ class DocPolicy < ApplicationPolicy
     Entitlements::ProductAccess.allowed?(
       user: user,
       product_code: product_code
-    ) && chapter_number <= 20
+    ) && LICENSED_CHAPTER_RANGES.any? { |range| range.cover?(chapter_number) }
   end
 
   def view_as_admin?

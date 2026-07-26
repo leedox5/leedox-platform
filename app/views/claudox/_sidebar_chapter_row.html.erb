@@ -1,0 +1,28 @@
+<% is_current = chapter[:id] == current_id %>
+
+<% if chapter[:available] && chapter[:accessible] %>
+  <%= link_to claudox_chapter_path(chapter[:id]),
+        class: "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors #{
+          is_current ? 'bg-blue-50 font-semibold text-blue-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+        }" do %>
+    <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-xs <%= is_current ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500' %>">
+      <%= chapter[:id] %>
+    </span>
+    <span class="leading-tight"><%= chapter[:title] %></span>
+  <% end %>
+<% elsif chapter[:available] %>
+  <div class="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-sm opacity-50">
+    <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-gray-100 text-xs text-gray-400">
+      🔒
+    </span>
+    <span class="leading-tight text-gray-400"><%= chapter[:title] %></span>
+  </div>
+<% else %>
+  <div class="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-sm opacity-50">
+    <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-gray-100 text-xs text-gray-400">
+      <%= chapter[:id] %>
+    </span>
+    <span class="leading-tight text-gray-400"><%= chapter[:title] %></span>
+    <span class="ml-auto text-xs text-gray-300">예정</span>
+  </div>
+<% end %>
