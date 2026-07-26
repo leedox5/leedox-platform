@@ -46,3 +46,4 @@
 | 번호 | 챕터 | 파일 | 완성도 | 상태 |
 |---|------|------|:---:|:---:|
 | 90 | 세션의 정체를 캐다 | [90_session_mechanics.md](90_session_mechanics.md) | 90% | ✅ |
+| 91 | 시간과 나를 어떻게 인지하는가 | [91_time_and_identity.md](91_time_and_identity.md) | 90% | ✅ |

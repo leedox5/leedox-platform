@@ -36,6 +36,8 @@ Claudox의 실제 메모리는 이 PC의 사용자 홈 디렉토리(`~/.claude/p
 18. **아이디어 백로그 큐** (2026-07-22, `service-desk/backlog.md`) — 작업 중 곁가지로 발견한 "해볼 만한데 지금은 아닌" 아이디어는 바로 구현하지도, 정식 티켓으로 접수하지도 말고 `backlog.md`에 표 한 줄로만 등록해둔다(번호/날짜/아이디어/배경/상태). 착수할 때가 되면 정식 티켓이나 handoff로 승격. "아이디어가 나오는 대로 바로 하려하면 길을 잃을 수 있다"는 Tommy의 판단에서 시작됨. `service-desk/GUIDE.md`에도 규칙 문서화.
 19. **handoff 발행 시 DEV 전달용 메시지도 같이 제공** (2026-07-22) — request.md를 발행할 때마다, Tommy가 DEV(Platform Agent) 세션에 그대로 복붙할 짧은 메시지도 같이 준다. 형식: "`.local/handoff/inbox/<패키지명>/request.md`를 확인하고 구현해줘. 완료되면 result.md로 보고해줘." Tommy와 Platform Agent 사이는 자동 채널이 아니라 Tommy가 직접 오가며 전달하는 구조라, 그 전달용 문구를 매번 새로 쓰지 않아도 되게 하기 위함.
 20. **콘텐츠 동기화 요청은 Tommy 기본값** (2026-07-22) — HQ에서 docs/·claudox/ 콘텐츠를 push한 뒤 실제 운영 사이트에 반영하려면 DEV에서 `sync_curriculum.sh`를 돌려야 하는데(자동 트리거 없음), 이 요청은 특별한 사정이 없는 한 Tommy가 직접 Platform Agent에게 한다. Claudox는 동기화가 필요하다는 사실만 알려주고, 매번 "요청할까요?"라고 되묻지 않는다.
+21. **부록 챕터 번호대(90~99) 예약** (2026-07-26) — 정규 20장에 안 들어가는 "특별판" 챕터(예: `90_session_mechanics.md`)는 90~99 번호를 쓴다. `88_progress.md`/`97_commands.md`(메타 트래커, 90~99와 우연히 겹침)는 이 범위에 새로 추가하지 않는 고정된 세트이고, DEV의 `Claudox::NON_CHAPTER_FILES`가 `97_commands.md`를 웹 노출에서 영구적으로 제외한다(임시방편 아님). 부록 챕터는 라이선스 보유자만 볼 수 있고(게스트/Trial 미리보기 대상 아님), 학습 진도 추적(완료 표시)에서도 제외된다 — `.local/handoff/completed/leedox_claudox_appendix_chapters_r1/` 참고.
+22. **DEV→HQ 콘텐츠 제안, 잡담성 대화도 대상 포함** (2026-07-26, `leedox_dev_content_time_awareness_r1`로 캘리브레이션) — 이전까지 이 채널(`leedox_dev_content_loop_r1`로 승인됨)로 온 소재는 전부 작업 중 발견한 버그/실수 사례였는데, 이번엔 Tommy가 Platform Agent와 순수 잡담(시간 인지, 기억 스코프, 정체성)을 나눈 게 첫 사례로 들어왔다. Tommy가 승인 — TOC 커버리지 규칙이 "작업 관련 대화"로 국한된 적이 없었으므로, 앞으로도 잡담성 대화가 DEV→HQ 제안으로 올라오면 동일하게 콘텐츠 후보로 검토한다. 이 첫 사례는 `claudox/91_time_and_identity.md`(90번의 자매 부록)로 반영됨.
 
 ## 관련 프로젝트: chatdox-platform
 
