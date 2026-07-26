@@ -5,7 +5,7 @@ class BillingController < ApplicationController
     @product_code = params[:product_code].presence || "chatdox"
     @product = Product.find_by(code: @product_code)
     unless Commerce::Sales.enabled_for?(@product)
-      @product_landing_path = product_landing_path_for(@product_code)
+      @product_landing_path = product_landing_path_for(@product)
       render :checkout
       return
     end
@@ -50,15 +50,16 @@ class BillingController < ApplicationController
 
   private
 
-  # Every product with its own marketing landing page gets a real mapping
-  # here; anything else (no dedicated landing page yet) falls back to root
+  # Every product's own landing page renders the same shared/_product_pricing
+  # partial with a #pricing anchor -- this button always means "show me
+  # pricing for this product," so it always lands there. A product with no
+  # landing_page_path yet (no dedicated marketing page) falls back to root
   # rather than guessing at a URL that doesn't exist.
-  def product_landing_path_for(product_code)
-    case product_code
-    when "chatdox" then chatdox_path(anchor: "pricing")
-    when "claudox" then claudox_path
-    else root_path
-    end
+  def product_landing_path_for(product)
+    path = product&.landing_page_path
+    return root_path if path.blank?
+
+    "#{path}#pricing"
   end
 
   def process_purchase_order_success(order)

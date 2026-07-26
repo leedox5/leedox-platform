@@ -28,7 +28,7 @@ class PricingSummaryPageTest < ActionDispatch::IntegrationTest
     assert chatdox_card, "expected a Chatdox card"
     assert_match(/판매 중/, chatdox_card.text)
     assert_match(/최저 7,700원부터/, chatdox_card.text)
-    assert_match(PagesController::PRODUCT_TAGLINES.fetch("chatdox"), chatdox_card.text)
+    assert_match(@chatdox.tagline, chatdox_card.text)
     detail_link = chatdox_card.at_css("a")
     assert_equal chatdox_path, detail_link["href"]
     assert_equal "자세히 보기", detail_link.text
@@ -52,9 +52,9 @@ class PricingSummaryPageTest < ActionDispatch::IntegrationTest
   end
 
   test "a brand-new product with no tagline/detail-page mapping still gets a card automatically" do
-    Product.create!(code: "widget_test", name: "Widget Test", active: true, sale_enabled: false)
-    assert_not PagesController::PRODUCT_TAGLINES.key?("widget_test")
-    assert_not PagesController::PRODUCT_DETAIL_PATH_HELPERS.key?("widget_test")
+    widget = Product.create!(code: "widget_test", name: "Widget Test", active: true, sale_enabled: false)
+    assert_nil widget.tagline
+    assert_nil widget.landing_page_path
 
     get pricing_path
     assert_response :success

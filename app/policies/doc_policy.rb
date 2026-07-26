@@ -4,10 +4,13 @@ class DocPolicy < ApplicationPolicy
     chapter_id.to_s.to_i
   end
 
+  # Every call site (ProductContentController, ChapterProgressesController)
+  # passes a chapter hash sourced from ProductContent -- chapters/find
+  # always embed their own product_code, so there's no implicit-product
+  # case left to fall back on. Fails loudly if that ever stops being true,
+  # rather than silently assuming Chatdox.
   def product_code
-    return record[:product_code].to_s if record.is_a?(Hash) && record[:product_code].present?
-
-    "chatdox"
+    record.fetch(:product_code).to_s
   end
 
   def view_as_guest?

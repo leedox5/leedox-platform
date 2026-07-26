@@ -65,6 +65,18 @@ class ProductEntitlementTest < ActiveSupport::TestCase
     assert DocPolicy.new(@user, chapter("claudox", 90)).view?
   end
 
+  test "a brand-new, never-registered product code works through DocPolicy with zero code changes (product_code has no implicit default)" do
+    widget = Product.create!(code: "widget_test", name: "Widget Test", active: true, sale_enabled: false)
+
+    assert DocPolicy.new(nil, chapter("widget_test", 2)).view?
+    assert_not DocPolicy.new(nil, chapter("widget_test", 3)).view?
+
+    today = @at.in_time_zone(KST).to_date
+    create_license(@user, widget, starts_on: today, last_on: today + 1.month - 1.day)
+    assert DocPolicy.new(@user, chapter("widget_test", 20)).view?
+    assert_not DocPolicy.new(@other_user, chapter("widget_test", 20)).view?
+  end
+
   private
 
   def chapter(product_code, number)

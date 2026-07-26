@@ -1,8 +1,16 @@
 module Commerce
   class CatalogBootstrap
     PRODUCTS = {
-      "chatdox" => "Chatdox",
-      "claudox" => "Claudox"
+      "chatdox" => {
+        name: "Chatdox",
+        tagline: "AI와 함께 SaaS를 기획부터 배포까지 직접 만들어보는 실전 커리큘럼",
+        landing_page_path: "/chatdox"
+      },
+      "claudox" => {
+        name: "Claudox",
+        tagline: "Claude를 팀에 합류시켜 실제로 협업한 기록을 그대로 따라가는 콘텐츠",
+        landing_page_path: "/claudox"
+      }
     }.freeze
     CHATDOX_OFFERS = [
       { code: "chatdox-1m-v1", version: 1, duration_months: 1,
@@ -28,11 +36,13 @@ module Commerce
 
     def self.call!
       ApplicationRecord.transaction do
-        products = PRODUCTS.to_h do |code, name|
+        products = PRODUCTS.to_h do |code, attributes|
           product = Product.find_or_create_by!(code: code) do |record|
-            record.name = name
+            record.name = attributes.fetch(:name)
             record.active = true
             record.sale_enabled = false
+            record.tagline = attributes.fetch(:tagline)
+            record.landing_page_path = attributes.fetch(:landing_page_path)
           end
           [ code, product ]
         end

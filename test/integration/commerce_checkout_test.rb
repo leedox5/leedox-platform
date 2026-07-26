@@ -18,6 +18,16 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
     @previous_payment_env.each { |key, value| restore_env(key, value) }
   end
 
+  test "order submission with a missing product_code redirects to the bare checkout path, same as Chatdox's implicit default" do
+    ENV["LEEDOX_COMMERCE_ENABLED"] = "false"
+    sign_in
+
+    assert_no_difference [ "Order.count", "PaymentTransaction.count" ] do
+      post billing_orders_path, params: { order: { offer_code: "chatdox-1m-v1", requested_start_on: Date.current } }
+    end
+    assert_redirected_to billing_checkout_path
+  end
+
   test "default configuration preserves the R2A inactive checkout and blocks direct order POST" do
     ENV["LEEDOX_COMMERCE_ENABLED"] = "false"
     @product.update!(sale_enabled: true)

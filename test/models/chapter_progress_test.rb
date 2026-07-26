@@ -2,6 +2,7 @@ require "test_helper"
 
 class ChapterProgressTest < ActiveSupport::TestCase
   setup do
+    Commerce::CatalogBootstrap.call!
     @user = User.create!(name: "테스트 유저", email: "chapter-progress-model@example.com", password: "password123")
   end
 
@@ -32,5 +33,12 @@ class ChapterProgressTest < ActiveSupport::TestCase
     progress = ChapterProgress.new(user: @user, chapter_id: "21", product_code: "chatdox", completed_at: Time.current)
     assert_not progress.valid?
     assert_includes progress.errors[:chapter_id], "is not included in the list"
+  end
+
+  test "a brand-new Product row is accepted as a valid product_code with no code changes" do
+    Product.create!(code: "widget_test", name: "Widget Test", active: true, sale_enabled: false)
+
+    progress = ChapterProgress.new(user: @user, chapter_id: "05", product_code: "widget_test", completed_at: Time.current)
+    assert progress.valid?
   end
 end
