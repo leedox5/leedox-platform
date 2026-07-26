@@ -12,16 +12,27 @@ class AistartFreeProductTest < ActionDispatch::IntegrationTest
     @aistart = Product.find_by!(code: "aistart")
   end
 
-  test "all 5 chapters are readable while signed out, with no login/license required" do
+  test "all 5 chapters are readable while signed out, each rendering its own real content" do
     get "/content/aistart"
     assert_response :success
     assert_match(/1\.\s*오늘, AI와 첫 만남/, response.body)
     assert_match(/5\.\s*오늘의 첫 결과물/, response.body)
 
-    (1..5).each do |n|
-      id = n.to_s.rjust(2, "0")
-      get "/content/aistart/#{id}"
+    source = ProductContent.for("aistart")
+    assert_equal 5, source.chapters.size
+
+    # Checking status 200 alone wouldn't catch a chapter accidentally
+    # rendering the wrong file's content (e.g. an id/slug mixup) -- compare
+    # against each chapter's real title and first body line straight from
+    # the synced markdown file on disk instead.
+    source.chapters.each do |chapter|
+      get "/content/aistart/#{chapter[:id]}"
       assert_response :success
+      assert_match(chapter[:title], response.body)
+
+      file_path = source.path.join("#{chapter[:slug]}.md")
+      first_body_line = File.readlines(file_path).drop(1).find { |line| line.strip.present? }.strip
+      assert_includes response.body, first_body_line
     end
 
     get "/content/aistart/06"

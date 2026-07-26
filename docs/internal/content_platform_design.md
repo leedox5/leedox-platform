@@ -22,7 +22,7 @@
 #   #images_path              -> Pathname        (이미지 서빙 base path)
 #   #editorial_status(id)     -> 상품마다 다른 형태 허용(아래 A-3), 어드민 전용
 #
-# Chapter = { id:, slug:, title:, kind: (:chapter | :appendix), exists: true/false }
+# Chapter = { id:, slug:, title:, kind: (:chapter | :appendix), available: true/false }
 # Phase   = { key:, label:, title:, description:, range: }
 ```
 
@@ -75,9 +75,9 @@ end
 
 감사에서 지적된 세 가지 서로 다른 기준을 검토한 결과, **하나로 합치지 않는다.** 이유:
 
-- **존재(existence)** — "이 챕터 ID에 해당하는 콘텐츠 파일이 지금 있는가"는 기계적으로 파일 존재 여부로 판단 가능하고, 리더 화면(잠금 아이콘, 접근 가능 문서 카운트)이 실제로 필요로 하는 값이다. `Chapter#exists`로 인터페이스에 포함시킨다(지금 `DocsController`의 `File.exist?` 기반 `available`, `Claudox.all`의 트리비얼한 `available: true`를 통일).
+- **존재(existence)** — "이 챕터 ID에 해당하는 콘텐츠 파일이 지금 있는가"는 기계적으로 파일 존재 여부로 판단 가능하고, 리더 화면(잠금 아이콘, 접근 가능 문서 카운트)이 실제로 필요로 하는 값이다. `Chapter#available`로 인터페이스에 포함시킨다(지금 `DocsController`의 `File.exist?` 기반 `available`, `Claudox.all`의 트리비얼한 `available: true`를 통일).
 - **편집 완성도(editorial status)** — "파일은 있는데 아직 플레이스홀더인가"(`ClaudoxProductsController`의 `UNWRITTEN_PLACEHOLDER` 검사)나 "얼마나 다듬어졌나"(`Admin::ContentProgressController`가 파싱하는 `88_progress.md`의 %/✅⬜🟡)는 **리더에게 노출되는 값이 아니라 HQ/어드민 전용 저작 진행률 지표**다. 두 상품이 지금도 서로 다른 정밀도(Chatdox는 있음/없음 이진, Claudox는 %+3단계 상태)를 쓰고 있고, 이건 실제로 다른 정보다 — 억지로 하나의 스키마로 합치면 Claudox 쪽 정보가 손실된다.
-- 그래서 `editorial_status(id)`는 인터페이스에 **자리는 만들어두되 반환 형태를 상품별로 허용**한다. `FilesystemSource`의 기본 구현은 플레이스홀더 텍스트 검사(지금 `ClaudoxProductsController`와 동일 로직을 흡수)로 이진 `:draft`/`:written`을 반환하고, `88_progress.md` 같은 더 정밀한 자체 트래커가 있는 상품은 그 파서를 `editorial_status`에 얹어 상세 값을 반환해도 된다. 어드민 진행률 화면(`Admin::ContentProgressController`)만 이 메서드를 쓰고, 리더 화면·대시보드·정책 어디도 이 값에 의존하지 않는다.
+- 그래서 `editorial_status(id)`는 인터페이스에 **자리는 만들어두되 반환 형태를 상품별로 허용**한다. `FilesystemSource`의 기본 구현은 플레이스홀더 텍스트 검사(지금 `ClaudoxProductsController`와 동일 로직을 흡수)로 이진 `:draft`/`:written`을 반환하고, `88_progress.md` 같은 더 정밀한 자체 트래커가 있는 상품은 그 파서를 `editorial_status`에 얹어 상세 값을 반환해도 된다. 설계 시점엔 어드민 진행률 화면(`Admin::ContentProgressController`)만 이 메서드를 쓸 것으로 예상했지만, 4단계에서 `ClaudoxProductsController`(리더 대상 마케팅 페이지)도 `editorial_status(id) == :written`로 "완성" 배지를 판정하도록 흡수되면서 이 값을 쓰는 두 번째 소비자가 됐다 — 여전히 대시보드·정책은 이 값에 의존하지 않는다.
 
 ## B. 라우트 / 컨트롤러
 
@@ -101,7 +101,7 @@ get "/content/:product_code/:id",          to: "product_content#show",  as: :pro
 get "/content/:product_code/images/*filename", to: "product_content#image", as: :product_content_image, format: false
 ```
 
-`ProductContentController`는 `params[:product_code]`(defaults로 주입되든 URL 세그먼트로 오든 동일)로 `ProductContent.for(product_code)`를 얻어 지금 `DocsController`/`ClaudoxController#show`/`#index`/`#image`가 하던 일을 그대로 한다. **신규 상품은 이 라우트 4줄이 이미 있으므로 라우트 추가가 필요 없다** — 나중에 그 상품이 `/docs`처럼 예쁜 전용 URL을 갖고 싶으면(선택) `defaults:` 줄 하나만 추가하면 된다.
+`ProductContentController`는 `params[:product_code]`(defaults로 주입되든 URL 세그먼트로 오든 동일)로 `ProductContent.for(product_code)`를 얻어 지금 `DocsController`/`ClaudoxController#show`/`#index`/`#image`가 하던 일을 그대로 한다. **신규 상품은 이 라우트 3줄(index/show/image)이 이미 있으므로 라우트 추가가 필요 없다** — 나중에 그 상품이 `/docs`처럼 예쁜 전용 URL을 갖고 싶으면(선택) `defaults:` 줄 하나만 추가하면 된다.
 
 ### B-2. 내부 링크 생성은 제네릭 헬퍼로 통일 (분기 제거)
 
@@ -183,5 +183,5 @@ end
 ## 미결정 사항
 
 - Chatdox를 언젠가 `FilesystemSource`로 완전 이관할지는 HQ가 `hq/chatdox/*.md` 헤딩을 표시용 제목과 맞게 정리해줄 의향이 있는지에 달려 있다 — 이번 설계 범위 밖의 콘텐츠 편집 결정이라 옵션으로만 남겨둔다.
-- `sync_curriculum.sh`가 `sync_one "docs" ...`/`sync_one "claudox" ...`를 여전히 하드코딩하고 있다는 걸 이번 설계 중 발견했다(감사 문서의 sitewide grep 범위(`app/`, `config/routes.rb`, `test/`) 밖이라 감사엔 안 실렸음). `content_meta.yml`이 상품 구조를 데이터화해도, HQ 콘텐츠가 DEV로 넘어오는 이 스크립트 자체는 여전히 상품코드마다 한 줄이 필요하다 — "코드 변경 없이 신규 상품 등록"이 완전해지려면 이 스크립트도 `Product.pluck(:code)` 기반으로 일반화하거나, 최소한 신규 상품 등록 시 필요한 유일한 코드 변경 지점으로 명시적으로 남겨둬야 한다. 4단계 또는 별도 라운드로 처리할지 판단 바란다.
+- `sync_curriculum.sh`가 `sync_one "docs" ...`/`sync_one "claudox" ...`를 여전히 하드코딩하고 있다는 걸 이번 설계 중 발견했다(감사 문서의 sitewide grep 범위(`app/`, `config/routes.rb`, `test/`) 밖이라 감사엔 안 실렸음). `content_meta.yml`이 상품 구조를 데이터화해도, HQ 콘텐츠가 DEV로 넘어오는 이 스크립트 자체는 여전히 상품코드마다 한 줄이 필요하다 — **5단계에서 실제 3번째 상품(`aistart`)을 등록하며 이걸 직접 확인했다**: `sync_one "aistart" ...` 한 줄을 추가해야만 콘텐츠가 넘어왔고, 이게 "새 상품 등록" 전체 과정에서 유일하게 남는 코드 변경 지점이었다(그 외엔 `Commerce::CatalogBootstrap`의 상품 데이터 등록뿐, 콘텐츠 조회 파이프라인 자체는 무변경). 이 문서 전반의 "코드 변경 없이 등록"이라는 표현은 정확히는 "콘텐츠 조회 파이프라인 코드는 무변경"을 뜻하며, `sync_curriculum.sh`는 그 예외다. 스크립트 자체를 `Product.pluck(:code)` 기반으로 완전 일반화할지는 backlog 006으로 별도 보류.
 - 어드민 진행률 화면(`Admin::ContentProgressController`)이 `editorial_status`로 흡수된 뒤에도, Chatdox 쪽 저작 진행률을 지금처럼 "파일 존재 여부"로만 볼지, Claudox처럼 더 정밀한 트래커를 도입할지는 콘텐츠 운영 정책 문제라 이 설계에서 결정하지 않는다.

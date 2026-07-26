@@ -21,7 +21,7 @@
       ) %>
     </div>
 
-    <% if user_signed_in? %>
+    <% if user_signed_in? && @current_chapter[:kind] != :appendix %>
       <div class="mt-10 rounded-lg border border-gray-200 bg-gray-50 p-5">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

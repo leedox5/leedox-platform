@@ -54,4 +54,43 @@ class SyntheticProductContentTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal "image/png", response.media_type
   end
+
+  test "guest access is actually blocked past guest_chapter_limit, not just allowed at/under it" do
+    File.write(@product_path.join("03_third.md"), "# 세 번째\n\n세 번째 챕터 본문.\n")
+
+    get "/content/#{@product_code}/03"
+    assert_redirected_to new_user_session_path
+  end
+
+  test "a signed-in user sees no 학습 상태 completion panel on an appendix chapter, via the generic template" do
+    File.write(@product_path.join("content_meta.yml"), <<~YAML)
+      chapter_range: "1..2"
+      appendix_range: "90..99"
+    YAML
+    File.write(@product_path.join("90_appendix.md"), "# 부록\n\n부록 챕터 본문.\n")
+
+    Commerce::CatalogBootstrap.call!
+    product = Product.find_or_create_by!(code: @product_code) { |record| record.name = "Synthetic" }
+    user = User.create!(name: "테스트 유저", email: "synthetic-appendix-#{SecureRandom.hex(3)}@example.com", password: "password123")
+    today = Time.current.in_time_zone(Commerce::PeriodCalculator::KST).to_date
+    end_date = today + 1.month
+    License.create!(
+      user: user, product: product, source: "paid", status: "active",
+      starts_on: today, last_usable_on: end_date - 1.day,
+      access_ends_at: Commerce::PeriodCalculator::KST.local(end_date.year, end_date.month, end_date.day)
+    )
+    post user_session_path, params: { user: { email: user.email, password: "password123" } }
+
+    get "/content/#{@product_code}/90"
+    assert_response :success
+    assert_match(/부록 챕터 본문/, response.body)
+    assert_no_match(/학습 상태/, response.body)
+    assert_no_match(/이 챕터 완료/, response.body)
+
+    # A regular (non-appendix) chapter for the same signed-in user still gets the panel --
+    # the fix must not hide it everywhere, only for kind: :appendix.
+    get "/content/#{@product_code}/01"
+    assert_response :success
+    assert_match(/학습 상태/, response.body)
+  end
 end

@@ -63,7 +63,7 @@ Chatdox는 `/docs`, `/docs/:id`(헬퍼: `doc_path`), Claudox는 `/claudox/read`,
 | 2.5 | `app/controllers/pages_controller.rb:6-17` (`PRODUCT_TAGLINES`, `PRODUCT_DETAIL_PATH_HELPERS`) | `/pricing` 요약 카드용 상품코드→문구/경로 매핑 | 신규 상품마다 두 해시에 줄 추가 필요(계획 문서가 명시적으로 지목한 지점) |
 | 2.6 | `app/controllers/billing_controller.rb:56-61`(`product_landing_path_for`) | 상품코드→마케팅 랜딩 경로 `case`문 | 2.5와 **개념적으로 완전히 같은 일**(상품코드→마케팅 페이지 경로)을 별도로 재구현 — 통합 후보 |
 | 2.7 | `app/controllers/application_controller.rb:22`(`billing_checkout_path_for`) | `"chatdox"`만 세그먼트 없는 구 URL로 리다이렉트, 나머지는 `/billing/checkout/:product_code` | 의도적 하위호환 예외(과거 북마크 보존) — **핵심 아님**, 그대로 둬도 됨. 다만 신규 상품 라우팅 설계 시 이 예외가 왜 있는지는 인지 필요 |
-| 2.8 | `app/controllers/billing_orders_controller.rb:18,91,104` | `product_code || "chatdox"` 기본값 3회 | 2.3과 같은 유형의 "묵시적 기본 상품" 가정 |
+| 2.8 | `app/controllers/billing_orders_controller.rb:18,91,104` | `product_code \|\| "chatdox"` 기본값 3회 | 2.3과 같은 유형의 "묵시적 기본 상품" 가정 |
 | 2.9 | `app/controllers/dashboard_controller.rb:8`(`CHAPTER_SOURCES` 키) | 1.6과 동일 지점, 문자열 리터럴 관점에서 중복 집계 | — |
 | 2.10 | `app/views/dashboard/show.html.erb:105`(`product.code == "chatdox"`) | GitHub Lab 카드를 Chatdox 블록에만 렌더링 | **의도적 상품 특화**(GitHub Lab 자체가 Chatdox 전용 기능) — 콘텐츠 조회 일반화와 무관, 그대로 둬도 됨 |
 | 2.11 | `app/controllers/admin/commerce/github_access_controller.rb:25` | `License.for_product("chatdox")`로 GitHub Lab 접근 가능 유저만 조회 | 2.10과 같은 이유로 의도적 — **핵심 아님** |

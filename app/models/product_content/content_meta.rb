@@ -44,12 +44,20 @@ class ProductContent::ContentMeta
 
   private
 
+  # A missing key (nil) is a legitimate "not specified" -- callers fall back
+  # to a sane default for that. A *present* value that's malformed or
+  # reversed is an operator mistake, not a missing-config case, so it raises
+  # instead of silently degrading into that same default (which would hide
+  # the mistake rather than surface it at content-load time).
   def parse_range(value)
     return nil if value.nil?
 
     match = value.to_s.match(/\A(\d+)\.\.(\d+)\z/)
-    return nil unless match
+    raise ArgumentError, "invalid range in content_meta.yml: #{value.inspect} (expected \"N..M\")" unless match
 
-    Range.new(match[1].to_i, match[2].to_i)
+    low, high = match[1].to_i, match[2].to_i
+    raise ArgumentError, "reversed range in content_meta.yml: #{value.inspect} (#{low} > #{high})" if low > high
+
+    Range.new(low, high)
   end
 end

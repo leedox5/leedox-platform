@@ -56,4 +56,22 @@ class ProductContent::ContentMetaTest < ActiveSupport::TestCase
       assert_equal [ 1..10 ], meta.licensed_chapter_ranges
     end
   end
+
+  test "a malformed chapter_range raises instead of silently falling back to the default" do
+    Dir.mktmpdir do |dir|
+      directory = Pathname.new(dir)
+      File.write(directory.join("content_meta.yml"), "chapter_range: \"one to twenty\"\n")
+
+      assert_raises(ArgumentError) { ProductContent::ContentMeta.load(directory) }
+    end
+  end
+
+  test "a reversed chapter_range raises instead of silently producing a range that never covers anything" do
+    Dir.mktmpdir do |dir|
+      directory = Pathname.new(dir)
+      File.write(directory.join("content_meta.yml"), "chapter_range: \"20..1\"\n")
+
+      assert_raises(ArgumentError) { ProductContent::ContentMeta.load(directory) }
+    end
+  end
 end

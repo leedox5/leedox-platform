@@ -35,10 +35,10 @@
                   the first 4 chapters -- kept exactly, only the frozen hardcoded titles (found to
                   have drifted from the real content, see stage 3 result.md) are now looked up live.
                   Raw headings carry a leading "N. " the way Chatdox's curated titles never did, so
-                  it's stripped to match this section's existing display style. %>
-              <% %w[01 03 05 10].each do |id| %>
-                <% chapter = ProductContent.for("claudox").find(id) %>
-                <li class="flex gap-3"><span class="text-violet-400"><%= id %></span><span><%= chapter[:title].sub(/\A\d+\.\s*/, "") %></span></li>
+                  it's stripped to match this section's existing display style. filter_map skips any
+                  id whose chapter file no longer exists, rather than crashing the homepage on a nil. %>
+              <% %w[01 03 05 10].filter_map { |id| ProductContent.for("claudox").find(id) }.each do |chapter| %>
+                <li class="flex gap-3"><span class="text-violet-400"><%= chapter[:id] %></span><span><%= chapter[:title].sub(/\A\d+\.\s*/, "") %></span></li>
               <% end %>
             </ol>
             <%= link_to "협업 기록 보기 →", claudox_path, class: "mt-7 inline-block rounded text-sm font-bold text-violet-300 hover:text-violet-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400" %>
