@@ -1,0 +1,53 @@
+<div class="min-h-screen bg-white">
+  <%= render "shared/header" %>
+
+  <main class="mx-auto max-w-3xl px-5 py-10 sm:px-7 sm:py-12">
+    <%= link_to "← 목차", product_content_index_path(@product_code), class: "mb-6 inline-block text-sm text-gray-500 hover:text-blue-600" %>
+
+    <div class="mb-8 border-b border-gray-100 pb-6">
+      <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-blue-600">Chapter <%= @current_chapter[:id] %></p>
+      <h1 class="text-3xl font-bold text-gray-900"><%= @current_chapter[:title] %></h1>
+      <p class="mt-3 text-sm text-gray-500">최종 업데이트: <%= l(@last_updated_at, format: :long, locale: :ko) %></p>
+    </div>
+
+    <div class="doc-content max-w-none">
+      <%= sanitize(
+        @content_html,
+        tags: %w[
+          h1 h2 h3 h4 h5 h6 p br hr ul ol li pre code blockquote strong em a img
+          table thead tbody tr th td
+        ],
+        attributes: %w[href target rel src alt]
+      ) %>
+    </div>
+
+    <% if user_signed_in? && @current_chapter[:kind] != :appendix %>
+      <div class="mt-10 rounded-lg border border-gray-200 bg-gray-50 p-5">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="font-semibold text-gray-900">학습 상태</h2>
+            <p class="mt-1 text-sm text-gray-600">
+              <% if @chapter_progress&.completed? %>
+                이 챕터를 완료한 상태입니다.
+              <% else %>
+                완료한 챕터로 표시하면 대시보드 진도에 반영됩니다.
+              <% end %>
+            </p>
+          </div>
+
+          <% if @chapter_progress&.completed? %>
+            <%= button_to "완료 표시 취소",
+              chapter_progresses_path(chapter_id: @current_id, product_code: @product_code),
+              method: :delete,
+              class: "rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-gray-400 hover:bg-gray-100" %>
+          <% else %>
+            <%= button_to "이 챕터 완료",
+              chapter_progresses_path(chapter_id: @current_id, product_code: @product_code),
+              method: :post,
+              class: "rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700" %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </main>
+</div>

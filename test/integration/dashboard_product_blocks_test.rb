@@ -81,7 +81,11 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
     assert_match(/Chapter 01/, chatdox_section)
   end
 
-  test "recent chapter and Next Step links point at the right product's reading controller" do
+  test "recent chapter and Next Step links point at the right product via the generic content route" do
+    # Dashboard-generated links now go through the generic product_chapter_path
+    # (docs/internal/content_platform_design.md section B-2) rather than the
+    # legacy claudox_chapter_path/doc_path helpers -- those legacy paths still
+    # work as external entry points, but the app no longer generates them itself.
     post chapter_progresses_path, params: { chapter_id: "01", product_code: "claudox" }
 
     get dashboard_path
@@ -90,9 +94,9 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
     doc = Nokogiri::HTML(response.body)
     claudox_section = doc.at_css("section[aria-label='Claudox 현황']")
 
-    assert claudox_section.css("a[href='#{claudox_chapter_path('01')}']").any?,
-      "expected a '다시 보기' link back into /claudox/read/01"
-    assert claudox_section.css("a[href='#{claudox_chapter_path('02')}']").any?,
-      "expected the Next Step link to point at /claudox/read/02"
+    assert claudox_section.css("a[href='#{product_chapter_path('claudox', '01')}']").any?,
+      "expected a '다시 보기' link back into #{product_chapter_path('claudox', '01')}"
+    assert claudox_section.css("a[href='#{product_chapter_path('claudox', '02')}']").any?,
+      "expected the Next Step link to point at #{product_chapter_path('claudox', '02')}"
   end
 end

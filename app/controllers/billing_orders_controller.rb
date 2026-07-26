@@ -15,7 +15,7 @@ class BillingOrdersController < ApplicationController
   rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid,
          Commerce::OrderCreator::Unavailable, ArgumentError => e
     Rails.logger.warn("Commerce order rejected: #{e.class.name}")
-    redirect_to billing_checkout_path_for(order_params[:product_code] || "chatdox"), alert: "주문 조건을 확인해 주세요."
+    redirect_to billing_checkout_path_for(order_params[:product_code]), alert: "주문 조건을 확인해 주세요."
   end
 
   def show
@@ -88,7 +88,7 @@ class BillingOrdersController < ApplicationController
     product_code = params.dig(:order, :product_code)
     return if Commerce::Sales.enabled_for_code?(product_code)
 
-    redirect_to billing_checkout_path_for(product_code || "chatdox"), alert: "신규 결제는 준비 중입니다."
+    redirect_to billing_checkout_path_for(product_code), alert: "신규 결제는 준비 중입니다."
   end
 
   # show/retry_preview/retry all act on an order the current user already
@@ -101,7 +101,7 @@ class BillingOrdersController < ApplicationController
     product_code = order.order_items.first&.product_code
     return true if Commerce::Sales.enabled_for_code?(product_code)
 
-    redirect_to billing_checkout_path_for(product_code || "chatdox"), alert: "신규 결제는 준비 중입니다."
+    redirect_to billing_checkout_path_for(product_code), alert: "신규 결제는 준비 중입니다."
     false
   end
 

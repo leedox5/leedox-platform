@@ -13,15 +13,19 @@ class ProductScopedChapterProgressTest < ActionDispatch::IntegrationTest
     assert_match(/학습 상태/, response.body)
     assert_match(/완료한 챕터로 표시하면/, response.body)
 
+    # The redirect target is the generic product_chapter_path now (design
+    # section B-2 -- internal link/redirect generation no longer uses the
+    # legacy doc_path/claudox_chapter_path helpers), even though doc_path
+    # itself still works as an external entry point (asserted above via GET).
     post chapter_progresses_path, params: { chapter_id: "05", product_code: "chatdox" }
-    assert_redirected_to doc_path("05")
+    assert_redirected_to product_chapter_path("chatdox", "05")
     assert @user.chapter_progresses.find_by(chapter_id: "05", product_code: "chatdox").completed?
 
     get doc_path("05")
     assert_match(/이 챕터를 완료한 상태입니다/, response.body)
 
     delete chapter_progresses_path, params: { chapter_id: "05", product_code: "chatdox" }
-    assert_redirected_to doc_path("05")
+    assert_redirected_to product_chapter_path("chatdox", "05")
     assert_nil @user.chapter_progresses.find_by(chapter_id: "05", product_code: "chatdox")
   end
 
@@ -31,7 +35,7 @@ class ProductScopedChapterProgressTest < ActionDispatch::IntegrationTest
     assert_match(/학습 상태/, response.body)
 
     post chapter_progresses_path, params: { chapter_id: "05", product_code: "claudox" }
-    assert_redirected_to claudox_chapter_path("05")
+    assert_redirected_to product_chapter_path("claudox", "05")
     assert @user.chapter_progresses.find_by(chapter_id: "05", product_code: "claudox").completed?
 
     get claudox_chapter_path("05")

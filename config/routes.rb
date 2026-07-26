@@ -15,13 +15,23 @@ Rails.application.routes.draw do
 
   get "/chatdox", to: "pages#chatdox", as: :chatdox
 
-  get "/docs", to: "docs#index"
-  get "/docs/images/*filename", to: "docs#image", as: :doc_image, format: false
-  get "/docs/:id", to: "docs#show", as: :doc
+  # Legacy per-product URLs and route helper names, kept exactly as they were
+  # (bookmarks/external links/SEO) -- product_code comes in via `defaults:`
+  # instead of the path, so both route to the single ProductContentController.
+  # See docs/internal/content_platform_design.md section B.
+  get "/docs", to: "product_content#index", defaults: { product_code: "chatdox" }, as: :docs
+  get "/docs/images/*filename", to: "product_content#image", defaults: { product_code: "chatdox" }, as: :doc_image, format: false
+  get "/docs/:id", to: "product_content#show", defaults: { product_code: "chatdox" }, as: :doc
   get "/claudox", to: "claudox_products#show", as: :claudox
-  get "/claudox/read", to: "claudox#index", as: :claudox_read
-  get "/claudox/images/*filename", to: "claudox#image", as: :claudox_image, format: false
-  get "/claudox/read/:id", to: "claudox#show", as: :claudox_chapter
+  get "/claudox/read", to: "product_content#index", defaults: { product_code: "claudox" }, as: :claudox_read
+  get "/claudox/images/*filename", to: "product_content#image", defaults: { product_code: "claudox" }, as: :claudox_image, format: false
+  get "/claudox/read/:id", to: "product_content#show", defaults: { product_code: "claudox" }, as: :claudox_chapter
+
+  # Generic pattern any future product is automatically covered by -- no new
+  # route needed just to register a 3rd+ product (see ProductContent.for).
+  get "/content/:product_code", to: "product_content#index", as: :product_content_index
+  get "/content/:product_code/images/*filename", to: "product_content#image", as: :product_content_image, format: false
+  get "/content/:product_code/:id", to: "product_content#show", as: :product_chapter
   get "/service-desk", to: "service_desk#index", as: :service_desk
   get "/service-desk/new", to: "service_desk#new", as: :new_service_desk_request
   post "/service-desk", to: "service_desk#create"

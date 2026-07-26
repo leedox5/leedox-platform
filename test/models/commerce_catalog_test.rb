@@ -9,7 +9,9 @@ class CommerceCatalogTest < ActiveSupport::TestCase
     chatdox = Product.find_by!(code: "chatdox")
     claudox = Product.find_by!(code: "claudox")
 
-    assert_equal [ "chatdox", "claudox" ], Product.order(:code).pluck(:code)
+    # aistart is a free, offer-less product (see leedox_multi_product_platform_stage5_r1) --
+    # present in the catalog but deliberately outside this test's Chatdox/Claudox offer assertions.
+    assert_equal [ "aistart", "chatdox", "claudox" ], Product.order(:code).pluck(:code)
     assert_equal false, claudox.sale_enabled?
     assert_equal [
       [ "chatdox-1m-v1", 1, 7_000, 700, 7_700, 0 ],
@@ -31,6 +33,14 @@ class CommerceCatalogTest < ActiveSupport::TestCase
     ], claudox.product_offers.ordered.pluck(
       :code, :duration_months, :supply_amount, :vat_amount, :total_amount, :discount_bps
     )
+  end
+
+  test "aistart is registered as a permanently offer-less, not-for-sale product" do
+    aistart = Product.find_by!(code: "aistart")
+
+    assert aistart.active?
+    assert_not aistart.sale_enabled?
+    assert_empty aistart.product_offers
   end
 
   test "catalog bootstrap is idempotent and does not overwrite operator changes" do

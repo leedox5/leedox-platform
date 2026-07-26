@@ -1,12 +1,10 @@
 class ChapterProgress < ApplicationRecord
   belongs_to :user
 
-  PRODUCT_CODES = %w[chatdox claudox].freeze
-
   validates :chapter_id,
     presence: true,
     uniqueness: { scope: [ :user_id, :product_code ] }
-  validates :product_code, presence: true, inclusion: { in: PRODUCT_CODES }
+  validates :product_code, presence: true, inclusion: { in: -> { Product.pluck(:code) } }
   validate :chapter_id_in_valid_range
 
   scope :completed, -> { where.not(completed_at: nil) }

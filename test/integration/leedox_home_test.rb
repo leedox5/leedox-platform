@@ -20,6 +20,22 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_no_match(/₩|9,900원|무료 체험|프리미엄 요금제/, response.body)
   end
 
+  test "homepage proof section shows live chapter titles for both products, not frozen copies" do
+    get root_path
+    assert_response :success
+
+    chatdox_titles = ProductContent.for("chatdox").chapters.first(4).map { |c| c[:title] }
+    claudox_titles = %w[01 03 05 10].map { |id| ProductContent.for("claudox").find(id)[:title].sub(/\A\d+\.\s*/, "") }
+
+    (chatdox_titles + claudox_titles).each do |title|
+      assert_match(/#{Regexp.escape(title)}/, response.body)
+    end
+    # Numbering prefix from the raw Claudox heading must not leak into this
+    # section (Chatdox's curated titles never had one, and doubling the
+    # chapter number that's already shown as its own badge would look broken).
+    assert_no_match(/\d+\. 클로독스와의 첫만남/, response.body)
+  end
+
   test "guest header keeps authentication actions on desktop and mobile" do
     get root_path
 
@@ -679,11 +695,24 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_match(/신규 결제를 준비하고 있습니다/, response.body)
   end
 
+  test "checkout's 가격과 준비 상태 보기 link points at each product's own #pricing anchor" do
+    get billing_checkout_path("chatdox")
+    assert_response :success
+    doc = Nokogiri::HTML(response.body)
+    link = doc.css("a").find { |a| a.text.include?("가격과 준비 상태 보기") }
+    assert_equal "#{chatdox_path}#pricing", link["href"]
+
+    get billing_checkout_path("claudox")
+    assert_response :success
+    doc = Nokogiri::HTML(response.body)
+    link = doc.css("a").find { |a| a.text.include?("가격과 준비 상태 보기") }
+    assert_equal "#{claudox_path}#pricing", link["href"]
+  end
+
   test "Claudox product page marks chapter completion accurately against source chapter files" do
-    placeholder = ClaudoxProductsController::UNWRITTEN_PLACEHOLDER
-    chapter_file = ->(id) { Dir.glob(ClaudoxProductsController::CLAUDOX_PATH.join("#{id}_*.md")).sort.first }
-    written_count = (1..20).count { |n| (file = chapter_file.call(n.to_s.rjust(2, "0"))) && !File.read(file).include?(placeholder) }
-    incomplete_id = (1..20).find { |n| (file = chapter_file.call(n.to_s.rjust(2, "0"))) && File.read(file).include?(placeholder) }
+    source = ProductContent.for("claudox")
+    written_count = (1..20).count { |n| source.editorial_status(n.to_s.rjust(2, "0")) == :written }
+    incomplete_id = (1..20).find { |n| source.editorial_status(n.to_s.rjust(2, "0")) == :draft }
 
     get claudox_path
 

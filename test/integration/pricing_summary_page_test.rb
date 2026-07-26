@@ -22,13 +22,15 @@ class PricingSummaryPageTest < ActionDispatch::IntegrationTest
 
     doc = Nokogiri::HTML(response.body)
     cards = doc.css("article")
-    assert_equal 2, cards.size
+    # aistart is a real, permanently-registered free product (see
+    # leedox_multi_product_platform_stage5_r1) -- present alongside Chatdox/Claudox here too.
+    assert_equal 3, cards.size
 
     chatdox_card = cards.find { |card| card.text.include?("Chatdox") }
     assert chatdox_card, "expected a Chatdox card"
     assert_match(/판매 중/, chatdox_card.text)
     assert_match(/최저 7,700원부터/, chatdox_card.text)
-    assert_match(PagesController::PRODUCT_TAGLINES.fetch("chatdox"), chatdox_card.text)
+    assert_match(@chatdox.tagline, chatdox_card.text)
     detail_link = chatdox_card.at_css("a")
     assert_equal chatdox_path, detail_link["href"]
     assert_equal "자세히 보기", detail_link.text
@@ -52,16 +54,16 @@ class PricingSummaryPageTest < ActionDispatch::IntegrationTest
   end
 
   test "a brand-new product with no tagline/detail-page mapping still gets a card automatically" do
-    Product.create!(code: "widget_test", name: "Widget Test", active: true, sale_enabled: false)
-    assert_not PagesController::PRODUCT_TAGLINES.key?("widget_test")
-    assert_not PagesController::PRODUCT_DETAIL_PATH_HELPERS.key?("widget_test")
+    widget = Product.create!(code: "widget_test", name: "Widget Test", active: true, sale_enabled: false)
+    assert_nil widget.tagline
+    assert_nil widget.landing_page_path
 
     get pricing_path
     assert_response :success
 
     doc = Nokogiri::HTML(response.body)
     cards = doc.css("article")
-    assert_equal 3, cards.size
+    assert_equal 4, cards.size
     widget_card = cards.find { |card| card.text.include?("Widget Test") }
     assert widget_card, "expected the newly seeded product to get a card without any code changes"
     assert_match(/가격 준비 중/, widget_card.text) # no offers yet

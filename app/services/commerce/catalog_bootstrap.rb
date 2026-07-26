@@ -1,8 +1,30 @@
 module Commerce
   class CatalogBootstrap
     PRODUCTS = {
-      "chatdox" => "Chatdox",
-      "claudox" => "Claudox"
+      "chatdox" => {
+        name: "Chatdox",
+        tagline: "AI와 함께 SaaS를 기획부터 배포까지 직접 만들어보는 실전 커리큘럼",
+        landing_page_path: "/chatdox"
+      },
+      "claudox" => {
+        name: "Claudox",
+        tagline: "Claude를 팀에 합류시켜 실제로 협업한 기록을 그대로 따라가는 콘텐츠",
+        landing_page_path: "/claudox"
+      },
+      # Free, always-guest-accessible content (see hq/aistart/content_meta.yml
+      # -- guest/trial limits both cover all 5 chapters). Not for sale: no
+      # ProductOffer entries below, no tagline/landing_page_path (an empty
+      # landing_page_path already makes the /pricing card omit its "자세히
+      # 보기" link -- proven in stage 4). sale_enabled stays false like every
+      # other product's initial state here, and must stay false permanently
+      # for this one specifically -- flipping it on would expose a checkout
+      # page with zero offers to choose from, since Commerce::Sales.enabled_for?
+      # only checks active/sale_enabled, not offer existence.
+      "aistart" => {
+        name: "AI, 오늘부터 시작",
+        tagline: nil,
+        landing_page_path: nil
+      }
     }.freeze
     CHATDOX_OFFERS = [
       { code: "chatdox-1m-v1", version: 1, duration_months: 1,
@@ -28,11 +50,13 @@ module Commerce
 
     def self.call!
       ApplicationRecord.transaction do
-        products = PRODUCTS.to_h do |code, name|
+        products = PRODUCTS.to_h do |code, attributes|
           product = Product.find_or_create_by!(code: code) do |record|
-            record.name = name
+            record.name = attributes.fetch(:name)
             record.active = true
             record.sale_enabled = false
+            record.tagline = attributes.fetch(:tagline)
+            record.landing_page_path = attributes.fetch(:landing_page_path)
           end
           [ code, product ]
         end

@@ -1,4 +1,15 @@
-class Curriculum
+# Chatdox can't safely use FilesystemSource yet -- verified directly (not
+# assumed) during 2단계 설계 that all 20 hardcoded chapter titles below differ
+# from the real markdown headings (numbering prefix on every one, and 07/08/13
+# etc. differ in wording too). The reading screen shows the chapter number as
+# its own UI element already, so switching to heading-derived titles would
+# double up the number and/or change displayed wording -- a real content/UX
+# change, not just an internal refactor. See
+# docs/internal/content_platform_design.md section A-2.
+#
+# This keeps the exact data that used to live in the Curriculum class (deleted
+# once every caller went through ProductContent instead -- see stage 3 result.md).
+class ProductContent::ChatdoxLegacySource
   DOCS_PATH = Rails.root.join("hq/chatdox")
 
   PHASES = [
@@ -48,20 +59,67 @@ class Curriculum
     { id: "20", slug: "20_launch", title: "런칭 & 운영" }
   ].freeze
 
-  def self.all
-    CHAPTERS
+  attr_reader :product_code
+
+  def initialize(product_code)
+    @product_code = product_code
   end
 
-  def self.phases
+  def path
+    DOCS_PATH
+  end
+
+  def images_path
+    DOCS_PATH.join("images")
+  end
+
+  def chapters
+    CHAPTERS.map do |chapter|
+      chapter.merge(
+        product_code: product_code,
+        kind: :chapter,
+        available: File.exist?(DOCS_PATH.join("#{chapter[:slug]}.md"))
+      )
+    end
+  end
+
+  def find(id)
+    normalized_id = id.to_s.rjust(2, "0")
+    chapters.find { |chapter| chapter[:id] == normalized_id }
+  end
+
+  def phases
     PHASES
   end
 
-  def self.find(id)
-    normalized_id = id.to_s.rjust(2, "0")
-    CHAPTERS.find { |chapter| chapter[:id] == normalized_id }
+  def licensed_chapter_ranges
+    [ 1..20 ]
   end
 
-  def self.last_updated_at(slug)
+  def guest_chapter_limit
+    2
+  end
+
+  def trial_chapter_limit
+    5
+  end
+
+  def missing_chapter_message
+    "챕터를 찾을 수 없습니다."
+  end
+
+  # Chatdox has no placeholder-text convention (unlike Claudox's
+  # UNWRITTEN_PLACEHOLDER) -- file existence alone has always been its
+  # "done" signal (see the pre-migration Admin::ContentProgressController).
+  # Request explicitly says keep this binary, not introduce a finer tracker.
+  def editorial_status(id)
+    chapter = find(id)
+    return :missing unless chapter
+
+    chapter[:available] ? :written : :draft
+  end
+
+  def last_updated_at(slug)
     ContentManifest.last_updated_at(DOCS_PATH, slug)
   end
 end

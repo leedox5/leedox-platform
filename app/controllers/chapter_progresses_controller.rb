@@ -26,11 +26,8 @@ class ChapterProgressesController < ApplicationController
   private
 
   def find_chapter
-    chapter = if params[:product_code] == "claudox"
-      Claudox.find(params[:chapter_id])
-    else
-      Curriculum.find(params[:chapter_id])&.merge(product_code: "chatdox")
-    end
+    product_code = params[:product_code].presence || "chatdox"
+    chapter = ProductContent.for(product_code).find(params[:chapter_id])
 
     # Appendix chapters are excluded from progress tracking -- the UI never
     # renders the button, but without this check a crafted request would
@@ -38,11 +35,20 @@ class ChapterProgressesController < ApplicationController
     # 1..20 via a validation error (an unhandled 500, not a clean 404).
     return nil if chapter&.dig(:kind) == :appendix
 
+    # Same reasoning for :available -- ChatdoxLegacySource can list a chapter
+    # that's in the fixed 20-chapter table but has no file written yet
+    # (available: false); the reading screen 404s on it, so the "complete"
+    # button never renders for it either. A crafted request could otherwise
+    # mark an unwritten chapter as completed. FilesystemSource-backed
+    # products never hit this branch -- their chapters list only ever
+    # contains files that actually exist, so available is always true there.
+    return nil unless chapter&.dig(:available)
+
     chapter
   end
 
   def redirect_path(chapter)
-    chapter[:product_code] == "claudox" ? claudox_chapter_path(chapter[:id]) : doc_path(chapter[:id])
+    product_chapter_path(chapter[:product_code], chapter[:id])
   end
 
   def complete_chapter_progress(chapter)

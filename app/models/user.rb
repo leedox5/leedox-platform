@@ -38,18 +38,4 @@ class User < ApplicationRecord
   def licensed_for?(product_code, at: Time.current)
     Entitlements::ProductAccess.licensed?(user: self, product_code: product_code, at: at)
   end
-
-  def can_view_chapter?(chapter_num, product_code: "chatdox", at: Time.current)
-    chapter_number = chapter_num.to_i
-
-    return true if admin?
-    return true if Entitlements::ProductAccess.allowed?(
-      user: self,
-      product_code: product_code,
-      at: at
-    )
-    return true if trial_active? && chapter_number <= 5
-
-    chapter_number <= 2
-  end
 end
