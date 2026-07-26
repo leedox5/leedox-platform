@@ -8,6 +8,12 @@ class Claudox
   CHAPTER_RANGE = 1..20
   APPENDIX_RANGE = 90..99
 
+  # 97_commands.md predates the appendix feature and happens to fall inside
+  # 90..99 -- it's a command-shorthand reference for the HQ/DEV workflow, not
+  # reader-facing content, so it must not surface as a browsable/licensed
+  # "appendix chapter" just because its filename matches the number range.
+  NON_CHAPTER_FILES = %w[97_commands.md].freeze
+
   PHASES = [
     {
       key: "part_1",
@@ -43,6 +49,8 @@ class Claudox
   # progress + titles), so this scan only happens in one place.
   def self.all
     Dir.glob(CLAUDOX_PATH.join("[0-9][0-9]_*.md")).sort.filter_map do |file_path|
+      next if NON_CHAPTER_FILES.include?(File.basename(file_path))
+
       id = File.basename(file_path, ".md").split("_", 2).first
       kind = chapter_kind(id.to_i)
       next unless kind
