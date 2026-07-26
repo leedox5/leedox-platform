@@ -13,7 +13,7 @@ class ChapterLastUpdatedTimestampTest < ActionDispatch::IntegrationTest
     assert_match(/최종 업데이트: #{Regexp.escape(expected)}/, response.body)
   end
 
-  test "Claudox appendix chapters 90 and 91 show their own distinct KST timestamps (not a shared deploy-checkout time)" do
+  test "Claudox chapters with different manifest commit dates show their own distinct KST timestamps (not a shared deploy-checkout time)" do
     user = User.create!(name: "테스트 유저", email: "last-updated-appendix@example.com", password: "password123")
     post user_session_path, params: { user: { email: user.email, password: "password123" } }
     product = Product.find_by!(code: "claudox")
@@ -25,17 +25,25 @@ class ChapterLastUpdatedTimestampTest < ActionDispatch::IntegrationTest
       access_ends_at: Commerce::PeriodCalculator::KST.local(end_date.year, end_date.month, end_date.day)
     )
 
-    expected_90 = I18n.l(Claudox.last_updated_at("90_session_mechanics"), format: :long, locale: :ko)
-    expected_91 = I18n.l(Claudox.last_updated_at("91_time_and_identity"), format: :long, locale: :ko)
-    assert_not_equal expected_90, expected_91,
-      "fixture assumption broken: 90 and 91's manifest entries are no longer distinct -- update this test's fixtures"
+    # Deliberately not hardcoded to specific chapter numbers -- HQ content
+    # syncs regularly touch several chapters in the same commit (they'd then
+    # share a timestamp and silently make this test meaningless), so find
+    # whichever pair currently has distinct commit dates in the real
+    # manifest instead of assuming particular chapters do.
+    chapter_a, chapter_b = Claudox.all.combination(2).find do |a, b|
+      Claudox.last_updated_at(a[:slug]) != Claudox.last_updated_at(b[:slug])
+    end
+    assert chapter_a, "expected at least two Claudox chapters with different manifest commit dates"
 
-    get claudox_chapter_path("90")
-    assert_response :success
-    assert_match(/최종 업데이트: #{Regexp.escape(expected_90)}/, response.body)
+    expected_a = I18n.l(Claudox.last_updated_at(chapter_a[:slug]), format: :long, locale: :ko)
+    expected_b = I18n.l(Claudox.last_updated_at(chapter_b[:slug]), format: :long, locale: :ko)
 
-    get claudox_chapter_path("91")
+    get claudox_chapter_path(chapter_a[:id])
     assert_response :success
-    assert_match(/최종 업데이트: #{Regexp.escape(expected_91)}/, response.body)
+    assert_match(/최종 업데이트: #{Regexp.escape(expected_a)}/, response.body)
+
+    get claudox_chapter_path(chapter_b[:id])
+    assert_response :success
+    assert_match(/최종 업데이트: #{Regexp.escape(expected_b)}/, response.body)
   end
 end
