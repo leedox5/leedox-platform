@@ -4,8 +4,8 @@ class ChapterImagesTest < ActionDispatch::IntegrationTest
   FIXTURE_IMAGE = Rails.root.join("test/fixtures/files/chapter_image_test.png")
 
   setup do
-    @docs_images_dir = DocsController::DOCS_PATH.join("images")
-    @claudox_images_dir = ClaudoxController::CLAUDOX_PATH.join("images")
+    @docs_images_dir = ProductContent.for("chatdox").images_path
+    @claudox_images_dir = ProductContent.for("claudox").images_path
     @filename = "#{SecureRandom.hex(8)}.png"
 
     FileUtils.mkdir_p(@docs_images_dir)

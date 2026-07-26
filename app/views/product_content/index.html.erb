@@ -1,0 +1,68 @@
+<div class="min-h-screen bg-white">
+  <%= render "shared/header" %>
+
+  <div class="mx-auto max-w-4xl px-4 py-16">
+    <div class="mb-12">
+      <h1 class="mb-4 text-4xl font-bold text-gray-900"><%= @product_code.titleize %> 목차</h1>
+    </div>
+
+    <div class="space-y-4">
+      <% @phase_chapters.each_with_index do |phase, index| %>
+        <details class="group overflow-hidden rounded-2xl border border-gray-200 bg-white" <%= "open" if index.zero? %>>
+          <summary class="flex cursor-pointer list-none items-center gap-4 px-5 py-4 hover:bg-gray-50">
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-semibold uppercase tracking-wide text-blue-600"><%= phase[:label] %></p>
+              <h2 class="text-lg font-semibold text-gray-900"><%= phase[:title] %></h2>
+            </div>
+            <span class="text-sm font-semibold text-gray-500"><%= phase[:available_count] %>/<%= phase[:total_count] %></span>
+          </summary>
+
+          <div class="space-y-2 border-t border-gray-100 bg-gray-50 px-4 py-4">
+            <% phase[:chapters].each do |chapter| %>
+              <% if chapter[:available] && chapter[:accessible] %>
+                <%= link_to product_chapter_path(@product_code, chapter[:id]), class: "block rounded-lg border border-gray-200 bg-white p-3 hover:border-blue-200" do %>
+                  <%= chapter[:id] %>. <%= chapter[:title] %>
+                <% end %>
+              <% else %>
+                <div class="rounded-lg border border-gray-100 bg-gray-100 p-3 text-gray-400"><%= chapter[:id] %>. <%= chapter[:title] %></div>
+              <% end %>
+            <% end %>
+          </div>
+        </details>
+      <% end %>
+
+      <% if @ungrouped_chapters.any? %>
+        <div class="space-y-2">
+          <% @ungrouped_chapters.each do |chapter| %>
+            <% if chapter[:available] && chapter[:accessible] %>
+              <%= link_to product_chapter_path(@product_code, chapter[:id]), class: "block rounded-lg border border-gray-200 bg-white p-3 hover:border-blue-200" do %>
+                <%= chapter[:id] %>. <%= chapter[:title] %>
+              <% end %>
+            <% else %>
+              <div class="rounded-lg border border-gray-100 bg-gray-100 p-3 text-gray-400"><%= chapter[:id] %>. <%= chapter[:title] %></div>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+
+      <% if @appendix_chapters.any? %>
+        <details class="group overflow-hidden rounded-2xl border border-gray-200 bg-white">
+          <summary class="flex cursor-pointer list-none items-center gap-4 px-5 py-4 hover:bg-gray-50">
+            <h2 class="text-lg font-semibold text-gray-900">부록</h2>
+          </summary>
+          <div class="space-y-2 border-t border-gray-100 bg-gray-50 px-4 py-4">
+            <% @appendix_chapters.each do |chapter| %>
+              <% if chapter[:available] && chapter[:accessible] %>
+                <%= link_to product_chapter_path(@product_code, chapter[:id]), class: "block rounded-lg border border-gray-200 bg-white p-3 hover:border-blue-200" do %>
+                  <%= chapter[:id] %>. <%= chapter[:title] %>
+                <% end %>
+              <% else %>
+                <div class="rounded-lg border border-gray-100 bg-gray-100 p-3 text-gray-400"><%= chapter[:id] %>. <%= chapter[:title] %></div>
+              <% end %>
+            <% end %>
+          </div>
+        </details>
+      <% end %>
+    </div>
+  </div>
+</div>
