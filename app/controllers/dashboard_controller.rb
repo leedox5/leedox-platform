@@ -11,6 +11,10 @@ class DashboardController < ApplicationController
     authorize :dashboard, :access?
 
     @product_dashboards = Product.order(:code).map { |product| build_product_dashboard(product) }
+    # The Trial banner promises access to chapters of products the user
+    # hasn't bought yet -- once every product on sale is licensed, that
+    # promise is moot even if the account-wide 7-day timer hasn't run out.
+    @has_unowned_product = @product_dashboards.any? { |pd| !current_user.licensed_for?(pd[:product].code) }
   end
 
   private
