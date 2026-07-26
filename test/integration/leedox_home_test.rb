@@ -20,6 +20,22 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_no_match(/₩|9,900원|무료 체험|프리미엄 요금제/, response.body)
   end
 
+  test "homepage proof section shows live chapter titles for both products, not frozen copies" do
+    get root_path
+    assert_response :success
+
+    chatdox_titles = ProductContent.for("chatdox").chapters.first(4).map { |c| c[:title] }
+    claudox_titles = %w[01 03 05 10].map { |id| ProductContent.for("claudox").find(id)[:title].sub(/\A\d+\.\s*/, "") }
+
+    (chatdox_titles + claudox_titles).each do |title|
+      assert_match(/#{Regexp.escape(title)}/, response.body)
+    end
+    # Numbering prefix from the raw Claudox heading must not leak into this
+    # section (Chatdox's curated titles never had one, and doubling the
+    # chapter number that's already shown as its own badge would look broken).
+    assert_no_match(/\d+\. 클로독스와의 첫만남/, response.body)
+  end
+
   test "guest header keeps authentication actions on desktop and mobile" do
     get root_path
 

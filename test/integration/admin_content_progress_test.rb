@@ -17,7 +17,7 @@ class AdminContentProgressTest < ActionDispatch::IntegrationTest
     get admin_content_progress_path
     assert_response :success
 
-    chatdox_done = Curriculum.all.count { |chapter| File.exist?(Rails.root.join("hq/chatdox/#{chapter[:slug]}.md")) }
+    chatdox_done = ProductContent.for("chatdox").chapters.count { |chapter| chapter[:available] }
     claudox_rows = File.read(Rails.root.join("hq/claudox/88_progress.md")).scan(Admin::ContentProgressController::CLAUDOX_ROW_PATTERN)
     claudox_done = claudox_rows.count { |_title, _id, status| status == "✅" }
     # 88_progress.md now also carries a "부록" tracking row (id 90) alongside
@@ -37,8 +37,8 @@ class AdminContentProgressTest < ActionDispatch::IntegrationTest
     assert_equal 2, cards.size, "expected one card per product"
 
     [
-      [ cards[0], Curriculum.all.map { |c| c.merge(done: File.exist?(Rails.root.join("hq/chatdox/#{c[:slug]}.md"))) }, Curriculum.phases, "doc_path" ],
-      [ cards[1], claudox_phase_rows.map { |title, id, status| { id: id, title: title, done: status == "✅" } }, Claudox.phases, "claudox_chapter_path" ]
+      [ cards[0], ProductContent.for("chatdox").chapters.map { |c| c.merge(done: c[:available]) }, ProductContent.for("chatdox").phases, "doc_path" ],
+      [ cards[1], claudox_phase_rows.map { |title, id, status| { id: id, title: title, done: status == "✅" } }, ProductContent.for("claudox").phases, "claudox_chapter_path" ]
     ].each do |card, chapters, phases, path_helper|
       # No percent or last-modified data should leak into this page anymore.
       assert_no_match(/\d+%/, card.text)

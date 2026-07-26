@@ -1,26 +1,32 @@
 class Admin::ContentProgressController < Admin::BaseController
-  CHATDOX_PATH = Rails.root.join("hq/chatdox")
   CLAUDOX_PATH = Rails.root.join("hq/claudox")
   CLAUDOX_PROGRESS_PATH = CLAUDOX_PATH.join("88_progress.md")
   CLAUDOX_ROW_PATTERN = /^\|\s*\d+\s*\|\s*(.+?)\s*\|\s*\[.+?\]\((\d{2})_[a-z0-9_]+\.md\)\s*\|\s*\d+%\s*\|\s*(✅|⬜|🟡)\s*\|$/
 
   def show
-    @chatdox_chapters = Curriculum.all.map do |chapter|
+    chatdox_source = ProductContent.for("chatdox")
+    @chatdox_chapters = chatdox_source.chapters.map do |chapter|
       {
         id: chapter[:id],
         title: chapter[:title],
-        done: File.exist?(CHATDOX_PATH.join("#{chapter[:slug]}.md")),
+        done: chapter[:available],
         path: doc_path(chapter[:id])
       }
     end
     @chatdox_done_count = @chatdox_chapters.count { |chapter| chapter[:done] }
     @chatdox_percent = percent(@chatdox_done_count, @chatdox_chapters.size)
-    @chatdox_phases = group_by_phase(@chatdox_chapters, Curriculum.phases)
+    @chatdox_phases = group_by_phase(@chatdox_chapters, chatdox_source.phases)
 
+    # Claudox's writing-progress table (88_progress.md, qualitative %/✅⬜🟡)
+    # predates this migration and carries information ProductContent's
+    # editorial_status doesn't (a human-curated completeness percentage, not
+    # just written/draft) -- left as its own parser rather than forced into
+    # the generic interface. See leedox_multi_product_platform_stage3_migration_r1
+    # result.md and docs/internal/content_platform_design.md section A-3.
     @claudox_chapters = parse_claudox_progress
     @claudox_done_count = @claudox_chapters.count { |chapter| chapter[:done] }
     @claudox_percent = percent(@claudox_done_count, @claudox_chapters.size)
-    @claudox_phases = group_by_phase(@claudox_chapters, Claudox.phases)
+    @claudox_phases = group_by_phase(@claudox_chapters, ProductContent.for("claudox").phases)
   end
 
   private

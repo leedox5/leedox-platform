@@ -50,7 +50,7 @@ class RefsController < ApplicationController
 
   def references_with_metadata
     REFERENCES.map do |reference|
-      chapter = Curriculum.find(reference[:chapter_id])
+      chapter = ProductContent.for("chatdox").find(reference[:chapter_id])
       reference.merge(
         chapter: chapter,
         available: File.exist?(REFS_PATH.join("#{reference[:slug]}.md"))
@@ -59,7 +59,7 @@ class RefsController < ApplicationController
   end
 
   def refs_by_phase(references)
-    Curriculum.phases.map do |phase|
+    ProductContent.for("chatdox").phases.map do |phase|
       phase_refs = references.select { |reference| phase[:range].cover?(reference[:chapter_id].to_i) }
       available_count = phase_refs.count { |reference| reference[:available] }
 

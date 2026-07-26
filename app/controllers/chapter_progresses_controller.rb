@@ -26,11 +26,8 @@ class ChapterProgressesController < ApplicationController
   private
 
   def find_chapter
-    chapter = if params[:product_code] == "claudox"
-      Claudox.find(params[:chapter_id])
-    else
-      Curriculum.find(params[:chapter_id])&.merge(product_code: "chatdox")
-    end
+    product_code = params[:product_code].presence || "chatdox"
+    chapter = ProductContent.for(product_code).find(params[:chapter_id])
 
     # Appendix chapters are excluded from progress tracking -- the UI never
     # renders the button, but without this check a crafted request would
@@ -42,7 +39,7 @@ class ChapterProgressesController < ApplicationController
   end
 
   def redirect_path(chapter)
-    chapter[:product_code] == "claudox" ? claudox_chapter_path(chapter[:id]) : doc_path(chapter[:id])
+    product_chapter_path(chapter[:product_code], chapter[:id])
   end
 
   def complete_chapter_progress(chapter)

@@ -21,17 +21,6 @@ module DashboardHelper
     end
   end
 
-  # R3: dashboard chapter links now need to point at the right reading
-  # controller per product -- Chatdox chapters live under /docs, Claudox
-  # under /claudox/read.
-  def chapter_link_path(product_code, chapter_id)
-    product_code == "claudox" ? claudox_chapter_path(chapter_id) : doc_path(chapter_id)
-  end
-
-  def chapter_index_path(product_code)
-    product_code == "claudox" ? claudox_read_path : docs_path
-  end
-
   def subscription_badge(user)
     label, classes = if user.licensed_for?("chatdox")
       [ "Chatdox 이용 중", "bg-emerald-100 text-emerald-700" ]

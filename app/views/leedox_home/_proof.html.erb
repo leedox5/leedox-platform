@@ -21,7 +21,7 @@
             <p class="font-mono text-xs font-bold text-blue-400">CHATDOX / BUILD LOG</p>
             <h3 class="mt-3 break-keep font-bold text-white">실제 SaaS 구축 목차</h3>
             <ol class="mt-6 space-y-4 font-mono text-sm text-slate-400">
-              <% Curriculum.all.first(4).each do |chapter| %>
+              <% ProductContent.for("chatdox").chapters.first(4).each do |chapter| %>
                 <li class="flex gap-3"><span class="text-blue-400"><%= chapter[:id] %></span><span><%= chapter[:title] %></span></li>
               <% end %>
             </ol>
@@ -31,8 +31,14 @@
             <p class="font-mono text-xs font-bold text-violet-400">CLAUDOX / TEAM LOG</p>
             <h3 class="mt-3 break-keep font-bold text-white">실제 협업 기록 목차</h3>
             <ol class="mt-6 space-y-4 font-mono text-sm text-slate-400">
-              <% [["01", "클로독스와의 첫만남"], ["03", "팀에 합류하다"], ["05", "기억을 심다 — 메모리와 CLAUDE.md"], ["10", "코드 리뷰를 맡기다"]].each do |id, title| %>
-                <li class="flex gap-3"><span class="text-violet-400"><%= id %></span><span><%= title %></span></li>
+              <%# This curated (non-sequential) selection is intentional editorial choice, not
+                  the first 4 chapters -- kept exactly, only the frozen hardcoded titles (found to
+                  have drifted from the real content, see stage 3 result.md) are now looked up live.
+                  Raw headings carry a leading "N. " the way Chatdox's curated titles never did, so
+                  it's stripped to match this section's existing display style. %>
+              <% %w[01 03 05 10].each do |id| %>
+                <% chapter = ProductContent.for("claudox").find(id) %>
+                <li class="flex gap-3"><span class="text-violet-400"><%= id %></span><span><%= chapter[:title].sub(/\A\d+\.\s*/, "") %></span></li>
               <% end %>
             </ol>
             <%= link_to "협업 기록 보기 →", claudox_path, class: "mt-7 inline-block rounded text-sm font-bold text-violet-300 hover:text-violet-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400" %>

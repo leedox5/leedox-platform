@@ -6,7 +6,7 @@ class ChapterLastUpdatedTimestampTest < ActionDispatch::IntegrationTest
   end
 
   test "Chatdox chapter page shows the manifest-derived KST timestamp, not raw (likely UTC) filesystem mtime" do
-    expected = I18n.l(Curriculum.last_updated_at("01_overview"), format: :long, locale: :ko)
+    expected = I18n.l(ProductContent.for("chatdox").last_updated_at("01_overview"), format: :long, locale: :ko)
 
     get doc_path("01")
     assert_response :success
@@ -30,13 +30,14 @@ class ChapterLastUpdatedTimestampTest < ActionDispatch::IntegrationTest
     # share a timestamp and silently make this test meaningless), so find
     # whichever pair currently has distinct commit dates in the real
     # manifest instead of assuming particular chapters do.
-    chapter_a, chapter_b = Claudox.all.combination(2).find do |a, b|
-      Claudox.last_updated_at(a[:slug]) != Claudox.last_updated_at(b[:slug])
+    claudox_source = ProductContent.for("claudox")
+    chapter_a, chapter_b = claudox_source.chapters.combination(2).find do |a, b|
+      claudox_source.last_updated_at(a[:slug]) != claudox_source.last_updated_at(b[:slug])
     end
     assert chapter_a, "expected at least two Claudox chapters with different manifest commit dates"
 
-    expected_a = I18n.l(Claudox.last_updated_at(chapter_a[:slug]), format: :long, locale: :ko)
-    expected_b = I18n.l(Claudox.last_updated_at(chapter_b[:slug]), format: :long, locale: :ko)
+    expected_a = I18n.l(claudox_source.last_updated_at(chapter_a[:slug]), format: :long, locale: :ko)
+    expected_b = I18n.l(claudox_source.last_updated_at(chapter_b[:slug]), format: :long, locale: :ko)
 
     get claudox_chapter_path(chapter_a[:id])
     assert_response :success
