@@ -51,4 +51,9 @@ class ClaudoxTest < ActiveSupport::TestCase
     assert_nil Claudox.send(:chapter_kind, 89)
     assert_nil Claudox.send(:chapter_kind, 100)
   end
+
+  test "last_updated_at delegates to ContentManifest against CLAUDOX_PATH" do
+    result = Claudox.last_updated_at("01_first_meeting")
+    assert_equal ContentManifest.last_updated_at(Claudox::CLAUDOX_PATH, "01_first_meeting"), result
+  end
 end

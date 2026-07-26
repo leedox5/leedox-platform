@@ -94,6 +94,17 @@ sync_one() {
 # which breaks File.mtime-based "last updated" displays in the app. Fix it up here:
 # look up each file's real last-commit time in the HQ source repo and stamp that
 # instead, so unchanged files keep a stable mtime across repeated syncs.
+#
+# That mtime stamp only survives locally, though -- it's filesystem metadata,
+# not something `git commit`/`git push` stores. Once this repo's commit gets
+# checked out again (Railway's deploy does exactly that), every file in the
+# checkout is stamped with the checkout time, identically across the whole
+# tree, and the distinct per-file mtimes set below are lost. So also write out
+# the same commit_dates as a JSON manifest (.last_updated.json) alongside the
+# content -- as real file *content*, git preserves it exactly across any
+# checkout, so the app can read "true" last-updated times in production
+# without depending on filesystem mtime at all. See
+# leedox_last_updated_timestamp_fix_r1 and app/models/content_manifest.rb.
 restore_mtimes() {
   local src="$1" dest="$2"
   local rel_path="" commit_date=""
@@ -122,6 +133,22 @@ restore_mtimes() {
       touch -d "${commit_dates[$rel_path]}" "$file"
     fi
   done < <(find "$dest" -type f)
+
+  {
+    while IFS= read -r file; do
+      rel_path="${file#$dest/}"
+      if [[ -n "${commit_dates[$rel_path]:-}" ]]; then
+        printf '%s\t%s\n' "$rel_path" "${commit_dates[$rel_path]}"
+      fi
+    done < <(find "$dest" -type f)
+  } | ruby -rjson -e '
+    entries = {}
+    STDIN.each_line do |line|
+      path, date = line.chomp.split("\t", 2)
+      entries[path] = date
+    end
+    puts JSON.pretty_generate(entries)
+  ' > "$dest/.last_updated.json"
 }
 
 echo "Syncing chatdox-curriculum ($REF), runtime folders only:"

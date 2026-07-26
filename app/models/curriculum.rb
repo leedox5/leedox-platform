@@ -1,4 +1,6 @@
 class Curriculum
+  DOCS_PATH = Rails.root.join("hq/chatdox")
+
   PHASES = [
     {
       key: "phase_1",
@@ -57,5 +59,9 @@ class Curriculum
   def self.find(id)
     normalized_id = id.to_s.rjust(2, "0")
     CHAPTERS.find { |chapter| chapter[:id] == normalized_id }
+  end
+
+  def self.last_updated_at(slug)
+    ContentManifest.last_updated_at(DOCS_PATH, slug)
   end
 end

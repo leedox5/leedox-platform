@@ -1,7 +1,7 @@
 class DocsController < ApplicationController
   include ChapterImages
 
-  DOCS_PATH = Rails.root.join("hq/chatdox")
+  DOCS_PATH = Curriculum::DOCS_PATH
 
   def index
     @chapters = chapters_with_availability
@@ -54,7 +54,7 @@ class DocsController < ApplicationController
       return
     end
 
-    @last_updated_at = File.mtime(file_path)
+    @last_updated_at = Curriculum.last_updated_at(@current_chapter[:slug])
     raw_markdown = File.read(file_path)
     @chapter_progress = if user_signed_in?
       current_user.chapter_progresses.find_by(chapter_id: @current_id, product_code: "chatdox")

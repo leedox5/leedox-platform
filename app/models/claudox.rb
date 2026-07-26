@@ -42,6 +42,10 @@ class Claudox
     PHASES
   end
 
+  def self.last_updated_at(slug)
+    ContentManifest.last_updated_at(CLAUDOX_PATH, slug)
+  end
+
   # Unlike Curriculum::CHAPTERS, Claudox has no hand-written chapter list --
   # its content lives as loose markdown files, so the chapter list is derived
   # by scanning the directory. Shared by ClaudoxController (chapter list/read
