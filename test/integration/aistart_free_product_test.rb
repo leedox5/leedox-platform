@@ -15,8 +15,12 @@ class AistartFreeProductTest < ActionDispatch::IntegrationTest
   test "all 5 chapters are readable while signed out, each rendering its own real content" do
     get "/content/aistart"
     assert_response :success
-    assert_match(/1\.\s*오늘, AI와 첫 만남/, response.body)
-    assert_match(/5\.\s*오늘의 첫 결과물/, response.body)
+    # No leading number prefix here anymore (leedox_content_template_unification_r1) --
+    # the chapter id already shows once in its own icon badge, so the title
+    # itself should be the plain heading text, not "1. 오늘, AI와 첫 만남".
+    assert_match(/오늘, AI와 첫 만남/, response.body)
+    assert_no_match(/1\.\s*오늘, AI와 첫 만남/, response.body)
+    assert_match(/오늘의 첫 결과물/, response.body)
 
     source = ProductContent.for("aistart")
     assert_equal 5, source.chapters.size

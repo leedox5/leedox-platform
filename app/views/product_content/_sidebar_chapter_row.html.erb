@@ -1,11 +1,11 @@
 <% is_current = chapter[:id] == current_id %>
 
 <% if chapter[:available] && chapter[:accessible] %>
-  <%= link_to claudox_chapter_path(chapter[:id]),
+  <%= link_to product_chapter_path_for(chapter[:product_code], chapter[:id]),
         class: "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors #{
-          is_current ? 'bg-blue-50 font-semibold text-blue-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+          is_current ? theme_classes[:sidebar_current] : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
         }" do %>
-    <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-xs <%= is_current ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500' %>">
+    <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-xs <%= is_current ? theme_classes[:sidebar_current_badge] : 'bg-gray-200 text-gray-500' %>">
       <%= chapter[:id] %>
     </span>
     <span class="leading-tight"><%= chapter[:title] %></span>

@@ -1,46 +1,48 @@
-<div class="min-h-screen bg-white">
+<% theme_classes = content_theme_classes(@theme[:accent]) %>
+<div class="min-h-screen bg-gray-50">
   <%= render "shared/header" %>
 
   <div class="mx-auto max-w-4xl px-4 py-16">
     <div class="mb-12">
-      <h1 class="mb-4 text-4xl font-bold text-gray-900"><%= @product_code.titleize %> 목차</h1>
+      <%= link_to "← LEEDOX", root_path, class: "mb-3 inline-block text-sm text-gray-500 hover:text-blue-600" %>
+      <div class="mb-2 text-sm font-semibold uppercase tracking-wide <%= theme_classes[:label] %>"><%= @theme[:label] || @display_name %></div>
+      <h1 class="mb-4 text-4xl font-bold text-gray-900"><%= @theme[:index_heading] || "#{@display_name} 목차" %></h1>
     </div>
 
     <div class="space-y-4">
       <% @phase_chapters.each_with_index do |phase, index| %>
         <details class="group overflow-hidden rounded-2xl border border-gray-200 bg-white" <%= "open" if index.zero? %>>
           <summary class="flex cursor-pointer list-none items-center gap-4 px-5 py-4 hover:bg-gray-50">
-            <div class="min-w-0 flex-1">
-              <p class="text-xs font-semibold uppercase tracking-wide text-blue-600"><%= phase[:label] %></p>
-              <h2 class="text-lg font-semibold text-gray-900"><%= phase[:title] %></h2>
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-sm font-bold <%= theme_classes[:icon_badge] %>">
+              <%= index + 1 %>
             </div>
-            <span class="text-sm font-semibold text-gray-500"><%= phase[:available_count] %>/<%= phase[:total_count] %></span>
+
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-semibold uppercase tracking-wide <%= theme_classes[:label] %>"><%= phase[:label] %></p>
+              <h2 class="text-lg font-semibold text-gray-900"><%= phase[:title] %></h2>
+              <p class="text-sm text-gray-500"><%= phase[:description] %></p>
+            </div>
+
+            <div class="text-right">
+              <p class="text-xs text-gray-400">진행도</p>
+              <p class="text-sm font-semibold text-gray-700"><%= phase[:available_count] %>/<%= phase[:total_count] %></p>
+            </div>
+
+            <span class="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
           </summary>
 
-          <div class="space-y-2 border-t border-gray-100 bg-gray-50 px-4 py-4">
+          <div class="space-y-3 border-t border-gray-100 bg-gray-50 px-4 py-4 sm:px-5">
             <% phase[:chapters].each do |chapter| %>
-              <% if chapter[:available] && chapter[:accessible] %>
-                <%= link_to product_chapter_path(@product_code, chapter[:id]), class: "block rounded-lg border border-gray-200 bg-white p-3 hover:border-blue-200" do %>
-                  <%= chapter[:id] %>. <%= chapter[:title] %>
-                <% end %>
-              <% else %>
-                <div class="rounded-lg border border-gray-100 bg-gray-100 p-3 text-gray-400"><%= chapter[:id] %>. <%= chapter[:title] %></div>
-              <% end %>
+              <%= render "product_content/index_chapter_row", chapter: chapter, theme_classes: theme_classes %>
             <% end %>
           </div>
         </details>
       <% end %>
 
       <% if @ungrouped_chapters.any? %>
-        <div class="space-y-2">
+        <div class="space-y-3">
           <% @ungrouped_chapters.each do |chapter| %>
-            <% if chapter[:available] && chapter[:accessible] %>
-              <%= link_to product_chapter_path(@product_code, chapter[:id]), class: "block rounded-lg border border-gray-200 bg-white p-3 hover:border-blue-200" do %>
-                <%= chapter[:id] %>. <%= chapter[:title] %>
-              <% end %>
-            <% else %>
-              <div class="rounded-lg border border-gray-100 bg-gray-100 p-3 text-gray-400"><%= chapter[:id] %>. <%= chapter[:title] %></div>
-            <% end %>
+            <%= render "product_content/index_chapter_row", chapter: chapter, theme_classes: theme_classes %>
           <% end %>
         </div>
       <% end %>
@@ -48,17 +50,27 @@
       <% if @appendix_chapters.any? %>
         <details class="group overflow-hidden rounded-2xl border border-gray-200 bg-white">
           <summary class="flex cursor-pointer list-none items-center gap-4 px-5 py-4 hover:bg-gray-50">
-            <h2 class="text-lg font-semibold text-gray-900">부록</h2>
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-50 text-sm font-bold text-amber-600">
+              +
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-semibold uppercase tracking-wide text-amber-600">부록</p>
+              <h2 class="text-lg font-semibold text-gray-900">특별판</h2>
+              <p class="text-sm text-gray-500">정규 흐름 밖에서, 챕터 하나로 딱 떨어지지 않는 이야기를 담습니다.</p>
+            </div>
+
+            <div class="text-right">
+              <p class="text-xs text-gray-400">공개</p>
+              <p class="text-sm font-semibold text-gray-700"><%= @appendix_chapters.size %>개</p>
+            </div>
+
+            <span class="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
           </summary>
-          <div class="space-y-2 border-t border-gray-100 bg-gray-50 px-4 py-4">
+
+          <div class="space-y-3 border-t border-gray-100 bg-gray-50 px-4 py-4 sm:px-5">
             <% @appendix_chapters.each do |chapter| %>
-              <% if chapter[:available] && chapter[:accessible] %>
-                <%= link_to product_chapter_path(@product_code, chapter[:id]), class: "block rounded-lg border border-gray-200 bg-white p-3 hover:border-blue-200" do %>
-                  <%= chapter[:id] %>. <%= chapter[:title] %>
-                <% end %>
-              <% else %>
-                <div class="rounded-lg border border-gray-100 bg-gray-100 p-3 text-gray-400"><%= chapter[:id] %>. <%= chapter[:title] %></div>
-              <% end %>
+              <%= render "product_content/index_chapter_row", chapter: chapter, theme_classes: theme_classes %>
             <% end %>
           </div>
         </details>

@@ -122,4 +122,14 @@ class ProductContent::ChatdoxLegacySource
   def last_updated_at(slug)
     ContentManifest.last_updated_at(DOCS_PATH, slug)
   end
+
+  # Hardcoded, not data-driven -- unlike FilesystemSource's theme (which
+  # reads hq/<product_code>/content_meta.yml), Chatdox has no content_meta.yml
+  # of its own to read from (see the class comment for why it can't move to
+  # FilesystemSource yet). Same shape as FilesystemSource#theme regardless,
+  # so ProductContentController/views don't need to know which source they're
+  # rendering.
+  def theme
+    { accent: "blue", label: "CHATDOX", back_link_label: "문서 목록", index_heading: "완전한 커리큘럼" }
+  end
 end

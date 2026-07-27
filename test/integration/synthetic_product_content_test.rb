@@ -22,8 +22,11 @@ class SyntheticProductContentTest < ActionDispatch::IntegrationTest
   test "a product with zero code registration and no content_meta.yml works end-to-end via the generic /content/:product_code route" do
     get "/content/#{@product_code}"
     assert_response :success
-    assert_match(/01\.\s*소개/, response.body)
-    assert_match(/02\.\s*다음 단계/, response.body)
+    # The chapter id already shows in its own icon badge (see
+    # leedox_content_template_unification_r1) -- the title text itself has
+    # no redundant number prefix.
+    assert_match(/소개/, response.body)
+    assert_match(/다음 단계/, response.body)
 
     get "/content/#{@product_code}/01"
     assert_response :success

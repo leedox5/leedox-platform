@@ -4,29 +4,23 @@
 # (see config/routes.rb) -- see docs/internal/content_platform_design.md
 # section B.
 #
-# Chatdox and Claudox keep their existing, visually distinct templates
-# (app/views/docs/*, app/views/claudox/*) -- unifying the controller doesn't
-# mean unifying the screens, and "동작 완전히 동일 유지" means the pixels
-# shouldn't move either. A product with neither gets a plain generic
-# template (app/views/product_content/*) as a working default.
+# Every product renders through the same app/views/product_content/* templates
+# now (see leedox_content_template_unification_r1) -- structure (layout,
+# sidebar, number handling) is fully shared; only the theme data returned by
+# each ProductContent source (accent color, sidebar label) still varies per
+# product.
 class ProductContentController < ApplicationController
   include ChapterImages
 
-  TEMPLATE_DIRS = {
-    "chatdox" => "docs",
-    "claudox" => "claudox"
-  }.freeze
+  helper_method :product_content_index_path_for, :product_chapter_path_for
 
   def index
     load_common
-    render template: "#{template_dir}/index"
   end
 
   def show
     @product_code = params[:product_code]
-    # Only Chatdox's original controller forced this; preserved exactly
-    # rather than applying it to both out of tidiness.
-    request.format = :html if @product_code == "chatdox"
+    request.format = :html
 
     load_common
     @current_id = params[:id].to_s.rjust(2, "0")
@@ -46,20 +40,21 @@ class ProductContentController < ApplicationController
 
     file_path = @source.path.join("#{@current_chapter[:slug]}.md")
     @last_updated_at = @source.last_updated_at(@current_chapter[:slug])
-    raw_markdown = File.read(file_path)
-    # Claudox's templates show the title as their own <h1> already, so the
-    # markdown body's leading "# ..." heading line would otherwise repeat it.
-    # Chatdox's body has always rendered its leading heading inline (its
-    # <h1> title comes from the hand-written chapter list, not the file) --
-    # keeping that exactly as before rather than "fixing" a visible change.
-    raw_markdown = strip_leading_heading(raw_markdown) if @product_code == "claudox"
+    # Every template now shows the chapter title as its own <h1>, so the
+    # markdown body's leading "# ..." heading would otherwise repeat it --
+    # applies to every product now, not just Claudox (see stage 3 -- Chatdox
+    # was left out at the time because its old hand-written title didn't
+    # always match the file's heading text; that's still true, but it no
+    # longer matters here since this only strips whatever heading line is
+    # actually in the file, independent of what title is displayed above it).
+    raw_markdown = strip_leading_heading(File.read(file_path))
     @content_html = render_markdown(raw_markdown)
 
     @chapter_progress = if user_signed_in?
       current_user.chapter_progresses.find_by(chapter_id: @current_id, product_code: @product_code)
     end
 
-    render template: "#{template_dir}/show", formats: :html
+    render formats: :html
   end
 
   def image
@@ -71,6 +66,9 @@ class ProductContentController < ApplicationController
   def load_common
     @product_code ||= params[:product_code]
     @source = ProductContent.for(@product_code)
+    @product = Product.find_by(code: @product_code)
+    @display_name = @product&.name || @product_code.titleize
+    @theme = @source.theme
     @chapters = available_chapters
     @phase_chapters = chapters_by_phase(@chapters)
     @appendix_chapters = appendix_chapters(@chapters)
@@ -79,10 +77,6 @@ class ProductContentController < ApplicationController
     # content_meta.yml at all has zero phases, so without this every chapter
     # would exist and be individually reachable but never listed anywhere.
     @ungrouped_chapters = ungrouped_chapters(@chapters)
-  end
-
-  def template_dir
-    TEMPLATE_DIRS.fetch(@product_code, "product_content")
   end
 
   def available_chapters
@@ -110,6 +104,31 @@ class ProductContentController < ApplicationController
   def ungrouped_chapters(chapters)
     grouped_ids = @phase_chapters.flat_map { |phase| phase[:chapters] }.map { |chapter| chapter[:id] }
     chapters.reject { |chapter| chapter[:kind] == :appendix || grouped_ids.include?(chapter[:id]) }
+  end
+
+  # Chatdox/Claudox chapter links (index list, sidebar, prev/next, back-link)
+  # keep pointing at each product's own pre-existing legacy path here, rather
+  # than switching to the generic /content/:product_code route the way
+  # dashboard-generated links already do (see design doc section B-2) --
+  # these two products' reading screens are reachable directly (bookmarks,
+  # search results, shared links), so "동작 완전히 동일 유지" extends to what
+  # URL clicking around inside the reader itself lands on, not just the
+  # entry point. A product with no legacy route falls back to the generic
+  # helper, which is the only path it's ever had.
+  def product_content_index_path_for(product_code)
+    case product_code
+    when "chatdox" then docs_path
+    when "claudox" then claudox_read_path
+    else product_content_index_path(product_code)
+    end
+  end
+
+  def product_chapter_path_for(product_code, id)
+    case product_code
+    when "chatdox" then doc_path(id)
+    when "claudox" then claudox_chapter_path(id)
+    else product_chapter_path(product_code, id)
+    end
   end
 
   def strip_leading_heading(raw_markdown)
