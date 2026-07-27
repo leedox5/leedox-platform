@@ -41,6 +41,13 @@ class CommerceCatalogTest < ActiveSupport::TestCase
     assert aistart.active?
     assert_not aistart.sale_enabled?
     assert_empty aistart.product_offers
+    assert aistart.free_access?
+    assert_equal "/content/aistart", aistart.landing_page_path
+  end
+
+  test "chatdox/claudox are not free_access -- the flag is aistart-specific, not a new default" do
+    assert_not Product.find_by!(code: "chatdox").free_access?
+    assert_not Product.find_by!(code: "claudox").free_access?
   end
 
   test "catalog bootstrap is idempotent and does not overwrite operator changes" do

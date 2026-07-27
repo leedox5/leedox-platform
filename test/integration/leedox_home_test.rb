@@ -20,6 +20,25 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_no_match(/₩|9,900원|무료 체험|프리미엄 요금제/, response.body)
   end
 
+  test "homepage has a lightweight aistart banner alongside, not instead of, the Chatdox/Claudox two-card section" do
+    get root_path
+    assert_response :success
+
+    doc = Nokogiri::HTML(response.body)
+    # The flagship two-card section is untouched -- still exactly Chatdox + Claudox.
+    assert_select "article", minimum: 2 do
+      assert_select "a[href=?]", chatdox_path
+      assert_select "a[href=?]", claudox_path
+    end
+
+    # The aistart banner exists as a distinct, lighter-weight element -- not
+    # a 3rd <article> card sitting alongside the two flagships.
+    banner_link = doc.css("a[href='#{product_content_index_path('aistart')}']").first
+    assert banner_link, "expected a banner/CTA linking to the aistart content"
+    assert_match(/무료/, banner_link.ancestors("div").first.text)
+    assert_not_equal "article", banner_link.ancestors("article").first&.name
+  end
+
   test "homepage proof section shows live chapter titles for both products, not frozen copies" do
     get root_path
     assert_response :success

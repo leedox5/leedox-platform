@@ -51,17 +51,25 @@ class AistartFreeProductTest < ActionDispatch::IntegrationTest
     section = doc.css("section[aria-label]").find { |s| s["aria-label"].include?(@aistart.name) }
     assert section, "expected a dashboard block for aistart with zero registration code"
     assert_match(%r{5\s*/\s*5}, section.text)
+    assert_match(/무료로 이용 가능/, section.text)
+    assert_no_match(/미보유/, section.text)
+    assert_match(/라이선스 없이 전체 이용 가능합니다/, section.text)
   end
 
-  test "aistart shows up on /pricing as a graceful placeholder, with no purchase link and no crash" do
+  test "aistart shows up on /pricing as a free product, not a not-yet-launched paid one" do
     get pricing_path
     assert_response :success
 
     doc = Nokogiri::HTML(response.body)
     card = doc.css("article").find { |c| c.text.include?(@aistart.name) }
     assert card, "expected a pricing card for aistart"
-    assert_match(/가격 준비 중/, card.text)
-    assert_nil card.at_css("a"), "no landing_page_path was set, so there should be no dangling detail link"
+    assert_match(/무료 이용 가능/, card.text)
+    assert_match(/무료/, card.text)
+    assert_no_match(/준비 중/, card.text)
+
+    link = card.at_css("a")
+    assert link, "expected a link to the actual content, since landing_page_path is now set"
+    assert_equal product_content_index_path("aistart"), link["href"]
   end
 
   test "checkout for aistart shows the same graceful not-ready screen as any other sale_enabled: false product" do

@@ -13,17 +13,19 @@ module Commerce
       },
       # Free, always-guest-accessible content (see hq/aistart/content_meta.yml
       # -- guest/trial limits both cover all 5 chapters). Not for sale: no
-      # ProductOffer entries below, no tagline/landing_page_path (an empty
-      # landing_page_path already makes the /pricing card omit its "자세히
-      # 보기" link -- proven in stage 4). sale_enabled stays false like every
-      # other product's initial state here, and must stay false permanently
-      # for this one specifically -- flipping it on would expose a checkout
-      # page with zero offers to choose from, since Commerce::Sales.enabled_for?
-      # only checks active/sale_enabled, not offer existence.
+      # ProductOffer entries below. sale_enabled stays false like every other
+      # product's initial state here, and must stay false permanently for
+      # this one specifically -- flipping it on would expose a checkout page
+      # with zero offers to choose from, since Commerce::Sales.enabled_for?
+      # only checks active/sale_enabled, not offer existence. free_access:
+      # true is what actually tells /pricing and the dashboard this is a
+      # permanently-free product, not a not-yet-launched paid one (see
+      # leedox_aistart_free_product_visibility_r1).
       "aistart" => {
         name: "AI, 오늘부터 시작",
         tagline: nil,
-        landing_page_path: nil
+        landing_page_path: "/content/aistart",
+        free_access: true
       }
     }.freeze
     CHATDOX_OFFERS = [
@@ -57,6 +59,7 @@ module Commerce
             record.sale_enabled = false
             record.tagline = attributes.fetch(:tagline)
             record.landing_page_path = attributes.fetch(:landing_page_path)
+            record.free_access = attributes.fetch(:free_access, false)
           end
           [ code, product ]
         end
