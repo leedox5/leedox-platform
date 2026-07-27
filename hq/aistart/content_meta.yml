@@ -11,3 +11,6 @@ phases:
 chapter_range: "1..5"
 guest_chapter_limit: 5
 trial_chapter_limit: 5
+theme:
+  accent: emerald
+  label: "AI, 오늘부터 시작"

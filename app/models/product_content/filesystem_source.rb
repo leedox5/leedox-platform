@@ -75,6 +75,10 @@ class ProductContent::FilesystemSource
     ContentManifest.last_updated_at(path, slug)
   end
 
+  def theme
+    meta.theme
+  end
+
   private
 
   def meta
@@ -92,7 +96,13 @@ class ProductContent::FilesystemSource
     File.foreach(file_path) do |line|
       next unless line.start_with?("#")
 
-      return line.sub(/^#+\s*/, "").strip
+      # HQ's markdown headings carry their own "N. " chapter-number prefix
+      # (e.g. "# 1. 오늘, AI와 첫 만남") -- the screen already shows the
+      # chapter number as its own UI element, so keeping the prefix here
+      # would duplicate it ("01. 1. 오늘..."). Strip it at parse time only;
+      # the source markdown files are untouched.
+      heading = line.sub(/^#+\s*/, "").strip
+      return heading.sub(/\A\d+\.\s*/, "")
     end
 
     File.basename(file_path, ".md").tr("_", " ")

@@ -11,9 +11,11 @@ class ProductContent::ContentMeta
   DEFAULT_GUEST_CHAPTER_LIMIT = 2
   DEFAULT_TRIAL_CHAPTER_LIMIT = 5
   DEFAULT_CHAPTER_RANGE = 1..20
+  DEFAULT_THEME_ACCENT = "blue"
+  DEFAULT_THEME_BACK_LINK_LABEL = "목차"
 
   attr_reader :phases, :chapter_range, :appendix_range, :non_chapter_files,
-    :guest_chapter_limit, :trial_chapter_limit
+    :guest_chapter_limit, :trial_chapter_limit, :theme
 
   def self.load(directory)
     meta_path = directory.join("content_meta.yml")
@@ -36,6 +38,7 @@ class ProductContent::ContentMeta
     @non_chapter_files = data["non_chapter_files"] || []
     @guest_chapter_limit = data["guest_chapter_limit"] || DEFAULT_GUEST_CHAPTER_LIMIT
     @trial_chapter_limit = data["trial_chapter_limit"] || DEFAULT_TRIAL_CHAPTER_LIMIT
+    @theme = parse_theme(data["theme"])
   end
 
   def licensed_chapter_ranges
@@ -43,6 +46,19 @@ class ProductContent::ContentMeta
   end
 
   private
+
+  # label/index_heading default to nil (not placeholder strings) so callers
+  # can fall back to something more useful in context (e.g. the product's
+  # real name) instead of a generic-sounding default.
+  def parse_theme(value)
+    value ||= {}
+    {
+      accent: value["accent"] || DEFAULT_THEME_ACCENT,
+      label: value["label"],
+      back_link_label: value["back_link_label"] || DEFAULT_THEME_BACK_LINK_LABEL,
+      index_heading: value["index_heading"]
+    }
+  end
 
   # A missing key (nil) is a legitimate "not specified" -- callers fall back
   # to a sane default for that. A *present* value that's malformed or

@@ -809,8 +809,10 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_match(/8\/8/, part_1.at_css(".text-right").text)
     chapter_titles_in_part_1 = part_1.css("span.font-medium").map(&:text)
     assert_equal 8, chapter_titles_in_part_1.size
-    assert_equal "1. 클로독스와의 첫만남", chapter_titles_in_part_1.first
-    assert_equal "8. 질문과 답변 — QNA로 지식 쌓기", chapter_titles_in_part_1.last
+    # No leading number prefix here anymore (leedox_content_template_unification_r1) --
+    # the chapter id already shows once in its own icon badge.
+    assert_equal "클로독스와의 첫만남", chapter_titles_in_part_1.first
+    assert_equal "질문과 답변 — QNA로 지식 쌓기", chapter_titles_in_part_1.last
   end
 
   test "Chatdox docs index keeps its own Phase 1/2/3 grouping, unaffected by the Claudox model" do

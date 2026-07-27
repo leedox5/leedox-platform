@@ -22,3 +22,8 @@ chapter_range: "1..20"
 appendix_range: "90..99"
 non_chapter_files:
   - 97_commands.md
+theme:
+  accent: violet
+  label: "클로독스"
+  back_link_label: "클로독스 목록"
+  index_heading: "전체 목차"

@@ -43,6 +43,38 @@ class ProductContent::ContentMetaTest < ActiveSupport::TestCase
       assert_equal 2, meta.guest_chapter_limit
       assert_equal 5, meta.trial_chapter_limit
       assert_equal [ 1..20 ], meta.licensed_chapter_ranges
+      assert_equal({ accent: "blue", label: nil, back_link_label: "목차", index_heading: nil }, meta.theme)
+    end
+  end
+
+  test "loads a theme block, with per-key defaults for whatever's missing" do
+    Dir.mktmpdir do |dir|
+      directory = Pathname.new(dir)
+      File.write(directory.join("content_meta.yml"), <<~YAML)
+        theme:
+          accent: violet
+          label: "클로독스"
+          back_link_label: "클로독스 목록"
+          index_heading: "전체 목차"
+      YAML
+
+      meta = ProductContent::ContentMeta.load(directory)
+      assert_equal({
+        accent: "violet", label: "클로독스", back_link_label: "클로독스 목록", index_heading: "전체 목차"
+      }, meta.theme)
+    end
+  end
+
+  test "a theme block with only some keys set still gets defaults for the rest" do
+    Dir.mktmpdir do |dir|
+      directory = Pathname.new(dir)
+      File.write(directory.join("content_meta.yml"), <<~YAML)
+        theme:
+          accent: emerald
+      YAML
+
+      meta = ProductContent::ContentMeta.load(directory)
+      assert_equal({ accent: "emerald", label: nil, back_link_label: "목차", index_heading: nil }, meta.theme)
     end
   end
 
