@@ -31,9 +31,12 @@
                 </td>
                 <td class="px-5 py-4 text-gray-700"><%= user.role %></td>
                 <td class="px-5 py-4">
-                  <div class="flex flex-col gap-1">
+                  <div class="flex flex-col gap-2">
                     <% @products.each do |product| %>
-                      <%= product_status_badge(user, product) %>
+                      <div>
+                        <%= product_status_badge(user, product) %>
+                        <p class="mt-0.5 text-xs text-gray-500"><%= license_period_text(user, product) %></p>
+                      </div>
                     <% end %>
                   </div>
                 </td>

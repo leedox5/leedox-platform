@@ -33,6 +33,32 @@ class AdminUsersTest < ActionDispatch::IntegrationTest
     assert_match(/AI, 오늘부터 시작 무료로 이용 가능/, row.text)
   end
 
+  test "the license period shows start~end for a licensed product, and a short placeholder otherwise" do
+    user = User.create!(name: "테스트 유저", email: "admin-users-period@example.com", password: "password123")
+    product = Product.find_by!(code: "claudox")
+    today = Time.current.in_time_zone(Commerce::PeriodCalculator::KST).to_date
+    end_date = today + 1.month
+    License.create!(
+      user: user, product: product, source: "paid", status: "active",
+      starts_on: today, last_usable_on: end_date - 1.day,
+      access_ends_at: Commerce::PeriodCalculator::KST.local(end_date.year, end_date.month, end_date.day)
+    )
+
+    get admin_users_path
+    assert_response :success
+
+    doc = Nokogiri::HTML(response.body)
+    row = doc.css("tbody tr").find { |tr| tr.text.include?(user.email) }
+    assert row, "expected a row for #{user.email}"
+
+    expected_period = "#{today.strftime('%Y.%m.%d')} ~ #{(end_date - 1.day).strftime('%Y.%m.%d')}"
+    assert_match(Regexp.new(Regexp.escape(expected_period)), row.text)
+    # Chatdox: no license at all -- short placeholder, not a repeat of "미보유".
+    assert_match(/없음/, row.text)
+    # aistart: free_access product -- period text stays a bare dash.
+    assert_match(/-/, row.text)
+  end
+
   test "role update still works (regression -- this page's other function, untouched by this round)" do
     user = User.create!(name: "테스트 유저", email: "admin-users-role@example.com", password: "password123")
 
