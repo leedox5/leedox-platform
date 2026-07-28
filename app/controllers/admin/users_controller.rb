@@ -1,6 +1,7 @@
 class Admin::UsersController < Admin::BaseController
   def index
     @users = User.order(created_at: :desc)
+    @products = Product.active.order(:code)
   end
 
   def update
