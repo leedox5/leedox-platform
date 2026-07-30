@@ -12,7 +12,7 @@ class UserPasswordPolicyTest < ActiveSupport::TestCase
     user = build_user(password: "Qwerty1234")
 
     assert_not user.valid?
-    assert user.errors.added?(:password, :common)
+    assert_includes user.errors[:base], "너무 흔한 비밀번호입니다. 다른 비밀번호를 입력해 주세요."
   end
 
   test "an existing weak password does not prevent unrelated updates" do
