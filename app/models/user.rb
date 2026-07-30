@@ -68,6 +68,8 @@ class User < ApplicationRecord
   private
 
   def password_must_not_be_common
-    errors.add(:password, :common) if COMMON_PASSWORDS.include?(password.downcase)
+    if COMMON_PASSWORDS.include?(password.downcase)
+      errors.add(:base, "너무 흔한 비밀번호입니다. 다른 비밀번호를 입력해 주세요.")
+    end
   end
 end

@@ -7,12 +7,6 @@ ko:
       user:
         email: "이메일"
         password: "비밀번호"
-    errors:
-      models:
-        user:
-          attributes:
-            password:
-              common: "사용 값이 너무 흔합니다"
   date:
     formats:
       long: "%Y년 %-m월 %-d일"
