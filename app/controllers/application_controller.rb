@@ -28,7 +28,7 @@ class ApplicationController < ActionController::Base
   end
 
   def after_sign_in_path_for(resource)
-    resource.admin? ? admin_dashboard_path : dashboard_path
+    stored_location_for(resource) || (resource.admin? ? admin_dashboard_path : dashboard_path)
   end
 
   def user_not_authorized
