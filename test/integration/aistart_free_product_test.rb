@@ -12,7 +12,27 @@ class AistartFreeProductTest < ActionDispatch::IntegrationTest
     @aistart = Product.find_by!(code: "aistart")
   end
 
-  test "all 5 chapters are readable while signed out, each rendering its own real content" do
+  test "aistart requires login for its index and chapters" do
+    get "/content/aistart"
+    assert_redirected_to new_user_session_path
+
+    get "/content/aistart/01"
+    assert_redirected_to new_user_session_path
+  end
+
+  test "login returns the user to the requested aistart content" do
+    user = User.create!(name: "테스트 유저", email: "aistart-return@example.com", password: "password123")
+
+    get "/content/aistart"
+    post user_session_path, params: { user: { email: user.email, password: "password123" } }
+
+    assert_redirected_to product_content_index_path("aistart")
+  end
+
+  test "all 5 chapters are readable after login, each rendering its own real content" do
+    user = User.create!(name: "테스트 유저", email: "aistart-reader@example.com", password: "password123")
+    post user_session_path, params: { user: { email: user.email, password: "password123" } }
+
     get "/content/aistart"
     assert_response :success
     # No leading number prefix here anymore (leedox_content_template_unification_r1) --

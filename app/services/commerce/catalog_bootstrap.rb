@@ -11,8 +11,10 @@ module Commerce
         tagline: "Claude를 팀에 합류시켜 실제로 협업한 기록을 그대로 따라가는 콘텐츠",
         landing_page_path: "/claudox"
       },
-      # Free, always-guest-accessible content (see hq/aistart/content_meta.yml
-      # -- guest/trial limits both cover all 5 chapters). Not for sale: no
+      # Free content available in full after login (see
+      # hq/aistart/content_meta.yml -- guest/trial limits both cover all 5
+      # chapters, while ProductContentController requires an account for
+      # free_access products). Not for sale: no
       # ProductOffer entries below. sale_enabled stays false like every other
       # product's initial state here, and must stay false permanently for
       # this one specifically -- flipping it on would expose a checkout page
