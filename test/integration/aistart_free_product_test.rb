@@ -93,7 +93,7 @@ class AistartFreeProductTest < ActionDispatch::IntegrationTest
 
     link = card.at_css("a")
     assert link, "expected a link to the actual content, since landing_page_path is now set"
-    assert_equal product_content_index_path("aistart"), link["href"]
+    assert_equal new_user_session_path(redirect_to: product_content_index_path("aistart")), link["href"]
   end
 
   test "checkout for aistart shows the same graceful not-ready screen as any other sale_enabled: false product" do

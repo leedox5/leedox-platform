@@ -32,14 +32,47 @@ class PricingSummaryPageTest < ActionDispatch::IntegrationTest
     assert_match(/최저 7,700원부터/, chatdox_card.text)
     assert_match(@chatdox.tagline, chatdox_card.text)
     detail_link = chatdox_card.at_css("a")
-    assert_equal chatdox_path, detail_link["href"]
+    assert_equal new_user_session_path(redirect_to: chatdox_path), detail_link["href"]
     assert_equal "자세히 보기", detail_link.text
 
     claudox_card = cards.find { |card| card.text.include?("Claudox") }
     assert claudox_card, "expected a Claudox card"
     assert_match(/준비 중/, claudox_card.text)
     assert_match(/최저 3,850원부터/, claudox_card.text)
-    assert_equal claudox_path, claudox_card.at_css("a")["href"]
+    assert_equal new_user_session_path(redirect_to: claudox_path), claudox_card.at_css("a")["href"]
+  end
+
+  test "guest user clicking product detail link on pricing page is guided to sign-in and redirected after login" do
+    user = User.create!(name: "테스트 유저", email: "aigravity-funnel@example.com", password: "password123")
+
+    # 1. Guest user visits /pricing
+    get pricing_path
+    assert_response :success
+
+    doc = Nokogiri::HTML(response.body)
+    aigravity_card = doc.css("article").find { |card| card.text.include?("Antigravity 개발 실전") }
+    assert aigravity_card
+    detail_link = aigravity_card.at_css("a")
+    assert_equal new_user_session_path(redirect_to: "/content/aigravity"), detail_link["href"]
+
+    # 2. Guest user follows detail link to sign-in page
+    get detail_link["href"]
+    assert_response :success
+
+    # 3. User logs in and gets redirected to /content/aigravity
+    post user_session_path, params: { user: { email: user.email, password: "password123" } }
+    assert_redirected_to "/content/aigravity"
+
+    follow_redirect!
+    assert_response :success
+
+    # 4. Signed in user visits /pricing and sees direct link
+    get pricing_path
+    assert_response :success
+
+    doc = Nokogiri::HTML(response.body)
+    aigravity_card = doc.css("article").find { |card| card.text.include?("Antigravity 개발 실전") }
+    assert_equal "/content/aigravity", aigravity_card.at_css("a")["href"]
   end
 
   test "a product with no offers shows a graceful placeholder instead of crashing" do
