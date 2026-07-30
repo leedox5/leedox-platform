@@ -2,6 +2,11 @@
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+if [[ -z "${HQ_DIR:-}" ]] && [[ -f "$PROJECT_ROOT/.env" ]]; then
+  set -a
+  source "$PROJECT_ROOT/.env"
+  set +a
+fi
 OUTBOX_DIR="$PROJECT_ROOT/.local/handoff/outbox"
 HQ_BASE="${HQ_DIR:-${SOURCE_REPO:-/mnt/d/RubyOnRails/chatdox-curriculum}}"
 TARGET_DIR="${TARGET_DIR:-$HQ_BASE/.local/handoff/inbox}"

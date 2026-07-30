@@ -22,8 +22,13 @@ set -euo pipefail
 # No shared git history, no subtree merge machinery, no unused content. Commit the
 # result in this repo like any other change.
 
-SOURCE_REPO="${HQ_DIR:-${SOURCE_REPO:-/mnt/d/RubyOnRails/chatdox-curriculum}}"
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+if [[ -z "${HQ_DIR:-}" ]] && [[ -f "$PROJECT_ROOT/.env" ]]; then
+  set -a
+  source "$PROJECT_ROOT/.env"
+  set +a
+fi
+SOURCE_REPO="${HQ_DIR:-${SOURCE_REPO:-/mnt/d/RubyOnRails/chatdox-curriculum}}"
 REF="main"
 DRY_RUN_MODE="false"
 
