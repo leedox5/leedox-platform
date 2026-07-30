@@ -21,7 +21,9 @@ jobs:
       - name: Run Rails tests
         env:
           RAILS_ENV: test
-        run: bin/rails db:test:prepare test
+        run: |
+          bin/rails db:test:prepare
+          bin/rails test
 
   scan_ruby:
     runs-on: ubuntu-latest
