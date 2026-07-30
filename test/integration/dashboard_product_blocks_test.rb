@@ -46,6 +46,20 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
     assert doc.at_css("section[aria-label='Claudox 현황']")
   end
 
+  test "a new user sees one first-chapter CTA per product" do
+    get dashboard_path
+    assert_response :success
+
+    doc = Nokogiri::HTML(response.body)
+    Product.order(:code).each do |product|
+      section = doc.at_css("section[aria-label='#{product.name} 현황']")
+      assert_equal 1, section.css("a").count { |link| link.text.strip == "첫 챕터 시작" }
+      assert_equal 0, section.css("a").count { |link| link.text.strip == "이어서 학습" }
+      assert section.at_css("a[href='#{product_chapter_path(product.code, '01')}']"),
+        "expected #{product.name} first-chapter CTA"
+    end
+  end
+
   test "a user who only completed Chatdox chapters sees accurate Chatdox progress and Next Step, while Claudox stays untouched" do
     post chapter_progresses_path, params: { chapter_id: "01", product_code: "chatdox" }
     post chapter_progresses_path, params: { chapter_id: "02", product_code: "chatdox" }
@@ -59,6 +73,7 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
 
     assert_match(/전체 20개 중 2개 완료/, chatdox_section)
     assert_match(/Chapter 03/, chatdox_section)
+    assert_match(/이어서 학습/, chatdox_section)
     assert_match(/전체 20개 중 0개 완료/, claudox_section)
     assert_match(/Chapter 01/, claudox_section)
   end

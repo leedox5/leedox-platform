@@ -1,4 +1,4 @@
-<% content_for :title, "마이페이지 - Chatdox" %>
+<% content_for :title, "마이페이지 - LEEDOX" %>
 
 <div class="min-h-screen bg-gray-50">
   <%= render "shared/header" %>
@@ -43,6 +43,6 @@
       </dl>
     </article>
 
-    <%= render "shared/commerce_summary", licenses: @licenses, orders: @orders %>
+    <%= render "shared/commerce_summary", licenses: @licenses, orders: @orders, free_products: @free_products %>
   </main>
 </div>

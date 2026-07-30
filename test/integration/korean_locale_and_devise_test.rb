@@ -83,6 +83,14 @@ class KoreanLocaleAndDeviseTest < ActionDispatch::IntegrationTest
     user.errors.full_messages.each do |message|
       assert_no_match(/translation missing/i, message)
     end
+
+    test "sign-up explains the strengthened password policy" do
+      get new_user_registration_path
+      assert_response :success
+
+      assert_match(/비밀번호 \(10자 이상\)/, response.body)
+      assert_match(/흔한 비밀번호는 사용할 수 없습니다/, response.body)
+    end
   end
 
   test "number/date formatting used sitewide is unaffected (numbers still comma-delimited)" do
