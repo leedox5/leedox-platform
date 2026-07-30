@@ -22,9 +22,9 @@ class PricingSummaryPageTest < ActionDispatch::IntegrationTest
 
     doc = Nokogiri::HTML(response.body)
     cards = doc.css("article")
-    # aistart is a real, permanently-registered free product (see
-    # leedox_multi_product_platform_stage5_r1) -- present alongside Chatdox/Claudox here too.
-    assert_equal 3, cards.size
+    # aistart and aigravity are real, permanently-registered products
+    # present alongside Chatdox/Claudox here too.
+    assert_equal Product.count, cards.size
 
     chatdox_card = cards.find { |card| card.text.include?("Chatdox") }
     assert chatdox_card, "expected a Chatdox card"
@@ -63,7 +63,7 @@ class PricingSummaryPageTest < ActionDispatch::IntegrationTest
 
     doc = Nokogiri::HTML(response.body)
     cards = doc.css("article")
-    assert_equal 4, cards.size
+    assert_equal Product.count, cards.size
     widget_card = cards.find { |card| card.text.include?("Widget Test") }
     assert widget_card, "expected the newly seeded product to get a card without any code changes"
     assert_match(/가격 준비 중/, widget_card.text) # no offers yet

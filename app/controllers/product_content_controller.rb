@@ -92,7 +92,11 @@ class ProductContentController < ApplicationController
 
   def chapters_by_phase(chapters)
     @source.phases.map do |phase|
-      phase_chapters = chapters.select { |chapter| phase[:range].cover?(chapter[:id].to_i) }
+      phase_chapters = if phase[:range]
+        chapters.select { |chapter| phase[:range].cover?(extract_chapter_number(chapter[:id])) }
+      else
+        []
+      end
       available_count = phase_chapters.count { |chapter| chapter[:available] }
 
       phase.merge(
@@ -100,6 +104,16 @@ class ProductContentController < ApplicationController
         available_count: available_count,
         total_count: phase_chapters.size
       )
+    end
+  end
+
+  private
+
+  def extract_chapter_number(id)
+    if match = id.to_s.match(/\A[A-Z0-9]+E(\d+)\z/i)
+      match[1].to_i
+    else
+      id.to_i
     end
   end
 

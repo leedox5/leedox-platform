@@ -9,9 +9,8 @@ class CommerceCatalogTest < ActiveSupport::TestCase
     chatdox = Product.find_by!(code: "chatdox")
     claudox = Product.find_by!(code: "claudox")
 
-    # aistart is a free, offer-less product (see leedox_multi_product_platform_stage5_r1) --
-    # present in the catalog but deliberately outside this test's Chatdox/Claudox offer assertions.
-    assert_equal [ "aistart", "chatdox", "claudox" ], Product.order(:code).pluck(:code)
+    # aistart and aigravity are offer-less products registered in the catalog.
+    assert_equal [ "aigravity", "aistart", "chatdox", "claudox" ], Product.order(:code).pluck(:code)
     assert_equal false, claudox.sale_enabled?
     assert_equal [
       [ "chatdox-1m-v1", 1, 7_000, 700, 7_700, 0 ],
@@ -33,6 +32,19 @@ class CommerceCatalogTest < ActiveSupport::TestCase
     ], claudox.product_offers.ordered.pluck(
       :code, :duration_months, :supply_amount, :vat_amount, :total_amount, :discount_bps
     )
+  end
+
+  test "aigravity is registered in catalog and ProductContent.for scans chapters and emerald theme" do
+    aigravity = Product.find_by!(code: "aigravity")
+
+    assert aigravity.active?
+    assert_not aigravity.sale_enabled?
+    assert_equal "Antigravity 개발 실전", aigravity.name
+    assert_equal "/content/aigravity", aigravity.landing_page_path
+
+    source = ProductContent.for("aigravity")
+    assert_equal "emerald", source.theme[:accent]
+    assert_operator source.chapters.size, :>, 0
   end
 
   test "aistart is registered as a permanently offer-less, not-for-sale product" do

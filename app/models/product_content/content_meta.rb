@@ -26,9 +26,9 @@ class ProductContent::ContentMeta
   def initialize(data)
     @phases = (data["phases"] || []).map do |phase|
       {
-        key: phase["key"],
-        label: phase["label"],
-        title: phase["title"],
+        key: phase["key"] || phase["code"],
+        label: phase["label"] || phase["title"],
+        title: phase["title"] || phase["label"],
         description: phase["description"],
         range: parse_range(phase["range"])
       }
@@ -51,6 +51,7 @@ class ProductContent::ContentMeta
   # can fall back to something more useful in context (e.g. the product's
   # real name) instead of a generic-sounding default.
   def parse_theme(value)
+    value = { "accent" => value } if value.is_a?(String)
     value ||= {}
     {
       accent: value["accent"] || DEFAULT_THEME_ACCENT,

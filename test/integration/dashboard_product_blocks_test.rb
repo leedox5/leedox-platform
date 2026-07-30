@@ -53,9 +53,10 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
     doc = Nokogiri::HTML(response.body)
     Product.order(:code).each do |product|
       section = doc.at_css("section[aria-label='#{product.name} 현황']")
+      first_chapter_id = ProductContent.for(product.code).chapters.first[:id]
       assert_equal 1, section.css("a").count { |link| link.text.strip == "첫 챕터 시작" }
       assert_equal 0, section.css("a").count { |link| link.text.strip == "이어서 학습" }
-      assert section.at_css("a[href='#{product_chapter_path(product.code, '01')}']"),
+      assert section.at_css("a[href='#{product_chapter_path(product.code, first_chapter_id)}']"),
         "expected #{product.name} first-chapter CTA"
     end
   end

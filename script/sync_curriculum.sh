@@ -86,6 +86,10 @@ fi
 
 sync_one() {
   local src="$1" dest="$2"
+  if [[ ! -d "$TMP_DIR/$src" ]]; then
+    echo "  $src -> (skipped, not present in $REF)"
+    return 0
+  fi
   mkdir -p "$dest"
   if [[ "$DRY_RUN_MODE" == "true" ]]; then
     # --itemize-changes lists every file rsync considered, including the ones

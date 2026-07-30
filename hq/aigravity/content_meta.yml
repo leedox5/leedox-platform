@@ -1,0 +1,34 @@
+title: "Antigravity 개발 실전: 15년 차 베테랑의 AI 에이전트 무중력 코딩"
+description: "15년 차 백엔드/DB 베테랑 개발자 토미와 Google DeepMind Antigravity 에이전트가 함께 만드는 실전 AI-Native SaaS & 무중력 코딩 가이드"
+guest_chapter_limit: 1
+trial_chapter_limit: 3
+
+phases:
+  - key: phase1
+    label: "1단계"
+    title: "환경 구축 & 에이전트 영혼 이식"
+    description: "Antigravity 환경 구축과 에이전트 영혼 이식 커리큘럼"
+    range: "1..4"
+  - key: phase2
+    label: "2단계"
+    title: "컨텍스트 주입 & 토큰 경제학"
+    description: "컨텍스트 주입 및 토큰 쿼터 절약 최적화"
+    range: "5..7"
+  - key: phase3
+    label: "3단계"
+    title: "실무 코드베이스 고도화 & 멀티 에이전트"
+    description: "레거시 DB 리팩토링 및 서브에이전트 병렬 구동"
+    range: "8..9"
+  - key: phase4
+    label: "4단계"
+    title: "자율 디버깅 & 배포 자동화"
+    description: "자율 디버깅 루프 및 GitHub MCP 자동화 배포"
+    range: "10..11"
+
+chapter_range: "1..11"
+
+theme:
+  accent: emerald
+  label: "LEEDOX"
+  back_link_label: "LEEDOX"
+  index_heading: "Antigravity 개발 실전 목차"

@@ -20,11 +20,13 @@ class ProductContent::FilesystemSource
   end
 
   def chapters
-    Dir.glob(path.join("[0-9][0-9]_*.md")).sort.filter_map do |file_path|
+    chapter_files = Dir.glob(path.join("[0-9][0-9]_*.md")) + Dir.glob(path.join("S[0-9][0-9]*_*.md"))
+    chapter_files.sort.filter_map do |file_path|
       next if meta.non_chapter_files.include?(File.basename(file_path))
 
       id = File.basename(file_path, ".md").split("_", 2).first
-      kind = chapter_kind(id.to_i)
+      number = extract_chapter_number(id)
+      kind = chapter_kind(number)
       next unless kind
 
       {
@@ -39,8 +41,8 @@ class ProductContent::FilesystemSource
   end
 
   def find(id)
-    normalized_id = id.to_s.rjust(2, "0")
-    chapters.find { |chapter| chapter[:id] == normalized_id }
+    id_str = id.to_s
+    chapters.find { |chapter| chapter[:id] == id_str || chapter[:id] == id_str.rjust(2, "0") }
   end
 
   def phases
@@ -80,6 +82,14 @@ class ProductContent::FilesystemSource
   end
 
   private
+
+  def extract_chapter_number(id)
+    if match = id.to_s.match(/\A[A-Z0-9]+E(\d+)\z/i)
+      match[1].to_i
+    else
+      id.to_i
+    end
+  end
 
   def meta
     @meta ||= ProductContent::ContentMeta.load(path)

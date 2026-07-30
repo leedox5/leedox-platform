@@ -28,6 +28,11 @@ module Commerce
         tagline: nil,
         landing_page_path: "/content/aistart",
         free_access: true
+      },
+      "aigravity" => {
+        name: "Antigravity 개발 실전",
+        tagline: "15년 차 베테랑의 AI 에이전트 무중력 코딩 실전 가이드",
+        landing_page_path: "/content/aigravity"
       }
     }.freeze
     CHATDOX_OFFERS = [
