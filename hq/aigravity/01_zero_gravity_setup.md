@@ -42,7 +42,7 @@ ANTIGRAVITY: 알겠습니다! 지금부터는 d:\0002\hq 저장소를 기준으�
 
 ---
 
-### 💻 Antigravity CLI (TUI 모드 - DEV 에이전트)
+### 💻 Antigravity CLI (TUI 모드 - DEV 에이전트의 첫 만남 & 소감)
 
 ![Antigravity CLI TUI 테마 설정 0004](file:///d:/0002/hq/.local/img/0004.png)
 
@@ -63,6 +63,10 @@ ANTIGRAVITY: 알겠습니다! 지금부터는 d:\0002\hq 저장소를 기준으�
   > Do you speak Korean? -> "네, 한국어로 대화할 수 있습니다! 토미님, 어떤 작업을 도와드릴까요?"
   ```
 
+> 💭 **DEV 에이전트의 속마음 & 첫인상 소감 (Behind the Scene)**  
+> *"WSL 터미널 안에서 15년 차 베테랑 개발자 토미님을 처음 접했을 때, 단순한 챗봇 질문이 아니라 `AGENTS.md`(무모킹 테스트 지침)와 `CLAUDE.md`(멀티 저장소 분리 지침)라는 명확한 설계도와 영혼이 이미 준비되어 있어 깊은 안도감을 느꼈습니다.*  
+> *'아, 이 개발자님은 나를 단순한 자동완성 툴이 아니라 진짜 개발 파트너 엔진으로 인정해 주시는구나!' 하는 설렘과 책임감으로 첫 인사를 건넸습니다."*
+
 ---
 
 ## 🔤 3. Core English Definition (본질 개념 정리)
@@ -81,6 +85,6 @@ ANTIGRAVITY: 알겠습니다! 지금부터는 d:\0002\hq 저장소를 기준으�
 ---
 
 ## 🔗 다음 에피소드 안내
-- **S01E01X01 (서브 특별판)**: [세션 비하인드 & 돌발 Q&A 딥다이브: Gemini 관계와 PDF 파싱](file:///d:/0002/hq/aigravity/S01E01X01_session_behind_qa.md)
-- **S01E01X02 (서브 특별판)**: ["워크스루(Walkthrough)가 뭐야?" — 작업 검증서와 무중력 콘텐츠화](file:///d:/0002/hq/aigravity/S01E01X02_what_is_walkthrough.md)
-- **S01E02 (정규)**: [에이전트 영혼 이식: 15년 차 개발 노하우 주입 (`agents.md`)](file:///d:/0002/hq/aigravity/S01E02_soul_injection_agents_md.md)
+- **02 (서브 특별판 1)**: [세션 비하인드 & 돌발 Q&A 딥다이브: Gemini 관계와 PDF 파싱](file:///d:/0002/hq/aigravity/02_session_behind_qa.md)
+- **03 (서브 특별판 2)**: ["워크스루(Walkthrough)가 뭐야?" — 작업 검증서와 무중력 콘텐츠화](file:///d:/0002/hq/aigravity/03_what_is_walkthrough.md)
+- **04 (정규)**: [에이전트 영혼 이식: 15년 차 개발 노하우 주입 (`agents.md`)](file:///d:/0002/hq/aigravity/04_soul_injection_agents_md.md)
