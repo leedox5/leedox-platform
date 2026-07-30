@@ -11,39 +11,119 @@
         <p class="mt-2 text-gray-600">사용자, 라이선스, 학습 진행 상태를 빠르게 확인합니다.</p>
       </div>
 
-      <div class="flex flex-wrap gap-3">
-        <%= link_to "콘텐츠 진행 현황", admin_content_progress_path,
-          class: "rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-center font-semibold text-blue-700 transition hover:bg-blue-50" %>
-        <%= link_to "GitHub Lab 운영", admin_commerce_github_access_path,
-          class: "rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-center font-semibold text-blue-700 transition hover:bg-blue-50" %>
-        <%= link_to "Commerce 운영", admin_commerce_orders_path,
-          class: "rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-center font-semibold text-blue-700 transition hover:bg-blue-50" %>
-        <%= link_to "사용자관리", admin_users_path,
-          class: "rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-center font-semibold text-blue-700 transition hover:bg-blue-50" %>
-        <%= link_to "상품 판매여부 관리", admin_commerce_products_path,
-          class: "rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-center font-semibold text-blue-700 transition hover:bg-blue-50" %>
-        <%= button_to "DB 백업 다운로드", admin_db_backup_path,
-          form: { data: { turbo: false } },
-          class: "rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-center font-semibold text-blue-700 transition hover:bg-blue-50" %>
-      </div>
+      <!-- Mobile Dropdown Trigger in Header (Separate Row) -->
+      <details class="relative w-full sm:hidden">
+        <summary class="flex w-full items-center justify-between cursor-pointer rounded-xl border border-gray-300 bg-white px-4 py-3 font-semibold text-gray-800 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 list-none [&::-webkit-details-marker]:hidden">
+          <span class="flex items-center gap-2">
+            <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            <span>빠른 관리 메뉴</span>
+          </span>
+          <svg class="h-4 w-4 text-gray-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </summary>
+        <div class="absolute left-0 right-0 z-30 mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white p-1.5 shadow-xl">
+          <%= link_to admin_content_progress_path, class: "flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700" do %>
+            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <span>콘텐츠 진행 현황</span>
+          <% end %>
+          <%= link_to admin_commerce_github_access_path, class: "flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700" do %>
+            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+            <span>GitHub Lab 운영</span>
+          <% end %>
+          <%= link_to admin_commerce_orders_path, class: "flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700" do %>
+            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            <span>Commerce 운영</span>
+          <% end %>
+          <%= link_to admin_users_path, class: "flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700" do %>
+            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <span>사용자관리</span>
+          <% end %>
+          <%= link_to admin_commerce_products_path, class: "flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700" do %>
+            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+            <span>상품 판매여부 관리</span>
+          <% end %>
+          <div class="my-1 border-t border-gray-100"></div>
+          <%= button_to admin_db_backup_path, form: { data: { turbo: false } }, class: "flex w-full items-center gap-2.5 rounded-lg px-3.5 py-2.5 text-sm font-medium text-amber-700 hover:bg-amber-50" do %>
+            <svg class="h-4 w-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span>DB 백업 다운로드</span>
+          <% end %>
+        </div>
+      </details>
     </header>
 
-    <section class="grid gap-5 md:grid-cols-4">
-      <article class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+    <!-- Quick Actions Card Section (Desktop Grid) -->
+    <section class="mb-8 hidden sm:block">
+      <div class="grid grid-cols-3 gap-3.5 lg:grid-cols-6">
+        <%= link_to admin_content_progress_path,
+          class: "group flex flex-col items-center justify-center rounded-xl border border-gray-200 bg-white p-4 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50/50 hover:shadow-md" do %>
+          <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          </div>
+          <span class="text-xs font-bold text-gray-800 group-hover:text-blue-700">콘텐츠 진행 현황</span>
+        <% end %>
+
+        <%= link_to admin_commerce_github_access_path,
+          class: "group flex flex-col items-center justify-center rounded-xl border border-gray-200 bg-white p-4 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50/50 hover:shadow-md" do %>
+          <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          </div>
+          <span class="text-xs font-bold text-gray-800 group-hover:text-blue-700">GitHub Lab 운영</span>
+        <% end %>
+
+        <%= link_to admin_commerce_orders_path,
+          class: "group flex flex-col items-center justify-center rounded-xl border border-gray-200 bg-white p-4 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50/50 hover:shadow-md" do %>
+          <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          </div>
+          <span class="text-xs font-bold text-gray-800 group-hover:text-blue-700">Commerce 운영</span>
+        <% end %>
+
+        <%= link_to admin_users_path,
+          class: "group flex flex-col items-center justify-center rounded-xl border border-gray-200 bg-white p-4 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50/50 hover:shadow-md" do %>
+          <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          </div>
+          <span class="text-xs font-bold text-gray-800 group-hover:text-blue-700">사용자관리</span>
+        <% end %>
+
+        <%= link_to admin_commerce_products_path,
+          class: "group flex flex-col items-center justify-center rounded-xl border border-gray-200 bg-white p-4 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50/50 hover:shadow-md" do %>
+          <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          </div>
+          <span class="text-xs font-bold text-gray-800 group-hover:text-blue-700">상품 판매여부</span>
+        <% end %>
+
+        <%= button_to admin_db_backup_path,
+          form: { class: "h-full w-full", data: { turbo: false } },
+          class: "group flex h-full w-full flex-col items-center justify-center rounded-xl border border-gray-200 bg-white p-4 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-amber-300 hover:bg-amber-50/50 hover:shadow-md" do %>
+          <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          </div>
+          <span class="text-xs font-bold text-gray-800 group-hover:text-amber-700">DB 백업 다운로드</span>
+        <% end %>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <article class="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm">
         <p class="text-sm font-semibold text-gray-500">전체 사용자</p>
-        <p class="mt-3 text-3xl font-bold text-gray-900"><%= @total_users %></p>
+        <p class="mt-2 text-3xl font-bold text-gray-900"><%= @total_users %></p>
       </article>
-      <article class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      <article class="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm">
         <p class="text-sm font-semibold text-gray-500">관리자</p>
-        <p class="mt-3 text-3xl font-bold text-gray-900"><%= @admin_users %></p>
+        <p class="mt-2 text-3xl font-bold text-gray-900"><%= @admin_users %></p>
       </article>
-      <article class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      <article class="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm">
         <p class="text-sm font-semibold text-gray-500">활성 라이선스</p>
-        <p class="mt-3 text-3xl font-bold text-gray-900"><%= @active_licenses %></p>
+        <p class="mt-2 text-3xl font-bold text-gray-900"><%= @active_licenses %></p>
       </article>
-      <article class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      <article class="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm">
         <p class="text-sm font-semibold text-gray-500">Trial 대상</p>
-        <p class="mt-3 text-3xl font-bold text-gray-900"><%= @trial_users %></p>
+        <p class="mt-2 text-3xl font-bold text-gray-900"><%= @trial_users %></p>
       </article>
     </section>
 
