@@ -1,4 +1,29 @@
 class User < ApplicationRecord
+  COMMON_PASSWORDS = %w[
+    0000000000
+    1111111111
+    1q2w3e4r5t
+    1234567890
+    abcdefghij
+    adminadmin
+    asdfghjkl
+    computer123
+    dragon12345
+    football123
+    iloveyou123
+    letmein1234
+    monkey12345
+    password12
+    princess123
+    qazwsxedc
+    qwerty1234
+    qwertyuiop
+    sunshine123
+    superman123
+    welcome123
+    zxcvbnm123
+  ].freeze
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
@@ -16,6 +41,7 @@ class User < ApplicationRecord
   enum :role, { user: 0, admin: 1 }
 
   validates :name, presence: true
+  validate :password_must_not_be_common, if: -> { password.present? }
 
   def trial_started_at
     created_at
@@ -37,5 +63,11 @@ class User < ApplicationRecord
 
   def licensed_for?(product_code, at: Time.current)
     Entitlements::ProductAccess.licensed?(user: self, product_code: product_code, at: at)
+  end
+
+  private
+
+  def password_must_not_be_common
+    errors.add(:password, :common) if COMMON_PASSWORDS.include?(password.downcase)
   end
 end

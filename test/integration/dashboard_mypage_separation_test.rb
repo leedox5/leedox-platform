@@ -43,6 +43,12 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
     assert_no_match(/학습 요약/, response.body)
     assert_no_match(/완료한 챕터/, response.body)
     assert_select "a[href=?]", dashboard_path, text: /대시보드/
+    assert_select "title", text: /마이페이지 - LEEDOX/
+
+    get edit_user_registration_path
+    assert_response :success
+    assert_select "title", text: /내 정보 수정 - LEEDOX/
+    assert_match(/새 비밀번호는 10자 이상/, response.body)
   end
 
   test "trial remaining days shown on dashboard, not on my page (R2: 이용 상태 card removed from my page)" do

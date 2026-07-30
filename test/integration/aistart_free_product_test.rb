@@ -108,5 +108,11 @@ class AistartFreeProductTest < ActionDispatch::IntegrationTest
 
     get mypage_path
     assert_response :success
+    assert_select "title", text: /마이페이지 - LEEDOX/
+    assert_match(/AI, 오늘부터 시작/, response.body)
+    assert_match(/무료 이용/, response.body)
+    assert_match(/전체 이용 가능 · 기간 제한 없음/, response.body)
+    assert_match(/아직 유료 상품 라이선스가 없습니다/, response.body)
+    assert_select "a[href=?]", product_content_index_path("aistart"), text: /콘텐츠 보기/
   end
 end
