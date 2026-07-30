@@ -10,10 +10,17 @@ class ApplicationController < ActionController::Base
   stale_when_importmap_changes
 
   before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :store_redirect_location
 
   helper_method :billing_checkout_path_for
 
   private
+
+  def store_redirect_location
+    if params[:redirect_to].present? && params[:redirect_to].to_s.start_with?("/")
+      store_location_for(:user, params[:redirect_to].to_s)
+    end
+  end
 
   # Chatdox omits the :product_code segment (bare /billing/checkout) so every
   # existing link/bookmark/test built before checkout supported other
