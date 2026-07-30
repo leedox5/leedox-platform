@@ -8,6 +8,8 @@ require "test_helper"
 class ContentTemplateUnificationTest < ActionDispatch::IntegrationTest
   setup do
     Commerce::CatalogBootstrap.call!
+    user = User.create!(name: "테스트 유저", email: "content-template@example.com", password: "password123")
+    post user_session_path, params: { user: { email: user.email, password: "password123" } }
   end
 
   test "Chatdox reader pages render with the blue theme, unchanged" do
