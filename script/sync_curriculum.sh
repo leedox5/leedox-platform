@@ -22,7 +22,7 @@ set -euo pipefail
 # No shared git history, no subtree merge machinery, no unused content. Commit the
 # result in this repo like any other change.
 
-SOURCE_REPO="/mnt/d/RubyOnRails/chatdox-curriculum"
+SOURCE_REPO="${HQ_DIR:-${SOURCE_REPO:-/mnt/d/RubyOnRails/chatdox-curriculum}}"
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REF="main"
 DRY_RUN_MODE="false"
@@ -161,6 +161,7 @@ echo "Syncing chatdox-curriculum ($REF), runtime folders only:"
 sync_one "docs" "$PROJECT_ROOT/hq/chatdox"
 sync_one "claudox" "$PROJECT_ROOT/hq/claudox"
 sync_one "aistart" "$PROJECT_ROOT/hq/aistart"
+sync_one "aigravity" "$PROJECT_ROOT/hq/aigravity"
 sync_one "service-desk/requests" "$PROJECT_ROOT/hq/service-desk"
 
 echo "Dry run: $DRY_RUN_MODE"

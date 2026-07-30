@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SOURCE_DIR="/mnt/d/RubyOnRails/chatdox-curriculum/.local/handoff"
+HQ_BASE="${HQ_DIR:-${SOURCE_REPO:-/mnt/d/RubyOnRails/chatdox-curriculum}}"
+SOURCE_DIR="${SOURCE_DIR:-$HQ_BASE/.local/handoff}"
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TARGET_DIR="$PROJECT_ROOT/.local/handoff"
 MIRROR_MODE="false"

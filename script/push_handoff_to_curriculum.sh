@@ -3,7 +3,8 @@ set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUTBOX_DIR="$PROJECT_ROOT/.local/handoff/outbox"
-TARGET_DIR="/mnt/d/RubyOnRails/chatdox-curriculum/.local/handoff/inbox"
+HQ_BASE="${HQ_DIR:-${SOURCE_REPO:-/mnt/d/RubyOnRails/chatdox-curriculum}}"
+TARGET_DIR="${TARGET_DIR:-$HQ_BASE/.local/handoff/inbox}"
 SOURCE_DIR=""
 MIRROR_MODE="false"
 DRY_RUN_MODE="false"
