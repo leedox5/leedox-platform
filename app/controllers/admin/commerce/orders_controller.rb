@@ -61,7 +61,11 @@ class Admin::Commerce::OrdersController < Admin::BaseController
 
     date = Date.iso8601(params[key])
     boundary = key == :to ? date.end_of_day : date.beginning_of_day
-    scope.where("orders.created_at #{operator} ?", boundary)
+    case operator
+    when ">=" then scope.where("orders.created_at >= ?", boundary)
+    when "<=" then scope.where("orders.created_at <= ?", boundary)
+    else scope
+    end
   rescue Date::Error
     scope
   end

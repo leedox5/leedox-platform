@@ -1,0 +1,8 @@
+{
+  "ignored_warnings": [
+    {
+      "fingerprint": "451c40bb85f1d83d2029943eb3af5c698ebbf94775815b28b6587e4cf465a782",
+      "note": "False positive: the file path is built from `@current_chapter[:slug]`, which is returned by `@source.find(@current_id)` — data owned by the application's content registry, not user-supplied. The chapter is already validated (nil check + available check) before the file read, and the path is always within the product content directory."
+    }
+  ]
+}
