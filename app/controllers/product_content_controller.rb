@@ -40,8 +40,19 @@ class ProductContentController < ApplicationController
 
     authorize @current_chapter, :view?, policy_class: DocPolicy
 
-    file_path = @source.path.join("#{@current_chapter[:slug]}.md")
-    @last_updated_at = @source.last_updated_at(@current_chapter[:slug])
+    slug = @current_chapter[:slug].to_s
+    unless slug.match?(/\A[\w-]+\z/)
+      render plain: "챕터를 찾을 수 없습니다.", status: :not_found
+      return
+    end
+
+    file_path = chapter_file_path(slug)
+    unless file_path
+      render plain: "챕터를 찾을 수 없습니다.", status: :not_found
+      return
+    end
+
+    @last_updated_at = @source.last_updated_at(slug)
     # Every template now shows the chapter title as its own <h1>, so the
     # markdown body's leading "# ..." heading would otherwise repeat it --
     # applies to every product now, not just Claudox (see stage 3 -- Chatdox
@@ -154,6 +165,12 @@ class ProductContentController < ApplicationController
 
   def strip_leading_heading(raw_markdown)
     raw_markdown.sub(/\A\s*#[^\n]*\n?/, "")
+  end
+
+  def chapter_file_path(slug)
+    @source.path.children.find do |candidate|
+      candidate.file? && candidate.extname == ".md" && candidate.basename(".md").to_s == slug
+    end
   end
 
   def render_markdown(raw_markdown)
