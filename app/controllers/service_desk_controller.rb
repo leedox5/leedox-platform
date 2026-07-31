@@ -48,7 +48,7 @@ class ServiceDeskController < ApplicationController
 
   def edit
     @service_desk_request = ServiceDeskRequest.find_by(request_number: params[:id].to_i)
-    return render(plain: "요청을 찾을 수 없습니다.", status: :not_found) unless @service_desk_request
+    render(plain: "요청을 찾을 수 없습니다.", status: :not_found) unless @service_desk_request
   end
 
   def update

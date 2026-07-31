@@ -20,7 +20,7 @@ class ServiceDeskJobsController < ApplicationController
     return render(plain: "요청을 찾을 수 없습니다.", status: :not_found) unless @service_desk_request
 
     @job = @service_desk_request.service_desk_jobs.find_by(job_number: params[:job_id].to_i)
-    return render(plain: "작업을 찾을 수 없습니다.", status: :not_found) unless @job
+    render(plain: "작업을 찾을 수 없습니다.", status: :not_found) unless @job
   end
 
   def update
