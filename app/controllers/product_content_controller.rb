@@ -46,7 +46,12 @@ class ProductContentController < ApplicationController
       return
     end
 
-    file_path = @source.path.join("#{slug}.md")
+    file_path = chapter_file_path(slug)
+    unless file_path
+      render plain: "챕터를 찾을 수 없습니다.", status: :not_found
+      return
+    end
+
     @last_updated_at = @source.last_updated_at(slug)
     # Every template now shows the chapter title as its own <h1>, so the
     # markdown body's leading "# ..." heading would otherwise repeat it --
@@ -160,6 +165,12 @@ class ProductContentController < ApplicationController
 
   def strip_leading_heading(raw_markdown)
     raw_markdown.sub(/\A\s*#[^\n]*\n?/, "")
+  end
+
+  def chapter_file_path(slug)
+    @source.path.children.find do |candidate|
+      candidate.file? && candidate.extname == ".md" && candidate.basename(".md").to_s == slug
+    end
   end
 
   def render_markdown(raw_markdown)
