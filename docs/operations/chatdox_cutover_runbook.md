@@ -72,83 +72,56 @@ The setup task refuses to run when `RAILWAY_ENVIRONMENT` is present. Sign in wit
 Only after the literal `0010 CUTOVER APPROVE` signal:
 
 The production `web` service follows GitHub `main`; a matching push creates a
-deployment. It currently has no volume mount. Do not start cutover until a web
-volume (or an approved immutable-image equivalent) survives a controlled
-restart. The steps below assume `<PERSISTENT_MOUNT>` has been approved.
+deployment. For this release, the validated public artifact is committed under
+`runtime/chatdox` and copied into `/rails/runtime/chatdox` by the normal Docker
+build. The Docker image sets the seasoned mode, artifact path and approved HQ
+SHA as one immutable default contract. No runtime install, web volume or Railway
+variable edit is required for activation.
 
-1. Confirm approved DEV full SHA, clean tree and production deploy commit. Create
-   a new custom-format Postgres dump through the authenticated admin action.
-   Verify it with `pg_restore --list`, restore it into an empty isolated database,
-   and run application integrity checks against that restore. Record only its
-   timestamp, checksum, size, tool version and pass/fail.
+The artifact contains S01's 20 published bodies and referenced images, plus S02
+public metadata with zero published bodies. Draft/review bodies are excluded by
+the snapshot builder. Public source methods also exclude unpublished seasons and
+episodes, and direct unpublished episode routes return 404.
+
+1. Confirm approved DEV full SHA, clean tree, packaged manifest SHA and tests.
 2. Push the approved application commit to `main` once. Do not also run a manual
    deploy. Wait for the matching Railway deployment SHA and `/up` 200.
-3. Transfer the approved artifact to an inactive directory under
-   `<PERSISTENT_MOUNT>` and verify its manifest and approved full SHA.
-4. Install it under a single-process lock:
+3. Run the production smoke and open `/admin/chatdox_readiness`. Require `ready`,
+   matching commits, S01 public 20 and S02 upcoming/public 0.
+4. On any failure, set the Railway `CHATDOX_CONTENT_SOURCE=legacy` override. That
+   variable takes precedence over the image default and triggers the rollback
+   deployment. Stop and do not backfill.
 
-   ```bash
-   CONFIRM_PRODUCTION=1 bin/chatdox-release install \
-     --artifact <INACTIVE_ARTIFACT> --target <PERSISTENT_TARGET> \
-     --expected-commit <APPROVED_FULL_SHA>
-   ```
-
-5. Set path and expected SHA with deploys suppressed. Set source mode last as the
-   single activation change and allow exactly one resulting restart/redeploy:
-
-   ```text
-   CHATDOX_SNAPSHOT_PATH=<PERSISTENT_TARGET>
-   CHATDOX_EXPECTED_SOURCE_COMMIT=<APPROVED_FULL_SHA>
-   CHATDOX_CONTENT_SOURCE=seasoned
-   ```
-
-   Railway variable changes are not assumed atomic. Install and verify first;
-   use the source-mode change as the controlled activation point.
-6. Run the production smoke list and open `/admin/chatdox_readiness`. Require `ready` and matching commits.
-7. On any failure, stop. Do not backfill.
-
-Exact operator order after persistent storage and a restorable backup are proven:
+Exact operator order:
 
 ```bash
 git status --short
 git rev-parse HEAD
 railway status --json
 
-# Create <BACKUP_FILE> through the authenticated admin backup action, then on
-# the restricted backup workstation (never against production):
-pg_restore --list <BACKUP_FILE>
-createdb <ISOLATED_RESTORE_DB>
-pg_restore --exit-on-error --clean --if-exists --no-owner \
-  --dbname <ISOLATED_RESTORE_DB> <BACKUP_FILE>
-
 git push origin main
 railway deployment list --service web --limit 1 --json
-curl --fail --silent --show-error https://leedox.up.railway.app/up
-
-railway volume files upload <LOCAL_ARTIFACT_ARCHIVE> <INACTIVE_VOLUME_PATH>
-railway ssh -- /bin/bash -lc 'CONFIRM_PRODUCTION=1 bin/chatdox-release install --artifact "$CHATDOX_INACTIVE_ARTIFACT" --target "$CHATDOX_PERSISTENT_TARGET" --expected-commit "$CHATDOX_APPROVED_COMMIT"'
-
-railway variable set CHATDOX_SNAPSHOT_PATH=<PERSISTENT_TARGET> --service web --environment production --skip-deploys
-railway variable set CHATDOX_EXPECTED_SOURCE_COMMIT=<APPROVED_FULL_SHA> --service web --environment production --skip-deploys
-railway variable set CHATDOX_CONTENT_SOURCE=seasoned --service web --environment production
-
 curl --fail --silent --show-error https://leedox.up.railway.app/up
 bin/chatdox-smoke --base-url https://leedox.up.railway.app
 railway ssh -- bin/chatdox-release readiness
 ```
 
-Do not substitute an ephemeral container directory for `<PERSISTENT_MOUNT>`. If
-SSH verification is unavailable, stop before artifact install.
+The existing runtime install CLI remains available for a future persistent
+artifact workflow, but is not a dependency of this image-bundled release.
 
 ## Source rollback
 
-Set `CHATDOX_CONTENT_SOURCE=legacy`, restart, require `/up`, `/chatdox`, `/docs`, `/docs/01`, checkout and other products to pass. Confirm the intended value before activation:
+Set the Railway `CHATDOX_CONTENT_SOURCE=legacy` override and allow its automatic
+deployment. Require `/up`, `/chatdox`, `/docs`, `/docs/01`, checkout and other
+products to pass. The packaged artifact remains inert inside the image.
 
 ```bash
-CONFIRM_PRODUCTION=1 CHATDOX_CONTENT_SOURCE=legacy bin/chatdox-release rollback-legacy
+railway variable set CHATDOX_CONTENT_SOURCE=legacy --service web --environment production
 ```
 
-Keep the failed artifact inactive for diagnosis; do not overwrite the last approved artifact. Canonical progress remains readable through the legacy compatibility layer.
+To try seasoned mode again in a later approved release, remove the Railway
+override so the image default applies. Canonical progress remains readable
+through the legacy compatibility layer.
 
 ## BACKFILL APPLY gate
 

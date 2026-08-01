@@ -1,0 +1,11 @@
+schema_version: 1
+product:
+  code: chatdox
+  title: CHATDOX
+seasons:
+  - code: s01
+    order: 1
+    path: s01
+  - code: s02
+    order: 2
+    path: s02
