@@ -60,4 +60,10 @@ class ChatdoxPackagedContentTest < ActionDispatch::IntegrationTest
     assert_equal [ "S02E01_chatgpt_or_codex.md" ], Dir.glob(Rails.root.join("runtime/chatdox/s02/*.md")).map { |path| File.basename(path) }
     assert_equal 21, ProductContent::ChatdoxSeasonedSource.new.public_chapters.size
   end
+
+  test "packaged contract records the approved commit and an env override can roll back" do
+    assert_equal APPROVED_COMMIT, ProductContent::PACKAGED_CHATDOX_SOURCE_COMMIT
+    ENV["CHATDOX_CONTENT_SOURCE"] = "legacy"
+    assert_equal "legacy", ProductContent.chatdox_source_mode
+  end
 end
