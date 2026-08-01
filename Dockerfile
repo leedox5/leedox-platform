@@ -42,7 +42,7 @@ ENV RAILS_ENV="production" \
     LD_PRELOAD="/usr/local/lib/libjemalloc.so" \
     CHATDOX_CONTENT_SOURCE="seasoned" \
     CHATDOX_SNAPSHOT_PATH="/rails/runtime/chatdox" \
-    CHATDOX_EXPECTED_SOURCE_COMMIT="3efda2782671144e8aa3c6692f0fe1d91f6882d1"
+    CHATDOX_EXPECTED_SOURCE_COMMIT="d89cd90461a96fc1980611c3b1bf81ee3b1e7b14"
 
 # Throw-away build stage to reduce size of final image
 FROM base AS build
