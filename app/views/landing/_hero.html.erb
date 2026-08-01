@@ -1,33 +1,22 @@
-<section id="top" class="relative overflow-hidden bg-gradient-to-b from-blue-50 via-cyan-50 to-slate-50 py-12 sm:py-24 lg:py-28">
-  <div class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-64 bg-[radial-gradient(circle_at_top,#bfdbfe_0%,transparent_70%)]"></div>
-
-  <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
-    <div id="start" class="max-w-2xl space-y-7">
-      <p class="inline-flex rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-blue-800">
-        Production SaaS Starter
+<%# locals: (hub:) %>
+<section id="top" class="bg-slate-950 text-white">
+  <div class="mx-auto flex min-h-[34rem] w-full max-w-6xl items-center px-5 py-16 sm:px-8 sm:py-20">
+    <div id="start" class="max-w-4xl">
+      <p class="text-xs font-bold uppercase text-cyan-300">Real SaaS Journey with AI</p>
+      <h1 class="mt-4 text-5xl font-black leading-none sm:text-6xl">CHATDOX</h1>
+      <p class="mt-6 max-w-3xl break-keep text-3xl font-bold leading-tight text-white sm:text-4xl">
+        AI와 함께 실제 SaaS를 만들고,<br class="hidden sm:block"> 운영하고, 성장시키는 기록
       </p>
-      <h1 class="break-keep text-4xl font-black leading-tight tracking-tight text-slate-900 sm:text-5xl">
-        따라하면 서비스가 완성되는
-        <span class="text-blue-700">웹서비스 구축 패키지</span>
-      </h1>
-      <p class="text-lg leading-8 text-slate-600">
-        누구나 단계별로 프로덕션 준비 완료된 SaaS를 직접 구현합니다.
-        20개 완전한 문서, GitHub 템플릿 코드, 운영 노하우까지 한 번에 제공합니다.
+      <p class="mt-6 max-w-2xl break-keep text-base leading-7 text-slate-300 sm:text-lg">
+        S01에서는 아이디어를 실제 서비스로 만들고 출시했습니다. S02에서는 Work를 HQ로 삼아 운영, 마케팅, 홍보와 플랫폼 전환의 문제를 함께 풀어갑니다.
       </p>
-      <p class="whitespace-nowrap rounded-lg border border-blue-100 bg-white/80 px-3 py-3 text-xs font-semibold text-slate-700 sm:px-4 sm:text-sm">
-        가입 후 10분 안에 첫 SaaS 골격을 실행해볼 수 있습니다.
-      </p>
-
-      <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-600 sm:gap-2 sm:text-xs">
-        <span class="rounded-full border border-slate-200 bg-white px-2.5 py-1 sm:px-3">기간제 선불 라이선스</span>
-        <span class="rounded-full border border-slate-200 bg-white px-2.5 py-1 sm:px-3">자동 갱신 없음</span>
-        <span class="rounded-full border border-slate-200 bg-white px-2.5 py-1 sm:px-3">표시 가격 VAT 포함</span>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+        <% if hub.primary_cta[:path] %>
+          <%= link_to hub.primary_cta[:label], hub.primary_cta[:path], class: "inline-flex min-h-12 items-center justify-center bg-cyan-300 px-6 py-3 text-sm font-bold text-slate-950 hover:bg-cyan-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white" %>
+        <% end %>
+        <%= link_to "시즌 살펴보기", "#seasons", class: "inline-flex min-h-12 items-center justify-center border border-slate-600 px-6 py-3 text-sm font-bold text-white hover:border-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white" %>
       </div>
-
-      <div class="flex flex-col gap-3 sm:flex-row">
-        <%= link_to "가격과 준비 상태 보기", "#pricing", class: "inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-900/10 transition hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2" %>
-        <%= link_to "커리큘럼 문서 보기", docs_path, class: "inline-flex items-center justify-center rounded-xl border border-blue-200 bg-white px-6 py-3.5 text-sm font-bold text-blue-700 transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2" %>
-      </div>
+      <p class="mt-6 text-sm text-slate-400">기간제 선불 라이선스 · 자동 갱신 없음 · 표시 가격 VAT 포함</p>
     </div>
   </div>
 </section>

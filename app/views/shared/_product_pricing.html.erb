@@ -11,6 +11,9 @@
       <% unless pricing_sales_enabled %>
         <p class="mt-4 max-w-2xl rounded-lg bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">신규 결제 시스템을 준비 중이며 현재는 구매할 수 없습니다.</p>
       <% end %>
+      <% if product_code == "chatdox" %>
+        <p class="mt-4 max-w-3xl break-keep text-sm leading-6 text-slate-700">CHATDOX 한 상품으로 현재 공개된 S01과 준비 중인 후속 시즌 S02를 함께 이용합니다. S02는 준비가 끝난 에피소드부터 순차적으로 공개됩니다.</p>
+      <% end %>
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -30,14 +30,14 @@
     </header>
 
     <div class="mt-8 grid gap-6 lg:grid-cols-2">
-      <%= render "progress", label: "전체 진도", segment: @summary.overall %>
-      <%= render "progress", label: @season[:title], segment: @season_summary %>
+      <%= render "progress", label: "CHATDOX 전체 진도", segment: @summary.overall %>
+      <%= render "progress", label: "이 시즌 진도 · #{@season[:title]}", segment: @season_summary %>
     </div>
 
     <% if @chapters.empty? %>
       <section class="py-14 text-center" aria-label="공개 episode">
         <h2 class="text-xl font-bold text-slate-900">준비 중입니다</h2>
-        <p class="mt-2 text-sm text-slate-600">공개된 episode가 아직 없습니다.</p>
+        <p class="mt-2 text-sm text-slate-600">공개된 에피소드가 아직 없습니다.</p>
       </section>
     <% else %>
       <section class="py-10" aria-label="공개 episode">

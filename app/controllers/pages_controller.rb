@@ -6,6 +6,7 @@ class PagesController < ApplicationController
   def chatdox
     # Pricing is rendered by shared/_product_pricing, which looks up the
     # product/offers/sales-enabled state itself from product_code alone.
+    @chatdox_hub = ChatdoxLandingPresenter.new(user: current_user, routes: view_context)
   end
 
   def getting_started; end

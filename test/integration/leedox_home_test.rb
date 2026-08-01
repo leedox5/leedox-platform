@@ -645,11 +645,10 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     get chatdox_path
 
     assert_response :success
-    assert_select "h1", text: /웹서비스 구축 패키지/
-    assert_select "h2", text: /완전한 커리큘럼/
-    assert_select "h2", text: /상품 구성/
+    assert_select "h1", text: "CHATDOX"
+    assert_select "h2", text: /하나의 상품, 이어지는 두 시즌/
+    assert_select "h2", text: /결과만이 아니라 판단의 과정까지/
     assert_select "h2", text: /기간별 이용 안내/
-    assert_select "h2", text: /기술 스택/
     assert_select "h2", text: /자주 묻는 질문/
     assert_match(/7,700원/, response.body)
     assert_match(/23,100원/, response.body)
@@ -657,11 +656,12 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_match(/73,920원/, response.body)
     assert_match(/VAT 포함/, response.body)
     assert_match(/자동 갱신 없는 기간제 선불 라이선스/, response.body)
+    assert_match(/기존 CHATDOX 라이선스에 S02가 포함/, response.body)
     assert_match(/구매 준비 중/, response.body)
     assert_no_match(/9,900원|평생 접근|1년 무료 업데이트|7일 이내 100% 환불|언제든 취소|월 구독/, response.body)
     assert_no_match(/무료 체험|프리미엄형|오픈 알림/, response.body)
     assert_no_match(/선택형 운영 지원|커뮤니티 이용|라이브 오피스아워|코드리뷰 크레딧|아키텍처 클리닉/, response.body)
-    assert_select "a[href=?]", docs_path, text: /커리큘럼 문서 보기/
+    assert_select "a[href=?]", doc_path("01"), text: /첫 에피소드 읽기/
     assert_select "a[href=?]", billing_checkout_path, count: 0
   end
 
