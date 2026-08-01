@@ -25,6 +25,12 @@ CHATDOX_EXPECTED_SOURCE_COMMIT=<APPROVED_FULL_SHA> bin/chatdox-release verify
 
 Expected: JSON `state=ready`, matching abbreviated commits, S01 public 20, S02 public 0. Build rejects dirty, detached, shallow and non-full-SHA sources. The inactive artifact must live on storage that survives restart; the current Docker image filesystem itself is ephemeral. Confirm Railway volume mounting before choosing the production target.
 
+Build web assets before starting a production-like server from a source checkout. Docker does this during image build, but a direct `bin/rails server` does not:
+
+```bash
+RAILS_ENV=production SECRET_KEY_BASE_DUMMY=1 bin/rails assets:precompile
+```
+
 ## Production-like smoke
 
 Start a separate server with `RAILS_ENV=production`, the inactive artifact and expected SHA. Verify:
@@ -43,6 +49,23 @@ invalid snapshot          503, generic, private no-store
 ```
 
 Also verify the S01 image content type/cache, S02 private-title absence, login return path, checkout, other products and admin readiness. A failed item blocks cutover.
+
+Run the machine-readable route and static-asset gate against the server:
+
+```bash
+bin/chatdox-smoke --base-url http://127.0.0.1:3002
+```
+
+It discovers fingerprinted CSS/JS from `/chatdox`, requires every asset to return 200 with `text/css` or JavaScript content type, and fails when no assets are found.
+
+For a local-only admin readiness preview, use the same isolated production-like DB environment as the server:
+
+```bash
+CONFIRM_LOCAL=1 PREVIEW_PASSWORD='<12+ character local password>' bin/rails chatdox:readiness_preview:setup
+bin/rails chatdox:readiness_preview:cleanup
+```
+
+The setup task refuses to run when `RAILWAY_ENVIRONMENT` is present. Sign in with the printed `.invalid` address, then open `/admin/chatdox_readiness`.
 
 ## CUTOVER APPROVE gate
 
