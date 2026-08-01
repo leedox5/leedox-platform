@@ -42,20 +42,32 @@ module ContentSnapshot
 
     def populate(staging, catalog)
       file_entries = []
-      copy_file(@source_root.join("catalog.yml"), staging.join("catalog.yml"), "catalog.yml", file_entries)
+      copy_file(@source_root.join("catalog.yml"), staging.join("catalog.yml"), "catalog.yml", file_entries, visibility: "public")
 
       season_entries = catalog.seasons.map do |entry|
         season_root = @source_root.join(entry[:path])
         target_root = staging.join(entry[:path])
         metadata_path = season_root.join("content_meta.yml")
-        copy_file(metadata_path, target_root.join("content_meta.yml"), "#{entry[:path]}/content_meta.yml", file_entries)
+        copy_file(metadata_path, target_root.join("content_meta.yml"), "#{entry[:path]}/content_meta.yml", file_entries, visibility: "public")
 
         published = entry[:metadata].public_chapters
         published.each do |chapter|
           relative = "#{entry[:path]}/#{chapter[:slug]}.md"
           body_path = season_root.join("#{chapter[:slug]}.md")
-          copy_file(body_path, staging.join(relative), relative, file_entries)
-          copy_referenced_images(body_path, season_root, target_root, entry, file_entries)
+          copy_file(body_path, staging.join(relative), relative, file_entries, visibility: "public")
+          copy_referenced_images(body_path, season_root, target_root, entry, file_entries, visibility: "public")
+        end
+
+        archived = entry[:metadata].chapters.select { |chapter| chapter[:status] == :archived && chapter[:file_present] }
+        archived.each do |chapter|
+          protected_root = staging.join("protected/archived", entry[:path])
+          relative = "protected/archived/#{entry[:path]}/#{chapter[:slug]}.md"
+          body_path = season_root.join("#{chapter[:slug]}.md")
+          copy_file(body_path, staging.join(relative), relative, file_entries, visibility: "protected_archived")
+          copy_referenced_images(
+            body_path, season_root, protected_root, entry, file_entries,
+            visibility: "protected_archived", relative_prefix: "protected/archived/#{entry[:path]}"
+          )
         end
 
         {
@@ -75,22 +87,22 @@ module ContentSnapshot
       }
     end
 
-    def copy_referenced_images(body_path, season_root, target_root, entry, file_entries)
+    def copy_referenced_images(body_path, season_root, target_root, entry, file_entries, visibility:, relative_prefix: entry[:path])
       images_dir = entry[:metadata].season[:images_dir]
       references = ImageReferences.extract(body_path.read, season_code: entry[:code], images_dir:)
       references.each do |relative_image|
         source = season_root.join(images_dir, relative_image)
         ensure_contained_file!(source, season_root.join(images_dir), :image_missing_or_unsafe)
-        relative = "#{entry[:path]}/#{images_dir}/#{relative_image}"
-        copy_file(source, target_root.join(images_dir, relative_image), relative, file_entries)
+        relative = "#{relative_prefix}/#{images_dir}/#{relative_image}"
+        copy_file(source, target_root.join(images_dir, relative_image), relative, file_entries, visibility:)
       end
     end
 
-    def copy_file(source, destination, relative, file_entries)
+    def copy_file(source, destination, relative, file_entries, visibility:)
       ensure_contained_file!(source, @source_root, :snapshot_file_missing_or_unsafe)
       destination.dirname.mkpath
       FileUtils.copy_file(source, destination)
-      file_entries << { "path" => relative.tr("\\", "/"), "sha256" => sha256(destination) }
+      file_entries << { "path" => relative.tr("\\", "/"), "sha256" => sha256(destination), "visibility" => visibility }
     end
 
     def ensure_contained_file!(path, root, code)

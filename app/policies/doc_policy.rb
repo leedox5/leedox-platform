@@ -33,12 +33,26 @@ class DocPolicy < ApplicationPolicy
   end
 
   def view?
+    return season_access_decision.allowed? if season_aware_record?
+
     view_as_admin? || view_as_license? || view_as_trial? || view_as_guest?
+  end
+
+  def access_reason
+    season_aware_record? ? season_access_decision.reason : (view? ? :allowed : :license_required)
   end
 
   private
 
   def content_source
     ProductContent.for(product_code)
+  end
+
+  def season_aware_record?
+    record.is_a?(Hash) && record[:id].to_s.match?(/\AS\d{2}E\d{2}\z/)
+  end
+
+  def season_access_decision
+    SeasonChapterAccessPolicy.new(user:, chapter: record, context: :direct).decision
   end
 end
