@@ -7,18 +7,37 @@
 ## 프로젝트 구조: DEV / HQ
 
 - 이 저장소(`chatdox-platform`)는 **DEV** — 실제 코드가 사는 곳.
-- 커리큘럼/handoff 저장소는 **HQ** (`chatdox-curriculum`). 이 WSL 환경에서는 `/mnt/d/RubyOnRails/chatdox-curriculum`에 마운트되어 있다.
+- **CHATDOX 공식 handoff HQ**는 새 Work HQ(`/mnt/d/0003/hq`)다. S01·S02 기획,
+  `.local/handoff`, 결과 검토를 관리하며 향후 Chatdox 콘텐츠 원본도 이곳으로 통합할
+  예정이다.
+- 기존 curriculum HQ(`/mnt/d/RubyOnRails/chatdox-curriculum`)는 전환 전 S01 runtime
+  원본과 Claudox/aistart 등 기존 콘텐츠 원본이다. S01·S02 콘텐츠 통합은 별도 handoff에서
+  진행하며, 그 전까지 `sync_curriculum.sh`는 계속 이 저장소를 사용한다.
 - **이 저장소(chatdox-platform) 자체도 체크아웃이 두 곳이다 — 역할이 다르다.**
   - `~/dev/chatdox-platform`(WSL 네이티브) — **여기가 진짜 DEV**. Linux 환경에서 실제로 웹을 구동하며 개발이 이뤄지는 곳. 지금 이 세션이 작업하는 곳도 여기.
   - `/mnt/d/RubyOnRails/chatdox-platform`(Windows) — **HQ가 DEV 코드를 참조용으로 체크아웃해둔 것.** 작업하는 곳이 아니라 "커리큘럼 쓸 때 실제 코드가 어떻게 생겼는지 확인하는" 용도. 2026-07-16에 HQ 쪽 에이전트가 실수로 여기에 직접 커밋(`e43e689`, CLAUDE.md 피드백)해서 origin에 올라간 적이 있다 — 이건 정상 흐름이 아니라 사고였고, Tommy가 이것 자체를 "AI 실수" 콘텐츠 소재로 올릴 예정이다.
   - 둘 다 같은 origin(`github.com/leedox5/chatdox-platform`)을 보므로, 커밋 히스토리가 안 맞는 것 같으면 먼저 `git fetch origin`으로 이쪽이 뒤처진 건 아닌지 확인할 것. D: 드라이브 쪽은 참조 전용이라 원래 커밋이 발생할 일이 없는 곳이니, 직접 건드리지 않고 origin을 통해서만 간접적으로 주고받는다.
 - **`script/`에 HQ 연동 스크립트 3개가 있다 — 이름이 서로 안 비슷하니 매번 `ls script/`로 전체를 확인하고 얘기할 것, 하나만 보고 "이 방향은 스크립트가 없다"고 단정하지 말 것(2026-07-16 실수).**
-  - `sync_handoff.sh` — HQ→DEV, handoff 패키지(request/result/STATUS) 전체 미러.
-  - `push_handoff_to_curriculum.sh` — DEV→HQ, handoff 패키지 하나를 HQ inbox로 push.
-  - `sync_curriculum.sh` — HQ→DEV, handoff와 무관하게 **실제 런타임 콘텐츠**(커리큘럼 문서/claudox/service-desk 요청)를 HQ git 저장소에서 `git archive`로 스냅샷 떠서 `hq/`(git 추적됨, `.local/`이 아님) 아래로 미러. REQ 0022에서 git subtree pull을 대체한 것 — subtree는 HQ 저장소 전체(QA/, SETUP/ 등 안 쓰는 것까지)를 끌어오고 merge conflict가 잦아서, 실제 쓰는 3개 폴더만 골라 받는 방식으로 바꿨다.
+  - `sync_handoff.sh` — 공식 handoff HQ→DEV, handoff 패키지(request/result/STATUS) 동기화.
+  - `push_handoff_to_curriculum.sh` — DEV→공식 handoff HQ, 패키지 하나를 inbox로 push.
+    파일명은 하위 호환을 위해 유지한 legacy 이름이며 실제 target은 curriculum으로
+    고정되지 않는다.
+  - `sync_curriculum.sh` — HQ→DEV, handoff와 무관하게 **실제 런타임 콘텐츠**(커리큘럼 문서/claudox/service-desk 요청)를 HQ git 저장소에서 `git archive`로 스냅샷 떠서 `hq/`(git 추적됨, `.local/`이 아님) 아래로 미러. REQ 0022에서 git subtree pull을 대체한 것 — subtree는 HQ 저장소 전체(QA/, SETUP/ 등 안 쓰는 것까지)를 끌어오고 merge conflict가 잦아서, 실제 쓰는 폴더만 골라 받는 방식으로 바꿨다.
+- HQ 역할은 namespaced 환경변수로 독립 설정한다:
+  - `HANDOFF_HQ_DIR=/mnt/d/0003/hq`
+  - `CURRICULUM_HQ_DIR=/mnt/d/RubyOnRails/chatdox-curriculum`
+  - 기존 `HQ_DIR`/`SOURCE_REPO`는 하위 호환 fallback이다. `HQ_DIR`은 두 역할을 다시
+    결합하므로 새 설정에서는 사용하지 않는다.
+  - 명령별 직접 override인 `SOURCE_DIR`(handoff pull)/`TARGET_DIR`(handoff push)가 가장
+    우선하고, 그다음 namespaced 변수, legacy 변수, 기본 경로 순서다. 명령 앞에서 지정한
+    값은 project `.env`보다 우선한다.
 - Handoff 작업 흐름:
   1. HQ가 `.local/handoff/inbox/<package>/request.md`를 만든다.
-  2. DEV는 `script/sync_handoff.sh`(`--dry-run`으로 먼저 확인 후 `--mirror`)로 HQ의 `.local/handoff/`를 이 저장소의 `.local/handoff/`로 끌어온다. `--mirror`는 HQ에 없는 로컬 전용 폴더(`outbox/`)까지 지우는 진짜 미러링이므로 실행 전 `--dry-run` 결과를 반드시 확인한다. `outbox/`가 매번 삭제되는 건 정상이다 — HQ는 애초에 `outbox/`를 갖지 않고, 그 폴더는 push 전 임시 스테이징 용도라 pull 시점엔 이미 역할이 끝나 있어야 한다.
+  2. DEV는 `script/sync_handoff.sh --dry-run`으로 preflight의 source/target/mode/delete와
+     실제 변경 목록을 확인한 뒤 `script/sync_handoff.sh --mirror`로 가져온다. `--mirror`는
+     HQ에 없는 `outbox/`, `completed/`, `shared/`도 지울 수 있으며 스크립트가 이 삭제
+     후보를 경고한다. 경고를 읽고 보존할 기록이 없는지 확인하지 않은 채 실제 실행하지
+     않는다. dry-run은 target/package/manifest를 만들지 않는 무변경 검사다.
   3. 구현 후 결과물(`result.md` 등)을 `.local/handoff/outbox/<package>/`에 채워 넣고, `script/push_handoff_to_curriculum.sh --source .local/handoff/outbox/<package>`(`--dry-run`으로 먼저 확인)로 HQ의 `.local/handoff/inbox/<package>/`에 보낸다. `--source`는 반드시 패키지 하나의 경로여야 한다(outbox 루트 자체를 넘기면 이미 completed로 옮겨진 과거 패키지까지 되살아나 HQ 쪽에 스푸리어스 파일이 생긴다 — 스크립트가 이 실수를 막아준다).
   4. `.local/handoff/inbox/<package>/`에도 같은 `result.md`를 남겨서 로컬 전체 기록(request+result)을 유지한다.
 - **"완료(completed)" 판정과 STATUS.md는 HQ의 권한이다.** DEV가 임의로 STATUS.md를 지어내지 말 것. "HQ에서 completed 처리했다"는 말을 들으면 직접 작성하지 말고 `script/sync_handoff.sh --mirror`로 HQ의 실제 사본을 가져올 것.
@@ -26,6 +45,19 @@
 - **이 handoff 워크플로우 자체가 아직 시험 운영(trial) 단계다(2026-07-16 Tommy 확인).** 고정된 프로세스로 여기지 말고, 실제로 작업하면서 걸리는 지점이 보이면 매번 그냥 넘어가지 말고 개선 아이디어를 제안할 것. 지금까지 눈에 띈 것:
   - **스크린샷 주석과 서면 request_rN.md 사이에 정보가 누락될 수 있다.** `/chatdox` R2에서 실제로 겪음(Tommy가 스크린샷에 표시한 것 하나가 서면 스펙에서 빠졌다가 R3에서 확정됨). 서면 요청서를 작성할 때 스크린샷의 모든 표시 항목을 명시적으로 나열하면 이런 누락을 줄일 수 있다.
 - **DEV→HQ 콘텐츠 제안 채널 승인됨(2026-07-16, HQ/Tommy 확인).** `leedox_dev_content_loop_r1`(`push_handoff_to_curriculum.sh`로 보낸 첫 제안)을 HQ가 검토해서 채널 자체와 소재 3건 전부 승인했다 — `.local/handoff/completed/leedox_dev_content_loop_r1/STATUS.md`(HQ 쪽, 이 WSL 마운트로 `/mnt/d/RubyOnRails/chatdox-curriculum/.local/handoff/completed/`에서 직접 읽을 수 있음)에 결정 근거가 있다. 앞으로도 작업 중 "이건 claudox/ 콘텐츠 소재가 될 만하다" 싶은 순간이 있으면 같은 방식(원재료 요약 + 어울릴 챕터 추측까지만, 산문은 HQ 몫)으로 `leedox_dev_content_*` 이름 규칙을 따라 계속 올릴 것 — 이번 건에서 부수적으로, `push_handoff_to_curriculum.sh`/`sync_handoff.sh` 두 스크립트를 HQ가 "존재하지 않는다"고 잘못 기록했던 것도 이번에 같이 바로잡혔다(HQ의 `service-desk/requests/0023.md` Job 0011 참고).
+
+### 공식 handoff HQ 첫 전환 절차
+
+이 절차는 스크립트 구현이나 테스트가 자동 수행하지 않는다. Tommy/DEV가 실제 전환할 때
+각 단계를 확인한다.
+
+1. 기존 DEV `.local/handoff`에서 보존할 `outbox`, `completed`, `shared` 기록을 확인한다.
+2. `HANDOFF_HQ_DIR=/mnt/d/0003/hq script/sync_handoff.sh --dry-run --mirror`를 실행한다.
+3. preflight 경로와 삭제 후보, 특히 보호 경고를 검토한다.
+4. 필요한 기록을 새 HQ로 옮기거나 별도 보존한다.
+5. 같은 명령에서 `--dry-run`만 제거해 첫 mirror를 실행한다.
+6. 새 HQ request가 DEV inbox에 수신됐는지 확인한다.
+7. 결과 패키지를 push dry-run→실제 push하고 새 HQ의 파일과 동일한지 확인한다.
 
 ## 환경 특이사항
 
