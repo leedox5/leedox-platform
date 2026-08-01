@@ -83,6 +83,10 @@ class ProductContent::ChatdoxLegacySource
     end
   end
 
+  def public_chapters
+    chapters.select { |chapter| chapter[:available] }
+  end
+
   def find(id)
     normalized_id = id.to_s.rjust(2, "0")
     chapters.find { |chapter| chapter[:id] == normalized_id }

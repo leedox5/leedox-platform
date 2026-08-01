@@ -14,6 +14,10 @@ class ProductContent::ChatdoxSeasonedCompatibilityAdapter
     end
   end
 
+  def public_chapters
+    source.public_chapters
+  end
+
   def find(id)
     chapters.find { |chapter| chapter[:id] == id.to_s.rjust(2, "0") }
   end

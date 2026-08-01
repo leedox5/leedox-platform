@@ -21,21 +21,26 @@ class DashboardController < ApplicationController
     chapters = source.chapters.reject { |chapter| chapter[:kind] == :appendix }
     total = chapters.size
 
+    summary = ProductContent::ProgressSummary.call(user: current_user, source:)
+
     completed_ids = current_user.chapter_progresses
       .where(product_code: product.code)
       .completed
       .order(completed_at: :desc)
       .pluck(:chapter_id)
-    completed_count = completed_ids.size
+    recent_chapters = completed_ids.filter_map do |id|
+      identity = ProductContent::ChapterIdentity.normalize(product_code: product.code, chapter_id: id, source:)
+      identity.aliases.filter_map { |candidate| source.find(candidate) }.first if identity.supported?
+    end.uniq { |chapter| chapter[:id] }.first(3)
 
     {
       product: product,
       total: total,
       accessible: accessible_chapter_count(source, total),
-      completed_count: completed_count,
-      progress_percent: progress_percent(completed_count, total),
-      recent_chapters: completed_ids.first(3).filter_map { |id| source.find(id) },
-      next_chapter: chapters.find { |chapter| completed_ids.exclude?(chapter[:id]) }
+      completed_count: summary.overall.completed_count,
+      progress_percent: summary.overall.percentage,
+      recent_chapters:,
+      next_chapter: summary.overall.next_chapter
     }
   end
 
@@ -49,11 +54,5 @@ class DashboardController < ApplicationController
     return [ total, source.trial_chapter_limit ].min if current_user.trial_active?
 
     [ total, source.guest_chapter_limit ].min
-  end
-
-  def progress_percent(completed_count, total_count)
-    return 0 if total_count.zero?
-
-    ((completed_count.to_f / total_count) * 100).round
   end
 end

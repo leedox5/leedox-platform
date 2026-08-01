@@ -18,7 +18,12 @@ class ChapterProgressesController < ApplicationController
 
     authorize chapter, :view?, policy_class: DocPolicy
 
-    current_user.chapter_progresses.find_by(chapter_id: chapter[:id], product_code: chapter[:product_code])&.destroy!
+    ChapterProgress.uncomplete!(
+      user: current_user,
+      product_code: chapter[:product_code],
+      chapter_id: chapter[:canonical_id] || chapter[:id],
+      source: ProductContent.for(chapter[:product_code])
+    )
 
     redirect_to redirect_path(chapter), notice: "완료 표시를 취소했습니다."
   end
@@ -52,13 +57,11 @@ class ChapterProgressesController < ApplicationController
   end
 
   def complete_chapter_progress(chapter)
-    progress = current_user.chapter_progresses.find_or_initialize_by(
-      chapter_id: chapter[:id], product_code: chapter[:product_code]
+    ChapterProgress.complete!(
+      user: current_user,
+      product_code: chapter[:product_code],
+      chapter_id: chapter[:canonical_id] || chapter[:id],
+      source: ProductContent.for(chapter[:product_code])
     )
-    progress.update!(completed_at: Time.current)
-  rescue ActiveRecord::RecordNotUnique
-    current_user.chapter_progresses
-      .find_by!(chapter_id: chapter[:id], product_code: chapter[:product_code])
-      .update!(completed_at: Time.current)
   end
 end

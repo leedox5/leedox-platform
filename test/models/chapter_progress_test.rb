@@ -35,6 +35,14 @@ class ChapterProgressTest < ActiveSupport::TestCase
     assert_includes progress.errors[:chapter_id], "is not included in the list"
   end
 
+  test "canonical Chatdox S01 ids are valid but malformed lookalikes are rejected" do
+    assert ChapterProgress.new(user: @user, chapter_id: "S01E05", product_code: "chatdox").valid?
+
+    %w[1 001 S01E21].each do |id|
+      assert_not ChapterProgress.new(user: @user, chapter_id: id, product_code: "chatdox").valid?
+    end
+  end
+
   test "a brand-new Product row is accepted as a valid product_code with no code changes" do
     Product.create!(code: "widget_test", name: "Widget Test", active: true, sale_enabled: false)
 
