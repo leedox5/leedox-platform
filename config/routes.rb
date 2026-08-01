@@ -14,6 +14,17 @@ Rails.application.routes.draw do
   root "pages#home"
 
   get "/chatdox", to: "pages#chatdox", as: :chatdox
+  get "/chatdox/:season_code/:episode_number/archived-images/*filename",
+    to: "chatdox_content#archived_image", as: :archived_chatdox_episode_image,
+    constraints: { season_code: /s\d{2}/, episode_number: /\d{2}/ }, format: false
+  get "/chatdox/:season_code/images/*filename",
+    to: "chatdox_content#image", as: :chatdox_season_image,
+    constraints: { season_code: /s\d{2}/ }, format: false
+  get "/chatdox/:season_code/:episode_number",
+    to: "chatdox_content#episode", as: :chatdox_episode,
+    constraints: { season_code: /s\d{2}/, episode_number: /\d{2}/ }
+  get "/chatdox/:season_code", to: "chatdox_content#season", as: :chatdox_season,
+    constraints: { season_code: /s\d{2}/ }
 
   # Legacy per-product URLs and route helper names, kept exactly as they were
   # (bookmarks/external links/SEO) -- product_code comes in via `defaults:`

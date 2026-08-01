@@ -1,0 +1,70 @@
+<% content_for :title, "#{@chapter[:title]} | CHATDOX" %>
+<% content_for :head do %>
+  <link rel="canonical" href="<%= chatdox_episode_url(@chapter[:season_code], @chapter[:display_number], host: ENV.fetch('CANONICAL_HOST', 'leedox.up.railway.app'), protocol: 'https', port: nil) %>">
+  <% if @archived %><meta name="robots" content="noindex,nofollow"><% end %>
+<% end %>
+
+<div class="min-h-screen bg-white">
+  <%= render "shared/header" %>
+  <main class="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
+    <nav aria-label="breadcrumb" class="flex flex-wrap items-center gap-2 text-sm text-slate-600">
+      <%= link_to "CHATDOX", chatdox_path, class: "hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" %>
+      <span aria-hidden="true">/</span>
+      <%= link_to @chapter[:season_code].upcase, chatdox_season_path(@chapter[:season_code]), class: "hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" %>
+      <span aria-hidden="true">/</span>
+      <span>Episode <%= @chapter[:display_number] %></span>
+    </nav>
+
+    <div class="mt-7 grid min-w-0 gap-10 lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <article class="min-w-0">
+        <header class="border-b border-slate-200 pb-6">
+          <p class="text-sm font-bold text-blue-700"><%= @chapter[:season_code].upcase %> · Episode <%= @chapter[:display_number] %></p>
+          <h1 class="mt-2 text-3xl font-bold text-slate-950 sm:text-4xl"><%= @chapter[:title] %></h1>
+          <% if @archived %><p class="mt-3 text-sm font-semibold text-slate-600">보관된 콘텐츠</p><% end %>
+          <% if @last_updated_at %><p class="mt-3 text-sm text-slate-500">Snapshot 생성: <%= l(@last_updated_at, format: :long, locale: :ko) %></p><% end %>
+        </header>
+
+        <div class="doc-content mt-8 max-w-none break-words">
+          <%= sanitize(@content_html, tags: %w[h1 h2 h3 h4 h5 h6 p br hr ul ol li pre code blockquote strong em a img table thead tbody tr th td], attributes: %w[href target rel src alt]) %>
+        </div>
+
+        <% if current_user && !@archived %>
+          <section class="mt-10 border-y border-slate-200 py-5" aria-label="학습 상태">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 class="font-semibold text-slate-900">학습 상태</h2>
+                <p class="mt-1 text-sm text-slate-600"><%= @chapter_progress ? "완료한 episode입니다." : "완료하면 전체와 시즌 진도에 반영됩니다." %></p>
+              </div>
+              <% if @chapter_progress %>
+                <%= button_to "완료 취소", chapter_progresses_path(chapter_id: @chapter[:id], product_code: "chatdox"), method: :delete, class: "border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" %>
+              <% else %>
+                <%= button_to "Episode 완료", chapter_progresses_path(chapter_id: @chapter[:id], product_code: "chatdox"), method: :post, class: "bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" %>
+              <% end %>
+            </div>
+          </section>
+        <% end %>
+
+        <% index = @public_season_chapters.index { |chapter| chapter[:id] == @chapter[:id] } %>
+        <% previous_chapter = index && index.positive? ? @public_season_chapters[index - 1] : nil %>
+        <% next_document = index ? @public_season_chapters[index + 1] : nil %>
+        <nav aria-label="Episode 이동" class="mt-10 flex min-h-12 items-start justify-between gap-5 border-t border-slate-200 pt-6">
+          <% if previous_chapter %><%= link_to "← #{previous_chapter[:title]}", chatdox_episode_path(previous_chapter[:season_code], previous_chapter[:display_number]), class: "max-w-[45%] text-sm font-semibold text-slate-600 hover:text-blue-700" %><% else %><span></span><% end %>
+          <% if next_document %><%= link_to "#{next_document[:title]} →", chatdox_episode_path(next_document[:season_code], next_document[:display_number]), class: "max-w-[45%] text-right text-sm font-semibold text-slate-600 hover:text-blue-700" %><% end %>
+        </nav>
+      </article>
+
+      <aside class="space-y-6 lg:sticky lg:top-6 lg:self-start">
+        <%= render "progress", label: "전체 진도", segment: @summary.overall %>
+        <%= render "progress", label: @chapter[:season_code].upcase, segment: @season_summary %>
+        <% if @summary.overall.next_chapter %>
+          <% progress_next = @summary.overall.next_chapter %>
+          <div class="border-b border-slate-200 pb-5">
+            <p class="text-xs font-semibold uppercase text-slate-500">학습 다음 Episode</p>
+            <p class="mt-2 text-sm font-bold text-slate-900"><%= progress_next[:season_code].upcase %> Episode <%= progress_next[:display_number] %></p>
+            <%= link_to "이어서 읽기", chatdox_episode_path(progress_next[:season_code], progress_next[:display_number]), class: "mt-3 inline-block text-sm font-semibold text-blue-700 hover:text-blue-900" %>
+          </div>
+        <% end %>
+      </aside>
+    </div>
+  </main>
+</div>

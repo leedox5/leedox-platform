@@ -1,0 +1,10 @@
+<% content_for :title, "접근 안내 | CHATDOX" %>
+<% content_for :head do %><meta name="robots" content="noindex,nofollow"><% end %>
+<div class="min-h-screen bg-white">
+  <%= render "shared/header" %>
+  <main class="mx-auto max-w-2xl px-5 py-20 text-center sm:px-8">
+    <h1 class="text-2xl font-bold text-slate-950">이 Episode를 이용하려면 접근 권한이 필요합니다</h1>
+    <p class="mt-4 text-sm leading-6 text-slate-600"><%= @access_reason == :trial_required ? "체험 기간이 종료되었습니다." : "CHATDOX 라이선스를 확인해 주세요." %></p>
+    <%= link_to "CHATDOX 이용 안내", chatdox_path(anchor: "pricing"), class: "mt-7 inline-block bg-blue-600 px-5 py-3 text-sm font-bold text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" %>
+  </main>
+</div>
