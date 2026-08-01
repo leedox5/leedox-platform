@@ -87,10 +87,16 @@ class ChatdoxContentController < ApplicationController
   end
 
   def render_not_found
+    response.headers["Cache-Control"] = "private, no-store"
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
     render plain: "콘텐츠를 찾을 수 없습니다.", status: :not_found
   end
 
   def render_unavailable
+    reason = ChatdoxRelease::Readiness.call.reason
+    Rails.logger.error("chatdox_content_unavailable reason=#{reason}")
+    response.headers["Cache-Control"] = "private, no-store"
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
     render plain: "콘텐츠를 일시적으로 불러올 수 없습니다.", status: :service_unavailable
   end
 

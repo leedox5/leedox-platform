@@ -78,6 +78,7 @@ Rails.application.routes.draw do
 
   namespace :admin do
     get "/dashboard", to: "dashboard#show", as: :dashboard
+    get "/chatdox_readiness", to: "chatdox_readiness#show", as: :chatdox_readiness
     get "/content_progress", to: "content_progress#show", as: :content_progress
     post "/db_backup", to: "db_backup#download", as: :db_backup
     resources :users, only: %i[index update]

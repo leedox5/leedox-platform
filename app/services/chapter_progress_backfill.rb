@@ -1,5 +1,8 @@
 class ChapterProgressBackfill
-  Result = Data.define(:dry_run, :scanned, :convertible, :converted, :collisions, :canonical, :unknown) do
+  Result = Data.define(
+    :dry_run, :scanned, :convertible, :converted, :collisions, :canonical, :unknown,
+    :distinct_users, :other_product_rows, :batch_size, :estimated_batches
+  ) do
     def to_h = members.to_h { |name| [ name, public_send(name) ] }
   end
 
@@ -18,7 +21,12 @@ class ChapterProgressBackfill
       batch.order(:id).each { |progress| process(progress) }
     end
 
-    Result.new(dry_run:, **%i[scanned convertible converted collisions canonical unknown].to_h { |key| [ key, counts[key] ] })
+    Result.new(
+      dry_run:, **%i[scanned convertible converted collisions canonical unknown].to_h { |key| [ key, counts[key] ] },
+      distinct_users: scope.distinct.count(:user_id),
+      other_product_rows: ChapterProgress.where.not(product_code: "chatdox").count,
+      batch_size:, estimated_batches: (counts[:scanned].to_f / batch_size).ceil
+    )
   end
 
   private
