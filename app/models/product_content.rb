@@ -20,39 +20,11 @@
 # Chatdox is registered, because it can't safely use FilesystemSource yet (see
 # ProductContent::ChatdoxLegacySource).
 class ProductContent
-  CHATDOX_SOURCE_MODES = %w[legacy seasoned].freeze
-
   def self.for(product_code)
-    return chatdox_source.new(product_code) if product_code == "chatdox"
-
     registry.fetch(product_code, FilesystemSource).new(product_code)
   end
 
   def self.registry
     { "chatdox" => ChatdoxLegacySource }
-  end
-
-  def self.chatdox_source_mode
-    ENV.fetch("CHATDOX_CONTENT_SOURCE", "legacy")
-  end
-
-  def self.chatdox_snapshot_path
-    Pathname.new(ENV.fetch("CHATDOX_SNAPSHOT_PATH", Rails.root.join("runtime/chatdox").to_s))
-  end
-
-  def self.chatdox_expected_source_commit
-    ENV["CHATDOX_EXPECTED_SOURCE_COMMIT"].presence
-  end
-
-  def self.chatdox_source
-    case chatdox_source_mode
-    when "legacy" then ChatdoxLegacySource
-    when "seasoned" then ChatdoxSeasonedCompatibilityAdapter
-    else InvalidChatdoxSource
-    end
-  end
-
-  def self.seasoned_chatdox(snapshot_path: chatdox_snapshot_path)
-    ChatdoxSeasonedSource.new("chatdox", snapshot_path:)
   end
 end
