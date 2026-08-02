@@ -35,14 +35,14 @@
     </div>
 
     <% if @chapters.empty? %>
-      <section class="py-14 text-center" aria-label="공개 에피소드">
+      <section class="py-14 text-center" aria-label="공개 episode">
         <h2 class="text-xl font-bold text-slate-900">준비 중입니다</h2>
         <p class="mt-2 text-sm text-slate-600">공개된 에피소드가 아직 없습니다.</p>
       </section>
     <% else %>
-      <section class="py-10" aria-label="공개 에피소드">
+      <section class="py-10" aria-label="공개 episode">
         <div class="flex items-center justify-between gap-4">
-          <h2 class="text-xl font-bold text-slate-950">공개 에피소드</h2>
+          <h2 class="text-xl font-bold text-slate-950">공개 Episode</h2>
           <span class="text-sm text-slate-500"><%= @chapters.size %>편</span>
         </div>
         <ol class="mt-5 divide-y divide-slate-200 border-y border-slate-200">

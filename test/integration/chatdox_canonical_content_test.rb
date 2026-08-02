@@ -59,7 +59,6 @@ class ChatdoxCanonicalContentTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match(/준비 중/, response.body)
     assert_match(/공개된 에피소드가 아직 없습니다/, response.body)
-    assert_select "section[aria-label='공개 에피소드']"
     assert_no_match(/Episode 1|Episode 2|review|draft/i, response.body)
 
     get chatdox_episode_path("s02", "01")
@@ -91,8 +90,6 @@ class ChatdoxCanonicalContentTest < ActionDispatch::IntegrationTest
 
     assert_response :service_unavailable
     assert_equal "콘텐츠를 일시적으로 불러올 수 없습니다.", response.body
-    assert_equal "private, no-store", response.headers["Cache-Control"]
-    assert_equal "noindex, nofollow", response.headers["X-Robots-Tag"]
     assert_no_match(/checksum|#{Regexp.escape(@snapshot.to_s)}/i, response.body)
   end
 

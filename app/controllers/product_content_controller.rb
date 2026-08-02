@@ -13,7 +13,6 @@ class ProductContentController < ApplicationController
   include ChapterImages
 
   before_action :authenticate_for_free_product!
-  after_action :log_legacy_chatdox_traffic
 
   helper_method :product_content_index_path_for, :product_chapter_path_for
 
@@ -79,13 +78,6 @@ class ProductContentController < ApplicationController
   end
 
   private
-
-  def log_legacy_chatdox_traffic
-    return unless params[:product_code] == "chatdox" && request.path.start_with?("/docs")
-
-    family = request.path.start_with?("/docs/images/") ? "image" : (params[:id].present? ? "episode" : "index")
-    Rails.logger.info("legacy_chatdox_route family=#{family} status=#{response.status}")
-  end
 
   def authenticate_for_free_product!
     product = Product.find_by(code: params[:product_code])
