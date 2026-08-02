@@ -12,8 +12,6 @@
 class ProductContentController < ApplicationController
   include ChapterImages
 
-  before_action :authenticate_for_free_product!
-
   helper_method :product_content_index_path_for, :product_chapter_path_for
 
   def index
@@ -75,11 +73,6 @@ class ProductContentController < ApplicationController
   end
 
   private
-
-  def authenticate_for_free_product!
-    product = Product.find_by(code: params[:product_code])
-    authenticate_user! if product&.free_access?
-  end
 
   def load_common
     @product_code ||= params[:product_code]

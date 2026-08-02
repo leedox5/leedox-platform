@@ -39,6 +39,19 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_not_equal "article", banner_link.ancestors("article").first&.name
   end
 
+  test "guest can click the homepage aistart banner straight through to readable content, no sign-in detour (leedox_restore_free_content_guest_access_r1)" do
+    get root_path
+    assert_response :success
+
+    doc = Nokogiri::HTML(response.body)
+    banner_link = doc.css("a[href='#{product_content_index_path('aistart')}']").first
+    assert banner_link
+
+    get banner_link["href"]
+    assert_response :success
+    assert_select "h1", text: /AI, 오늘부터 시작/
+  end
+
   test "homepage proof section shows live chapter titles for both products, not frozen copies" do
     get root_path
     assert_response :success

@@ -12,27 +12,15 @@ class AistartFreeProductTest < ActionDispatch::IntegrationTest
     @aistart = Product.find_by!(code: "aistart")
   end
 
-  test "aistart requires login for its index and chapters" do
+  test "aistart is readable without login for its index and chapters (guest access restored, leedox_restore_free_content_guest_access_r1)" do
     get "/content/aistart"
-    assert_redirected_to new_user_session_path
+    assert_response :success
 
     get "/content/aistart/01"
-    assert_redirected_to new_user_session_path
+    assert_response :success
   end
 
-  test "login returns the user to the requested aistart content" do
-    user = User.create!(name: "테스트 유저", email: "aistart-return@example.com", password: "password123")
-
-    get "/content/aistart"
-    post user_session_path, params: { user: { email: user.email, password: "password123" } }
-
-    assert_redirected_to product_content_index_path("aistart")
-  end
-
-  test "all 5 chapters are readable after login, each rendering its own real content" do
-    user = User.create!(name: "테스트 유저", email: "aistart-reader@example.com", password: "password123")
-    post user_session_path, params: { user: { email: user.email, password: "password123" } }
-
+  test "all 5 chapters are readable as a guest, each rendering its own real content" do
     get "/content/aistart"
     assert_response :success
     # No leading number prefix here anymore (leedox_content_template_unification_r1) --
@@ -92,8 +80,10 @@ class AistartFreeProductTest < ActionDispatch::IntegrationTest
     assert_no_match(/준비 중/, card.text)
 
     link = card.at_css("a")
-    assert link, "expected a link to the actual content, since landing_page_path is now set"
-    assert_equal new_user_session_path(redirect_to: product_content_index_path("aistart")), link["href"]
+    # Free-access products skip the login funnel (leedox_restore_free_content_guest_access_r1)
+    # -- unlike paid products, whose /pricing detail link still routes through sign-in first.
+    assert link, "expected a link straight to the content, bypassing the login funnel"
+    assert_equal product_content_index_path("aistart"), link["href"]
   end
 
   test "checkout for aistart shows the same graceful not-ready screen as any other sale_enabled: false product" do

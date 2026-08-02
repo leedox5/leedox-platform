@@ -39,7 +39,7 @@
           </p>
 
           <% if product.landing_page_path.present? %>
-            <% detail_target = user_signed_in? ? product.landing_page_path : new_user_session_path(redirect_to: product.landing_page_path) %>
+            <% detail_target = (product.free_access? || user_signed_in?) ? product.landing_page_path : new_user_session_path(redirect_to: product.landing_page_path) %>
             <%= link_to (product.free_access? ? "무료로 시작하기" : "자세히 보기"), detail_target,
               class: "mt-6 inline-flex items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" %>
           <% end %>
