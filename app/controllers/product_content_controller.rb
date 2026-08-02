@@ -68,7 +68,6 @@ class ProductContentController < ApplicationController
         user: current_user, product_code: @product_code, chapter_id: @current_id, source: @source
       ).completed.first
     end
-    @canonical_url = canonical_chatdox_url(@current_chapter) if @product_code == "chatdox"
 
     render formats: :html
   end
@@ -191,13 +190,5 @@ class ProductContentController < ApplicationController
     )
 
     markdown.render(raw_markdown).html_safe
-  end
-
-  def canonical_chatdox_url(chapter)
-    number = chapter[:canonical_id]&.match(/\AS01E(\d{2})\z/)&.captures&.first || chapter[:id]
-    chatdox_episode_url(
-      season_code: "s01", episode_number: number,
-      host: ENV.fetch("CANONICAL_HOST", "leedox.up.railway.app"), protocol: "https", port: nil
-    )
   end
 end

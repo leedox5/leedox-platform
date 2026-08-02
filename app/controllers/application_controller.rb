@@ -17,8 +17,9 @@ class ApplicationController < ActionController::Base
   private
 
   def store_redirect_location
-    path = params[:redirect_to].to_s
-    store_location_for(:user, path) if path.start_with?("/") && !path.start_with?("//")
+    if params[:redirect_to].present? && params[:redirect_to].to_s.start_with?("/")
+      store_location_for(:user, params[:redirect_to].to_s)
+    end
   end
 
   # Chatdox omits the :product_code segment (bare /billing/checkout) so every

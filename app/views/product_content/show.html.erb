@@ -1,7 +1,4 @@
 <% theme_classes = content_theme_classes(@theme[:accent]) %>
-<% if @canonical_url %>
-  <% content_for :head do %><link rel="canonical" href="<%= @canonical_url %>"><% end %>
-<% end %>
 <div class="min-h-screen bg-white">
   <%= render "shared/header" %>
 

@@ -32,12 +32,7 @@ class ChapterProgressesController < ApplicationController
 
   def find_chapter
     product_code = params[:product_code].presence || "chatdox"
-    source = if product_code == "chatdox" && params[:chapter_id].to_s.match?(/\AS\d{2}E\d{2}\z/)
-      ProductContent.seasoned_chatdox
-    else
-      ProductContent.for(product_code)
-    end
-    chapter = source.find(params[:chapter_id])
+    chapter = ProductContent.for(product_code).find(params[:chapter_id])
 
     # Appendix chapters are excluded from progress tracking -- the UI never
     # renders the button, but without this check a crafted request would
@@ -58,10 +53,6 @@ class ChapterProgressesController < ApplicationController
   end
 
   def redirect_path(chapter)
-    if chapter[:product_code] == "chatdox" && (match = chapter[:id].match(/\AS(\d{2})E(\d{2})\z/))
-      return chatdox_episode_path(season_code: "s#{match[1]}", episode_number: match[2])
-    end
-
     product_chapter_path(chapter[:product_code], chapter[:id])
   end
 
