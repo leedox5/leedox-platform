@@ -71,20 +71,9 @@ The setup task refuses to run when `RAILWAY_ENVIRONMENT` is present. Sign in wit
 
 Only after the literal `0010 CUTOVER APPROVE` signal:
 
-The production `web` service follows GitHub `main`; a matching push creates a
-deployment. It currently has no volume mount. Do not start cutover until a web
-volume (or an approved immutable-image equivalent) survives a controlled
-restart. The steps below assume `<PERSISTENT_MOUNT>` has been approved.
-
-1. Confirm approved DEV full SHA, clean tree and production deploy commit. Create
-   a new custom-format Postgres dump through the authenticated admin action.
-   Verify it with `pg_restore --list`, restore it into an empty isolated database,
-   and run application integrity checks against that restore. Record only its
-   timestamp, checksum, size, tool version and pass/fail.
-2. Push the approved application commit to `main` once. Do not also run a manual
-   deploy. Wait for the matching Railway deployment SHA and `/up` 200.
-3. Transfer the approved artifact to an inactive directory under
-   `<PERSISTENT_MOUNT>` and verify its manifest and approved full SHA.
+1. Confirm approved DEV full SHA, clean tree, production deploy commit and backup/restore point.
+2. Deploy the approved application release and wait for `/up` 200. Confirm whether GitHub push auto-deploy is enabled in Railway service settings before pushing any later release.
+3. Build/transfer the approved artifact to an inactive persistent target.
 4. Install it under a single-process lock:
 
    ```bash
@@ -93,8 +82,7 @@ restart. The steps below assume `<PERSISTENT_MOUNT>` has been approved.
      --expected-commit <APPROVED_FULL_SHA>
    ```
 
-5. Set path and expected SHA with deploys suppressed. Set source mode last as the
-   single activation change and allow exactly one resulting restart/redeploy:
+5. Set the release contract together in Railway, then restart/redeploy:
 
    ```text
    CHATDOX_SNAPSHOT_PATH=<PERSISTENT_TARGET>
@@ -102,43 +90,9 @@ restart. The steps below assume `<PERSISTENT_MOUNT>` has been approved.
    CHATDOX_CONTENT_SOURCE=seasoned
    ```
 
-   Railway variable changes are not assumed atomic. Install and verify first;
-   use the source-mode change as the controlled activation point.
+   Railway variable changes are not assumed atomic. Install and verify the inactive target first; set path and expected SHA before setting source mode; use one controlled restart as the activation point.
 6. Run the production smoke list and open `/admin/chatdox_readiness`. Require `ready` and matching commits.
 7. On any failure, stop. Do not backfill.
-
-Exact operator order after persistent storage and a restorable backup are proven:
-
-```bash
-git status --short
-git rev-parse HEAD
-railway status --json
-
-# Create <BACKUP_FILE> through the authenticated admin backup action, then on
-# the restricted backup workstation (never against production):
-pg_restore --list <BACKUP_FILE>
-createdb <ISOLATED_RESTORE_DB>
-pg_restore --exit-on-error --clean --if-exists --no-owner \
-  --dbname <ISOLATED_RESTORE_DB> <BACKUP_FILE>
-
-git push origin main
-railway deployment list --service web --limit 1 --json
-curl --fail --silent --show-error https://leedox.up.railway.app/up
-
-railway volume files upload <LOCAL_ARTIFACT_ARCHIVE> <INACTIVE_VOLUME_PATH>
-railway ssh -- /bin/bash -lc 'CONFIRM_PRODUCTION=1 bin/chatdox-release install --artifact "$CHATDOX_INACTIVE_ARTIFACT" --target "$CHATDOX_PERSISTENT_TARGET" --expected-commit "$CHATDOX_APPROVED_COMMIT"'
-
-railway variable set CHATDOX_SNAPSHOT_PATH=<PERSISTENT_TARGET> --service web --environment production --skip-deploys
-railway variable set CHATDOX_EXPECTED_SOURCE_COMMIT=<APPROVED_FULL_SHA> --service web --environment production --skip-deploys
-railway variable set CHATDOX_CONTENT_SOURCE=seasoned --service web --environment production
-
-curl --fail --silent --show-error https://leedox.up.railway.app/up
-bin/chatdox-smoke --base-url https://leedox.up.railway.app
-railway ssh -- bin/chatdox-release readiness
-```
-
-Do not substitute an ephemeral container directory for `<PERSISTENT_MOUNT>`. If
-SSH verification is unavailable, stop before artifact install.
 
 ## Source rollback
 
