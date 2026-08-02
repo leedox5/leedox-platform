@@ -1,7 +1,7 @@
 ---
 schema_version: 1
 product_code: chatdox
-source_commit: d89cd90461a96fc1980611c3b1bf81ee3b1e7b14
+source_commit: 3efda2782671144e8aa3c6692f0fe1d91f6882d1
 seasons:
 - code: s01
   order: 1
@@ -9,8 +9,8 @@ seasons:
   published_episode_count: 20
 - code: s02
   order: 2
-  metadata_checksum: 27645f18e4fbf5a9efd652c4a41030bf76648ac5d66a2c567451958e6457f2d6
-  published_episode_count: 1
+  metadata_checksum: ba04613036f5b0e568fee905a433f4a6c5c3ce1edd8b8d7a33a620c0926fdde0
+  published_episode_count: 0
 files:
 - path: catalog.yml
   sha256: 858fc74ad92ecd935f81c12514638a6b078e547d7084552b6cd2682fdbee361c
@@ -87,9 +87,6 @@ files:
 - path: s01/images/18_resend_domains.png
   sha256: 1269b8ba9938f890886858344f40539a6720e4060876b3004076b0911b52018c
   visibility: public
-- path: s02/S02E01_chatgpt_or_codex.md
-  sha256: fdc7668c78ebbec5d13f42b6db1acf6bf74edbb6ed3d670dd358488b9aa5ade3
-  visibility: public
 - path: s02/content_meta.yml
-  sha256: 27645f18e4fbf5a9efd652c4a41030bf76648ac5d66a2c567451958e6457f2d6
+  sha256: ba04613036f5b0e568fee905a433f4a6c5c3ce1edd8b8d7a33a620c0926fdde0
   visibility: public

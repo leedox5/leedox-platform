@@ -3,7 +3,7 @@ season:
   code: s02
   order: 2
   title: "CHATDOX Season 02"
-  status: publishing
+  status: upcoming
   guest_episode_limit: 1
   trial_episode_limit: 2
   images_dir: images
@@ -16,9 +16,9 @@ episodes:
   - id: S02E01
     number: 1
     order: 1
-    slug: S02E01_chatgpt_or_codex
-    title: "너는 ChatGPT인가, Codex인가"
-    status: published
+    slug: S02E01_safeguard_in_action
+    title: "안전장치가 바로 다음 작업에서 작동했다"
+    status: review
     phase: handoff_foundation
   - id: S02E02
     number: 2

@@ -1,9 +1,11 @@
 require "test_helper"
 
 class ChatdoxPackagedContentTest < ActionDispatch::IntegrationTest
-  APPROVED_COMMIT = "d89cd90461a96fc1980611c3b1bf81ee3b1e7b14"
-  PUBLIC_S02_TITLE = "너는 ChatGPT인가, Codex인가"
-  PRIVATE_S02_TITLE = "파일 오류가 접근 범위를 넓히지 않게 하기"
+  APPROVED_COMMIT = "3efda2782671144e8aa3c6692f0fe1d91f6882d1"
+  PRIVATE_S02_TITLES = [
+    "안전장치가 바로 다음 작업에서 작동했다",
+    "파일 오류가 접근 범위를 넓히지 않게 하기"
+  ].freeze
 
   setup do
     Commerce::CatalogBootstrap.call!
@@ -26,38 +28,29 @@ class ChatdoxPackagedContentTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "packaged S02 publishes E01 to guests without disclosing E02" do
+  test "packaged S02 remains upcoming with no public or private episode disclosure" do
     [ chatdox_path, chatdox_season_path("s02") ].each do |path|
       get path
 
       assert_response :success
-      assert_match(/연재 중/, response.body)
-      assert_match(/공개 1편/, response.body)
-      assert_no_match(/#{Regexp.escape(PRIVATE_S02_TITLE)}/, response.body)
+      assert_match(/준비 중/, response.body)
+      assert_match(/공개(?:된 에피소드가 아직 없습니다| 0편)/, response.body)
+      PRIVATE_S02_TITLES.each { |title| assert_no_match(/#{Regexp.escape(title)}/, response.body) }
       assert_no_match(/review|draft/i, response.body)
     end
 
-    get chatdox_season_path("s02")
-    assert_match(/#{Regexp.escape(PUBLIC_S02_TITLE)}/, response.body)
-
     get chatdox_episode_path("s02", "01")
-    assert_response :success
-    assert_select "h1", text: PUBLIC_S02_TITLE
-    assert_match(/Codex/, response.body)
-
-    get chatdox_episode_path("s02", "02")
     assert_response :not_found
   end
 
-  test "packaged artifact contains only the published S02 body" do
+  test "packaged artifact contains no S02 draft or review bodies" do
     snapshot = ProductContent::RuntimeSnapshotVerifier.verify(
       root: Rails.root.join("runtime/chatdox"), expected_source_commit: APPROVED_COMMIT
     )
 
     assert snapshot.usable?
     assert_equal 20, snapshot.manifest.fetch("seasons").find { |season| season["code"] == "s01" }.fetch("published_episode_count")
-    assert_equal 1, snapshot.manifest.fetch("seasons").find { |season| season["code"] == "s02" }.fetch("published_episode_count")
-    assert_equal [ "S02E01_chatgpt_or_codex.md" ], Dir.glob(Rails.root.join("runtime/chatdox/s02/*.md")).map { |path| File.basename(path) }
-    assert_equal 21, ProductContent::ChatdoxSeasonedSource.new.public_chapters.size
+    assert_equal 0, snapshot.manifest.fetch("seasons").find { |season| season["code"] == "s02" }.fetch("published_episode_count")
+    assert_empty Dir.glob(Rails.root.join("runtime/chatdox/s02/*.md"))
   end
 end
