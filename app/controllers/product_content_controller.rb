@@ -64,9 +64,7 @@ class ProductContentController < ApplicationController
     @content_html = render_markdown(raw_markdown)
 
     @chapter_progress = if user_signed_in?
-      ChapterProgress.for_chapter(
-        user: current_user, product_code: @product_code, chapter_id: @current_id, source: @source
-      ).completed.first
+      current_user.chapter_progresses.find_by(chapter_id: @current_id, product_code: @product_code)
     end
 
     render formats: :html

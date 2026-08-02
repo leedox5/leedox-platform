@@ -13,49 +13,16 @@ class ChapterProgress < ApplicationRecord
     completed_at.present?
   end
 
-  def self.for_chapter(user:, product_code:, chapter_id:, source: ProductContent.for(product_code))
-    identity = ProductContent::ChapterIdentity.normalize(product_code:, chapter_id:, source:)
-    return none unless identity.supported?
-
-    user.chapter_progresses.where(product_code:, chapter_id: identity.aliases)
-  end
-
-  def self.complete!(user:, product_code:, chapter_id:, source: ProductContent.for(product_code), at: Time.current)
-    identity = ProductContent::ChapterIdentity.normalize(product_code:, chapter_id:, source:)
-    raise ActiveRecord::RecordInvalid, new unless identity.supported?
-
-    transaction do
-      rows = user.chapter_progresses.lock.where(product_code:, chapter_id: identity.aliases).to_a
-      canonical = rows.find { |row| row.chapter_id == identity.canonical_id }
-      canonical ||= user.chapter_progresses.new(product_code:, chapter_id: identity.canonical_id)
-      completed_at = (rows.filter_map(&:completed_at) + [ at ]).min
-      canonical.completed_at = completed_at
-      canonical.save!
-      rows.each { |row| row.delete unless row.id == canonical.id }
-      canonical
-    end
-  rescue ActiveRecord::RecordNotUnique
-    retry
-  end
-
-  def self.uncomplete!(user:, product_code:, chapter_id:, source: ProductContent.for(product_code))
-    for_chapter(user:, product_code:, chapter_id:, source:).delete_all
-  end
-
   private
 
+  # Chatdox and Claudox chapters are both numbered 1..20, but neither has a
+  # shared constant listing valid ids (Curriculum::CHAPTERS is Chatdox-only;
+  # Claudox's list is built by scanning the filesystem in ClaudoxController).
+  # A simple numeric range check avoids coupling this model to either product's
+  # chapter source.
   def chapter_id_in_valid_range
-    return if chapter_id.blank? || product_code.blank?
+    return if chapter_id.blank?
 
-    source = ProductContent.for(product_code)
-    identity = ProductContent::ChapterIdentity.normalize(product_code:, chapter_id:, source:)
-    if product_code == "chatdox"
-      errors.add(:chapter_id, :inclusion) unless identity.supported?
-      return
-    end
-    return if source.find(chapter_id).present?
-    return if chapter_id.match?(/\A(?:0[1-9]|1\d|20)\z/)
-
-    errors.add(:chapter_id, :inclusion)
+    errors.add(:chapter_id, :inclusion) unless (1..20).cover?(chapter_id.to_i)
   end
 end
