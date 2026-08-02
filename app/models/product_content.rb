@@ -21,7 +21,6 @@
 # ProductContent::ChatdoxLegacySource).
 class ProductContent
   CHATDOX_SOURCE_MODES = %w[legacy seasoned].freeze
-  PACKAGED_CHATDOX_SOURCE_COMMIT = "d89cd90461a96fc1980611c3b1bf81ee3b1e7b14"
 
   def self.for(product_code)
     return chatdox_source.new(product_code) if product_code == "chatdox"
@@ -34,7 +33,7 @@ class ProductContent
   end
 
   def self.chatdox_source_mode
-    ENV.fetch("CHATDOX_CONTENT_SOURCE") { Rails.env.production? ? "seasoned" : "legacy" }
+    ENV.fetch("CHATDOX_CONTENT_SOURCE", "legacy")
   end
 
   def self.chatdox_snapshot_path
@@ -42,7 +41,7 @@ class ProductContent
   end
 
   def self.chatdox_expected_source_commit
-    ENV["CHATDOX_EXPECTED_SOURCE_COMMIT"].presence || (PACKAGED_CHATDOX_SOURCE_COMMIT if Rails.env.production?)
+    ENV["CHATDOX_EXPECTED_SOURCE_COMMIT"].presence
   end
 
   def self.chatdox_source
