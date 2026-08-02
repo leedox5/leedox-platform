@@ -18,12 +18,7 @@ class ChapterProgressesController < ApplicationController
 
     authorize chapter, :view?, policy_class: DocPolicy
 
-    ChapterProgress.uncomplete!(
-      user: current_user,
-      product_code: chapter[:product_code],
-      chapter_id: chapter[:canonical_id] || chapter[:id],
-      source: ProductContent.for(chapter[:product_code])
-    )
+    current_user.chapter_progresses.find_by(chapter_id: chapter[:id], product_code: chapter[:product_code])&.destroy!
 
     redirect_to redirect_path(chapter), notice: "완료 표시를 취소했습니다."
   end
@@ -32,12 +27,7 @@ class ChapterProgressesController < ApplicationController
 
   def find_chapter
     product_code = params[:product_code].presence || "chatdox"
-    source = if product_code == "chatdox" && params[:chapter_id].to_s.match?(/\AS\d{2}E\d{2}\z/)
-      ProductContent.seasoned_chatdox
-    else
-      ProductContent.for(product_code)
-    end
-    chapter = source.find(params[:chapter_id])
+    chapter = ProductContent.for(product_code).find(params[:chapter_id])
 
     # Appendix chapters are excluded from progress tracking -- the UI never
     # renders the button, but without this check a crafted request would
@@ -58,19 +48,17 @@ class ChapterProgressesController < ApplicationController
   end
 
   def redirect_path(chapter)
-    if chapter[:product_code] == "chatdox" && (match = chapter[:id].match(/\AS(\d{2})E(\d{2})\z/))
-      return chatdox_episode_path(season_code: "s#{match[1]}", episode_number: match[2])
-    end
-
     product_chapter_path(chapter[:product_code], chapter[:id])
   end
 
   def complete_chapter_progress(chapter)
-    ChapterProgress.complete!(
-      user: current_user,
-      product_code: chapter[:product_code],
-      chapter_id: chapter[:canonical_id] || chapter[:id],
-      source: ProductContent.for(chapter[:product_code])
+    progress = current_user.chapter_progresses.find_or_initialize_by(
+      chapter_id: chapter[:id], product_code: chapter[:product_code]
     )
+    progress.update!(completed_at: Time.current)
+  rescue ActiveRecord::RecordNotUnique
+    current_user.chapter_progresses
+      .find_by!(chapter_id: chapter[:id], product_code: chapter[:product_code])
+      .update!(completed_at: Time.current)
   end
 end

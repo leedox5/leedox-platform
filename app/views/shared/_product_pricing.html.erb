@@ -6,13 +6,10 @@
 <section id="pricing" class="bg-white py-10 sm:py-16">
   <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
     <div class="mb-10">
-      <h2 class="break-normal text-3xl font-extrabold tracking-tight text-slate-900 sm:break-keep"><%= pricing_product&.name || product_code %> 기간별 이용 안내</h2>
-      <p class="mt-3 max-w-2xl break-normal text-slate-600 sm:break-keep">자동 갱신 없는 기간제 선불 라이선스이며, 아래 금액은 모두 VAT가 포함된 실제 결제 예정 금액입니다.</p>
+      <h2 class="break-keep text-3xl font-extrabold tracking-tight text-slate-900"><%= pricing_product&.name || product_code %> 기간별 이용 안내</h2>
+      <p class="mt-3 max-w-2xl break-keep text-slate-600">자동 갱신 없는 기간제 선불 라이선스이며, 아래 금액은 모두 VAT가 포함된 실제 결제 예정 금액입니다.</p>
       <% unless pricing_sales_enabled %>
         <p class="mt-4 max-w-2xl rounded-lg bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">신규 결제 시스템을 준비 중이며 현재는 구매할 수 없습니다.</p>
-      <% end %>
-      <% if product_code == "chatdox" %>
-        <p class="mt-4 max-w-3xl break-normal text-sm leading-6 text-slate-700 sm:break-keep">CHATDOX 한 상품으로 완결된 S01과 연재 중인 후속 시즌 S02를 함께 이용합니다. S02는 준비가 끝난 에피소드부터 순차적으로 공개됩니다.</p>
       <% end %>
     </div>
 

@@ -13,7 +13,6 @@ class ProductContentController < ApplicationController
   include ChapterImages
 
   before_action :authenticate_for_free_product!
-  after_action :log_legacy_chatdox_traffic
 
   helper_method :product_content_index_path_for, :product_chapter_path_for
 
@@ -65,11 +64,8 @@ class ProductContentController < ApplicationController
     @content_html = render_markdown(raw_markdown)
 
     @chapter_progress = if user_signed_in?
-      ChapterProgress.for_chapter(
-        user: current_user, product_code: @product_code, chapter_id: @current_id, source: @source
-      ).completed.first
+      current_user.chapter_progresses.find_by(chapter_id: @current_id, product_code: @product_code)
     end
-    @canonical_url = canonical_chatdox_url(@current_chapter) if @product_code == "chatdox"
 
     render formats: :html
   end
@@ -79,13 +75,6 @@ class ProductContentController < ApplicationController
   end
 
   private
-
-  def log_legacy_chatdox_traffic
-    return unless params[:product_code] == "chatdox" && request.path.start_with?("/docs")
-
-    family = request.path.start_with?("/docs/images/") ? "image" : (params[:id].present? ? "episode" : "index")
-    Rails.logger.info("legacy_chatdox_route family=#{family} status=#{response.status}")
-  end
 
   def authenticate_for_free_product!
     product = Product.find_by(code: params[:product_code])
@@ -199,13 +188,5 @@ class ProductContentController < ApplicationController
     )
 
     markdown.render(raw_markdown).html_safe
-  end
-
-  def canonical_chatdox_url(chapter)
-    number = chapter[:canonical_id]&.match(/\AS01E(\d{2})\z/)&.captures&.first || chapter[:id]
-    chatdox_episode_url(
-      season_code: "s01", episode_number: number,
-      host: ENV.fetch("CANONICAL_HOST", "leedox.up.railway.app"), protocol: "https", port: nil
-    )
   end
 end

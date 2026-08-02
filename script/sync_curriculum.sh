@@ -23,22 +23,12 @@ set -euo pipefail
 # result in this repo like any other change.
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-source "$PROJECT_ROOT/script/lib/hq_sync_common.sh"
-load_project_env "$PROJECT_ROOT"
-
-if [[ -n "${CURRICULUM_HQ_DIR:-}" ]]; then
-  SOURCE_REPO="$CURRICULUM_HQ_DIR"
-  SELECTED_BY="CURRICULUM_HQ_DIR"
-elif [[ -n "${HQ_DIR:-}" ]]; then
-  SOURCE_REPO="$HQ_DIR"
-  SELECTED_BY="HQ_DIR"
-elif [[ -n "${SOURCE_REPO:-}" ]]; then
-  SELECTED_BY="SOURCE_REPO"
-else
-  SOURCE_REPO="/mnt/d/RubyOnRails/chatdox-curriculum"
-  SELECTED_BY="default"
+if [[ -z "${HQ_DIR:-}" ]] && [[ -f "$PROJECT_ROOT/.env" ]]; then
+  set -a
+  source "$PROJECT_ROOT/.env"
+  set +a
 fi
-
+SOURCE_REPO="${HQ_DIR:-${SOURCE_REPO:-/mnt/d/RubyOnRails/chatdox-curriculum}}"
 REF="main"
 DRY_RUN_MODE="false"
 
@@ -57,11 +47,6 @@ for arg in "$@"; do
       ;;
   esac
 done
-
-SOURCE_REPO="$(canonical_path "$SOURCE_REPO")"
-TARGET_ROOT="$(canonical_path "$PROJECT_ROOT/hq")"
-print_preflight "curriculum sync" "$SOURCE_REPO" "$TARGET_ROOT" "mirror" "$DRY_RUN_MODE" "$SELECTED_BY"
-warn_legacy_hq_dir "$SELECTED_BY"
 
 if [[ ! -d "$SOURCE_REPO/.git" ]]; then
   echo "Source repo not found: $SOURCE_REPO" >&2
@@ -105,24 +90,13 @@ sync_one() {
     echo "  $src -> (skipped, not present in $REF)"
     return 0
   fi
+  mkdir -p "$dest"
   if [[ "$DRY_RUN_MODE" == "true" ]]; then
-    local rsync_dest rsync_output
-    rsync_dest="$(dry_run_target "$dest")"
     # --itemize-changes lists every file rsync considered, including the ones
     # left untouched (leading `.`). Only the leading-non-`.` lines are files
     # that will actually be created/updated/deleted, so drop the rest.
-    if ! rsync_output="$(rsync "${RSYNC_OPTS[@]}" "$TMP_DIR/$src/" "$rsync_dest/")"; then
-      if [[ "$rsync_dest" != "$dest" ]]; then
-        rm -rf "$rsync_dest"
-      fi
-      return 1
-    fi
-    printf '%s\n' "$rsync_output" | grep -v '^\.' || true
-    if [[ "$rsync_dest" != "$dest" ]]; then
-      rm -rf "$rsync_dest"
-    fi
+    rsync "${RSYNC_OPTS[@]}" "$TMP_DIR/$src/" "$dest/" | grep -v '^\.' || true
   else
-    mkdir -p "$dest"
     rsync "${RSYNC_OPTS[@]}" "$TMP_DIR/$src/" "$dest/"
     restore_mtimes "$src" "$dest"
   fi
