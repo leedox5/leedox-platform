@@ -54,8 +54,8 @@
       </article>
 
       <aside class="space-y-6 lg:sticky lg:top-6 lg:self-start">
-        <%= render "progress", label: "CHATDOX 전체 진도", segment: @summary.overall %>
-        <%= render "progress", label: "이 시즌 진도 · #{@chapter[:season_code].upcase}", segment: @season_summary %>
+        <%= render "progress", label: "전체 진도", segment: @summary.overall %>
+        <%= render "progress", label: @chapter[:season_code].upcase, segment: @season_summary %>
         <% if @summary.overall.next_chapter %>
           <% progress_next = @summary.overall.next_chapter %>
           <div class="border-b border-slate-200 pb-5">

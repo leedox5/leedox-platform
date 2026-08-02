@@ -58,7 +58,7 @@ class ChatdoxCanonicalContentTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_match(/준비 중/, response.body)
-    assert_match(/공개된 에피소드가 아직 없습니다/, response.body)
+    assert_match(/공개된 episode가 아직 없습니다/, response.body)
     assert_no_match(/Episode 1|Episode 2|review|draft/i, response.body)
 
     get chatdox_episode_path("s02", "01")

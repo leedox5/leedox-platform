@@ -1,16 +1,23 @@
-<% content_for :title, "CHATDOX | AI와 실제 SaaS를 만들고 운영하는 기록" %>
-<% content_for :head do %>
-  <meta name="description" content="Tommy와 AI가 실제 SaaS를 만들고, 운영하고, 성장시키며 남긴 결과와 과정의 기록. S01 구축과 출시, S02 운영과 사업 활용을 함께 다룹니다.">
-<% end %>
+<% content_for :title, "Chatdox | AI와 함께 SaaS 구축하기" %>
 
 <div class="min-h-screen">
   <%= render "shared/header" %>
 
   <main>
-    <%= render "landing/hero", hub: @chatdox_hub %>
-    <%= render "landing/season_hub", hub: @chatdox_hub %>
+    <%= render "landing/hero" %>
+    <% if ProductContent.chatdox_source_mode == "seasoned" %>
+      <nav aria-label="CHATDOX 시즌" class="border-y border-slate-200 bg-white">
+        <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-5 py-4 sm:px-8">
+          <span class="text-sm font-semibold text-slate-700">시즌</span>
+          <%= link_to "Season 01", chatdox_season_path("s01"), class: "text-sm font-semibold text-blue-700 hover:text-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" %>
+          <%= link_to "Season 02 준비 중", chatdox_season_path("s02"), class: "text-sm font-medium text-slate-600 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" %>
+        </div>
+      </nav>
+    <% end %>
+    <%= render "landing/curriculum" %>
     <%= render "landing/product" %>
     <%= render "shared/product_pricing", product_code: "chatdox" %>
+    <%= render "landing/tech_stack" %>
     <%= render "landing/faq" %>
     <%= render "landing/cta" %>
   </main>
