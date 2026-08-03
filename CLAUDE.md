@@ -7,7 +7,7 @@
 ## 프로젝트 구조: DEV / HQ
 
 - 이 저장소(`leedox-platform`)는 **DEV** — 실제 코드가 사는 곳.
-- 커리큘럼/handoff 저장소는 **HQ** (`leedox-hq`). 이 WSL 환경에서는 `/mnt/d/RubyOnRails/leedox-hq`에 마운트되어 있다.
+- 커리큘럼/handoff 저장소는 **HQ** (`leedox-hq`). 경로는 환경마다 다르므로 고정값으로 가정하지 않는다(예: `/mnt/d/dev/leedox-hq`, 과거 환경 `/mnt/d/RubyOnRails/leedox-hq`).
 - **이 저장소(leedox-platform) 자체도 체크아웃이 두 곳이다 — 역할이 다르다.**
   - `/home/leedox/rails/leedox-platform`(WSL 네이티브) — **여기가 진짜 DEV**. Linux 환경에서 실제로 웹을 구동하며 개발이 이뤄지는 곳. 지금 이 세션이 작업하는 곳도 여기.
   - `/mnt/d/RubyOnRails/leedox-platform`(Windows) — **HQ가 DEV 코드를 참조용으로 체크아웃해둔 것.** 작업하는 곳이 아니라 "커리큘럼 쓸 때 실제 코드가 어떻게 생겼는지 확인하는" 용도. 2026-07-16에 HQ 쪽 에이전트가 실수로 여기에 직접 커밋(`e43e689`, CLAUDE.md 피드백)해서 origin에 올라간 적이 있다 — 이건 정상 흐름이 아니라 사고였고, Tommy가 이것 자체를 "AI 실수" 콘텐츠 소재로 올릴 예정이다.
@@ -18,7 +18,7 @@
   - `sync_curriculum.sh` — HQ→DEV, handoff와 무관하게 **실제 런타임 콘텐츠**(커리큘럼 문서/claudox/service-desk 요청)를 HQ git 저장소에서 `git archive`로 스냅샷 떠서 `hq/`(git 추적됨, `.local/`이 아님) 아래로 미러. REQ 0022에서 git subtree pull을 대체한 것 — subtree는 HQ 저장소 전체(QA/, SETUP/ 등 안 쓰는 것까지)를 끌어오고 merge conflict가 잦아서, 실제 쓰는 3개 폴더만 골라 받는 방식으로 바꿨다.
 - Handoff 작업 흐름(현재):
   1. HQ가 `handoff/000N_descriptive_name/0000.md`를 Source of Truth로 발행한다.
-  2. DEV는 **현재 로컬 환경에서 실제 접근 가능한 handoff 경로**를 먼저 확인하고(고정 경로 가정 금지), 해당 패키지의 `0000.md`를 직접 읽는다.
+  2. DEV는 **현재 로컬 환경에서 실제 접근 가능한 handoff 경로**를 먼저 확인하고(고정 경로 가정 금지), 해당 패키지의 `0000.md`를 직접 읽는다. 필요 시 `ls -ld handoff`, `readlink -f handoff`로 실제 경로를 확인한다.
   3. DEV는 같은 패키지 폴더에 `result.md`(리비전은 `result_rN.md`)만 작성한다.
   4. inbox/completed 이동, `STATUS.md` 작성, HQ 저장소 commit/push는 HQ(Tommy) 권한이다.
 - **권한 경계:** DEV는 handoff 패키지 내 `result*.md` 외 HQ 저장소 파일을 수정하지 않는다. HQ 저장소 commit/push도 하지 않는다.
