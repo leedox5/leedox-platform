@@ -8,7 +8,7 @@ if [[ -z "${HQ_DIR:-}" ]] && [[ -f "$PROJECT_ROOT/.env" ]]; then
   set +a
 fi
 OUTBOX_DIR="$PROJECT_ROOT/.local/handoff/outbox"
-HQ_BASE="${HQ_DIR:-${SOURCE_REPO:-/mnt/d/RubyOnRails/chatdox-curriculum}}"
+HQ_BASE="${HQ_DIR:-${SOURCE_REPO:-/mnt/d/RubyOnRails/leedox-hq}}"
 TARGET_DIR="${TARGET_DIR:-$HQ_BASE/.local/handoff/inbox}"
 SOURCE_DIR=""
 MIRROR_MODE="false"

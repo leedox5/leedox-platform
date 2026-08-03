@@ -1,5 +1,5 @@
 # Manual snapshot of the DB-backed service desk into the same fenced-header
-# .md format documented in chatdox-curriculum's service-desk/GUIDE.md, zipped
+# .md format documented in leedox-hq's service-desk/GUIDE.md, zipped
 # for download. Purely a backup — nothing here writes back to git or to
 # hq/service-desk/, and nothing runs this automatically.
 class ServiceDeskExport

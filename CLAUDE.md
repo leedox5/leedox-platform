@@ -6,12 +6,12 @@
 
 ## 프로젝트 구조: DEV / HQ
 
-- 이 저장소(`chatdox-platform`)는 **DEV** — 실제 코드가 사는 곳.
-- 커리큘럼/handoff 저장소는 **HQ** (`chatdox-curriculum`). 이 WSL 환경에서는 `/mnt/d/RubyOnRails/chatdox-curriculum`에 마운트되어 있다.
-- **이 저장소(chatdox-platform) 자체도 체크아웃이 두 곳이다 — 역할이 다르다.**
-  - `~/dev/chatdox-platform`(WSL 네이티브) — **여기가 진짜 DEV**. Linux 환경에서 실제로 웹을 구동하며 개발이 이뤄지는 곳. 지금 이 세션이 작업하는 곳도 여기.
-  - `/mnt/d/RubyOnRails/chatdox-platform`(Windows) — **HQ가 DEV 코드를 참조용으로 체크아웃해둔 것.** 작업하는 곳이 아니라 "커리큘럼 쓸 때 실제 코드가 어떻게 생겼는지 확인하는" 용도. 2026-07-16에 HQ 쪽 에이전트가 실수로 여기에 직접 커밋(`e43e689`, CLAUDE.md 피드백)해서 origin에 올라간 적이 있다 — 이건 정상 흐름이 아니라 사고였고, Tommy가 이것 자체를 "AI 실수" 콘텐츠 소재로 올릴 예정이다.
-  - 둘 다 같은 origin(`github.com/leedox5/chatdox-platform`)을 보므로, 커밋 히스토리가 안 맞는 것 같으면 먼저 `git fetch origin`으로 이쪽이 뒤처진 건 아닌지 확인할 것. D: 드라이브 쪽은 참조 전용이라 원래 커밋이 발생할 일이 없는 곳이니, 직접 건드리지 않고 origin을 통해서만 간접적으로 주고받는다.
+- 이 저장소(`leedox-platform`)는 **DEV** — 실제 코드가 사는 곳.
+- 커리큘럼/handoff 저장소는 **HQ** (`leedox-hq`). 이 WSL 환경에서는 `/mnt/d/RubyOnRails/leedox-hq`에 마운트되어 있다.
+- **이 저장소(leedox-platform) 자체도 체크아웃이 두 곳이다 — 역할이 다르다.**
+  - `/home/leedox/rails/leedox-platform`(WSL 네이티브) — **여기가 진짜 DEV**. Linux 환경에서 실제로 웹을 구동하며 개발이 이뤄지는 곳. 지금 이 세션이 작업하는 곳도 여기.
+  - `/mnt/d/RubyOnRails/leedox-platform`(Windows) — **HQ가 DEV 코드를 참조용으로 체크아웃해둔 것.** 작업하는 곳이 아니라 "커리큘럼 쓸 때 실제 코드가 어떻게 생겼는지 확인하는" 용도. 2026-07-16에 HQ 쪽 에이전트가 실수로 여기에 직접 커밋(`e43e689`, CLAUDE.md 피드백)해서 origin에 올라간 적이 있다 — 이건 정상 흐름이 아니라 사고였고, Tommy가 이것 자체를 "AI 실수" 콘텐츠 소재로 올릴 예정이다.
+  - 둘 다 같은 origin(`github.com/leedox5/leedox-platform`)을 보므로, 커밋 히스토리가 안 맞는 것 같으면 먼저 `git fetch origin`으로 이쪽이 뒤처진 건 아닌지 확인할 것. D: 드라이브 쪽은 참조 전용이라 원래 커밋이 발생할 일이 없는 곳이니, 직접 건드리지 않고 origin을 통해서만 간접적으로 주고받는다.
 - **`script/`에 HQ 연동 스크립트 3개가 있다 — 이름이 서로 안 비슷하니 매번 `ls script/`로 전체를 확인하고 얘기할 것, 하나만 보고 "이 방향은 스크립트가 없다"고 단정하지 말 것(2026-07-16 실수).**
   - `sync_handoff.sh` — HQ→DEV, handoff 패키지(request/result/STATUS) 전체 미러.
   - `push_handoff_to_curriculum.sh` — DEV→HQ, handoff 패키지 하나를 HQ inbox로 push.
@@ -25,7 +25,7 @@
 - `.local/`은 `.gitignore`에 포함되어 커밋되지 않는다 — handoff 패키지, STATUS.md, 참고 정책 문서 등은 전부 로컬 전용이고, git 이력에는 실제 코드/테스트/마이그레이션만 남는다.
 - **이 handoff 워크플로우 자체가 아직 시험 운영(trial) 단계다(2026-07-16 Tommy 확인).** 고정된 프로세스로 여기지 말고, 실제로 작업하면서 걸리는 지점이 보이면 매번 그냥 넘어가지 말고 개선 아이디어를 제안할 것. 지금까지 눈에 띈 것:
   - **스크린샷 주석과 서면 request_rN.md 사이에 정보가 누락될 수 있다.** `/chatdox` R2에서 실제로 겪음(Tommy가 스크린샷에 표시한 것 하나가 서면 스펙에서 빠졌다가 R3에서 확정됨). 서면 요청서를 작성할 때 스크린샷의 모든 표시 항목을 명시적으로 나열하면 이런 누락을 줄일 수 있다.
-- **DEV→HQ 콘텐츠 제안 채널 승인됨(2026-07-16, HQ/Tommy 확인).** `leedox_dev_content_loop_r1`(`push_handoff_to_curriculum.sh`로 보낸 첫 제안)을 HQ가 검토해서 채널 자체와 소재 3건 전부 승인했다 — `.local/handoff/completed/leedox_dev_content_loop_r1/STATUS.md`(HQ 쪽, 이 WSL 마운트로 `/mnt/d/RubyOnRails/chatdox-curriculum/.local/handoff/completed/`에서 직접 읽을 수 있음)에 결정 근거가 있다. 앞으로도 작업 중 "이건 claudox/ 콘텐츠 소재가 될 만하다" 싶은 순간이 있으면 같은 방식(원재료 요약 + 어울릴 챕터 추측까지만, 산문은 HQ 몫)으로 `leedox_dev_content_*` 이름 규칙을 따라 계속 올릴 것 — 이번 건에서 부수적으로, `push_handoff_to_curriculum.sh`/`sync_handoff.sh` 두 스크립트를 HQ가 "존재하지 않는다"고 잘못 기록했던 것도 이번에 같이 바로잡혔다(HQ의 `service-desk/requests/0023.md` Job 0011 참고).
+- **DEV→HQ 콘텐츠 제안 채널 승인됨(2026-07-16, HQ/Tommy 확인).** `leedox_dev_content_loop_r1`(`push_handoff_to_curriculum.sh`로 보낸 첫 제안)을 HQ가 검토해서 채널 자체와 소재 3건 전부 승인했다 — `.local/handoff/completed/leedox_dev_content_loop_r1/STATUS.md`(HQ 쪽, 이 WSL 마운트로 `/mnt/d/RubyOnRails/leedox-hq/.local/handoff/completed/`에서 직접 읽을 수 있음)에 결정 근거가 있다. 앞으로도 작업 중 "이건 claudox/ 콘텐츠 소재가 될 만하다" 싶은 순간이 있으면 같은 방식(원재료 요약 + 어울릴 챕터 추측까지만, 산문은 HQ 몫)으로 `leedox_dev_content_*` 이름 규칙을 따라 계속 올릴 것 — 이번 건에서 부수적으로, `push_handoff_to_curriculum.sh`/`sync_handoff.sh` 두 스크립트를 HQ가 "존재하지 않는다"고 잘못 기록했던 것도 이번에 같이 바로잡혔다(HQ의 `service-desk/requests/0023.md` Job 0011 참고).
 
 ## 환경 특이사항
 

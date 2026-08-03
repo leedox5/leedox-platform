@@ -1,4 +1,4 @@
-# chatdox-platform
+# leedox-platform
 
 Collaboration signature: LEEDOX x Codidox.
 

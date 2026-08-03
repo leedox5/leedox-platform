@@ -1,5 +1,5 @@
 # Parses the git-based service-desk request format documented in
-# chatdox-curriculum's service-desk/GUIDE.md: a fenced ID/Date/Requester/
+# leedox-hq's service-desk/GUIDE.md: a fenced ID/Date/Requester/
 # Subject/Status/Visibility header, a fenced Description block, and a fenced
 # Job block whose entries each start with a "NNNN Author YYYY.MM.DD HH:MM"
 # header line. Used only by the one-time DB import (lib/tasks/service_desk_import.rake)

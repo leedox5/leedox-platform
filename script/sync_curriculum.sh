@@ -28,7 +28,7 @@ if [[ -z "${HQ_DIR:-}" ]] && [[ -f "$PROJECT_ROOT/.env" ]]; then
   source "$PROJECT_ROOT/.env"
   set +a
 fi
-SOURCE_REPO="${HQ_DIR:-${SOURCE_REPO:-/mnt/d/RubyOnRails/chatdox-curriculum}}"
+SOURCE_REPO="${HQ_DIR:-${SOURCE_REPO:-/mnt/d/RubyOnRails/leedox-hq}}"
 REF="main"
 DRY_RUN_MODE="false"
 
