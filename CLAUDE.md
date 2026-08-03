@@ -9,7 +9,7 @@
 - 이 저장소(`leedox-platform`)는 **DEV** — 실제 코드가 사는 곳.
 - 커리큘럼/handoff 저장소는 **HQ** (`leedox-hq`). 경로는 환경마다 다르므로 고정값으로 가정하지 않는다(예: `/mnt/d/dev/leedox-hq`, 과거 환경 `/mnt/d/RubyOnRails/leedox-hq`).
 - **이 저장소(leedox-platform) 자체도 체크아웃이 두 곳이다 — 역할이 다르다.**
-  - `/home/leedox/rails/leedox-platform`(WSL 네이티브) — **여기가 진짜 DEV**. Linux 환경에서 실제로 웹을 구동하며 개발이 이뤄지는 곳. 지금 이 세션이 작업하는 곳도 여기.
+  - **WSL 네이티브 클론(경로는 데스크탑마다 다르다)이 진짜 DEV** — Linux 환경에서 실제로 웹을 구동하며 개발이 이뤄지는 곳. 고정 경로를 가정하지 말고 현재 세션에서 `pwd`로 실제 작업 경로를 확인할 것. 데스크탑별 확인된 예: `/home/leedox/rails/leedox-platform`, `/home/leedox/dev/leedox-platform`(2026-08-03 확인). 지금 이 세션이 작업하는 곳도 이 WSL 네이티브 클론 중 하나다.
   - `/mnt/d/RubyOnRails/leedox-platform`(Windows) — **HQ가 DEV 코드를 참조용으로 체크아웃해둔 것.** 작업하는 곳이 아니라 "커리큘럼 쓸 때 실제 코드가 어떻게 생겼는지 확인하는" 용도. 2026-07-16에 HQ 쪽 에이전트가 실수로 여기에 직접 커밋(`e43e689`, CLAUDE.md 피드백)해서 origin에 올라간 적이 있다 — 이건 정상 흐름이 아니라 사고였고, Tommy가 이것 자체를 "AI 실수" 콘텐츠 소재로 올릴 예정이다.
   - 둘 다 같은 origin(`github.com/leedox5/leedox-platform`)을 보므로, 커밋 히스토리가 안 맞는 것 같으면 먼저 `git fetch origin`으로 이쪽이 뒤처진 건 아닌지 확인할 것. D: 드라이브 쪽은 참조 전용이라 원래 커밋이 발생할 일이 없는 곳이니, 직접 건드리지 않고 origin을 통해서만 간접적으로 주고받는다.
 - **`script/`에 HQ 연동 스크립트 3개가 있다 — 이름이 서로 안 비슷하니 매번 `ls script/`로 전체를 확인하고 얘기할 것, 하나만 보고 "이 방향은 스크립트가 없다"고 단정하지 말 것(2026-07-16 실수).**
