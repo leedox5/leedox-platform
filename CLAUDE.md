@@ -13,19 +13,19 @@
   - `/mnt/d/RubyOnRails/leedox-platform`(Windows) — **HQ가 DEV 코드를 참조용으로 체크아웃해둔 것.** 작업하는 곳이 아니라 "커리큘럼 쓸 때 실제 코드가 어떻게 생겼는지 확인하는" 용도. 2026-07-16에 HQ 쪽 에이전트가 실수로 여기에 직접 커밋(`e43e689`, CLAUDE.md 피드백)해서 origin에 올라간 적이 있다 — 이건 정상 흐름이 아니라 사고였고, Tommy가 이것 자체를 "AI 실수" 콘텐츠 소재로 올릴 예정이다.
   - 둘 다 같은 origin(`github.com/leedox5/leedox-platform`)을 보므로, 커밋 히스토리가 안 맞는 것 같으면 먼저 `git fetch origin`으로 이쪽이 뒤처진 건 아닌지 확인할 것. D: 드라이브 쪽은 참조 전용이라 원래 커밋이 발생할 일이 없는 곳이니, 직접 건드리지 않고 origin을 통해서만 간접적으로 주고받는다.
 - **`script/`에 HQ 연동 스크립트 3개가 있다 — 이름이 서로 안 비슷하니 매번 `ls script/`로 전체를 확인하고 얘기할 것, 하나만 보고 "이 방향은 스크립트가 없다"고 단정하지 말 것(2026-07-16 실수).**
-  - `sync_handoff.sh` — HQ→DEV, handoff 패키지(request/result/STATUS) 전체 미러.
-  - `push_handoff_to_curriculum.sh` — DEV→HQ, handoff 패키지 하나를 HQ inbox로 push.
+  - `sync_handoff.sh` — (Deprecated) `.local/handoff` 미러링용 레거시 스크립트.
+  - `push_handoff_to_curriculum.sh` — (Deprecated) `.local/handoff` push용 레거시 스크립트.
   - `sync_curriculum.sh` — HQ→DEV, handoff와 무관하게 **실제 런타임 콘텐츠**(커리큘럼 문서/claudox/service-desk 요청)를 HQ git 저장소에서 `git archive`로 스냅샷 떠서 `hq/`(git 추적됨, `.local/`이 아님) 아래로 미러. REQ 0022에서 git subtree pull을 대체한 것 — subtree는 HQ 저장소 전체(QA/, SETUP/ 등 안 쓰는 것까지)를 끌어오고 merge conflict가 잦아서, 실제 쓰는 3개 폴더만 골라 받는 방식으로 바꿨다.
-- Handoff 작업 흐름:
-  1. HQ가 `.local/handoff/inbox/<package>/request.md`를 만든다.
-  2. DEV는 `script/sync_handoff.sh`(`--dry-run`으로 먼저 확인 후 `--mirror`)로 HQ의 `.local/handoff/`를 이 저장소의 `.local/handoff/`로 끌어온다. `--mirror`는 HQ에 없는 로컬 전용 폴더(`outbox/`)까지 지우는 진짜 미러링이므로 실행 전 `--dry-run` 결과를 반드시 확인한다. `outbox/`가 매번 삭제되는 건 정상이다 — HQ는 애초에 `outbox/`를 갖지 않고, 그 폴더는 push 전 임시 스테이징 용도라 pull 시점엔 이미 역할이 끝나 있어야 한다.
-  3. 구현 후 결과물(`result.md` 등)을 `.local/handoff/outbox/<package>/`에 채워 넣고, `script/push_handoff_to_curriculum.sh --source .local/handoff/outbox/<package>`(`--dry-run`으로 먼저 확인)로 HQ의 `.local/handoff/inbox/<package>/`에 보낸다. `--source`는 반드시 패키지 하나의 경로여야 한다(outbox 루트 자체를 넘기면 이미 completed로 옮겨진 과거 패키지까지 되살아나 HQ 쪽에 스푸리어스 파일이 생긴다 — 스크립트가 이 실수를 막아준다).
-  4. `.local/handoff/inbox/<package>/`에도 같은 `result.md`를 남겨서 로컬 전체 기록(request+result)을 유지한다.
-- **"완료(completed)" 판정과 STATUS.md는 HQ의 권한이다.** DEV가 임의로 STATUS.md를 지어내지 말 것. "HQ에서 completed 처리했다"는 말을 들으면 직접 작성하지 말고 `script/sync_handoff.sh --mirror`로 HQ의 실제 사본을 가져올 것.
-- `.local/`은 `.gitignore`에 포함되어 커밋되지 않는다 — handoff 패키지, STATUS.md, 참고 정책 문서 등은 전부 로컬 전용이고, git 이력에는 실제 코드/테스트/마이그레이션만 남는다.
+- Handoff 작업 흐름(현재):
+  1. HQ가 `handoff/000N_descriptive_name/0000.md`를 Source of Truth로 발행한다.
+  2. DEV는 **현재 로컬 환경에서 실제 접근 가능한 handoff 경로**를 먼저 확인하고(고정 경로 가정 금지), 해당 패키지의 `0000.md`를 직접 읽는다.
+  3. DEV는 같은 패키지 폴더에 `result.md`(리비전은 `result_rN.md`)만 작성한다.
+  4. inbox/completed 이동, `STATUS.md` 작성, HQ 저장소 commit/push는 HQ(Tommy) 권한이다.
+- **권한 경계:** DEV는 handoff 패키지 내 `result*.md` 외 HQ 저장소 파일을 수정하지 않는다. HQ 저장소 commit/push도 하지 않는다.
+- 기존 `.local/handoff` 기록은 보존 대상이다. 새 절차 도입을 이유로 자동 이동/삭제하지 않는다.
 - **이 handoff 워크플로우 자체가 아직 시험 운영(trial) 단계다(2026-07-16 Tommy 확인).** 고정된 프로세스로 여기지 말고, 실제로 작업하면서 걸리는 지점이 보이면 매번 그냥 넘어가지 말고 개선 아이디어를 제안할 것. 지금까지 눈에 띈 것:
   - **스크린샷 주석과 서면 request_rN.md 사이에 정보가 누락될 수 있다.** `/chatdox` R2에서 실제로 겪음(Tommy가 스크린샷에 표시한 것 하나가 서면 스펙에서 빠졌다가 R3에서 확정됨). 서면 요청서를 작성할 때 스크린샷의 모든 표시 항목을 명시적으로 나열하면 이런 누락을 줄일 수 있다.
-- **DEV→HQ 콘텐츠 제안 채널 승인됨(2026-07-16, HQ/Tommy 확인).** `leedox_dev_content_loop_r1`(`push_handoff_to_curriculum.sh`로 보낸 첫 제안)을 HQ가 검토해서 채널 자체와 소재 3건 전부 승인했다 — `.local/handoff/completed/leedox_dev_content_loop_r1/STATUS.md`(HQ 쪽, 이 WSL 마운트로 `/mnt/d/RubyOnRails/leedox-hq/.local/handoff/completed/`에서 직접 읽을 수 있음)에 결정 근거가 있다. 앞으로도 작업 중 "이건 claudox/ 콘텐츠 소재가 될 만하다" 싶은 순간이 있으면 같은 방식(원재료 요약 + 어울릴 챕터 추측까지만, 산문은 HQ 몫)으로 `leedox_dev_content_*` 이름 규칙을 따라 계속 올릴 것 — 이번 건에서 부수적으로, `push_handoff_to_curriculum.sh`/`sync_handoff.sh` 두 스크립트를 HQ가 "존재하지 않는다"고 잘못 기록했던 것도 이번에 같이 바로잡혔다(HQ의 `service-desk/requests/0023.md` Job 0011 참고).
+- **DEV→HQ 콘텐츠 제안 채널 승인됨(2026-07-16, HQ/Tommy 확인).** `leedox_dev_content_loop_r1`(당시 레거시 `.local/handoff` 절차로 전달)을 HQ가 검토해서 채널 자체와 소재 3건 전부 승인했다. 이후 handoff 운영은 `handoff/` Git 패키지 중심으로 전환되었고, `sync_handoff.sh`/`push_handoff_to_curriculum.sh`는 호환 목적의 deprecated 스크립트로 유지한다.
 
 ## 환경 특이사항
 
@@ -36,8 +36,8 @@
 
 ## 작업 규칙 (Tommy와의 협업 패턴)
 
-- **모든 작업이 handoff를 타지는 않는다(2026-07-16 Tommy 확인).** 정식 handoff(`request.md`)는 규모가 있거나 HQ 쪽에도 기록이 남아야 하는 작업용이고, 간단한 건 그냥 대화로 바로 요청한다. 대화로 온 요청은 `.local/handoff/`에 억지로 request.md/result.md를 지어내지 말고, 필요하면 커밋 메시지와 이 대화 자체가 기록이 된다 — 정식 handoff 패턴(아래 두 줄)은 실제로 `.local/handoff/inbox/`에 request.md가 있을 때만 적용.
-- 작업 요청은 `.local/handoff/inbox/<package>/request.md`로 온다. 문서 맨 끝 "Platform 실행 문구" 섹션이 실제 지시사항.
+- **모든 작업이 handoff를 타지는 않는다(2026-07-16 Tommy 확인).** 정식 handoff가 필요한 경우 현재 기준 문서는 `handoff/000N_descriptive_name/0000.md`다. 간단한 건 대화로 바로 요청할 수 있다.
+- handoff 작업 시 DEV는 활성 패키지의 `0000.md`를 기준으로 수행하고, 같은 폴더의 `result*.md`만 작성한다(다른 HQ 파일 수정 금지).
 - 구현 후에는 거의 항상 커밋 + push, 그리고 `result.md`로 (조사 결과 / 실제 채택한 설계와 제안 대비 달라진 점 + 이유 / 변경·삭제 파일 / 테스트 결과 / 미결정 사항) 보고하는 게 표준 패턴이다.
 - **request.md의 "현재 코드 확인 완료, 재조사 불필요"를 그대로 믿지 말 것.** 실제로 매 작업마다 request.md가 나열하지 않은 관련 참조가 더 있었다(예: Toss/Subscription 제거 때 admin 컨트롤러 4곳 + `Commerce::Reconciliation`/`EventLogger`, GitHub access 단순화 때 `event_recorder.rb`/`task_factory.rb` + `Commerce::Reconciliation`). 삭제·리팩터링 대상 클래스/모델명으로 항상 sitewide grep을 먼저 돌려 숨은 참조를 확인한다.
 - "코드량을 최대한 줄이는 것"처럼 명시적 단순화 목표가 있는 작업에서는, 요청서의 제안 설계보다 더 간단한 방법이 보이면 조정해도 되는 재량이 주어진다 — 다만 `result.md`에 무엇을 왜 다르게 했는지 반드시 남긴다.

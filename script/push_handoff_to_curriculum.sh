@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# DEPRECATED: Legacy .local/handoff push workflow.
+# Keep for backward compatibility until Git-based handoff (handoff/000N_*/)
+# is fully validated across environments.
+
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 if [[ -z "${HQ_DIR:-}" ]] && [[ -f "$PROJECT_ROOT/.env" ]]; then
   set -a
