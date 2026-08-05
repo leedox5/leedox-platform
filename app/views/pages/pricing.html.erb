@@ -3,14 +3,14 @@
 <div class="min-h-screen bg-slate-50">
   <%= render "shared/header" %>
 
-  <main class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6">
-    <div class="mb-10">
+  <main class="mx-auto w-full max-w-6xl px-2 py-6 sm:px-6">
+    <div class="mb-4">
       <p class="text-sm font-black uppercase tracking-[0.18em] text-indigo-700">Pricing</p>
       <h1 class="mt-2 break-keep text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">상품별 가격</h1>
       <p class="mt-3 max-w-2xl break-keep text-slate-600">LEEDOX가 제공하는 상품들을 한눈에 확인하세요. 자세한 구성과 전체 가격표는 각 상품 페이지에서 볼 수 있습니다.</p>
     </div>
 
-    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
       <% @products.each do |product| %>
         <% sales_enabled = Commerce::Sales.enabled_for?(product) %>
         <% cheapest_offer = product.product_offers.active.ordered.first %>
@@ -40,8 +40,11 @@
 
           <% if product.landing_page_path.present? %>
             <% detail_target = (product.free_access? || user_signed_in?) ? product.landing_page_path : new_user_session_path(redirect_to: product.landing_page_path) %>
-            <%= link_to (product.free_access? ? "무료로 시작하기" : "자세히 보기"), detail_target,
-              class: "mt-6 inline-flex items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" %>
+            <% preparing = !product.free_access? && !sales_enabled %>
+            <% cta_classes = preparing ?
+              "mt-6 inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" :
+              "mt-6 inline-flex items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" %>
+            <%= link_to (product.free_access? ? "무료로 시작하기" : "자세히 보기"), detail_target, class: cta_classes %>
           <% end %>
         </article>
       <% end %>

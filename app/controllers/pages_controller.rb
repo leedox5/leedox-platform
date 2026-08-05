@@ -11,7 +11,7 @@ class PagesController < ApplicationController
   def getting_started; end
 
   def pricing
-    @products = Product.order(:code)
+    @products = Product.order(:code).sort_by { |product| [ pricing_rank(product), product.code ] }
   end
 
   def community; end
@@ -21,4 +21,17 @@ class PagesController < ApplicationController
   def terms; end
 
   def privacy; end
+
+  private
+
+  # /pricing's card order (handoff 0019): on sale first, then free, then
+  # everything still prepping -- ahead of the plain code-alphabetical order,
+  # so a not-yet-purchasable product (e.g. Antigravity) never happens to
+  # sort ahead of what's actually buyable right now.
+  def pricing_rank(product)
+    return 0 if Commerce::Sales.enabled_for?(product)
+    return 1 if product.free_access?
+
+    2
+  end
 end
