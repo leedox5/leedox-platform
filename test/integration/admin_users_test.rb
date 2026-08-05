@@ -28,9 +28,11 @@ class AdminUsersTest < ActionDispatch::IntegrationTest
     assert_match(/Claudox 이용 중/, row.text)
     # aistart (free_access) is excluded from this column entirely.
     assert_no_match(/AI, 오늘부터 시작/, row.text)
-    # Everything the user doesn't hold collapses into one summary line
-    # (products ordered by code: aigravity, chatdox, claudox).
-    assert_match(/미보유: Antigravity 개발 실전, Chatdox/, row.text)
+    # aigravity has no active offer yet (not on sale) -- excluded entirely,
+    # not listed as 미보유 either, since nobody can hold or lack a
+    # subscription to something not yet purchasable.
+    assert_no_match(/Antigravity/, row.text)
+    assert_match(/미보유: Chatdox\b/, row.text)
   end
 
   test "구독 column shows only the 미보유 summary when the user owns nothing" do
@@ -44,7 +46,8 @@ class AdminUsersTest < ActionDispatch::IntegrationTest
     assert row, "expected a row for #{user.email}"
 
     assert_no_match(/이용 중/, row.text)
-    assert_match(/미보유: Antigravity 개발 실전, Chatdox, Claudox/, row.text)
+    assert_no_match(/Antigravity/, row.text)
+    assert_match(/미보유: Chatdox, Claudox/, row.text)
   end
 
   test "role update still works (regression -- untouched by this round)" do

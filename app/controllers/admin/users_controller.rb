@@ -5,7 +5,13 @@ class Admin::UsersController < Admin::BaseController
 
   def index
     @users = User.order(created_at: :desc)
-    @products = Product.active.where(free_access: false).order(:code)
+    # free_access (aistart) is excluded because everyone always has it --
+    # per-user status is meaningless. Products with no active offer (e.g.
+    # aigravity, pre-sale) are excluded because nobody can hold or lack a
+    # subscription to something not yet purchasable -- "미보유" would imply
+    # they could buy it, which they can't.
+    @products = Product.active.where(free_access: false)
+      .joins(:product_offers).merge(ProductOffer.active).distinct.order(:code)
     @grantable_products = @products.select { |product| FREE_GRANTABLE_PRODUCT_CODES.include?(product.code) }
   end
 
