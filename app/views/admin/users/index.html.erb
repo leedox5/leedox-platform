@@ -32,11 +32,14 @@
                 <td class="px-5 py-4 text-gray-700"><%= user.role %></td>
                 <td class="px-5 py-4">
                   <div class="flex flex-col gap-2">
-                    <% @products.each do |product| %>
+                    <% @products.select { |product| user.licensed_for?(product.code) }.each do |product| %>
                       <div>
                         <%= product_status_badge(user, product) %>
                         <p class="mt-0.5 text-xs text-gray-500"><%= license_period_text(user, product) %></p>
                       </div>
+                    <% end %>
+                    <% if (summary = unowned_products_line(user, @products)) %>
+                      <p class="text-xs text-gray-400"><%= summary %></p>
                     <% end %>
                   </div>
                 </td>
@@ -44,16 +47,27 @@
                   <%= I18n.l(user.created_at.to_date, format: :long, locale: :ko) %>
                 </td>
                 <td class="px-5 py-4">
-                  <%= form_with model: [:admin, user],
-                    method: :patch,
-                    class: "flex items-center justify-end gap-2" do |form| %>
-                    <%= form.select :role,
-                      User.roles.keys.map { |role| [role, role] },
-                      {},
-                      class: "rounded-lg border border-gray-300 px-3 py-2 text-sm" %>
-                    <%= form.submit "저장",
-                      class: "rounded-lg bg-gray-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-gray-800" %>
-                  <% end %>
+                  <div class="flex flex-col items-end gap-3">
+                    <%= form_with model: [:admin, user],
+                      method: :patch,
+                      class: "flex items-center justify-end gap-2" do |form| %>
+                      <%= form.select :role,
+                        User.roles.keys.map { |role| [role, role] },
+                        {},
+                        class: "rounded-lg border border-gray-300 px-3 py-2 text-sm" %>
+                      <%= form.submit "저장",
+                        class: "rounded-lg bg-gray-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-gray-800" %>
+                    <% end %>
+                    <div class="flex flex-wrap justify-end gap-1.5">
+                      <% @grantable_products.each do |product| %>
+                        <%= button_to "#{product.name} 1년 무료 부여",
+                          grant_free_license_admin_user_path(user, product_code: product.code),
+                          method: :post,
+                          data: { turbo_confirm: grant_free_license_confirm_message(user, product) },
+                          class: "rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50" %>
+                      <% end %>
+                    </div>
+                  </div>
                 </td>
               </tr>
             <% end %>
