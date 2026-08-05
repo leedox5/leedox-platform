@@ -20,6 +20,15 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_no_match(/₩|9,900원|무료 체험|프리미엄 요금제/, response.body)
   end
 
+  test "homepage FAQ presents V1 confirmed scope for Chatdox and Claudox in present tense" do
+    get root_path
+    assert_response :success
+
+    assert_select "#faq"
+    assert_select "p", text: /Chatdox는 웹 챕터와 코드 예제를, Claudox는 웹 챕터와 라이선스 전용 특별판을 제공하며/
+    assert_no_match(/확정될 예정입니다/, response.body)
+  end
+
   test "homepage has a lightweight aistart banner alongside, not instead of, the Chatdox/Claudox two-card section" do
     get root_path
     assert_response :success
