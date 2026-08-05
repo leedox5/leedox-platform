@@ -63,10 +63,13 @@ class AdminProductSaleManagementTest < ActionDispatch::IntegrationTest
     assert_not @product.reload.sale_enabled?
   end
 
-  test "toggling is immediately reflected on the /chatdox purchase gate" do
+  test "toggling is immediately reflected on the /chatdox purchase gate and FAQ" do
     get chatdox_path
     assert_response :success
     assert_select "a[href=?]", billing_checkout_path, count: 0
+    assert_select "p", text: /현재는 구매 준비 중이며/
+    assert_select "p", text: /판매 재개 후/, count: 0
+    assert_select "p", text: /Chatdox Lab/, count: 0
 
     sign_in(@admin)
     patch admin_commerce_product_path(@product)
@@ -75,6 +78,9 @@ class AdminProductSaleManagementTest < ActionDispatch::IntegrationTest
     get chatdox_path
     assert_response :success
     assert_select "a[href=?]", billing_checkout_path, text: /기간제 라이선스 구매/
+    assert_select "p", text: /구매한 라이선스 기간 동안 Chatdox의 유료 문서에 접근할 수 있습니다/
+    assert_select "p", text: /판매 재개 후/, count: 0
+    assert_select "p", text: /Chatdox Lab/, count: 0
   end
 
   private
