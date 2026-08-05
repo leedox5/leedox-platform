@@ -4,6 +4,13 @@
   <div class="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
     <h1 class="mb-6 text-center text-3xl font-bold text-gray-800">회원가입</h1>
 
+    <% if purchase_checkout_flow? %>
+      <div class="mb-6 rounded-lg border border-indigo-100 bg-indigo-50 p-4 text-sm leading-6 text-indigo-900 shadow-sm">
+        <p class="font-bold">구매를 계속하려면 회원가입이 필요합니다.</p>
+        <p class="mt-1 text-indigo-700">회원가입 후 선택한 상품의 결제 화면으로 자동 이동합니다.</p>
+      </div>
+    <% end %>
+
     <%= form_with(model: resource, as: resource_name, url: registration_path(resource_name), local: true) do |form| %>
       <% if resource.errors.any? %>
         <div class="mb-4 rounded border border-red-200 bg-red-50 p-4">
@@ -59,7 +66,8 @@
 
     <p class="text-center text-sm text-gray-600">
       이미 계정이 있나요?
-      <%= link_to "로그인", new_user_session_path, class: "font-bold text-blue-500 hover:underline" %>
+      <% session_params = current_stored_return_to.present? ? { redirect_to: current_stored_return_to } : {} %>
+      <%= link_to "로그인", new_user_session_path(session_params), class: "font-bold text-blue-500 hover:underline" %>
     </p>
   </div>
 </div>

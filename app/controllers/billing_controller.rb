@@ -41,11 +41,15 @@ class BillingController < ApplicationController
     respond_to_payment_reconciliation_failure
   rescue StandardError
     log_callback_failure(order: order, provider: order&.provider, status: "verification_failed")
-    respond_to_payment_failure
+    respond_to_payment_failure(order)
   end
 
   def cancel
-    redirect_to dashboard_path, alert: "결제가 취소되었습니다."
+    product_code = params[:product_code].presence || params[:product].presence
+    target_path = product_code.present? ? billing_checkout_path_for(product_code) : pricing_path
+    flash[:alert] ||= "결제가 취소되었습니다. 선택한 상품 결제 화면에서 다시 시도하실 수 있습니다."
+    flash.keep(:alert)
+    redirect_to target_path
   end
 
   private
@@ -73,7 +77,7 @@ class BillingController < ApplicationController
     )
 
     Commerce::OrderFinalizer.call!(order: order, payment: payment_attributes)
-    respond_to_payment_success
+    respond_to_payment_success(order)
   end
 
   def find_purchase_order
@@ -103,19 +107,27 @@ class BillingController < ApplicationController
     }
   end
 
-  def respond_to_payment_success
+  def respond_to_payment_success(order)
+    product = order&.order_items&.first&.product
+    product_name = product&.name || "상품"
+    message = "#{product_name} 결제가 완료되었습니다. 대시보드에서 구매한 콘텐츠를 바로 이용하실 수 있습니다."
+
     if json_payment_request?
-      render json: { ok: true, redirectUrl: dashboard_path }, status: :ok
+      render json: { ok: true, redirectUrl: dashboard_path, message: message }, status: :ok
     else
-      redirect_to dashboard_path, notice: "결제가 완료되었습니다."
+      redirect_to dashboard_path, notice: message
     end
   end
 
-  def respond_to_payment_failure
+  def respond_to_payment_failure(order = nil)
+    product_code = order&.order_items&.first&.product_code || params[:product_code]
+    message = "결제 승인에 실패했습니다. 선택한 상품 결제 화면에서 다시 시도해 주세요."
+    target_path = product_code.present? ? billing_checkout_path_for(product_code) : billing_cancel_path
+
     if json_payment_request?
-      render json: { ok: false, message: "결제 승인에 실패했습니다." }, status: :unprocessable_entity
+      render json: { ok: false, message: message, redirectUrl: target_path }, status: :unprocessable_entity
     else
-      redirect_to billing_cancel_path, alert: "결제 승인에 실패했습니다."
+      redirect_to billing_cancel_path, alert: message
     end
   end
 
@@ -130,10 +142,10 @@ class BillingController < ApplicationController
   end
 
   def respond_to_payment_reconciliation_failure
-    message = "결제는 확인됐지만 라이선스 반영에 실패했습니다. 고객센터에 문의해 주세요."
+    message = "결제는 확인됐지만 라이선스 반영에 실패했습니다. 재결제하지 마시고 고객센터(leedox@naver.com)로 문의해 주세요."
 
     if json_payment_request?
-      render json: { ok: false, message: message }, status: :internal_server_error
+      render json: { ok: false, message: message, redirectUrl: dashboard_path }, status: :internal_server_error
     else
       redirect_to dashboard_path, alert: message
     end
