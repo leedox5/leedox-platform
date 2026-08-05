@@ -1,6 +1,7 @@
 require "test_helper"
 
 class SaleStateRegressionTest < ActionDispatch::IntegrationTest
+  include ActionView::Helpers::NumberHelper
   setup do
     Commerce::CatalogBootstrap.call!
     @previous_env = %w[LEEDOX_COMMERCE_ENABLED PAYMENT_PROVIDER PORTONE_API_SECRET PORTONE_STORE_ID PORTONE_CHANNEL_KEY PORTONE_WEBHOOK_SECRET].to_h { |key| [ key, ENV[key] ] }
@@ -23,19 +24,39 @@ class SaleStateRegressionTest < ActionDispatch::IntegrationTest
     @previous_env.each { |key, value| value.nil? ? ENV.delete(key) : ENV[key] = value }
   end
 
-  test "/pricing renders badges, prices, and CTAs consistently for all products under enabled/disabled sales states" do
+  test "/pricing renders badges, prices, and CTAs consistently for Chatdox and Claudox under enabled/disabled sales states" do
     # When Chatdox and Claudox have sale_enabled: true
     @chatdox.update!(sale_enabled: true)
     @claudox.update!(sale_enabled: true)
 
+    # 1. Logged out user view on /pricing
     get pricing_path
     assert_response :success
 
-    # Logged out user sees sales badges and landing page links
+    # Badges
     assert_select "span.rounded-full", text: "판매 중", count: 2
     assert_select "span.rounded-full", text: "무료 이용 가능", count: 1
 
-    # When sale_enabled is false for Chatdox & Claudox
+    # Prices
+    chatdox_cheapest = @chatdox.product_offers.active.ordered.first
+    claudox_cheapest = @claudox.product_offers.active.ordered.first
+    assert_select "p", text: /최저 #{number_with_delimiter(chatdox_cheapest.total_amount)}원부터/
+    assert_select "p", text: /최저 #{number_with_delimiter(claudox_cheapest.total_amount)}원부터/
+
+    # Detail CTA links for logged out user (redirect_to)
+    assert_select "a[href=?]", new_user_session_path(redirect_to: chatdox_path), text: "자세히 보기"
+    assert_select "a[href=?]", new_user_session_path(redirect_to: claudox_path), text: "자세히 보기"
+
+    # 2. Logged in user view on /pricing
+    sign_in(@user)
+    get pricing_path
+    assert_response :success
+
+    assert_select "a[href=?]", chatdox_path, text: "자세히 보기"
+    assert_select "a[href=?]", claudox_path, text: "자세히 보기"
+    delete destroy_user_session_path
+
+    # 3. When sale_enabled is false for Chatdox & Claudox
     @chatdox.update!(sale_enabled: false)
     @claudox.update!(sale_enabled: false)
 
@@ -43,6 +64,39 @@ class SaleStateRegressionTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "span.rounded-full", text: "준비 중", minimum: 2
     assert_select "span.rounded-full", text: "무료 이용 가능", count: 1
+    # Prices remain displayed from bootstrap catalog even when sales are paused
+    assert_select "p", text: /최저 #{number_with_delimiter(chatdox_cheapest.total_amount)}원부터/
+    assert_select "p", text: /최저 #{number_with_delimiter(claudox_cheapest.total_amount)}원부터/
+  end
+
+  test "Logged-out user sign in and seamless return to original checkout destination" do
+    @chatdox.update!(sale_enabled: true)
+    @claudox.update!(sale_enabled: true)
+
+    # 1. Chatdox checkout redirect flow
+    get billing_checkout_path
+    assert_redirected_to new_user_session_path
+
+    # Sign in and verify redirect to original stored checkout location
+    post user_session_path, params: { user: { email: @user.email, password: "password123" } }
+    assert_redirected_to billing_checkout_path
+    follow_redirect!
+    assert_response :success
+    assert_select "h1", text: /기간제 라이선스 선택/
+    assert_select "input[type=submit]", value: "주문하기"
+
+    delete destroy_user_session_path
+
+    # 2. Claudox checkout redirect flow
+    get billing_checkout_path("claudox")
+    assert_redirected_to new_user_session_path
+
+    post user_session_path, params: { user: { email: @user.email, password: "password123" } }
+    assert_redirected_to billing_checkout_path("claudox")
+    follow_redirect!
+    assert_response :success
+    assert_select "h1", text: /기간제 라이선스 선택/
+    assert_select "input[type=submit]", value: "주문하기"
   end
 
   test "Chatdox sales state consistency across /pricing, /chatdox, and checkout gate" do
@@ -72,10 +126,6 @@ class SaleStateRegressionTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "a[href=?]", billing_checkout_path, text: /기간제 라이선스 구매/
     assert_select "p", text: /구매한 라이선스 기간 동안 Chatdox의 유료 문서에 접근할 수 있습니다/
-
-    # Logged-out checkout attempt redirects to sign in
-    get billing_checkout_path
-    assert_redirected_to new_user_session_path
 
     # Logged-in user checkout attempt opens enabled checkout screen with active offers
     sign_in(@user)
@@ -112,10 +162,6 @@ class SaleStateRegressionTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "a[href=?]", billing_checkout_path("claudox"), text: /기간제 라이선스 구매/
     assert_select "p", text: /구매 기간 동안 제공되는 Claudox 콘텐츠에 접근할 수 있습니다/
-
-    # Logged-out checkout attempt redirects to sign in
-    get billing_checkout_path("claudox")
-    assert_redirected_to new_user_session_path
 
     # Logged-in user checkout attempt opens enabled checkout screen with active offers
     sign_in(@user)
