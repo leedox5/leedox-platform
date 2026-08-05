@@ -69,7 +69,7 @@
         <article class="rounded-2xl border border-violet-100 bg-white p-6 sm:p-8">
           <h2 class="text-2xl font-black tracking-tight text-slate-950">포함 항목 / 미포함 항목</h2>
           <ul class="mt-5 space-y-3 text-sm leading-6 text-slate-700">
-            <li>포함: 챕터 텍스트 20장과 실제 운영 파일 템플릿 세트 (CLAUDE.md, service-desk 스크립트, memory_seed.md 등)</li>
+            <li>포함: Claudox 챕터 텍스트 20장</li>
             <li>포함: 읽기 경로와 적용 힌트, 실제 협업 사례 맥락</li>
             <li>미포함: 1:1 실시간 코칭, 팀 맞춤 운영 대행, 외부 툴 유료 플랜 비용</li>
             <% if @featured_chapters.any? %>
@@ -96,13 +96,20 @@
 
     <%= render "shared/product_pricing", product_code: "claudox" %>
 
+    <% claudox_product = Product.find_by(code: "claudox") %>
+    <% sales_enabled = Commerce::Sales.enabled_for?(claudox_product) %>
+
     <section class="bg-white py-14 sm:py-16">
       <div class="mx-auto w-full max-w-5xl px-4 sm:px-6">
         <h2 class="text-center text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">FAQ</h2>
         <div class="mt-8 space-y-4">
           <details class="rounded-xl border border-slate-200 bg-slate-50 p-5" open>
-            <summary class="cursor-pointer font-semibold text-slate-900">Q. 판매 일정과 이용 조건은 확정됐나요?</summary>
-            <p class="mt-3 text-sm leading-6 text-slate-700">A. 아직 검토 중입니다. 가격, 이용 기간과 제공 범위를 확정한 뒤 별도로 안내하겠습니다.</p>
+            <summary class="cursor-pointer font-semibold text-slate-900">Q. 이용 기간과 구매 조건은 어떻게 되나요?</summary>
+            <% if sales_enabled %>
+              <p class="mt-3 text-sm leading-6 text-slate-700">A. 1·3·6·12개월 중 원하는 이용 기간을 선택할 수 있으며 자동 갱신되지 않습니다. 구매 기간 동안 제공되는 Claudox 콘텐츠에 접근할 수 있습니다.</p>
+            <% else %>
+              <p class="mt-3 text-sm leading-6 text-slate-700">A. 1·3·6·12개월 기간제 선불 라이선스로 제공되며 자동 갱신되지 않습니다. 현재는 구매 준비 중이며, 판매 개시 후 선택한 기간 동안 Claudox 콘텐츠에 접근할 수 있습니다.</p>
+            <% end %>
           </details>
           <details class="rounded-xl border border-slate-200 bg-slate-50 p-5">
             <summary class="cursor-pointer font-semibold text-slate-900">Q. 지금 콘텐츠를 미리 볼 수 있나요?</summary>

@@ -83,6 +83,27 @@ class AdminProductSaleManagementTest < ActionDispatch::IntegrationTest
     assert_select "p", text: /Chatdox Lab/, count: 0
   end
 
+  test "toggling is immediately reflected on the /claudox purchase gate and FAQ" do
+    claudox = Product.find_by!(code: "claudox")
+    claudox.update!(sale_enabled: false)
+
+    get claudox_path
+    assert_response :success
+    assert_select "p", text: /현재는 구매 준비 중이며/
+    assert_select "p", text: /아직 검토 중입니다/, count: 0
+    assert_select "li", text: /템플릿 세트/, count: 0
+
+    sign_in(@admin)
+    patch admin_commerce_product_path(claudox)
+    delete destroy_user_session_path
+
+    get claudox_path
+    assert_response :success
+    assert_select "p", text: /구매 기간 동안 제공되는 Claudox 콘텐츠에 접근할 수 있습니다/
+    assert_select "p", text: /아직 검토 중입니다/, count: 0
+    assert_select "li", text: /템플릿 세트/, count: 0
+  end
+
   private
 
   def sign_in(user)
