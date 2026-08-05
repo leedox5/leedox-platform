@@ -106,6 +106,10 @@ class AdminUsersTest < ActionDispatch::IntegrationTest
     user = User.create!(name: "테스트 유저", email: "admin-users-no-aigravity@example.com", password: "password123")
     product = Product.find_by!(code: "aigravity")
 
+    get admin_users_path
+    assert_response :success
+    assert_no_match(/#{Regexp.escape(product.name)} 1년 무료 부여/, response.body)
+
     assert_no_difference -> { user.licenses.count } do
       post grant_free_license_admin_user_path(user, product_code: product.code)
     end

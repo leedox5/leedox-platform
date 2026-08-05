@@ -22,24 +22,34 @@ module Commerce
     def call!
       raise Pundit::NotAuthorizedError unless @actor&.admin?
 
-      license = Commerce::LicenseScheduler.grant!(
-        user: @user,
-        product: @product,
-        duration_months: DURATION_MONTHS,
-        source: SOURCE,
-        at: @at
-      )
+      # LicenseScheduler.grant! takes a row lock on @user internally
+      # (@user.lock!), but that lock is only meaningful for the duration of an
+      # enclosing transaction -- without one it releases right after the
+      # SELECT, same as any bare `record.lock!` call. Wrapping here (matching
+      # OrderFinalizer's pattern for the paid path) makes the lock actually
+      # serialize concurrent grants for the same user, and keeps the license
+      # and its audit event atomic -- no license ever persists without the
+      # audit trail that makes a free, unpaid grant reviewable.
+      ApplicationRecord.transaction do
+        license = Commerce::LicenseScheduler.grant!(
+          user: @user,
+          product: @product,
+          duration_months: DURATION_MONTHS,
+          source: SOURCE,
+          at: @at
+        )
 
-      Commerce::AuditRecorder.record!(
-        actor: @actor,
-        action: "free_license_granted",
-        auditable: license,
-        to_state: license.status,
-        reason_code: "admin_free_grant",
-        at: @at
-      )
+        Commerce::AuditRecorder.record!(
+          actor: @actor,
+          action: "free_license_granted",
+          auditable: license,
+          to_state: license.status,
+          reason_code: "admin_free_grant",
+          at: @at
+        )
 
-      license
+        license
+      end
     end
   end
 end
