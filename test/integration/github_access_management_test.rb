@@ -34,12 +34,25 @@ class GithubAccessManagementTest < ActionDispatch::IntegrationTest
     assert_equal "GitHub Lab 연결 기능은 현재 V1 제공 범위에 포함되지 않습니다.", flash[:alert]
   end
 
-  test "direct URL access to admin github_access is disabled in V1 and safely redirects" do
+  test "direct URL access to admin github_access GET, PATCH invite, and PATCH revoke are disabled in V1" do
+    link = ExternalAccountLink.create!(user: @user, username: "lab-user")
     sign_in(@admin)
 
     get admin_commerce_github_access_path
     assert_redirected_to admin_dashboard_path
     assert_equal "GitHub Lab 운영 기능은 현재 V1 제공 범위에 포함되지 않습니다.", flash[:alert]
+
+    patch admin_commerce_invite_github_access_path(link.public_id)
+    assert_redirected_to admin_dashboard_path
+    assert_equal "GitHub Lab 운영 기능은 현재 V1 제공 범위에 포함되지 않습니다.", flash[:alert]
+    link.reload
+    assert_nil link.invited_at, "invited_at should not be updated when invite route is disabled in V1"
+
+    patch admin_commerce_revoke_github_access_path(link.public_id)
+    assert_redirected_to admin_dashboard_path
+    assert_equal "GitHub Lab 운영 기능은 현재 V1 제공 범위에 포함되지 않습니다.", flash[:alert]
+    link.reload
+    assert_nil link.revoked_at, "revoked_at should not be updated when revoke route is disabled in V1"
   end
 
   test "privacy policy states that GitHub account info is not collected in V1" do
