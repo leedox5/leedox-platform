@@ -736,17 +736,17 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_match(/신규 결제를 준비하고 있습니다/, response.body)
   end
 
-  test "checkout's 가격과 준비 상태 보기 link points at each product's own #pricing anchor" do
+  test "checkout's 가격 및 이용 기간 보기 link points at each product's own #pricing anchor" do
     get billing_checkout_path("chatdox")
     assert_response :success
     doc = Nokogiri::HTML(response.body)
-    link = doc.css("a").find { |a| a.text.include?("가격과 준비 상태 보기") }
+    link = doc.css("a").find { |a| a.text.include?("가격 및 이용 기간 보기") }
     assert_equal "#{chatdox_path}#pricing", link["href"]
 
     get billing_checkout_path("claudox")
     assert_response :success
     doc = Nokogiri::HTML(response.body)
-    link = doc.css("a").find { |a| a.text.include?("가격과 준비 상태 보기") }
+    link = doc.css("a").find { |a| a.text.include?("가격 및 이용 기간 보기") }
     assert_equal "#{claudox_path}#pricing", link["href"]
   end
 
