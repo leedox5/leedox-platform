@@ -1,5 +1,6 @@
 class GithubAccessController < ApplicationController
   before_action :authenticate_user!
+  before_action :ensure_v1_boundary!
 
   def show
     @link = current_user.external_account_link
@@ -20,6 +21,10 @@ class GithubAccessController < ApplicationController
   end
 
   private
+
+  def ensure_v1_boundary!
+    redirect_to dashboard_path, alert: "GitHub Lab 연결 기능은 현재 V1 제공 범위에 포함되지 않습니다."
+  end
 
   def link_params
     params.require(:external_account_link).permit(:username)

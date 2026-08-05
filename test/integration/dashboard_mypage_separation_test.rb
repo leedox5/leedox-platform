@@ -14,7 +14,7 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
     assert_match(/학습 진도/, response.body)
     assert_match(/최근 완료한 챕터/, response.body)
     assert_match(/Next Step/, response.body)
-    assert_match(/GitHub Lab/, response.body)
+    assert_no_match(/GitHub Lab/, response.body)
     assert_match(/접근 가능 문서/, response.body)
 
     assert_no_match(/상품별 라이선스/, response.body)

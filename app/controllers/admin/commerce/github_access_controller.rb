@@ -1,4 +1,6 @@
 class Admin::Commerce::GithubAccessController < Admin::BaseController
+  before_action :ensure_v1_boundary!
+
   def index
     links = ExternalAccountLink.includes(:user).order(created_at: :asc).to_a
     active_user_ids = active_chatdox_license_user_ids
@@ -20,6 +22,10 @@ class Admin::Commerce::GithubAccessController < Admin::BaseController
   end
 
   private
+
+  def ensure_v1_boundary!
+    redirect_to admin_dashboard_path, alert: "GitHub Lab 운영 기능은 현재 V1 제공 범위에 포함되지 않습니다."
+  end
 
   def active_chatdox_license_user_ids
     License.for_product("chatdox").not_canceled.select { |license| license.active_at? }.map(&:user_id).to_set

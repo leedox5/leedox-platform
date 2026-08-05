@@ -23,18 +23,14 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "Chatdox GitHub Lab lives inside the Chatdox section, not as a standalone section" do
+  test "GitHub Lab entry point is not present in dashboard sections in V1" do
     get dashboard_path
     assert_response :success
 
     doc = Nokogiri::HTML(response.body)
-    chatdox_section = doc.at_css("section[aria-label='Chatdox 현황']")
-    claudox_section = doc.at_css("section[aria-label='Claudox 현황']")
-
-    assert_match(/GitHub Lab/, chatdox_section.text)
-    assert_no_match(/GitHub Lab/, claudox_section.text)
+    assert_no_match(/GitHub Lab/, response.body)
     assert_nil doc.at_css("section[aria-label='GitHub Lab 연결']"),
-      "GitHub Lab should no longer be its own top-level section"
+      "GitHub Lab should no longer be present in V1 dashboard"
   end
 
   test "unlicensed products still render their own block (not hidden)" do

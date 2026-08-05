@@ -72,6 +72,6 @@ class LegalPagesTest < ActionDispatch::IntegrationTest
     doc = Nokogiri::HTML(response.body)
     assert_no_match(/Chatdox/, doc.at_css("title").text)
     assert_no_match(/Chatdox/, doc.at_css("div.space-y-8").text)
-    assert_match(/GitHub 저장소 접근이 포함된 상품을 이용하는 경우/, response.body)
+    assert_match(/현재 V1 서비스에서는 GitHub 계정 및 저장소 연동 정보를 수집하지 않습니다/, response.body)
   end
 end
