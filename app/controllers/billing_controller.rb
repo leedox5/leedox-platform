@@ -142,7 +142,7 @@ class BillingController < ApplicationController
   end
 
   def respond_to_payment_reconciliation_failure
-    message = "결제는 확인됐지만 라이선스 반영에 실패했습니다. 재결제하지 마시고 고객센터(leedox@naver.com)로 문의해 주세요."
+    message = "결제는 확인됐지만 라이선스 반영에 실패했습니다. 재결제하지 마시고 고객센터(#{CompanyInfo::EMAIL})로 문의해 주세요."
 
     if json_payment_request?
       render json: { ok: false, message: message, redirectUrl: dashboard_path }, status: :internal_server_error

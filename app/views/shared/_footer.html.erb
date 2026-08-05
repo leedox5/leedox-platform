@@ -3,12 +3,12 @@
     <div class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
       <div class="space-y-2">
         <p class="mb-4 text-base font-black tracking-tight text-slate-900">LEEDOX</p>
-        <p>리독스 | 대표 이명호</p>
-        <p>사업자등록번호 473-23-01337</p>
-        <p>통신판매업신고 제 2025-경기의왕-0084 호</p>
-        <p>주소 경기도 의왕시 약수터길 11</p>
-        <p>이메일 leedox@naver.com</p>
-        <p>유선 010-3276-8332</p>
+        <p><%= CompanyInfo::NAME %> | 대표 <%= CompanyInfo::REPRESENTATIVE %></p>
+        <p>사업자등록번호 <%= CompanyInfo::REGISTRATION_NUMBER %></p>
+        <p>통신판매업신고 <%= CompanyInfo::MAIL_ORDER_LICENSE %></p>
+        <p>주소 <%= CompanyInfo::ADDRESS %></p>
+        <p>이메일 <%= CompanyInfo::EMAIL %></p>
+        <p>유선 <%= CompanyInfo::PHONE %></p>
       </div>
 
       <div class="space-y-2 md:text-right">
