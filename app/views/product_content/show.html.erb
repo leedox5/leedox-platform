@@ -84,6 +84,34 @@
           ) %>
         </div>
 
+        <% if @product_code == "aistart" && @current_id == "05" %>
+          <div id="aistart-completion-cta" class="mt-12 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/70 via-white to-blue-50/70 p-6 shadow-sm sm:p-8">
+            <div class="max-w-2xl">
+              <span class="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold text-indigo-800">다음 단계</span>
+              <h2 class="mt-3 break-keep text-xl font-extrabold text-slate-900 sm:text-2xl">무료 가이드로 AI 협업의 감을 잡으셨나요?</h2>
+              <p class="mt-2 break-keep text-sm leading-6 text-slate-600">이제 실제 서비스를 만들고 팀의 업무 방식을 바꾼 과정을 Chatdox와 Claudox에서 이어서 살펴보세요.</p>
+
+              <div class="mt-5 space-y-2 rounded-xl border border-slate-200/80 bg-white/90 p-4 text-xs leading-5 text-slate-700">
+                <p class="flex items-start gap-2"><strong class="font-bold text-slate-900">Chatdox:</strong> AI와 함께 SaaS를 기획하고 배포한 실전 과정</p>
+                <p class="flex items-start gap-2"><strong class="font-bold text-slate-900">Claudox:</strong> AI 에이전트가 팀에 합류해 업무 방식을 바꾼 기록</p>
+                <p class="mt-2 text-[11px] font-semibold text-slate-500">※ 두 상품 모두 일부 챕터를 무료로 확인할 수 있습니다.</p>
+              </div>
+
+              <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <% if user_signed_in? %>
+                  <%= link_to "내 콘텐츠에서 이어보기", dashboard_path,
+                    class: "inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" %>
+                <% else %>
+                  <%= link_to "회원가입하고 실전 가이드 둘러보기", new_user_registration_path,
+                    class: "inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" %>
+                <% end %>
+                <%= link_to "전체 상품과 가격 보기", pricing_path,
+                  class: "inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
         <% if user_signed_in? && @current_chapter[:kind] != :appendix %>
           <div class="mt-10 rounded-lg border border-gray-200 bg-gray-50 p-5">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
