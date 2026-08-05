@@ -18,14 +18,14 @@ class LegalPagesTest < ActionDispatch::IntegrationTest
     rows = table.css("tbody tr").map { |row| row.css("td").map(&:text) }
     assert_equal 2, rows.size
     assert_equal "Chatdox", rows[0][0]
-    assert_equal "포함", rows[0][2]
-    assert_equal "포함(수동 초대)", rows[0][3]
+    assert_match(/미포함/, rows[0][2])
+    assert_equal "미포함", rows[0][3]
     assert_equal "Claudox", rows[1][0]
     assert_equal "미포함", rows[1][2]
     assert_equal "미포함", rows[1][3]
   end
 
-  test "terms page preserves every existing Chatdox legal clause verbatim after the restructure" do
+  test "terms page reflects QA/03 V1 product definitions for Chatdox and Claudox" do
     get terms_path
     assert_response :success
     body = response.body
@@ -44,13 +44,11 @@ class LegalPagesTest < ActionDispatch::IntegrationTest
     assert_match(/이용 기간이 합산되지 않습니다/, body)
     assert_match(/제3자에게 양도하거나 공유할 수 없습니다/, body)
 
-    # Chatdox-specific clauses (old 제5조의2/제5조의3) -- substance must survive intact.
-    assert_match(/원본 또는 이와 실질적으로 유사한 형태의 소스 코드를 재판매·재배포하는 행위/, body)
-    assert_match(/템플릿이나 강의 형태로 재구성하여 판매하는 행위/, body)
-    assert_match(/GitHub 저장소 및 콘텐츠 접근 권한을 타인과 공유하는 행위/, body)
-    assert_match(/회사의 사전 동의 없이 Chatdox 또는 LEEDOX 명칭을 사용하는 행위/, body)
-    assert_match(/하나의 라이선스는 이용자가 등록한 하나의 GitHub 계정에 대해서만 저장소 접근 권한을 부여/, body)
-    assert_match(/정당하게 내려받은 소스 코드 및 이를 기반으로 제작한 결과물은 계속 사용, 운영 및 수익화할 수 있습니다/, body)
+    # Chatdox-specific V1 clauses -- aligned with QA/03.
+    assert_match(/핵심 웹 챕터 20개, 챕터 설명 및 코드 예제/, body)
+    assert_match(/예제 코드를 학습하고 자신의 개인 프로젝트에 수정 및 적용하여 배포·운영할 수 있습니다/, body)
+    assert_match(/LEEDOX가 제공한 원문 콘텐츠, 이미지, 문서를 복제·재배포·재판매하거나/, body)
+    assert_match(/템플릿이나 강의 형태로 재구성하여 판매하는 행위는 금지됩니다/, body)
 
     # Common misconduct/liability/change/contact clauses carried over unchanged.
     assert_match(/타인의 계정 또는 결제 정보를 무단으로 사용하는 행위/, body)
@@ -58,13 +56,13 @@ class LegalPagesTest < ActionDispatch::IntegrationTest
     assert_match(/leedox@naver\.com/, body)
   end
 
-  test "terms page adds Claudox-specific scope without a GitHub or source-code entitlement" do
+  test "terms page reflects Claudox V1 scope without source code or repository access" do
     get terms_path
     assert_response :success
     body = response.body
 
-    assert_match(/Claudox 이용 기간 중에는 협업 스토리 콘텐츠\(챕터\)/, body)
-    assert_match(/소스 코드 및 GitHub 저장소 접근은 Claudox 이용 범위에 포함되지 않습니다/, body)
+    assert_match(/Claudox 이용 기간 중에는 핵심 웹 챕터 20개, 라이선스 전용 특별판/, body)
+    assert_match(/소스코드 전체, 다운로드용 템플릿 파일 묶음.*GitHub 저장소 접근.*포함되지 않습니다/, body)
   end
 
   test "privacy page no longer names Chatdox specifically" do
