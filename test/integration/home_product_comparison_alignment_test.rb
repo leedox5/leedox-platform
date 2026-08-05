@@ -84,11 +84,21 @@ class HomeProductComparisonAlignmentTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#products']", text: "나에게 맞는 상품 찾기"
   end
 
-  test "7. Desktop 2-column grid and mobile responsive layout classes are preserved" do
+  test "7. Desktop 2-column grid, mobile responsive layout, and mt-auto bottom alignment on CTA containers are preserved" do
     get root_path
     assert_response :success
 
     assert_select "#products div.grid.gap-6.lg\\:grid-cols-2"
+
+    doc = Nokogiri::HTML(response.body)
+    articles = doc.css("#products article")
+    assert_equal 2, articles.size
+
+    articles.each do |article|
+      cta_container = article.css("div.mt-auto").first
+      assert cta_container, "Each product card must have an mt-auto container for bottom alignment"
+      assert cta_container.css("a").present?, "The mt-auto container must hold the detail CTA button"
+    end
   end
 
   test "8. Home page does not display pricing tables or excluded unconfirmed feature promises" do
