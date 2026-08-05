@@ -4,10 +4,15 @@ class GuestPurchaseFlowGuidanceTest < ActionDispatch::IntegrationTest
   KST = Commerce::PeriodCalculator::KST
 
   setup do
+    @old_env = ENV["LEEDOX_COMMERCE_ENABLED"]
     Commerce::CatalogBootstrap.call!
     @chatdox = Product.find_by!(code: "chatdox")
     @claudox = Product.find_by!(code: "claudox")
     @user = User.create!(name: "게스트 테스트", email: "guest-funnel@example.com", password: "password123")
+  end
+
+  teardown do
+    ENV["LEEDOX_COMMERCE_ENABLED"] = @old_env
   end
 
   test "1. Sign-in page displays purchase context banner when entering from Chatdox or Claudox checkout" do
@@ -83,6 +88,24 @@ class GuestPurchaseFlowGuidanceTest < ActionDispatch::IntegrationTest
     assert_redirected_to billing_checkout_path("chatdox")
   end
 
+  test "4-b. Claudox sign-up preserves return destination and redirects to Claudox checkout" do
+    enable_sales!
+
+    get billing_checkout_path("claudox")
+    assert_redirected_to new_user_session_path
+
+    get new_user_registration_path(redirect_to: billing_checkout_path("claudox"))
+    assert_response :success
+    assert_select "div", text: /구매를 계속하려면 회원가입이 필요합니다/
+
+    assert_difference "User.count", 1 do
+      post user_registration_path, params: {
+        user: { name: "클로드회원", email: "claudox-purchaser@example.com", password: "password123", password_confirmation: "password123" }
+      }
+    end
+    assert_redirected_to billing_checkout_path("claudox")
+  end
+
   test "5. External URL parameters are blocked from being stored as redirect destinations" do
     get new_user_session_path(redirect_to: "https://attacker.com/malicious")
     assert_response :success
@@ -123,6 +146,23 @@ class GuestPurchaseFlowGuidanceTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", product_chapter_path("chatdox", "01"), text: /첫 챕터 시작/
   end
 
+  test "7-b. PortOne payment success for Claudox identifies Claudox product and redirects to dashboard with Claudox content CTA" do
+    enable_sales!
+    post user_session_path, params: { user: { email: @user.email, password: "password123" } }
+
+    offer = @claudox.product_offers.first!
+    order = create_order_for(@claudox, offer)
+
+    with_fake_gateway(FakeSuccessGateway.new) do
+      get billing_success_path, params: { paymentId: order.public_id }
+    end
+
+    assert_redirected_to dashboard_path
+    follow_redirect!
+    assert_select "div", text: /Claudox 결제가 완료되었습니다/
+    assert_select "a[href=?]", product_chapter_path("claudox", "01"), text: /첫 챕터 시작/
+  end
+
   test "8. Manual bank transfer pending order stays on order page with deposit instructions and does not show payment success" do
     enable_sales!
     post user_session_path, params: { user: { email: @user.email, password: "password123" } }
@@ -159,9 +199,10 @@ class GuestPurchaseFlowGuidanceTest < ActionDispatch::IntegrationTest
     with_fake_gateway(FakeFailureGateway.new) do
       get billing_success_path, params: { paymentId: order.public_id }
     end
-    assert_redirected_to billing_cancel_path
+    assert_redirected_to billing_cancel_path(product_code: "chatdox")
     follow_redirect!
-    follow_redirect! if response.redirect?
+    assert_redirected_to billing_checkout_path_for("chatdox")
+    follow_redirect!
     assert_match(/결제 승인에 실패했습니다/, response.body)
 
     # Reconciliation failure
@@ -171,6 +212,30 @@ class GuestPurchaseFlowGuidanceTest < ActionDispatch::IntegrationTest
     assert_redirected_to dashboard_path
     follow_redirect!
     assert_match(/결제는 확인됐지만 라이선스 반영에 실패했습니다.*leedox@naver\.com/, response.body)
+  end
+
+  test "9-b. Claudox cancel and approval failure redirect to Claudox checkout with product context" do
+    enable_sales!
+    post user_session_path, params: { user: { email: @user.email, password: "password123" } }
+
+    # Cancellation for Claudox
+    get billing_cancel_path(product_code: "claudox")
+    assert_redirected_to billing_checkout_path_for("claudox")
+    follow_redirect!
+    assert_match(/결제가 취소되었습니다/, response.body)
+
+    # Approval failure for Claudox
+    offer = @claudox.product_offers.first!
+    order = create_order_for(@claudox, offer)
+
+    with_fake_gateway(FakeFailureGateway.new) do
+      get billing_success_path, params: { paymentId: order.public_id }
+    end
+    assert_redirected_to billing_cancel_path(product_code: "claudox")
+    follow_redirect!
+    assert_redirected_to billing_checkout_path_for("claudox")
+    follow_redirect!
+    assert_match(/결제 승인에 실패했습니다/, response.body)
   end
 
   private

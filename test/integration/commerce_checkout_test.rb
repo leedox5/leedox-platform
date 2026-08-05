@@ -220,7 +220,7 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
       get billing_success_path, params: { paymentId: other_order.public_id }
     end
 
-    assert_redirected_to billing_cancel_path
+    assert_redirected_to billing_cancel_path(product_code: "chatdox")
     assert_equal "pending", other_order.reload.status
     assert_empty other_order.licenses
   end

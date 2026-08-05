@@ -122,12 +122,12 @@ class BillingController < ApplicationController
   def respond_to_payment_failure(order = nil)
     product_code = order&.order_items&.first&.product_code || params[:product_code]
     message = "결제 승인에 실패했습니다. 선택한 상품 결제 화면에서 다시 시도해 주세요."
-    target_path = product_code.present? ? billing_checkout_path_for(product_code) : billing_cancel_path
+    cancel_path = product_code.present? ? billing_cancel_path(product_code: product_code) : billing_cancel_path
 
     if json_payment_request?
-      render json: { ok: false, message: message, redirectUrl: target_path }, status: :unprocessable_entity
+      render json: { ok: false, message: message, redirectUrl: cancel_path }, status: :unprocessable_entity
     else
-      redirect_to billing_cancel_path, alert: message
+      redirect_to cancel_path, alert: message
     end
   end
 
