@@ -69,7 +69,9 @@ Rails.application.routes.draw do
     get "/dashboard", to: "dashboard#show", as: :dashboard
     get "/content_progress", to: "content_progress#show", as: :content_progress
     post "/db_backup", to: "db_backup#download", as: :db_backup
-    resources :users, only: %i[index update]
+    resources :users, only: %i[index update] do
+      post :grant_free_license, on: :member
+    end
     namespace :commerce do
       resources :orders, only: %i[index show], param: :id do
         post :abandon, on: :member
