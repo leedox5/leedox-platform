@@ -23,34 +23,62 @@ set -euo pipefail
 # result in this repo like any other change.
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-if [[ -z "${HQ_DIR:-}" ]] && [[ -f "$PROJECT_ROOT/.env" ]]; then
+if [[ -f "$PROJECT_ROOT/.env" ]]; then
   set -a
   source "$PROJECT_ROOT/.env"
   set +a
 fi
-SOURCE_REPO="${HQ_DIR:-${SOURCE_REPO:-/mnt/d/RubyOnRails/leedox-hq}}"
-REF="main"
+
+CLI_REPO=""
+REF=""
 DRY_RUN_MODE="false"
+ONLY_PRODUCT=""
 
 for arg in "$@"; do
   case "$arg" in
     --ref=*)
       REF="${arg#--ref=}"
       ;;
+    --repo=*|--source=*)
+      CLI_REPO="${arg#*=}"
+      ;;
+    --only=*|--product=*)
+      ONLY_PRODUCT="${arg#*=}"
+      ;;
     --dry-run)
       DRY_RUN_MODE="true"
       ;;
     *)
       echo "Unknown option: $arg" >&2
-      echo "Usage: $0 [--ref=<git-ref>] [--dry-run]" >&2
+      echo "Usage: $0 [--repo=<repo-path>] [--ref=<git-ref>] [--only=<product-code>] [--dry-run]" >&2
       exit 1
       ;;
   esac
 done
 
+if [[ -n "$CLI_REPO" ]]; then
+  SOURCE_REPO="$CLI_REPO"
+elif [[ -n "${HQ_DIR_AGY:-}" ]] && [[ -d "$HQ_DIR_AGY/.git" ]]; then
+  SOURCE_REPO="$HQ_DIR_AGY"
+elif [[ -d "/mnt/d/0002/hq/.git" ]]; then
+  SOURCE_REPO="/mnt/d/0002/hq"
+else
+  SOURCE_REPO="${HQ_DIR:-/mnt/d/RubyOnRails/leedox-hq}"
+fi
+
 if [[ ! -d "$SOURCE_REPO/.git" ]]; then
   echo "Source repo not found: $SOURCE_REPO" >&2
   exit 1
+fi
+
+if [[ -z "$REF" ]]; then
+  if git -C "$SOURCE_REPO" rev-parse --verify main >/dev/null 2>&1; then
+    REF="main"
+  elif git -C "$SOURCE_REPO" rev-parse --verify master >/dev/null 2>&1; then
+    REF="master"
+  else
+    REF="HEAD"
+  fi
 fi
 
 TMP_DIR="$(mktemp -d)"
@@ -85,9 +113,17 @@ if [[ "$DRY_RUN_MODE" == "true" ]]; then
 fi
 
 sync_one() {
-  local src="$1" dest="$2"
+  local src="$1" dest="$2" product_code="${3:-}"
+  if [[ -n "$ONLY_PRODUCT" ]] && [[ -n "$product_code" ]] && [[ "$product_code" != "$ONLY_PRODUCT" ]]; then
+    echo "  $src -> (skipped, --only filter active)"
+    return 0
+  fi
   if [[ ! -d "$TMP_DIR/$src" ]]; then
     echo "  $src -> (skipped, not present in $REF)"
+    return 0
+  fi
+  if [[ "$src" == "docs" ]] && [[ ! -f "$TMP_DIR/$src/01_overview.md" ]] && [[ ! -f "$TMP_DIR/$src/01_overview.html" ]]; then
+    echo "  $src -> (skipped, non-curriculum docs folder)"
     return 0
   fi
   mkdir -p "$dest"
@@ -166,11 +202,11 @@ restore_mtimes() {
   ' > "$dest/.last_updated.json"
 }
 
-echo "Syncing chatdox-curriculum ($REF), runtime folders only:"
-sync_one "docs" "$PROJECT_ROOT/hq/chatdox"
-sync_one "claudox" "$PROJECT_ROOT/hq/claudox"
-sync_one "aistart" "$PROJECT_ROOT/hq/aistart"
-sync_one "aigravity" "$PROJECT_ROOT/hq/aigravity"
-sync_one "service-desk/requests" "$PROJECT_ROOT/hq/service-desk"
+echo "Syncing HQ curriculum ($SOURCE_REPO @ $REF), runtime folders only:"
+sync_one "docs" "$PROJECT_ROOT/hq/chatdox" "chatdox"
+sync_one "claudox" "$PROJECT_ROOT/hq/claudox" "claudox"
+sync_one "aistart" "$PROJECT_ROOT/hq/aistart" "aistart"
+sync_one "aigravity" "$PROJECT_ROOT/hq/aigravity" "aigravity"
+sync_one "service-desk/requests" "$PROJECT_ROOT/hq/service-desk" "service-desk"
 
 echo "Dry run: $DRY_RUN_MODE"
