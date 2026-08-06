@@ -16,7 +16,7 @@ ANTIGRAVITY: 와! 정말 무중력 개발과 콘텐츠화의 정곡을 찌르는
 
 ---
 
-## 🔤 2. Core English Definition (본질 개념 정리)
+## 🔤 3. 핵심 용어 정리 (Core Terms)
 
 > **Core English Definition**: *Walkthrough (워크스루 / 작업 검증보고서)*
 > - **Simple Definition**: A step-by-step document walking the user through what changes were made and how they were verified.
@@ -48,6 +48,7 @@ Antigravity 에이전트 협업 체계에서 워크스루(`walkthrough.md`)는 �
 
 ## 🔗 다음 에피소드 안내
 - **04 (정규)**: [에이전트 영혼 이식: 15년 차 개발 노하우 주입 (`agents.md`)](/content/aigravity/)
+
 
 
 

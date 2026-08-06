@@ -43,7 +43,7 @@ Antigravity를 사용하다 보면 무료 플랜(Free Tier)이나 기본 플랜�
 
 ---
 
-## 🔤 4. Core English Definition (본질 개념 정리)
+## 🔤 3. 핵심 용어 정리 (Core Terms)
 
 > **Core English Definition**: *Rate Limit & Quota (호출 한도 & 쿼터)*
 > - **Simple Definition**: The maximum number of requests or tokens you can use within a specific timeframe.
@@ -54,6 +54,7 @@ Antigravity를 사용하다 보면 무료 플랜(Free Tier)이나 기본 플랜�
 ## 🔗 다음 에피소드 안내
 - **07 (서브 특별판)**: [쿼터 초과와 Google AI Pro 결제 & 4배 한도 해금 실전 비하인드](/content/aigravity/07)
 - **08 (정규)**: [실무 레거시 코드 파악과 안전한 DB/API 리팩토링](/content/aigravity/08)
+
 
 
 

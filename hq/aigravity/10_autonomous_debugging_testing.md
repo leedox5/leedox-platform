@@ -30,7 +30,7 @@
 
 ---
 
-## 🔤 3. Core English Definition (본질 개념 정리)
+## 🔤 3. 핵심 용어 정리 (Core Terms)
 
 > **Core English Definition**: *Self-Correction Loop (자율 수정 루프)*
 > - **Simple Definition**: An automated process where the AI runs tests, analyzes failure logs, and fixes its own code until tests pass.
@@ -49,4 +49,5 @@
 
 ## 🔗 다음 에피소드 안내
 - **11 (정규)**: [GitHub MCP & 자동화 파이프라인: 무중력 릴리즈와 상품화](/content/aigravity/11)
+
 

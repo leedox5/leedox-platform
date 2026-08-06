@@ -15,7 +15,7 @@
 
 ---
 
-## 🔤 2. Core English Definition (본질 개념 정리)
+## 🔤 3. 핵심 용어 정리 (Core Terms)
 
 > **Core English Definition**: *Legacy Refactoring (레거시 리팩토링)*
 > - **Simple Definition**: Improving existing codebase structure without changing its external behavior.
@@ -39,6 +39,7 @@
 
 ## 🔗 다음 에피소드 안내
 - **09 (정규)**: [멀티 에이전트 병렬 구동: DB 스키마 & API 동시 개발](/content/aigravity/09)
+
 
 
 

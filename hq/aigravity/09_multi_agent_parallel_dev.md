@@ -17,7 +17,7 @@ Main Agent ────┤
 
 ---
 
-## 🔤 2. Core English Definition (본질 개념 정리)
+## 🔤 3. 핵심 용어 정리 (Core Terms)
 
 > **Core English Definition**: *Subagent Parallelism (서브에이전트 병렬 처리)*
 > - **Simple Definition**: Spawning multiple isolated AI workers to perform different subtasks concurrently.
@@ -36,6 +36,7 @@ Main Agent ────┤
 
 ## 🔗 다음 에피소드 안내
 - **10 (정규)**: [자율 디버깅과 자동화 테스트: 에러 발생 시 자율 수정 루프](/content/aigravity/10)
+
 
 
 

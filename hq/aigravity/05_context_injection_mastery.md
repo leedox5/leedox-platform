@@ -42,7 +42,7 @@ ANTIGRAVITY: hq/docs/implementation_plan.md 경로에 로컬 파일로 저장 �
 
 ---
 
-## 🔤 3. Core English Definition (본질 개념 정리)
+## 🔤 3. 핵심 용어 정리 (Core Terms)
 
 > **Core English Definition**: *Context Window (맥락 윈도우 / 대화 기억 용량)*
 > - **Simple Definition**: The total amount of text and code an AI agent can read and process at a single time.
@@ -71,6 +71,7 @@ ANTIGRAVITY: hq/docs/implementation_plan.md 경로에 로컬 파일로 저장 �
 
 ## 🔗 다음 에피소드 안내
 - **E04 (정규)**: [토큰 경제학과 비용 최적화: 무료 플랜부터 Pro까지](/content/aigravity/)
+
 
 
 

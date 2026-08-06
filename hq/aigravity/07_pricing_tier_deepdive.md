@@ -34,7 +34,7 @@
 
 ---
 
-## 🔤 2. Core English Definition (본질 개념 정리)
+## 🔤 3. 핵심 용어 정리 (Core Terms)
 
 > **Core English Definition**: *ROI (Return on Investment / 투자 대비 효과)*
 > - **Simple Definition**: The ratio between net profit and cost of investment.
@@ -44,6 +44,7 @@
 
 ## 🔗 다음 에피소드 안내
 - **08 (정규)**: [실무 레거시 코드 파악과 안전한 DB/API 리팩토링](/content/aigravity/08)
+
 
 
 

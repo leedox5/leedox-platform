@@ -20,11 +20,12 @@ end
 
 ---
 
-## 🔤 2. Core English Definition
+## 🔤 3. 핵심 용어 정리 (Core Terms)
 
 > **Core English Definition**: *Conversion Funnel & Autonomous PR Workflow*  
 > - **Simple Definition**: Guiding unauthenticated users through a seamless login funnel while letting AI agents issue, review, and merge GitHub Pull Requests autonomously via CLI.  
 > - **Practical Meaning**: 유저의 이탈을 방지하고 로그인 완료 후 목적지로 돌려보내는 전환 퍼널 패턴과, CLI 명령어로 브랜치 생성부터 PR 발행 및 머지까지 완전 자동화하는 자율 파이프라인.
+
 
 
 

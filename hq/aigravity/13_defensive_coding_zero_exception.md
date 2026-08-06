@@ -19,11 +19,12 @@ end
 
 ---
 
-## 🔤 2. Core English Definition
+## 🔤 3. 핵심 용어 정리 (Core Terms)
 
 > **Core English Definition**: *Defensive Guard & No-Mock Testing*  
 > - **Simple Definition**: Writing fail-safe condition checks to protect live applications from null errors while using real integration tests instead of fake test mocks.  
 > - **Practical Meaning**: 예외 상황에서도 서비스가 멈추지 않도록 가드를 치고, 가짜 객체(Mock) 없이 실제 DB와 레코드 데이터로 시스템 정합성을 완전 검증하는 테스트 개발 기법.
+
 
 
 

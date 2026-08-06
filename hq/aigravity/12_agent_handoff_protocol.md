@@ -26,11 +26,12 @@
 
 ---
 
-## 🔤 3. Core English Definition
+## 🔤 3. 핵심 용어 정리 (Core Terms)
 
 > **Core English Definition**: *File-Based Agent Handoff Protocol*  
 > - **Simple Definition**: A structured file-contract mechanism (`request.md` and `result.md`) allowing autonomous AI agents in different repositories to collaborate asynchronously without shared memory or hallucinations.  
 > - **Practical Meaning**: 상호 메모리를 직접 공유하지 않는 독립된 AI 에이전트들이 파일 기반의 명확한 입출력 계약(Contract)을 통해 100% 안전하게 작업을 주고받는 협업 규약.
+
 
 
 

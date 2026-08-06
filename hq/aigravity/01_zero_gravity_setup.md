@@ -77,11 +77,13 @@ Gemini 3.6 Flash (High)
 
 ---
 
-## 🔤 3. Core English Definition (본질 개념 정리)
+## 🔤 3. 핵심 용어 정리 (Core Terms)
 
-> **Core English Definition**: *Dual-Mode Agents (GUI vs CLI TUI)*
-> - **Simple Definition**: Running AI agents in two complementary modes: a graphical IDE for high-level planning, and a command-line TUI for fast terminal execution.
-> - **Practical Meaning**: 상위 기획/문서화/청사진을 담당하는 GUI 에이전트(HQ)와, 터미널/마이그레이션/테스트 실행을 담당하는 CLI 에이전트(DEV)가 구분을 두고 협업하는 듀얼 에이전트 체계.
+> **💡 본질 개념 한눈에 파악하기**
+> - **GUI (Graphical User Interface)**: 창과 마우스 클릭 기반으로 조작하는 시각적 그래픽 인터페이스 (HQ 기획용 IDE 모드).
+> - **CLI (Command Line Interface)**: 터미널 텍스트 커맨드라인 기반의 빠른 명령어 인터페이스.
+> - **TUI (Text-based User Interface)**: 터미널 환경 안에서 색상과 키보드 메뉴를 통해 다채롭게 조작하는 텍스트 기반 사용자 인터페이스 (DEV 실무용).
+> - **Dual-Mode Agents (듀얼 에이전트)**: 상위 기획/청사진을 담당하는 GUI 에이전트(HQ)와, 터미널/테스트 실행을 담당하는 CLI 에이전트(DEV)가 역할을 나눠 협업하는 이중 에이전트 체계.
 
 ---
 

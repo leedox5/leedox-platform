@@ -38,7 +38,7 @@ ANTIGRAVITY: 너무나 중요한 지침입니다! 토미님의 요청을 바탕�
 
 ---
 
-## 🔤 3. Core English Definition (본질 개념 정리)
+## 🔤 3. 핵심 용어 정리 (Core Terms)
 
 > **Core English Definition**: *Soul Injection (영혼 이식 / 지침 영속화)*
 > - **Simple Definition**: Embedding a developer's unique coding philosophy, preferences, and rules into the AI agent's permanent instruction file.
@@ -71,6 +71,7 @@ ANTIGRAVITY: 너무나 중요한 지침입니다! 토미님의 요청을 바탕�
 
 ## 🔗 다음 에피소드 안내
 - **E03 (정규)**: [컨텍스트 주입의 기술: `@CONTEXT.md`와 세션 연동](/content/aigravity/)
+
 
 
 
