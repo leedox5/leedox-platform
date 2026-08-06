@@ -7,62 +7,56 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
     post user_session_path, params: { user: { email: @user.email, password: "password123" } }
   end
 
-  test "each product gets its own section grouping status, doc access, progress, recent chapters, and Next Step together" do
+  test "owned products get detailed main learning section while unowned products appear in bottom catalog grid" do
+    grant_license(@user, "chatdox")
+
     get dashboard_path
     assert_response :success
 
     doc = Nokogiri::HTML(response.body)
-    %w[Chatdox Claudox].each do |name|
-      section = doc.at_css("section[aria-label='#{name} 현황']")
-      assert section, "expected a #{name} 현황 section"
 
-      assert_match(/접근 가능 문서/, section.text)
-      assert_match(/학습 진도/, section.text)
-      assert_match(/최근 완료한 챕터/, section.text)
-      assert_match(/Next Step/, section.text)
-    end
+    # Chatdox (owned) appears in main section with full learning block
+    chatdox_section = doc.at_css("section[aria-label='Chatdox 현황']")
+    assert chatdox_section, "expected a Chatdox 현황 main section"
+    assert_match(/접근 가능 문서/, chatdox_section.text)
+    assert_match(/학습 진도/, chatdox_section.text)
+    assert_match(/최근 완료한 챕터/, chatdox_section.text)
+    assert_match(/Next Step/, chatdox_section.text)
+    assert chatdox_section.at_css("a[href*='/content/chatdox/']"), "expected learning CTA for owned Chatdox"
+
+    # Claudox (unowned) appears in bottom catalog grid with compact card
+    catalog_section = doc.at_css("section[aria-label='전체 카탈로그 둘러보기']")
+    assert catalog_section, "expected a 전체 카탈로그 둘러보기 section"
+    assert_includes catalog_section.text, "Claudox"
+    assert catalog_section.at_css("a[href='#{pricing_path}']"), "expected pricing CTA for unowned Claudox"
   end
 
   test "GitHub Lab entry point is not present in dashboard sections in V1" do
     get dashboard_path
     assert_response :success
 
-    doc = Nokogiri::HTML(response.body)
     assert_no_match(/GitHub Lab/, response.body)
-    assert_nil doc.at_css("section[aria-label='GitHub Lab 연결']"),
+    assert_nil Nokogiri::HTML(response.body).at_css("section[aria-label='GitHub Lab 연결']"),
       "GitHub Lab should no longer be present in V1 dashboard"
   end
 
-  test "unlicensed products still render their own block (not hidden)" do
+  test "an unowned user sees onboarding card in main area and all unowned products in bottom catalog" do
     get dashboard_path
     assert_response :success
 
     doc = Nokogiri::HTML(response.body)
-    assert doc.at_css("section[aria-label='Chatdox 현황']")
-    assert doc.at_css("section[aria-label='Claudox 현황']")
+
+    # Onboarding notice in main section when 0 products are owned
+    assert doc.at_css("section[aria-label='학습 중인 상품 없음']")
+
+    # Bottom catalog grid contains compact cards for Chatdox & Claudox
+    catalog_section = doc.at_css("section[aria-label='전체 카탈로그 둘러보기']")
+    assert catalog_section, "expected catalog grid section"
+    assert_includes catalog_section.text, "Chatdox"
+    assert_includes catalog_section.text, "Claudox"
   end
 
-  test "an unowned user sees '라이선스 둘러보기' CTA per product, while licensed user sees learning CTA" do
-    get dashboard_path
-    assert_response :success
-
-    doc = Nokogiri::HTML(response.body)
-    Product.active.where(free_access: false).joins(:product_offers).merge(ProductOffer.active).distinct.order(:code).each do |product|
-      section = doc.at_css("section[aria-label='#{product.name} 현황']")
-      assert_equal 1, section.css("a").count { |link| link.text.strip == "라이선스 둘러보기" }
-      assert section.at_css("a[href='#{pricing_path}']"), "expected #{product.name} pricing CTA"
-    end
-
-    grant_license(@user, "chatdox")
-    get dashboard_path
-    assert_response :success
-
-    doc = Nokogiri::HTML(response.body)
-    chatdox_section = doc.at_css("section[aria-label='Chatdox 현황']")
-    assert_equal 1, chatdox_section.css("a").count { |link| link.text.strip == "첫 챕터 시작" }
-  end
-
-  test "a user who only completed Chatdox chapters sees accurate Chatdox progress and Next Step, while Claudox stays untouched" do
+  test "a user who completed Chatdox chapters sees accurate Chatdox progress and Next Step" do
     grant_license(@user, "chatdox")
     post chapter_progresses_path, params: { chapter_id: "01", product_code: "chatdox" }
     post chapter_progresses_path, params: { chapter_id: "02", product_code: "chatdox" }
@@ -72,35 +66,13 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
 
     doc = Nokogiri::HTML(response.body)
     chatdox_section = doc.at_css("section[aria-label='Chatdox 현황']").text
-    claudox_section = doc.at_css("section[aria-label='Claudox 현황']").text
 
     assert_match(/전체 20개 중 2개 완료/, chatdox_section)
     assert_match(/Chapter 03/, chatdox_section)
     assert_match(/이어서 학습/, chatdox_section)
-    assert_match(/전체 20개 중 0개 완료/, claudox_section)
-    assert_match(/Chapter 01/, claudox_section)
   end
 
-  test "a user who only completed Claudox chapters sees accurate Claudox progress and Next Step, while Chatdox stays untouched" do
-    grant_license(@user, "claudox")
-    post chapter_progresses_path, params: { chapter_id: "01", product_code: "claudox" }
-    post chapter_progresses_path, params: { chapter_id: "02", product_code: "claudox" }
-    post chapter_progresses_path, params: { chapter_id: "03", product_code: "claudox" }
-
-    get dashboard_path
-    assert_response :success
-
-    doc = Nokogiri::HTML(response.body)
-    chatdox_section = doc.at_css("section[aria-label='Chatdox 현황']").text
-    claudox_section = doc.at_css("section[aria-label='Claudox 현황']").text
-
-    assert_match(/전체 20개 중 3개 완료/, claudox_section)
-    assert_match(/Chapter 04/, claudox_section)
-    assert_match(/전체 20개 중 0개 완료/, chatdox_section)
-    assert_match(/Chapter 01/, chatdox_section)
-  end
-
-  test "recent chapter and Next Step links point at the right product via the generic content route" do
+  test "recent chapter and Next Step links point at the right product via generic content route" do
     grant_license(@user, "claudox")
     post chapter_progresses_path, params: { chapter_id: "01", product_code: "claudox" }
 

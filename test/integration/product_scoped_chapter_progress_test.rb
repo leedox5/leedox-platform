@@ -60,6 +60,16 @@ class ProductScopedChapterProgressTest < ActionDispatch::IntegrationTest
   end
 
   test "dashboard's Chatdox progress count is unaffected by Claudox completions (regression check for section E)" do
+    kst = ActiveSupport::TimeZone["Asia/Seoul"]
+    today = Date.current
+    last_usable = today + 30.days
+    access_ends = kst.local((last_usable + 1.day).year, (last_usable + 1.day).month, (last_usable + 1.day).day)
+    License.create!(
+      user: @user, product: Product.find_by!(code: "chatdox"),
+      source: "paid", status: "active",
+      starts_on: today, last_usable_on: last_usable, access_ends_at: access_ends
+    )
+
     post chapter_progresses_path, params: { chapter_id: "01", product_code: "chatdox" }
     post chapter_progresses_path, params: { chapter_id: "01", product_code: "claudox" }
     post chapter_progresses_path, params: { chapter_id: "02", product_code: "claudox" }
