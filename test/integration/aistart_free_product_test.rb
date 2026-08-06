@@ -52,7 +52,7 @@ class AistartFreeProductTest < ActionDispatch::IntegrationTest
     assert_match(/아직 공개되지 않은 챕터입니다/, response.body)
   end
 
-  test "aistart appears on the dashboard for a signed-in user with 5/5 always accessible, no purchase implied" do
+  test "aistart does not appear on the user dashboard under Option B policy (handoff 0021)" do
     user = User.create!(name: "테스트 유저", email: "aistart-dashboard@example.com", password: "password123")
     post user_session_path, params: { user: { email: user.email, password: "password123" } }
 
@@ -61,11 +61,7 @@ class AistartFreeProductTest < ActionDispatch::IntegrationTest
 
     doc = Nokogiri::HTML(response.body)
     section = doc.css("section[aria-label]").find { |s| s["aria-label"].include?(@aistart.name) }
-    assert section, "expected a dashboard block for aistart with zero registration code"
-    assert_match(%r{5\s*/\s*5}, section.text)
-    assert_match(/무료로 이용 가능/, section.text)
-    assert_no_match(/미보유/, section.text)
-    assert_match(/라이선스 없이 전체 이용 가능합니다/, section.text)
+    assert_nil section, "aistart must be excluded from user dashboard under Option B policy"
   end
 
   test "aistart shows up on /pricing as a free product, not a not-yet-launched paid one" do

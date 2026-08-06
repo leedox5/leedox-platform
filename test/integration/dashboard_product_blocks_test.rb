@@ -47,7 +47,7 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     doc = Nokogiri::HTML(response.body)
-    Product.order(:code).each do |product|
+    Product.active.where(free_access: false).joins(:product_offers).merge(ProductOffer.active).distinct.order(:code).each do |product|
       section = doc.at_css("section[aria-label='#{product.name} 현황']")
       first_chapter_id = ProductContent.for(product.code).chapters.first[:id]
       assert_equal 1, section.css("a").count { |link| link.text.strip == "첫 챕터 시작" }
