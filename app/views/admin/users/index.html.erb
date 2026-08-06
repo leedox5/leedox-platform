@@ -34,7 +34,7 @@
                   <div class="flex flex-col gap-2">
                     <% user_owned_products(user, @products).each do |product| %>
                       <div>
-                        <%= product_status_badge(user, product) %>
+                        <%= admin_product_status_badge(user, product) %>
                         <p class="mt-0.5 text-xs text-gray-500"><%= license_period_text(user, product) %></p>
                       </div>
                     <% end %>

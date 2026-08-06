@@ -115,6 +115,13 @@ class AdminLicenseExtensionDisplayTest < ActionDispatch::IntegrationTest
     assert_not @user.licensed_for?("chatdox")
     get product_chapter_path("chatdox", "06")
     assert_redirected_to root_path
+
+    # Customer dashboard displays pre-0020 consistent unowned status without contradictory scheduled badge
+    get dashboard_path
+    assert_response :success
+    assert_select "span", text: "Chatdox 미보유"
+    assert_select "p", text: "Chatdox 이용 중인 라이선스가 없습니다"
+    assert_no_match(/Chatdox 이용 예정/, response.body)
   end
 
   test "5. Canceled, expired, or discontiguous licenses with gaps are not incorrectly merged" do

@@ -4,8 +4,6 @@ module DashboardHelper
       [ "#{product.name} 무료로 이용 가능", "bg-emerald-100 text-emerald-700" ]
     elsif user.licensed_for?(product.code)
       [ "#{product.name} 이용 중", "bg-emerald-100 text-emerald-700" ]
-    elsif user.licenses.for_product(product.code).not_canceled.any? { |l| l.effective_status == "scheduled" }
-      [ "#{product.name} 이용 예정", "bg-blue-100 text-blue-700" ]
     else
       [ "#{product.name} 미보유", "bg-gray-100 text-gray-700" ]
     end

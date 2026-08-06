@@ -37,6 +37,20 @@ module Admin::UsersHelper
     { starts_on: start_date, last_usable_on: current_end_date, anchor: anchor_license }
   end
 
+  def admin_product_status_badge(user, product)
+    label, classes = if product.free_access?
+      [ "#{product.name} 무료로 이용 가능", "bg-emerald-100 text-emerald-700" ]
+    elsif user.licensed_for?(product.code)
+      [ "#{product.name} 이용 중", "bg-emerald-100 text-emerald-700" ]
+    elsif user.licenses.for_product(product.code).not_canceled.any? { |l| l.effective_status == "scheduled" }
+      [ "#{product.name} 이용 예정", "bg-blue-100 text-blue-700" ]
+    else
+      [ "#{product.name} 미보유", "bg-gray-100 text-gray-700" ]
+    end
+
+    tag.span(label, class: "inline-flex rounded-full px-3 py-1 text-xs font-semibold #{classes}")
+  end
+
   def user_owned_products(user, products)
     products.select do |product|
       user.licensed_for?(product.code) ||
