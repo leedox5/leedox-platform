@@ -68,6 +68,10 @@ Claudox의 실제 메모리는 이 PC의 사용자 홈 디렉토리(`~/.claude/p
 
 `chatdox-curriculum`→`leedox-hq`, `chatdox-platform`→`leedox-platform`으로 GitHub 저장소와 로컬 폴더명을 바꿨다(`chatdox/repository_naming_and_migration.md`가 Source of Truth, `handoff/0001_repository_naming_and_migration/`에 실행 기록). 이 PC(WSL 클론 경로가 `~/dev/leedox-platform`인 데스크탑)에서는 `handoff/0003_desktop_env_rename_impact/`로 로컬 폴더 rename 영향도를 별도 점검했다 — HQ 쪽 `service-desk/sync-platform.ps1` 기본 경로, `.gitignore` 주석, 이 파일의 현재형 서술을 새 이름으로 갱신했고, DEV 쪽 `config/deploy.yml`(Kamal service/image/volume이 여전히 `chatdox_platform`)과 DEV의 `CLAUDE.md`(이 데스크탑의 실제 WSL 클론 경로 `~/dev/leedox-platform`을 반영 못 함, 다른 데스크탑인 `~/rails/leedox-platform` 기준으로만 서술됨)는 `handoff/0004_platform_desktop_env_followup/`로 Platform Agent에게 전달했다. Platform Agent가 둘 다 고쳐 커밋(`eca81a5`)했고, HQ가 `origin/main`을 직접 fetch해 검증 후 0004를 Completed로 판정 — CLAUDE.md는 이제 특정 데스크탑에 고정하지 않고 두 데스크탑(`~/rails/...`, `~/dev/...`) 경로를 예시로 병기하는 방식으로 바뀌었다. **다른 데스크탑에 clone된 이 프로젝트를 열 때, 로컬 경로나 저장소명이 여기 적힌 것과 다르면 그 데스크탑 기준으로 다시 조사하고 이 파일을 갱신할 것** — 고정된 값으로 가정하지 않는다.
 
+## 프로덕션 화면 확인용 테스트 계정 (2026-08-03)
+
+프로덕션(`leedox.up.railway.app`)에 라이선스 보유 테스트 전용 계정이 있다 — 비밀번호 강화 규칙 이전에 만들어졌고 Tommy가 의도적으로 계속 그 상태로 둘 예정이라 보안 우려는 없다고 확인받았다. 브라우저 자동화 도구가 없어서 curl로 Devise 로그인(CSRF 토큰 추출 → 세션 쿠키로 로그인 → 대상 페이지 GET) 방식으로 텍스트 레벨 검증만 가능하다. 실제 이메일/비밀번호는 이 git 추적 파일에는 적지 않고 로컬 메모리(`reference_production_test_user.md`)에만 둔다 — credential은 아무리 저위험이어도 영구 git 이력에 남기지 않는다는 원칙. 상세 화면 확인이 필요할 때 매번 물어보지 않고 바로 이 계정을 쓴다.
+
 ## 프로젝트 비전
 
 Claudox와의 모든 활동을 기록해서, AI를 적극적으로 활용하려는 유저들을 위한 학습 자료로 만드는 것이 목표. 개인 일지가 아니라 다른 독자도 배울 수 있는 콘텐츠를 지향한다.
