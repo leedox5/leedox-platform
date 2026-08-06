@@ -46,8 +46,9 @@ class Admin::UsersController < Admin::BaseController
       return
     end
 
-    Commerce::GrantFreeLicense.call!(user: user, product: product, actor: current_user)
-    redirect_to admin_users_path, notice: "#{user.name}님에게 #{product.name} 1년 무료 라이선스를 부여했습니다."
+    license = Commerce::GrantFreeLicense.call!(user: user, product: product, actor: current_user)
+    granted_period = "#{license.starts_on.strftime('%Y.%m.%d')} ~ #{license.last_usable_on.strftime('%Y.%m.%d')}"
+    redirect_to admin_users_path, notice: "#{user.name}님에게 #{product.name} 1년 무료 라이선스를 부여했습니다. (부여 기간: #{granted_period}, 최종 종료일: #{license.last_usable_on.strftime('%Y.%m.%d')})"
   rescue ActiveRecord::RecordInvalid => e
     redirect_to admin_users_path, alert: e.record.errors.full_messages.to_sentence
   end

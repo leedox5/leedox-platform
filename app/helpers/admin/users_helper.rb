@@ -5,10 +5,43 @@ module Admin::UsersHelper
   def license_period_text(user, product)
     return "-" if product.free_access?
 
-    license = user.licenses.for_product(product.code).not_canceled.find { |item| item.active_at? }
-    return "없음" unless license
+    period = contiguous_license_period(user, product)
+    return "없음" unless period
 
-    "#{license.starts_on.strftime('%Y.%m.%d')} ~ #{license.last_usable_on.strftime('%Y.%m.%d')}"
+    "#{period[:starts_on].strftime('%Y.%m.%d')} ~ #{period[:last_usable_on].strftime('%Y.%m.%d')}"
+  end
+
+  # Calculates contiguous active -> scheduled license chain starting from
+  # active license (or earliest scheduled license if no active license).
+  # Excludes canceled/expired licenses and does not bridge date gaps.
+  def contiguous_license_period(user, product)
+    licenses = user.licenses.for_product(product.code).not_canceled.to_a
+    return nil if licenses.empty?
+
+    active_license = licenses.find { |l| l.effective_status == "active" }
+    scheduled_licenses = licenses.select { |l| l.effective_status == "scheduled" }
+
+    anchor_license = active_license || scheduled_licenses.min_by(&:starts_on)
+    return nil unless anchor_license
+
+    start_date = anchor_license.starts_on
+    current_end_date = anchor_license.last_usable_on
+
+    loop do
+      next_license = scheduled_licenses.find { |l| l.starts_on == current_end_date + 1.day }
+      break unless next_license
+
+      current_end_date = next_license.last_usable_on
+    end
+
+    { starts_on: start_date, last_usable_on: current_end_date, anchor: anchor_license }
+  end
+
+  def user_owned_products(user, products)
+    products.select do |product|
+      user.licensed_for?(product.code) ||
+        user.licenses.for_product(product.code).not_canceled.any? { |l| l.effective_status == "scheduled" }
+    end
   end
 
   # "미보유: Chatdox, Antigravity" summary line for the 구독 column (handoff
@@ -16,7 +49,8 @@ module Admin::UsersHelper
   # line instead of a badge+period block each, so the column stays ~2 lines
   # for the common case instead of growing with every product added.
   def unowned_products_line(user, products)
-    names = products.reject { |product| user.licensed_for?(product.code) }.map(&:name)
+    owned = user_owned_products(user, products)
+    names = products.reject { |product| owned.include?(product) }.map(&:name)
     return if names.empty?
 
     "미보유: #{names.join(', ')}"
@@ -29,11 +63,26 @@ module Admin::UsersHelper
     user.licenses.for_product(product.code).not_canceled.find { |license| license.effective_status != "expired" }
   end
 
-  def grant_free_license_confirm_message(user, product)
-    existing = active_or_scheduled_license(user, product)
-    return "#{user.name}님에게 #{product.name} 1년 무료 라이선스를 부여하시겠습니까?" unless existing
+  def preview_free_license_grant(user, product)
+    Commerce::LicenseScheduler.preview(
+      user: user,
+      product: product,
+      duration_months: Commerce::GrantFreeLicense::DURATION_MONTHS,
+      requested_start_on: Time.current.in_time_zone(Commerce::PeriodCalculator::KST).to_date
+    )
+  end
 
-    period = "#{existing.starts_on.strftime('%Y.%m.%d')}~#{existing.last_usable_on.strftime('%Y.%m.%d')}"
-    "#{user.name}님은 이미 #{product.name} 라이선스가 있습니다(#{period}). 그래도 1년을 추가로 부여하시겠습니까?"
+  def grant_free_license_confirm_message(user, product)
+    current_period = contiguous_license_period(user, product)
+    preview = preview_free_license_grant(user, product)
+    new_period_str = "#{preview.starts_on.strftime('%Y.%m.%d')} ~ #{preview.last_usable_on.strftime('%Y.%m.%d')}"
+    final_end_str = preview.last_usable_on.strftime("%Y.%m.%d")
+
+    if current_period
+      current_end_str = current_period[:last_usable_on].strftime("%Y.%m.%d")
+      "#{user.name}님은 이미 #{product.name} 라이선스가 있습니다 (현재 종료일: #{current_end_str}). 1년을 추가로 부여하시겠습니까?\n(추가 기간: #{new_period_str}, 최종 종료일: #{final_end_str})"
+    else
+      "#{user.name}님에게 #{product.name} 1년 무료 라이선스를 부여하시겠습니까? (이용 기간: #{new_period_str})"
+    end
   end
 end
