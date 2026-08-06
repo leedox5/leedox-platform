@@ -47,3 +47,4 @@
 |---|------|------|:---:|:---:|
 | 90 | 세션의 정체를 캐다 | [90_session_mechanics.md](90_session_mechanics.md) | 90% | ✅ |
 | 91 | 시간과 나를 어떻게 인지하는가 | [91_time_and_identity.md](91_time_and_identity.md) | 90% | ✅ |
+| 92 | 두 에이전트가 똑같이 틀린 이유 | [92_shared_blind_spot.md](92_shared_blind_spot.md) | 90% | ✅ |

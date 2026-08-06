@@ -41,4 +41,5 @@
 
 90. [세션의 정체를 캐다](90_session_mechanics.md) — Claude Code 세션이 HQ/DEV에서 왜 다르게 동작하는지 파고든 기록
 91. [시간과 나를 어떻게 인지하는가](91_time_and_identity.md) — DEV에서 나온 자매편. 시간 인지 부재, 기억의 스코프, "동료"라는 감각의 경계, 우체국장 메타포까지
+92. [두 에이전트가 똑같이 틀린 이유](92_shared_blind_spot.md) — 프로덕션 DB가 SQLite인지 Postgres인지를 두고 HQ·DEV 두 에이전트가 같은 결론(SQLite)에 도달했다가, 내가 직접 회원가입해 확인하고서야 둘 다 틀렸다는 게 드러난 기록
 
