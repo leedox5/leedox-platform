@@ -20,6 +20,25 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_no_match(/₩|9,900원|무료 체험|프리미엄 요금제/, response.body)
   end
 
+  test "hero CHATDOX/CLAUDOX cards are themselves clickable links, not static article blocks (handoff 0023)" do
+    get root_path
+    assert_response :success
+
+    doc = Nokogiri::HTML(response.body)
+    hero_products = doc.at_css("[aria-label='LEEDOX의 두 상품']")
+    assert hero_products, "expected the hero's two-product block"
+
+    chatdox_card = hero_products.at_css("a[href='#{chatdox_path}']")
+    assert chatdox_card, "expected the CHATDOX hero card to be an <a> to chatdox_path"
+    assert_match(/CHATDOX/, chatdox_card.text)
+    assert_equal "a", chatdox_card.name, "the card itself must be the link, not a link nested inside a static block"
+
+    claudox_card = hero_products.at_css("a[href='#{claudox_path}']")
+    assert claudox_card, "expected the CLAUDOX hero card to be an <a> to claudox_path"
+    assert_match(/CLAUDOX/, claudox_card.text)
+    assert_equal "a", claudox_card.name
+  end
+
   test "homepage FAQ presents V1 confirmed scope for Chatdox and Claudox in present tense" do
     get root_path
     assert_response :success
