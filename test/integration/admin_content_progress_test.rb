@@ -19,18 +19,16 @@ class AdminContentProgressTest < ActionDispatch::IntegrationTest
 
     chatdox_done = ProductContent.for("chatdox").chapters.count { |chapter| chapter[:available] }
     claudox_rows = File.read(Rails.root.join("hq/claudox/88_progress.md")).scan(Admin::ContentProgressController::CLAUDOX_ROW_PATTERN)
-    claudox_done = claudox_rows.count { |_title, _id, status| status == "✅" }
-    # 88_progress.md now also carries a "부록" tracking row (id 90) alongside
-    # the regular 1..20 table; CLAUDOX_ROW_PATTERN matches both tables
-    # indiscriminately, and Admin::ContentProgressController's badge counts
-    # every matched row (hence claudox_rows.size, not a hardcoded 20) while
-    # its Part 1/2/3 grouping only ever displays ids within a phase range.
-    # Admin screens are out of scope for the appendix-chapters round -- this
-    # is just keeping the assertions honest about that existing behavior.
-    claudox_phase_rows = claudox_rows.select { |_title, id, _status| (1..20).cover?(id.to_i) }
+    # 88_progress.md's "부록 (특별판)" table (ids 90/91) uses the exact same
+    # column shape as the regular chapter tables, so CLAUDOX_ROW_PATTERN
+    # matches both indiscriminately -- the controller filters to
+    # CLAUDOX_CHAPTER_RANGE (1..20) so appendix rows never inflate the total
+    # or leak into a phase group. See handoff 0022.
+    claudox_phase_rows = claudox_rows.select { |_title, id, _status| Admin::ContentProgressController::CLAUDOX_CHAPTER_RANGE.cover?(id.to_i) }
+    claudox_done = claudox_phase_rows.count { |_title, _id, status| status == "✅" }
 
     assert_match(/#{chatdox_done}\s*\/\s*20/, response.body)
-    assert_match(/#{claudox_done}\s*\/\s*#{claudox_rows.size}/, response.body)
+    assert_match(/#{claudox_done}\s*\/\s*20/, response.body)
 
     doc = Nokogiri::HTML(response.body)
     cards = doc.css("article")
@@ -58,6 +56,43 @@ class AdminContentProgressTest < ActionDispatch::IntegrationTest
         assert_equal chapter[:done], row.text.include?("✅")
       end
     end
+  end
+
+  test "appendix rows (부록, ids 90/91) never appear as a Claudox chapter row" do
+    admin = User.create!(name: "테스트 유저", email: "content-progress-appendix-admin@example.com", password: "password123", role: :admin)
+    post user_session_path, params: { user: { email: admin.email, password: "password123" } }
+
+    get admin_content_progress_path
+    assert_response :success
+
+    doc = Nokogiri::HTML(response.body)
+    claudox_card = doc.css("article")[1]
+    appendix_titles = File.read(Rails.root.join("hq/claudox/88_progress.md"))
+      .scan(Admin::ContentProgressController::CLAUDOX_ROW_PATTERN)
+      .reject { |_title, id, _status| Admin::ContentProgressController::CLAUDOX_CHAPTER_RANGE.cover?(id.to_i) }
+      .map(&:first)
+    assert appendix_titles.any?, "expected 88_progress.md to still have at least one 부록 row to test against"
+
+    appendix_titles.each do |title|
+      assert_nil claudox_card.css("li").find { |li| li.text.include?(title) },
+        "expected no row for appendix chapter #{title.inspect}"
+    end
+  end
+
+  test "CLAUDOX_ROW_PATTERN recognizes 🔵 as a status, counted as not-done" do
+    sample = <<~MARKDOWN
+      | # | 챕터 | 파일 | 완성도 | 상태 |
+      |---|------|------|:---:|:---:|
+      | 15 | 진행 중인 이야기 | [15_pull_request.md](15_pull_request.md) | 70% | 🔵 |
+    MARKDOWN
+
+    rows = sample.scan(Admin::ContentProgressController::CLAUDOX_ROW_PATTERN)
+    assert_equal 1, rows.size, "🔵 row should still match the pattern, not silently disappear"
+
+    title, id, status = rows.first
+    assert_equal "15", id
+    assert_equal "🔵", status
+    assert_not_equal "✅", status # done: status == "✅" still marks 🔵 as not-done, which is correct
   end
 
   test "admin dashboard links to the content progress page" do

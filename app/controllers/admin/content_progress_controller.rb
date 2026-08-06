@@ -1,7 +1,12 @@
 class Admin::ContentProgressController < Admin::BaseController
   CLAUDOX_PATH = Rails.root.join("hq/claudox")
   CLAUDOX_PROGRESS_PATH = CLAUDOX_PATH.join("88_progress.md")
-  CLAUDOX_ROW_PATTERN = /^\|\s*\d+\s*\|\s*(.+?)\s*\|\s*\[.+?\]\((\d{2})_[a-z0-9_]+\.md\)\s*\|\s*\d+%\s*\|\s*(✅|⬜|🟡)\s*\|$/
+  CLAUDOX_ROW_PATTERN = /^\|\s*\d+\s*\|\s*(.+?)\s*\|\s*\[.+?\]\((\d{2})_[a-z0-9_]+\.md\)\s*\|\s*\d+%\s*\|\s*(✅|⬜|🟡|🔵)\s*\|$/
+  # 88_progress.md's 부록 (특별판) table (90·91) uses the exact same column
+  # shape as the regular chapter tables, so CLAUDOX_ROW_PATTERN matches it
+  # too -- filter to Claudox's actual chapter numbering (content_meta.yml's
+  # chapter_range) so appendix rows never inflate the totals or phase groups.
+  CLAUDOX_CHAPTER_RANGE = 1..20
 
   def show
     chatdox_source = ProductContent.for("chatdox")
@@ -34,9 +39,11 @@ class Admin::ContentProgressController < Admin::BaseController
   def parse_claudox_progress
     return [] unless File.exist?(CLAUDOX_PROGRESS_PATH)
 
-    File.read(CLAUDOX_PROGRESS_PATH).scan(CLAUDOX_ROW_PATTERN).map do |title, id, status|
-      { id: id, title: title, done: status == "✅", path: claudox_chapter_path(id) }
-    end
+    File.read(CLAUDOX_PROGRESS_PATH).scan(CLAUDOX_ROW_PATTERN)
+      .select { |_title, id, _status| CLAUDOX_CHAPTER_RANGE.cover?(id.to_i) }
+      .map do |title, id, status|
+        { id: id, title: title, done: status == "✅", path: claudox_chapter_path(id) }
+      end
   end
 
   def group_by_phase(chapters, phases)
