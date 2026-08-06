@@ -16,16 +16,16 @@
   - `sync_handoff.sh` — (Deprecated) `.local/handoff` 미러링용 레거시 스크립트.
   - `push_handoff_to_curriculum.sh` — (Deprecated) `.local/handoff` push용 레거시 스크립트.
   - `sync_curriculum.sh` — HQ→DEV, handoff와 무관하게 **실제 런타임 콘텐츠**(커리큘럼 문서/claudox/service-desk 요청)를 HQ git 저장소에서 `git archive`로 스냅샷 떠서 `hq/`(git 추적됨, `.local/`이 아님) 아래로 미러. REQ 0022에서 git subtree pull을 대체한 것 — subtree는 HQ 저장소 전체(QA/, SETUP/ 등 안 쓰는 것까지)를 끌어오고 merge conflict가 잦아서, 실제 쓰는 3개 폴더만 골라 받는 방식으로 바꿨다.
-- Handoff 작업 흐름(현재):
-  1. HQ가 `handoff/000N_descriptive_name/0000.md`를 Source of Truth로 발행한다.
-  2. DEV는 **현재 로컬 환경에서 실제 접근 가능한 handoff 경로**를 먼저 확인하고(고정 경로 가정 금지), 해당 패키지의 `0000.md`를 직접 읽는다. 필요 시 `ls -ld handoff`, `readlink -f handoff`로 실제 경로를 확인한다.
-  3. DEV는 같은 패키지 폴더에 `result.md`(리비전은 `result_rN.md`)만 작성한다.
+- Handoff 작업 흐름 (Handoff 2.0):
+  1. HQ가 `handoff-agy/<번호_슬러그>/0000.md`를 Source of Truth로 발행한다 (WSL Symlink 0-Copy 실시간 연동 및 Git 이력 영구 보존).
+  2. DEV는 `handoff-agy/<번호_슬러그>/0000.md`를 직접 읽는다.
+  3. DEV는 같은 패키지 폴더(`handoff-agy/<번호_슬러그>/`)에 `result.md`(리비전은 `result_rN.md`)만 작성한다.
   4. inbox/completed 이동, `STATUS.md` 작성, HQ 저장소 commit/push는 HQ(Tommy) 권한이다.
-- **권한 경계:** DEV는 handoff 패키지 내 `result*.md` 외 HQ 저장소 파일을 수정하지 않는다. HQ 저장소 commit/push도 하지 않는다.
-- 기존 `.local/handoff` 기록은 보존 대상이다. 새 절차 도입을 이유로 자동 이동/삭제하지 않는다.
+- **권한 경계:** DEV는 `handoff-agy/<번호_슬러그>/` 패키지 내 `result*.md` 외 HQ 저장소 파일을 수정하지 않는다. HQ 저장소 commit/push도 하지 않는다.
+- 기존 `.local/handoff` 및 `handoff` 기록은 보존 대상이다. 새 절차 도입을 이유로 자동 이동/삭제하지 않는다.
 - **이 handoff 워크플로우 자체가 아직 시험 운영(trial) 단계다(2026-07-16 Tommy 확인).** 고정된 프로세스로 여기지 말고, 실제로 작업하면서 걸리는 지점이 보이면 매번 그냥 넘어가지 말고 개선 아이디어를 제안할 것. 지금까지 눈에 띈 것:
   - **스크린샷 주석과 서면 request_rN.md 사이에 정보가 누락될 수 있다.** `/chatdox` R2에서 실제로 겪음(Tommy가 스크린샷에 표시한 것 하나가 서면 스펙에서 빠졌다가 R3에서 확정됨). 서면 요청서를 작성할 때 스크린샷의 모든 표시 항목을 명시적으로 나열하면 이런 누락을 줄일 수 있다.
-- **DEV→HQ 콘텐츠 제안 채널 승인됨(2026-07-16, HQ/Tommy 확인).** `leedox_dev_content_loop_r1`(당시 레거시 `.local/handoff` 절차로 전달)을 HQ가 검토해서 채널 자체와 소재 3건 전부 승인했다. 이후 handoff 운영은 `handoff/` Git 패키지 중심으로 전환되었고, `sync_handoff.sh`/`push_handoff_to_curriculum.sh`는 호환 목적의 deprecated 스크립트로 유지한다.
+- **DEV→HQ 콘텐츠 제안 채널 승인됨(2026-07-16, HQ/Tommy 확인).** `leedox_dev_content_loop_r1`(당시 레거시 `.local/handoff` 절차로 전달)을 HQ가 검토해서 채널 자체와 소재 3건 전부 승인했다. 이후 handoff 운영은 `handoff-agy/` Git 패키지 중심 2.0 체계로 전환되었다.
 
 ## 환경 특이사항
 
@@ -36,7 +36,7 @@
 
 ## 작업 규칙 (Tommy와의 협업 패턴)
 
-- **모든 작업이 handoff를 타지는 않는다(2026-07-16 Tommy 확인).** 정식 handoff가 필요한 경우 현재 기준 문서는 `handoff/000N_descriptive_name/0000.md`다. 간단한 건 대화로 바로 요청할 수 있다.
+- **모든 작업이 handoff를 타지는 않는다(2026-07-16 Tommy 확인).** 정식 handoff가 필요한 경우 현재 기준 문서는 `handoff-agy/<번호_슬러그>/0000.md`다. 간단한 건 대화로 바로 요청할 수 있다.
 - handoff 작업 시 DEV는 활성 패키지의 `0000.md`를 기준으로 수행하고, 같은 폴더의 `result*.md`만 작성한다(다른 HQ 파일 수정 금지).
 - 구현 후에는 거의 항상 커밋 + push, 그리고 `result.md`로 (조사 결과 / 실제 채택한 설계와 제안 대비 달라진 점 + 이유 / 변경·삭제 파일 / 테스트 결과 / 미결정 사항) 보고하는 게 표준 패턴이다.
 - **request.md의 "현재 코드 확인 완료, 재조사 불필요"를 그대로 믿지 말 것.** 실제로 매 작업마다 request.md가 나열하지 않은 관련 참조가 더 있었다(예: Toss/Subscription 제거 때 admin 컨트롤러 4곳 + `Commerce::Reconciliation`/`EventLogger`, GitHub access 단순화 때 `event_recorder.rb`/`task_factory.rb` + `Commerce::Reconciliation`). 삭제·리팩터링 대상 클래스/모델명으로 항상 sitewide grep을 먼저 돌려 숨은 참조를 확인한다.
