@@ -58,10 +58,6 @@ done
 
 if [[ -n "$CLI_REPO" ]]; then
   SOURCE_REPO="$CLI_REPO"
-elif [[ -n "${HQ_DIR_AGY:-}" ]] && [[ -d "$HQ_DIR_AGY/.git" ]]; then
-  SOURCE_REPO="$HQ_DIR_AGY"
-elif [[ -d "/mnt/d/0002/hq/.git" ]]; then
-  SOURCE_REPO="/mnt/d/0002/hq"
 else
   SOURCE_REPO="${HQ_DIR:-/mnt/d/RubyOnRails/leedox-hq}"
 fi
@@ -117,6 +113,13 @@ sync_one() {
   if [[ -n "$ONLY_PRODUCT" ]] && [[ -n "$product_code" ]] && [[ "$product_code" != "$ONLY_PRODUCT" ]]; then
     echo "  $src -> (skipped, --only filter active)"
     return 0
+  fi
+  if [[ "$product_code" == "aigravity" ]] && [[ -z "$CLI_REPO" ]]; then
+    if [[ "$ONLY_PRODUCT" == "aigravity" ]]; then
+      echo "Error: Syncing 'aigravity' requires an explicit --repo option." >&2
+      echo "Example: $0 --repo=/mnt/d/0002/hq --only=aigravity" >&2
+      exit 1
+    fi
   fi
   if [[ ! -d "$TMP_DIR/$src" ]]; then
     echo "  $src -> (skipped, not present in $REF)"
