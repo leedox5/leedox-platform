@@ -8,6 +8,19 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
   end
 
   test "dashboard is a learning hub: progress, recent chapters, next step, GitHub Lab, doc access -- no order/license ledger" do
+    product = Product.find_by!(code: "chatdox")
+    today = Time.current.in_time_zone(Commerce::PeriodCalculator::KST).to_date
+    end_date = today + 1.month
+    License.create!(
+      user: @user,
+      product: product,
+      source: "paid",
+      status: "active",
+      starts_on: today,
+      last_usable_on: end_date - 1.day,
+      access_ends_at: Commerce::PeriodCalculator::KST.local(end_date.year, end_date.month, end_date.day)
+    )
+
     get dashboard_path
     assert_response :success
 
@@ -84,12 +97,12 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
 
     doc = Nokogiri::HTML(response.body)
     claudox_section = doc.at_css("section[aria-label='Claudox 현황']").text
-    chatdox_section = doc.at_css("section[aria-label='Chatdox 현황']").text
+    catalog_section = doc.at_css("section[aria-label='전체 카탈로그 둘러보기']").text
 
     assert_match(/Claudox 이용 중/, claudox_section)
     assert_match(%r{20/20}, claudox_section)
-    assert_match(/Chatdox 미보유/, chatdox_section)
-    assert_match(%r{5/20}, chatdox_section)
+    assert_match(/Chatdox 미보유/, catalog_section)
+    assert_match(%r{5/20}, catalog_section)
   end
 
   test "mobile navigation includes 대시보드 for a regular signed-in user, matching desktop" do

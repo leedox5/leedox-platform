@@ -21,12 +21,14 @@ class UserDashboardVisibilityFilterTest < ActionDispatch::IntegrationTest
     assert_select "section[aria-label*='Antigravity']", count: 0
     assert_no_match(/aigravity/i, response.body)
 
-    # Purchasable paid products (Chatdox, Claudox) are displayed
-    assert_select "section[aria-label*='Chatdox']"
-    assert_select "section[aria-label*='Claudox']"
+    # Bottom catalog grid displays purchasable paid products (Chatdox, Claudox) for unowned user
+    assert_select "section[aria-label='전체 카탈로그 둘러보기']" do
+      assert_select "h3", text: "Chatdox"
+      assert_select "h3", text: "Claudox"
+    end
   end
 
-  test "2. Licensed/active paid product is prioritized at the top of user dashboard cards" do
+  test "2. Licensed/active paid product is placed in main section, unowned product is in bottom catalog section" do
     claudox = Product.find_by!(code: "claudox")
     today = Date.current
     last_usable = today + 30.days
@@ -46,12 +48,16 @@ class UserDashboardVisibilityFilterTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     doc = Nokogiri::HTML(response.body)
-    sections = doc.css("section[aria-label$='현황']")
-    assert_equal 2, sections.size
 
-    # Claudox (licensed) appears first, Chatdox (unowned) appears second
-    assert_includes sections[0].text, "Claudox"
-    assert_includes sections[1].text, "Chatdox"
+    # Claudox (owned) appears in main section
+    main_section = doc.at_css("section[aria-label='Claudox 현황']")
+    assert main_section, "Claudox must appear in main section"
+    assert_includes main_section.text, "Claudox"
+
+    # Chatdox (unowned) appears in bottom catalog grid section
+    catalog_section = doc.at_css("section[aria-label='전체 카탈로그 둘러보기']")
+    assert catalog_section, "Chatdox must appear in bottom catalog section"
+    assert_includes catalog_section.text, "Chatdox"
   end
 
   test "3. Empty state UI is rendered when 0 dashboard products are available" do
