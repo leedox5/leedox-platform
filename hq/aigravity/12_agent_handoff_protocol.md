@@ -1,4 +1,4 @@
-# 12. AI 에이전트 간 계약 기반 Handoff & 멀티 저장소 프로토콜
+# AI 에이전트 간 계약 기반 Handoff & 멀티 저장소 프로토콜
 
 > **Phase 3: 실무 코드베이스 고도화 & 에이전트 Handoff 프로토콜**  
 > **Key Objective**: HQ(콘텐츠 기획)와 DEV(플랫폼 개발) 두 독립 저장소 간에 `inbox/outbox` 파일 기반 프로토콜과 `result.md` 스펙 계약을 적용하여, AI 에이전트 간 비동기 분업 시스템을 구축한다.
@@ -31,3 +31,5 @@
 > **Core English Definition**: *File-Based Agent Handoff Protocol*  
 > - **Simple Definition**: A structured file-contract mechanism (`request.md` and `result.md`) allowing autonomous AI agents in different repositories to collaborate asynchronously without shared memory or hallucinations.  
 > - **Practical Meaning**: 상호 메모리를 직접 공유하지 않는 독립된 AI 에이전트들이 파일 기반의 명확한 입출력 계약(Contract)을 통해 100% 안전하게 작업을 주고받는 협업 규약.
+
+

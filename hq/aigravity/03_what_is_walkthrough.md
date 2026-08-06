@@ -1,4 +1,4 @@
-# E01X02: (특별판) "워크스루(Walkthrough)가 뭐야?" — 작업 검증서와 무중력 콘텐츠화
+# (특별판) "워크스루(Walkthrough)가 뭐야?" — 작업 검증서와 무중력 콘텐츠화
 
 > **Special Edition Series (X-Series)**  
 > **Key Objective**: 디렉터 토미(Tommy)의 질문 *"워크스루가 뭐야?"*를 바탕으로, Antigravity 개발 지침의 핵심 문서인 Walkthrough 개념과 **대화 자체가 무중력상태로 교육 커리큘럼이 되는 과정**을 다룬다.
@@ -47,4 +47,6 @@ Antigravity 에이전트 협업 체계에서 워크스루(`walkthrough.md`)는 �
 ---
 
 ## 🔗 다음 에피소드 안내
-- **E02 (정규)**: [에이전트 영혼 이식: 15년 차 개발 노하우 주입 (`agents.md`)](file:///d:/0002/hq/aigravity/02_soul_injection_agents_md.md)
+- **E02 (정규)**: [에이전트 영혼 이식: 15년 차 개발 노하우 주입 (`agents.md`)](/content/aigravity/)
+
+

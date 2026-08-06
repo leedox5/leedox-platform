@@ -78,4 +78,22 @@ class ChapterImagesTest < ActionDispatch::IntegrationTest
     assert_includes html, '<img src="/docs/images/example.png" alt="설명">'
     assert_not_includes html, "<script"
   end
+
+  test "serves synced aigravity chapter image via generic product image route" do
+    get "/content/aigravity/images/0001.png"
+
+    assert_response :success
+    assert_equal "image/png", response.media_type
+  end
+
+  test "renders aigravity chapter 01 without broken image paths" do
+    get "/content/aigravity/01"
+
+    assert_response :success
+    assert_select "h1", text: "에이전트와의 첫 만남과 무중력 개발 환경 구축"
+    assert_select "img[src*='images/0001.png']"
+    assert_select "img[src*='images/0007.png']"
+    assert_select "img[src*='images/0004.png']"
+    assert_select "img[src*='images/0005.png']"
+  end
 end

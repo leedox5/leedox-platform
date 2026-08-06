@@ -1,4 +1,4 @@
-# E02: 에이전트 영혼 이식: 15년 차 개발 노하우 주입 (`agents.md`)
+# 에이전트 영혼 이식: 15년 차 개발 노하우 주입 (`agents.md`)
 
 > **Phase 1: 환경 구축 & 에이전트 영혼 이식**  
 > **Key Objective**: 15년 차 디렉터 토미(Tommy)의 개발 철학과 세션 수록 방식을 에이전트 상시 지침서인 `agents.md`에 주입(영혼 이식)하고 행동 규칙을 수립한다.
@@ -70,4 +70,6 @@ ANTIGRAVITY: 너무나 중요한 지침입니다! 토미님의 요청을 바탕�
 ---
 
 ## 🔗 다음 에피소드 안내
-- **E03 (정규)**: [컨텍스트 주입의 기술: `@CONTEXT.md`와 세션 연동](file:///d:/0002/hq/aigravity/03_context_injection_mastery.md)
+- **E03 (정규)**: [컨텍스트 주입의 기술: `@CONTEXT.md`와 세션 연동](/content/aigravity/)
+
+

@@ -1,4 +1,4 @@
-# 02. (서브 특별판 1) 세션 비하인드 & 돌발 Q&A 딥다이브
+# (서브 특별판 1) 세션 비하인드 & 돌발 Q&A 딥다이브
 
 > **Special Edition Series (X-Series)**  
 > **Key Objective**: E01 환경 구축 및 Handoff 파이프라인 진행 과정 중 디렉터 토미(Tommy)와 에이전트 듀오(HQ & DEV) 간에 주고받은 사소하지만 감동적인 손편지 서사와 돌발 Q&A 비하인드 스토리를 독립 에피소드로 수록한다.
@@ -107,5 +107,7 @@ ANTIGRAVITY: 네! d:/0002/hq/.local/CONTEXT_SEESION.pdf 파일을 아주 잘 읽
 ---
 
 ## 🔗 다음 에피소드 안내
-- **03 (서브 특별판 2)**: ["워크스루(Walkthrough)가 뭐야?" — 작업 검증서와 무중력 콘텐츠화](file:///d:/0002/hq/aigravity/03_what_is_walkthrough.md)
-- **04 (정규)**: [에이전트 영혼 이식: 15년 차 개발 노하우 주입 (`agents.md`)](file:///d:/0002/hq/aigravity/04_soul_injection_agents_md.md)
+- **03 (서브 특별판 2)**: ["워크스루(Walkthrough)가 뭐야?" — 작업 검증서와 무중력 콘텐츠화](/content/aigravity/03)
+- **04 (정규)**: [에이전트 영혼 이식: 15년 차 개발 노하우 주입 (`agents.md`)](/content/aigravity/04)
+
+

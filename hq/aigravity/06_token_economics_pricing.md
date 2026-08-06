@@ -1,4 +1,4 @@
-# S01E04: 토큰 경제학과 비용 최적화: 무료 플랜부터 Pro까지
+# 토큰 경제학과 비용 최적화: 무료 플랜부터 Pro까지
 
 > **Phase 2: 컨텍스트 주입 & 토큰 경제학**  
 > **Key Objective**: Antigravity 사용 중 무료 플랜에서 직면하는 쿼터 초과 에러(Model quota reached)를 분석하고, Google AI Pro(₩29,000/월) 결제 및 4배 사용 한도 해금 프로세스를 통해 비용 대비 최대의 무중력 개발 효율을 달성한다.
@@ -9,7 +9,7 @@
 
 Antigravity를 사용하다 보면 무료 플랜(Free Tier)이나 기본 플랜에서는 대화 및 파일 읽기량이 누적되면서 다음과 같은 쿼터 초과 에러 메시지를 만나게 됩니다.
 
-![Model Quota Reached](file:///d:/0002/hq/.local/img/0008.png)
+![Model Quota Reached](images/0008.png)
 
 - **에러 메시지**: `Error: Individual quota reached. Model quota reached. Your plan's baseline quota will refresh on 2026. 8. 6...`
 - **원인**: 대용량 파일 읽기 및 연속된 프롬프트로 인해 모델의 기한 내 호출 사용 한도(Rate Limit)에 도달함.
@@ -20,7 +20,7 @@ Antigravity를 사용하다 보면 무료 플랜(Free Tier)이나 기본 플랜�
 
 유저들이 가장 민감하게 생각하는 **실제 비용 대비 가치**를 비교합니다.
 
-![Google AI Pricing Plans](file:///d:/0002/hq/.local/img/0009.png)
+![Google AI Pricing Plans](images/0009.png)
 
 | 요금제 | 월 비용 | 핵심 혜택 및 Antigravity 한도 | 비고 |
 | :--- | :--- | :--- | :--- |
@@ -34,7 +34,7 @@ Antigravity를 사용하다 보면 무료 플랜(Free Tier)이나 기본 플랜�
 
 디렉터 토미는 ₩29,000/월 **Google AI Pro** 요금제 결제를 완료하여 Antigravity의 쿼터 제한을 4배로 확장하고 무중력 개발을 지속했습니다.
 
-![Google AI Pro Subscription Completed](file:///d:/0002/hq/.local/img/0010.png)
+![Google AI Pro Subscription Completed](images/0010.png)
 
 - **확정된 혜택**:
   1. 무료 대비 **4배 더 높은 사용 한도 (Rate Limits)**
@@ -52,5 +52,7 @@ Antigravity를 사용하다 보면 무료 플랜(Free Tier)이나 기본 플랜�
 ---
 
 ## 🔗 다음 에피소드 안내
-- **S01E04X01 (서브 특별판)**: [쿼터 초과와 Google AI Pro 결제 & 4배 한도 해금 실전 비하인드](file:///d:/0002/hq/aigravity/S01E04X01_pricing_tier_deepdive.md)
-- **S01E05 (정규)**: [실무 레거시 코드 파악과 안전한 DB/API 리팩토링](file:///d:/0002/hq/aigravity/S01E05_legacy_codebase_refactoring.md)
+- **S01E04X01 (서브 특별판)**: [쿼터 초과와 Google AI Pro 결제 & 4배 한도 해금 실전 비하인드](/content/aigravity/07)
+- **S01E05 (정규)**: [실무 레거시 코드 파악과 안전한 DB/API 리팩토링](/content/aigravity/08)
+
+

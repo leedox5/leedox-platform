@@ -1,4 +1,4 @@
-# E03: 컨텍스트 주입의 기술: `@CONTEXT.md`와 세션 연동
+# 컨텍스트 주입의 기술: `@CONTEXT.md`와 세션 연동
 
 > **Phase 2: 컨텍스트 주입 & 토큰 경제학**  
 > **Key Objective**: 휘발되기 쉬운 대화 세션의 맥락을 프로젝트 청사진인 `CONTEXT.md` 파일로 승화하고, 새로운 세션에서도 `@CONTEXT.md` 주입을 통해 단 1초 만에 프로젝트 맥락을 100% 동기화하는 기법을 마스터한다.
@@ -70,4 +70,6 @@ ANTIGRAVITY: hq/docs/implementation_plan.md 경로에 로컬 파일로 저장 �
 ---
 
 ## 🔗 다음 에피소드 안내
-- **E04 (정규)**: [토큰 경제학과 비용 최적화: 무료 플랜부터 Pro까지](file:///d:/0002/hq/aigravity/04_token_economics_pricing.md)
+- **E04 (정규)**: [토큰 경제학과 비용 최적화: 무료 플랜부터 Pro까지](/content/aigravity/)
+
+
