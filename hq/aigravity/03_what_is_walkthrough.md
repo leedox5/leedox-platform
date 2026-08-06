@@ -47,6 +47,7 @@ Antigravity 에이전트 협업 체계에서 워크스루(`walkthrough.md`)는 �
 ---
 
 ## 🔗 다음 에피소드 안내
-- **E02 (정규)**: [에이전트 영혼 이식: 15년 차 개발 노하우 주입 (`agents.md`)](/content/aigravity/)
+- **04 (정규)**: [에이전트 영혼 이식: 15년 차 개발 노하우 주입 (`agents.md`)](/content/aigravity/)
+
 
 

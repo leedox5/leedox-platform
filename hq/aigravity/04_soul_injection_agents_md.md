@@ -30,7 +30,7 @@ ANTIGRAVITY: 너무나 중요한 지침입니다! 토미님의 요청을 바탕�
 
 ## 🛠️ Key Directives & Content Ingestion Rules
 1. Live Experience Ingestion (생생한 실전 대화 및 질문 기록)
-2. Special Edition Rule (특별판 E01X01, E01X02 편성 규칙)
+2. Special Edition Rule (특별판 E01X01, 03 편성 규칙)
 3. Core English Definition (쉬운 영어 본질 정의)
 4. Database & Schema-First Approach (DB 무결성 검증)
 5. Strict Definition of Done (DoD)
@@ -71,5 +71,6 @@ ANTIGRAVITY: 너무나 중요한 지침입니다! 토미님의 요청을 바탕�
 
 ## 🔗 다음 에피소드 안내
 - **E03 (정규)**: [컨텍스트 주입의 기술: `@CONTEXT.md`와 세션 연동](/content/aigravity/)
+
 
 

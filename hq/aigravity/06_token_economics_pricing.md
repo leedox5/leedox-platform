@@ -52,7 +52,8 @@ Antigravity를 사용하다 보면 무료 플랜(Free Tier)이나 기본 플랜�
 ---
 
 ## 🔗 다음 에피소드 안내
-- **S01E04X01 (서브 특별판)**: [쿼터 초과와 Google AI Pro 결제 & 4배 한도 해금 실전 비하인드](/content/aigravity/07)
-- **S01E05 (정규)**: [실무 레거시 코드 파악과 안전한 DB/API 리팩토링](/content/aigravity/08)
+- **07 (서브 특별판)**: [쿼터 초과와 Google AI Pro 결제 & 4배 한도 해금 실전 비하인드](/content/aigravity/07)
+- **08 (정규)**: [실무 레거시 코드 파악과 안전한 DB/API 리팩토링](/content/aigravity/08)
+
 
 

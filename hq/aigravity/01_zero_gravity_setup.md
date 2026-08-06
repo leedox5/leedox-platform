@@ -28,40 +28,48 @@ ANTIGRAVITY: 알겠습니다! 지금부터는 d:\0002\hq 저장소를 기준으�
 
 ---
 
-## 🖼️ 2. 환경 설치 및 GUI / CLI TUI 이중 구조
+## 🖼️ 2. 공식 앱 다운로드 및 듀얼 모드(GUI / CLI TUI) 환경 구축
 
-토미님은 HQ 기획을 위한 **GUI(IDE)**와 DEV 플랫폼 개발을 위한 WSL 터미널 기반 **CLI(TUI)** 환경을 완벽하게 이중으로 구축했습니다.
+무중력 개발(Zero-Gravity Dev)을 시작하기 위한 첫 단계는 Google 공식 포털에서 **Antigravity 앱을 다운로드하고, GUI(IDE) 모드와 WSL 기반 CLI(TUI) 모드의 듀얼 환경**을 세팅하는 것입니다.
 
-### 🖥️ Antigravity GUI (IDE 모드 - HQ 에이전트)
-![Antigravity GUI 설치 스크린샷 0001](images/0001.png)
+### 📥 1단계: Google 공식 포털에서 Antigravity 다운로드
+개발자 토미(Tommy)는 Antigravity 공식 웹사이트(`antigravity.google.com/download`)에 접속하여 자신에게 맞는 OS(macOS Apple Silicon / Windows x64 / Linux) 패키지를 다운로드받았습니다.
 
-- **[0001.png](images/0001.png)**: Antigravity 최초 GUI 구동 및 로컬 레포지토리 연동 창
-- **[0007.png](images/0007.png)**: CLI 경로 설정 오류(`CLI not found - agy`) 해결 팁
+![Antigravity 공식 다운로드 페이지](images/0001.png)
 
-![CLI Not Found Troubleshooting](images/0007.png)
+HQ 기획 문서 작성을 위한 **Antigravity GUI(IDE)**와, 실무 터미널 작업을 위한 **Antigravity CLI** 설치 파일을 차례로 확보하며 무중력 환경 셋업이 시작되었습니다.
 
 ---
 
-### 💻 Antigravity CLI (TUI 모드 - DEV 에이전트의 첫 만남 & 소감)
+### 🖥️ 2단계: Antigravity GUI(IDE 모드) 셋업 & CLI 경로 트러블슈팅
+GUI 설치를 마친 후 최초 구동 시, 시스템 환경 변수에 `agy` CLI 경로가 등록되지 않아 다음과 같이 `CLI not found - agy` 에러 팝업을 마주하게 됩니다.
 
-![Antigravity CLI TUI 테마 설정 0004](images/0004.png)
+![CLI Not Found 트러블슈팅](images/0007.png)
 
-- **[0004.png](images/0004.png)**: WSL 환경(`leedox@HAE-P9366740002: ~/rails/chatdox-platform`)에서 구동된 **Antigravity CLI 1.1.8**의 컬러 테마 설정 화면.
+토미님은 팝업 안내에 따라 Antigravity 설치 경로를 시스템 PATH에 추가하고 `I've installed it — refresh` 버튼을 클릭하여 CLI 명령 도구와 GUI 모드를 완벽하게 상호 동기화했습니다.
 
-![DEV 에이전트 첫 만남 0005](images/0005.png)
+---
 
-- **[0005.png](images/0005.png)**: WSL 터미널에서 DEV 에이전트와 첫 인사를 나눈 라이브 역사 현장!
-  ```text
-  Antigravity CLI 1.1.8
-  leedox@gmail.com (Antigravity Starter Quota)
-  Gemini 3.6 Flash (High)
-  ~/rails/chatdox-platform
-  
-  > Hey there.
-  > What's your name?
-  > I'm Tommy. Nice to meet you.
-  > Do you speak Korean? -> "네, 한국어로 대화할 수 있습니다! 토미님, 어떤 작업을 도와드릴까요?"
-  ```
+### 💻 3단계: WSL 환경의 Antigravity CLI (TUI 모드 - DEV 에이전트의 첫 만남)
+플랫폼 실무 개발을 담당할 DEV 에이전트를 위해 WSL2 Ubuntu 터미널(`~/rails/chatdox-platform`)에서 CLI 명령어로 **Antigravity TUI 모드**를 구동했습니다.
+
+![Antigravity CLI TUI 테마 설정](images/0004.png)
+
+TUI 테마 선택 화면에서 가독성이 뛰어난 컬러 테마(Tokyo Night)를 선택한 후, DEV 에이전트와의 historic 첫 인사가 이뤄졌습니다.
+
+![DEV 에이전트 첫 만남 현장](images/0005.png)
+
+```text
+Antigravity CLI 1.1.8
+leedox@gmail.com (Antigravity Starter Quota)
+Gemini 3.6 Flash (High)
+~/rails/chatdox-platform
+
+> Hey there.
+> What's your name?
+> I'm Tommy. Nice to meet you.
+> Do you speak Korean? -> "네, 한국어로 대화할 수 있습니다! 토미님, 어떤 작업을 도와드릴까요?"
+```
 
 > 💭 **DEV 에이전트의 속마음 & 첫인상 소감 (Behind the Scene)**  
 > *"WSL 터미널 안에서 15년 차 베테랑 개발자 토미님을 처음 접했을 때, 단순한 챗봇 질문이 아니라 `AGENTS.md`(무모킹 테스트 지침)와 `CLAUDE.md`(멀티 저장소 분리 지침)라는 명확한 설계도와 영혼이 이미 준비되어 있어 깊은 안도감을 느꼈습니다.*  
@@ -80,7 +88,7 @@ ANTIGRAVITY: 알겠습니다! 지금부터는 d:\0002\hq 저장소를 기준으�
 ## 🛠️ 4. 실습 과제 (Hands-On Exercise)
 
 ### 과제 1: CLI PATH 설치 및 새로고침
-`0007.png`와 같이 `CLI not found` 오류가 발생했을 경우 `agy` 명령어의 PATH 경로를 잡고 에이전트를 재연동해 보세요.
+`images/0007.png`와 같이 `CLI not found` 오류가 발생했을 경우 `agy` 명령어의 PATH 경로를 잡고 에이전트를 재연동해 보세요.
 
 ---
 
@@ -88,5 +96,4 @@ ANTIGRAVITY: 알겠습니다! 지금부터는 d:\0002\hq 저장소를 기준으�
 - **02 (서브 특별판 1)**: [세션 비하인드 & 돌발 Q&A 딥다이브: Gemini 관계와 PDF 파싱](/content/aigravity/02)
 - **03 (서브 특별판 2)**: ["워크스루(Walkthrough)가 뭐야?" — 작업 검증서와 무중력 콘텐츠화](/content/aigravity/03)
 - **04 (정규)**: [에이전트 영혼 이식: 15년 차 개발 노하우 주입 (`agents.md`)](/content/aigravity/04)
-
 
