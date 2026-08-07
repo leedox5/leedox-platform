@@ -104,6 +104,45 @@ class AdminProductSaleManagementTest < ActionDispatch::IntegrationTest
     assert_select "li", text: /템플릿 세트/, count: 0
   end
 
+  test "admin can update pricing offers, discounts, and trial_chapter_limit dynamically" do
+    sign_in(@admin)
+
+    get edit_admin_commerce_product_path(@product)
+    assert_response :success
+
+    patch admin_commerce_product_path(@product), params: {
+      product: {
+        name: "Chatdox SaaS Engine",
+        sale_enabled: "1",
+        trial_chapter_limit: "4",
+        offers_attributes: {
+          "0" => { duration_months: "1", total_amount: "9900", discount_pct: "5", active: "1" },
+          "1" => { duration_months: "3", total_amount: "28000", discount_pct: "10", active: "1" },
+          "2" => { duration_months: "6", total_amount: "50000", discount_pct: "15", active: "1" },
+          "3" => { duration_months: "12", total_amount: "88000", discount_pct: "25", active: "1" }
+        }
+      }
+    }
+
+    assert_redirected_to admin_commerce_products_path
+    @product.reload
+    assert_equal "Chatdox SaaS Engine", @product.name
+    assert @product.sale_enabled?
+    assert_equal 4, @product.trial_chapter_limit
+    assert_equal 4, ProductContent.for("chatdox").trial_chapter_limit
+
+    offer_12m = @product.product_offers.find_by!(duration_months: 12)
+    assert_equal 88000, offer_12m.total_amount
+    assert_equal 2500, offer_12m.discount_bps
+
+    # Verify updated price renders on landing page
+    get chatdox_path
+    assert_response :success
+    assert_match(/9,900원/, response.body)
+    assert_match(/88,000원/, response.body)
+    assert_match(/25% 할인/, response.body)
+  end
+
   private
 
   def sign_in(user)
