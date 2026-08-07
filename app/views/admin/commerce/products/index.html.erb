@@ -12,70 +12,77 @@
       <%= link_to "관리자 대시보드", admin_dashboard_path, class: "text-sm font-bold text-blue-700 hover:underline" %>
     </header>
 
-    <section class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <table class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-          <tr>
-            <th class="px-4 py-3">상품 정보</th>
-            <th class="px-4 py-3">상태 설정</th>
-            <th class="px-4 py-3">무료 체험 한도</th>
-            <th class="px-4 py-3">동적 요금제 (ProductOffer)</th>
-            <th class="px-4 py-3 text-right">작업</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <% @products.each do |product| %>
-            <tr class="align-top">
-              <td class="px-4 py-4">
-                <strong><%= product.name %></strong>
-                <p class="text-xs text-slate-500"><%= product.code %></p>
-              </td>
-              <td class="px-4 py-4 space-y-1">
-                <div>
-                  <span class="rounded-full px-2.5 py-0.5 text-xs font-bold <%= product.sale_enabled? ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-600" %>">
-                    <%= product.sale_enabled? ? "판매 중" : "판매 중지" %>
-                  </span>
-                </div>
-                <% if product.free_access? %>
-                  <div>
-                    <span class="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-bold text-blue-700">영구 무료</span>
-                  </div>
-                <% end %>
-              </td>
-              <td class="px-4 py-4">
-                <span class="font-semibold text-slate-800">
-                  <%= product.trial_chapter_limit.present? ? "#{product.trial_chapter_limit} 챕터 (DB)" : "#{ProductContent.for(product.code).trial_chapter_limit} 챕터 (기본)" %>
-                </span>
-              </td>
-              <td class="px-4 py-4">
-                <% offers = product.product_offers.ordered %>
-                <% if offers.any? %>
-                  <ul class="space-y-1 text-xs text-slate-600">
-                    <% offers.each do |offer| %>
-                      <li>
-                        <strong><%= offer.duration_months %>개월:</strong>
-                        <%= number_with_delimiter(offer.total_amount) %>원
-                        <% if offer.discount_bps.positive? %>
-                          <span class="font-bold text-blue-600">(<%= offer.discount_bps / 100 %>% 할인)</span>
-                        <% end %>
-                        <%= " [비활성]" unless offer.active? %>
-                      </li>
-                    <% end %>
-                  </ul>
-                <% else %>
-                  <span class="text-slate-400">등록된 요금제 없음</span>
-                <% end %>
-              </td>
-              <td class="px-4 py-4 text-right">
-                <%= link_to "요금/설정 수정 →",
-                  edit_admin_commerce_product_path(product),
-                  class: "inline-flex rounded-lg border border-blue-200 bg-white px-3 py-1.5 font-semibold text-blue-700 transition hover:bg-blue-50" %>
-              </td>
+    <section class="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div class="w-full overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+          <thead class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+            <tr>
+              <th class="px-4 py-3 whitespace-nowrap">상품 정보</th>
+              <th class="px-4 py-3 whitespace-nowrap">상태 설정</th>
+              <th class="px-4 py-3 whitespace-nowrap">무료 체험 한도</th>
+              <th class="px-4 py-3 whitespace-nowrap">동적 요금제 (ProductOffer)</th>
+              <th class="px-4 py-3 text-right whitespace-nowrap">설정/수정 ⚙️</th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
-      <% if @products.empty? %><p class="p-8 text-center text-slate-500">등록된 상품이 없습니다.</p><% end %>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <% @products.each do |product| %>
+              <tr class="align-top">
+                <td class="px-4 py-4 whitespace-nowrap">
+                  <strong class="text-slate-900"><%= product.name %></strong>
+                  <p class="text-xs text-slate-500"><%= product.code %></p>
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap space-y-1">
+                  <div>
+                    <span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-bold whitespace-nowrap <%= product.sale_enabled? ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-600" %>">
+                      <%= product.sale_enabled? ? "판매 중" : "판매 중지" %>
+                    </span>
+                  </div>
+                  <% if product.free_access? %>
+                    <div>
+                      <span class="inline-block rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-bold text-blue-700 whitespace-nowrap">영구 무료</span>
+                    </div>
+                  <% end %>
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap">
+                  <span class="inline-block font-semibold text-slate-800 whitespace-nowrap">
+                    <%= product.trial_chapter_limit.present? ? "#{product.trial_chapter_limit} 챕터 (DB)" : "#{ProductContent.for(product.code).trial_chapter_limit} 챕터 (기본)" %>
+                  </span>
+                </td>
+                <td class="px-4 py-4">
+                  <% offers = product.product_offers.ordered %>
+                  <% if product.free_access? %>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 border border-blue-200 whitespace-nowrap">
+                      🎁 영구 무료 개방 (유료 라이선스 없음)
+                    </span>
+                  <% elsif offers.any? %>
+                    <ul class="space-y-1 text-xs text-slate-600">
+                      <% offers.each do |offer| %>
+                        <li class="whitespace-nowrap">
+                          <strong><%= offer.duration_months %>개월:</strong>
+                          <%= number_with_delimiter(offer.total_amount) %>원
+                          <% if offer.discount_bps.positive? %>
+                            <span class="font-bold text-blue-600">(<%= offer.discount_bps / 100 %>% 할인)</span>
+                          <% end %>
+                          <%= " [비활성]" unless offer.active? %>
+                        </li>
+                      <% end %>
+                    </ul>
+                  <% else %>
+                    <span class="text-slate-400 whitespace-nowrap">등록된 요금제 없음</span>
+                  <% end %>
+                </td>
+                <td class="px-4 py-4 text-right whitespace-nowrap">
+                  <%= link_to edit_admin_commerce_product_path(product),
+                    class: "inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-white px-3 py-1.5 font-semibold text-blue-700 shadow-sm transition hover:bg-blue-50 hover:border-blue-300 whitespace-nowrap" do %>
+                    <span>설정/수정 ⚙️</span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <% if @products.empty? %><p class="p-8 text-center text-slate-500 whitespace-nowrap">등록된 상품이 없습니다.</p><% end %>
     </section>
   </main>
 </div>

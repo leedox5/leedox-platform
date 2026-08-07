@@ -39,6 +39,12 @@ class AdminProductSaleManagementTest < ActionDispatch::IntegrationTest
     sign_in(@admin)
     get admin_commerce_products_path
     assert_response :success
+
+    # Responsive overflow container & whitespace-nowrap badges
+    assert_select "div.overflow-x-auto"
+    assert_select "th.whitespace-nowrap", text: /설정\/수정 ⚙️/
+    assert_select "span.whitespace-nowrap", text: /판매 중|판매 중지/
+    assert_select "span.whitespace-nowrap", text: /🎁 영구 무료 개방 \(유료 라이선스 없음\)/
   end
 
   test "toggling flips sale_enabled and records a commerce audit event" do
