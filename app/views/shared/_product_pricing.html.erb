@@ -2,6 +2,12 @@
 <% pricing_product = Product.find_by(code: product_code) %>
 <% pricing_sales_enabled = Commerce::Sales.enabled_for?(pricing_product) %>
 <% pricing_offers = pricing_product&.product_offers&.active&.ordered || ProductOffer.none %>
+<% is_violet = product_code.to_s == "claudox" %>
+<% is_emerald = product_code.to_s == "aigravity" %>
+
+<% card_bg_class = is_violet ? "border-violet-100 bg-violet-50/60" : (is_emerald ? "border-emerald-100 bg-emerald-50/60" : "border-blue-100 bg-blue-50/60") %>
+<% btn_bg_class = is_violet ? "bg-violet-600 hover:bg-violet-700 focus-visible:ring-violet-500" : (is_emerald ? "bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500" : "bg-blue-600 hover:bg-blue-700 focus-visible:ring-blue-500") %>
+<% badge_bg_class = is_violet ? "bg-violet-600 text-white" : (is_emerald ? "bg-emerald-600 text-white" : "bg-blue-600 text-white") %>
 
 <section id="pricing" class="bg-white py-10 sm:py-16">
   <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
@@ -15,13 +21,13 @@
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <% pricing_offers.each do |offer| %>
-        <article class="flex flex-col justify-between rounded-2xl border border-blue-100 bg-blue-50/60 p-6 text-center">
+        <article class="flex flex-col justify-between rounded-2xl border <%= card_bg_class %> p-6 text-center">
           <div>
             <h3 class="text-lg font-bold text-slate-900"><%= offer.duration_months %>개월</h3>
             <p class="mt-3 text-3xl font-black text-slate-950"><%= number_to_currency(offer.total_amount, unit: "원", format: "%n%u", precision: 0) %></p>
             <p class="mt-2 text-xs font-semibold text-slate-600">VAT 포함</p>
             <% if offer.discount_bps.positive? %>
-              <span class="mt-4 inline-flex rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white">
+              <span class="mt-4 inline-flex rounded-full <%= badge_bg_class %> px-3 py-1 text-xs font-bold">
                 <% if offer.duration_months == 12 %>최대 <% elsif offer.duration_months == 6 %>인기 <% end %><%= offer.discount_bps / 100 %>% 할인
               </span>
             <% else %>
@@ -32,7 +38,7 @@
           <div>
             <% if pricing_sales_enabled %>
               <%= link_to "#{offer.duration_months}개월 선택", billing_checkout_path_for(product_code, offer_code: offer.code),
-                class: "mt-6 inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-xs font-bold text-white shadow transition hover:bg-blue-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" %>
+                class: "mt-6 inline-flex w-full items-center justify-center rounded-xl #{btn_bg_class} px-4 py-3 text-xs font-bold text-white shadow transition hover:shadow-md focus:outline-none focus-visible:ring-2" %>
             <% else %>
               <span class="mt-6 inline-flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-slate-200 px-4 py-3 text-xs font-bold text-slate-500" aria-disabled="true">
                 <%= offer.duration_months %>개월 선택

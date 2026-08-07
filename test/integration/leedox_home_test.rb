@@ -732,7 +732,7 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "Claudox product page includes required structure and links into viewer" do
+  test "Claudox product page includes required structure, direct 20 chapter links, and pricing CTAs" do
     get claudox_path
 
     assert_response :success
@@ -743,9 +743,21 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_match(/구매 준비 중/, response.body)
     assert_no_match(/9,900원|평생 접근|1년 무료 업데이트|7일 이내 100% 환불/, response.body)
     assert_select "a[href=?]", claudox_read_path, text: /읽기 시작하기/
-    assert_select "a[href=?]", claudox_chapter_path("01"), minimum: 1
-    assert_select "a[href=?]", billing_checkout_path, count: 0
-    assert_select "a[href=?]", billing_checkout_path("claudox"), count: 0
+
+    # 4 pricing offer cards CTAs (disabled when sales not enabled, active when enabled)
+    [ 1, 3, 6, 12 ].each do |months|
+      assert_select "article", text: /#{months}개월/ do
+        assert_select "span", text: /#{months}개월 선택/
+      end
+    end
+
+    # 20 curriculum chapters direct links
+    doc = Nokogiri::HTML(response.body)
+    (1..20).each do |id|
+      padded_id = format("%02d", id)
+      link = doc.at_css("a[href='#{product_chapter_path('claudox', padded_id)}']")
+      assert link, "expected curriculum link for Claudox chapter #{padded_id}"
+    end
   end
 
   test "signed-in product pages also keep the legacy checkout link hidden" do
