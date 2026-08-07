@@ -53,15 +53,15 @@ class PricingSummaryPageTest < ActionDispatch::IntegrationTest
     aigravity_card = doc.css("article").find { |card| card.text.include?("Antigravity 개발 실전") }
     assert aigravity_card
     detail_link = aigravity_card.at_css("a")
-    assert_equal new_user_session_path(redirect_to: "/content/aigravity"), detail_link["href"]
+    assert_equal new_user_session_path(redirect_to: "/aigravity"), detail_link["href"]
 
     # 2. Guest user follows detail link to sign-in page
     get detail_link["href"]
     assert_response :success
 
-    # 3. User logs in and gets redirected to /content/aigravity
+    # 3. User logs in and gets redirected to /aigravity
     post user_session_path, params: { user: { email: user.email, password: "password123" } }
-    assert_redirected_to "/content/aigravity"
+    assert_redirected_to "/aigravity"
 
     follow_redirect!
     assert_response :success
@@ -72,7 +72,7 @@ class PricingSummaryPageTest < ActionDispatch::IntegrationTest
 
     doc = Nokogiri::HTML(response.body)
     aigravity_card = doc.css("article").find { |card| card.text.include?("Antigravity 개발 실전") }
-    assert_equal "/content/aigravity", aigravity_card.at_css("a")["href"]
+    assert_equal "/aigravity", aigravity_card.at_css("a")["href"]
   end
 
   test "a product with no offers shows a graceful placeholder instead of crashing" do

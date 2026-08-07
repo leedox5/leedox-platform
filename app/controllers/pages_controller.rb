@@ -8,6 +8,8 @@ class PagesController < ApplicationController
     # product/offers/sales-enabled state itself from product_code alone.
   end
 
+  def aigravity; end
+
   def getting_started; end
 
   def pricing
