@@ -1,84 +1,127 @@
 <section id="products" class="scroll-mt-20 bg-slate-50 py-20 sm:py-28">
   <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
     <div class="max-w-2xl">
-      <p class="text-sm font-black uppercase tracking-[0.18em] text-indigo-700">Two ways to collaborate</p>
-      <h2 class="mt-3 break-keep text-3xl font-black tracking-tight text-slate-950 sm:text-5xl">만드는 과정과, 일하는 방식</h2>
-      <p class="mt-4 text-lg leading-8 text-slate-600">목표는 다르지만 약속은 같습니다. AI를 설명하는 데 그치지 않고 실제로 무엇을 만들고 어떻게 일했는지 보여줍니다.</p>
+      <p class="text-sm font-black uppercase tracking-[0.18em] text-indigo-700">MASTERCLASS LINEUP</p>
+      <h2 class="mt-3 break-keep text-3xl font-black tracking-tight text-slate-950 sm:text-5xl">만드는 과정과, AI 무중력 협업 실전</h2>
+      <p class="mt-4 text-lg leading-8 text-slate-600">SaaS 구축, 클로드 팀 협업, 무중력 AI 코딩까지. LEEDOX의 3대 실전 마스터클래스 카탈로그입니다.</p>
     </div>
 
-    <div class="mt-12 grid gap-6 lg:grid-cols-2">
-      <article class="group flex flex-col overflow-hidden rounded-3xl border border-blue-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-xl sm:p-9">
+    <div class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <!-- 01 / Chatdox -->
+      <article class="group flex flex-col overflow-hidden rounded-3xl border border-blue-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
         <div class="flex items-start justify-between">
           <span class="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black tracking-[0.16em] text-blue-700">BUILD WITH AI</span>
           <span class="font-mono text-sm text-slate-400">01 / CHATDOX</span>
         </div>
         <div class="mt-8">
           <p class="text-sm font-bold text-blue-700">무엇을 만들 수 있는가?</p>
-          <h3 class="mt-2 break-keep text-3xl font-black tracking-tight text-slate-950">AI와 함께 SaaS 구축하기</h3>
-          <p class="mt-3 break-keep text-base leading-7 text-slate-600">기획부터 배포까지 실제 서비스 하나를 완성하는 실전 과정입니다.</p>
+          <h3 class="mt-2 break-keep text-2xl font-black tracking-tight text-slate-950">AI와 함께 SaaS 구축하기</h3>
+          <p class="mt-3 break-keep text-sm leading-6 text-slate-600">기획부터 배포까지 실제 서비스 하나를 완성하는 실전 과정입니다.</p>
         </div>
 
-        <dl class="mt-8 space-y-4 rounded-2xl border border-blue-100 bg-blue-50/40 p-5 text-sm">
+        <dl class="mt-8 space-y-3.5 rounded-2xl border border-blue-100 bg-blue-50/40 p-4 text-xs">
           <div>
-            <dt class="text-xs font-bold uppercase tracking-wider text-blue-900/70">추천 대상</dt>
-            <dd class="mt-1 font-semibold text-slate-900">첫 SaaS를 만들고 싶은 비개발자·초급 개발자</dd>
+            <dt class="font-bold uppercase tracking-wider text-blue-900/70">추천 대상</dt>
+            <dd class="mt-0.5 font-semibold text-slate-900">첫 SaaS를 만들고 싶은 비개발자·초급 개발자</dd>
           </div>
-          <div class="border-t border-blue-100/80 pt-3">
-            <dt class="text-xs font-bold uppercase tracking-wider text-blue-900/70">목표</dt>
-            <dd class="mt-1 font-semibold text-slate-900">AI와 실제 서비스를 기획부터 배포</dd>
+          <div class="border-t border-blue-100/80 pt-2.5">
+            <dt class="font-bold uppercase tracking-wider text-blue-900/70">목표</dt>
+            <dd class="mt-0.5 font-semibold text-slate-900">AI와 실제 서비스를 기획부터 배포</dd>
           </div>
-          <div class="border-t border-blue-100/80 pt-3">
-            <dt class="text-xs font-bold uppercase tracking-wider text-blue-900/70">주요 콘텐츠</dt>
-            <dd class="mt-1 font-semibold text-slate-900">구축 과정·기술 선택·코드 예제</dd>
+          <div class="border-t border-blue-100/80 pt-2.5">
+            <dt class="font-bold uppercase tracking-wider text-blue-900/70">주요 콘텐츠</dt>
+            <dd class="mt-0.5 font-semibold text-slate-900">구축 과정·기술 선택·코드 예제</dd>
           </div>
         </dl>
 
-        <div class="mt-auto pt-8">
+        <div class="mt-auto pt-7">
           <%= link_to chatdox_path, class: "inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition group-hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2" do %>
             Chatdox 자세히 보기 <span aria-hidden="true">→</span>
           <% end %>
         </div>
       </article>
 
-      <article class="group flex flex-col overflow-hidden rounded-3xl border border-violet-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-xl sm:p-9">
+      <!-- 02 / Claudox -->
+      <article class="group flex flex-col overflow-hidden rounded-3xl border border-violet-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
         <div class="flex items-start justify-between">
           <span class="rounded-full bg-violet-50 px-3 py-1.5 text-xs font-black tracking-[0.16em] text-violet-700">WORK WITH AI</span>
           <span class="font-mono text-sm text-slate-400">02 / CLAUDOX</span>
         </div>
         <div class="mt-8">
           <p class="text-sm font-bold text-violet-700">어떻게 함께 일할 것인가?</p>
-          <h3 class="mt-2 break-keep text-3xl font-black tracking-tight text-slate-950">클로드가 들어온 날,<br>팀이 달라졌다</h3>
-          <p class="mt-3 break-keep text-base leading-7 text-slate-600">AI가 질문, 기록과 업무 프로세스를 바꾸는 실제 협업 이야기입니다.</p>
+          <h3 class="mt-2 break-keep text-2xl font-black tracking-tight text-slate-950">클로드가 들어온 날,<br>팀이 달라졌다</h3>
+          <p class="mt-3 break-keep text-sm leading-6 text-slate-600">AI가 질문, 기록과 업무 프로세스를 바꾸는 실제 협업 이야기입니다.</p>
         </div>
 
-        <dl class="mt-8 space-y-4 rounded-2xl border border-violet-100 bg-violet-50/40 p-5 text-sm">
+        <dl class="mt-8 space-y-3.5 rounded-2xl border border-violet-100 bg-violet-50/40 p-4 text-xs">
           <div>
-            <dt class="text-xs font-bold uppercase tracking-wider text-violet-900/70">추천 대상</dt>
-            <dd class="mt-1 font-semibold text-slate-900">AI 협업 방식을 설계하려는 실무자·기획자·팀 리더</dd>
+            <dt class="font-bold uppercase tracking-wider text-violet-900/70">추천 대상</dt>
+            <dd class="mt-0.5 font-semibold text-slate-900">AI 협업 방식을 설계하려는 실무자·팀 리더</dd>
           </div>
-          <div class="border-t border-violet-100/80 pt-3">
-            <dt class="text-xs font-bold uppercase tracking-wider text-violet-900/70">목표</dt>
-            <dd class="mt-1 font-semibold text-slate-900">반복 가능한 AI 협업 방식 설계</dd>
+          <div class="border-t border-violet-100/80 pt-2.5">
+            <dt class="font-bold uppercase tracking-wider text-violet-900/70">목표</dt>
+            <dd class="mt-0.5 font-semibold text-slate-900">반복 가능한 AI 협업 방식 설계</dd>
           </div>
-          <div class="border-t border-violet-100/80 pt-3">
-            <dt class="text-xs font-bold uppercase tracking-wider text-violet-900/70">주요 콘텐츠</dt>
-            <dd class="mt-1 font-semibold text-slate-900">질문·기록·역할·업무 프로세스</dd>
+          <div class="border-t border-violet-100/80 pt-2.5">
+            <dt class="font-bold uppercase tracking-wider text-violet-900/70">주요 콘텐츠</dt>
+            <dd class="mt-0.5 font-semibold text-slate-900">질문·기록·역할·업무 프로세스</dd>
           </div>
         </dl>
 
-        <div class="mt-auto pt-8">
+        <div class="mt-auto pt-7">
           <%= link_to claudox_path, class: "inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white transition group-hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2" do %>
             Claudox 자세히 보기 <span aria-hidden="true">→</span>
           <% end %>
         </div>
       </article>
+
+      <!-- 03 / Antigravity -->
+      <article class="group flex flex-col overflow-hidden rounded-3xl border border-emerald-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+        <div class="flex items-start justify-between">
+          <span class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black tracking-[0.16em] text-emerald-700">AI-NATIVE AGENT</span>
+          <span class="font-mono text-sm text-slate-400">03 / AIGRAVITY</span>
+        </div>
+        <div class="mt-8">
+          <p class="text-sm font-bold text-emerald-700">무중력 코딩이란 무엇인가?</p>
+          <h3 class="mt-2 break-keep text-2xl font-black tracking-tight text-slate-950">무중력 AI 코딩 마스터클래스</h3>
+          <p class="mt-3 break-keep text-sm leading-6 text-slate-600">Google Antigravity GUI/CLI 듀얼 에이전트와 Handoff 2.0 실전 가이드입니다.</p>
+        </div>
+
+        <dl class="mt-8 space-y-3.5 rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4 text-xs">
+          <div>
+            <dt class="font-bold uppercase tracking-wider text-emerald-900/70">추천 대상</dt>
+            <dd class="mt-0.5 font-semibold text-slate-900">AI 에이전트 무중력 코딩을 정복하려는 개발자</dd>
+          </div>
+          <div class="border-t border-emerald-100/80 pt-2.5">
+            <dt class="font-bold uppercase tracking-wider text-emerald-900/70">목표</dt>
+            <dd class="mt-0.5 font-semibold text-slate-900">무모킹 디펜시브 코딩 & Handoff 2.0 체계화</dd>
+          </div>
+          <div class="border-t border-emerald-100/80 pt-2.5">
+            <dt class="font-bold uppercase tracking-wider text-emerald-900/70">주요 콘텐츠</dt>
+            <dd class="mt-0.5 font-semibold text-slate-900">Antigravity IDE·TUI·실전 프롬프트</dd>
+          </div>
+        </dl>
+
+        <div class="mt-auto pt-7">
+          <%= link_to aigravity_path, class: "inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition group-hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2" do %>
+            Antigravity 자세히 보기 <span aria-hidden="true">→</span>
+          <% end %>
+        </div>
+      </article>
     </div>
 
-    <div class="mt-8 flex flex-col items-start justify-between gap-4 rounded-2xl border border-emerald-100 bg-emerald-50/60 px-6 py-5 sm:flex-row sm:items-center">
-      <p class="break-keep text-sm leading-6 text-slate-700">
-        <span class="font-bold text-emerald-700">먼저 가볍게 체험해보고 싶다면</span> — AI를 처음 써보는 분들을 위한 5화짜리 무료 가이드, <strong class="font-bold text-slate-950">AI, 오늘부터 시작</strong>을 로그인 없이 바로 읽어보세요.
-      </p>
-      <%= link_to product_content_index_path("aistart"), class: "shrink-0 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2" do %>
+    <!-- 무료 입문 게이트웨이 스페셜 바 (aistart) -->
+    <div class="mt-10 flex flex-col items-start justify-between gap-4 rounded-2xl border border-teal-200 bg-teal-50/80 p-6 sm:flex-row sm:items-center shadow-sm">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="rounded-full bg-teal-100 px-3 py-1 text-xs font-bold text-teal-800">🎁 무료 입문 가이드</span>
+          <strong class="font-bold text-slate-950 text-base">AI, 오늘부터 시작 — 로그인 없이 5분 무료 가이드</strong>
+        </div>
+        <p class="mt-2 text-sm leading-6 text-slate-600">
+          AI를 처음 접하는 분들을 위해 부담 없이 5분 만에 시작할 수 있는 영구 무료 입문 콘텐츠입니다.
+        </p>
+      </div>
+      <%= link_to product_content_index_path("aistart"), class: "shrink-0 inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 shadow-sm" do %>
         무료로 읽어보기 <span aria-hidden="true">→</span>
       <% end %>
     </div>
