@@ -54,7 +54,8 @@ class ProductContent::FilesystemSource
   end
 
   def guest_chapter_limit
-    meta.guest_chapter_limit
+    db_limit = Product.find_by(code: product_code)&.trial_chapter_limit
+    db_limit.presence || meta.guest_chapter_limit
   end
 
   def trial_chapter_limit

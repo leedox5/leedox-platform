@@ -97,7 +97,8 @@ class ProductContent::ChatdoxLegacySource
   end
 
   def guest_chapter_limit
-    2
+    db_limit = Product.find_by(code: "chatdox")&.trial_chapter_limit
+    db_limit.presence || 2
   end
 
   def trial_chapter_limit

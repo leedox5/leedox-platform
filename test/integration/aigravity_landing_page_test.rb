@@ -14,7 +14,8 @@ class AigravityLandingPageTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: /무중력 AI 코딩 마스터클래스/
     assert_select "p", text: /AI-NATIVE STARTER PACKAGE/
 
-    # Hero CTA link to episode 01
+    # Hero free trial badge & CTA link to episode 01
+    assert_select "a[href=?]", product_chapter_path("aigravity", "01"), text: /무료 체험 가능/
     assert_select "a[href=?]", product_chapter_path("aigravity", "01"), text: /무중력 코딩 시작하기/
 
     # 14 chapters across 4 phases
@@ -63,5 +64,35 @@ class AigravityLandingPageTest < ActionDispatch::IntegrationTest
         end
       end
     end
+  end
+
+  test "pricing page links Antigravity product to /aigravity landing page" do
+    user = User.create!(name: "Test User", email: "aigravity-user@example.com", password: "password123")
+    post user_session_path, params: { user: { email: user.email, password: "password123" } }
+
+    get pricing_path
+    assert_response :success
+    assert_select "a[href=?]", aigravity_path, text: /자세히 보기/
+  end
+
+  test "enforces admin DB trial_chapter_limit override dynamically" do
+    product = Product.find_by!(code: "aigravity")
+    product.update!(trial_chapter_limit: 2)
+
+    assert_equal 2, ProductContent.for("aigravity").trial_chapter_limit
+    assert_equal 2, ProductContent.for("aigravity").guest_chapter_limit
+
+    # Hero badge reflects updated limit
+    get aigravity_path
+    assert_response :success
+    assert_select "a[href=?]", product_chapter_path("aigravity", "01"), text: /2 챕터 무료 체험 가능/
+
+    # Accessing chapter 02 is allowed as guest
+    get product_chapter_path("aigravity", "02")
+    assert_response :success
+
+    # Accessing chapter 03 without a license redirects or blocks guest
+    get product_chapter_path("aigravity", "03")
+    assert_response :redirect
   end
 end

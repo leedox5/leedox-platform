@@ -66,8 +66,11 @@ module Commerce
             record.sale_enabled = false
             record.tagline = attributes.fetch(:tagline)
             record.landing_page_path = attributes.fetch(:landing_page_path)
-            record.free_access = attributes.fetch(:free_access, false)
           end
+          product.update!(
+            landing_page_path: attributes.fetch(:landing_page_path),
+            free_access: attributes.fetch(:free_access, false)
+          )
           [ code, product ]
         end
 
