@@ -40,7 +40,7 @@ class CommerceCatalogTest < ActiveSupport::TestCase
     assert aigravity.active?
     assert_not aigravity.sale_enabled?
     assert_equal "Antigravity 개발 실전", aigravity.name
-    assert_equal "/content/aigravity", aigravity.landing_page_path
+    assert_equal "/aigravity", aigravity.landing_page_path
 
     source = ProductContent.for("aigravity")
     assert_equal "emerald", source.theme[:accent]

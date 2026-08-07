@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   root "pages#home"
 
   get "/chatdox", to: "pages#chatdox", as: :chatdox
+  get "/aigravity", to: "pages#aigravity", as: :aigravity
 
   # Legacy per-product URLs and route helper names, kept exactly as they were
   # (bookmarks/external links/SEO) -- product_code comes in via `defaults:`
