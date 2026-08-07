@@ -1,11 +1,20 @@
 <header class="sticky top-0 z-50 border-b border-slate-200/70 bg-white/90 shadow-sm backdrop-blur">
   <div class="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-    <%= link_to root_path, class: "group inline-flex items-center gap-2 text-lg font-black tracking-tight text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" do %>
-      <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-950 text-sm font-black text-white transition group-hover:bg-indigo-700">L</span>
-      LEEDOX
-    <% end %>
+    <div class="flex items-center gap-4">
+      <%= link_to root_path, class: "group inline-flex items-center gap-2 text-lg font-black tracking-tight text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" do %>
+        <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-950 text-sm font-black text-white transition group-hover:bg-indigo-700">L</span>
+        LEEDOX
+      <% end %>
+
+      <div class="hidden items-center gap-2 border-l border-slate-200 pl-4 lg:flex">
+        <%= link_to "Chatdox", chatdox_path, class: "rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 transition hover:bg-blue-100" %>
+        <%= link_to "Claudox", claudox_path, class: "rounded-full bg-violet-50 px-2.5 py-1 text-xs font-bold text-violet-700 transition hover:bg-violet-100" %>
+        <%= link_to "Antigravity", aigravity_path, class: "rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100" %>
+      </div>
+    </div>
 
     <nav aria-label="주요 내비게이션" class="hidden items-center gap-4 text-sm font-medium text-slate-600 md:flex">
+
       <% primary_navigation_items.each do |label, path| %>
         <%= link_to label, path, class: "rounded transition hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" %>
       <% end %>
@@ -30,25 +39,32 @@
       <summary class="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-lg border border-slate-200 text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" aria-label="메뉴 열기">
         <span aria-hidden="true" class="text-xl leading-none">☰</span>
       </summary>
-      <nav aria-label="모바일 내비게이션" class="absolute right-0 mt-3 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
-        <% primary_navigation_items.each do |label, path| %>
-          <%= link_to label, path, class: "block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" %>
-        <% end %>
+      <div class="absolute right-0 mt-3 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+        <div class="flex items-center gap-1.5 px-3 py-2 border-b border-slate-100 pb-2.5">
+          <%= link_to "Chatdox", chatdox_path, class: "rounded-full bg-blue-50 px-2 py-0.5 text-xs font-bold text-blue-700 hover:bg-blue-100" %>
+          <%= link_to "Claudox", claudox_path, class: "rounded-full bg-violet-50 px-2 py-0.5 text-xs font-bold text-violet-700 hover:bg-violet-100" %>
+          <%= link_to "Antigravity", aigravity_path, class: "rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100" %>
+        </div>
+        <nav aria-label="모바일 내비게이션">
+          <% primary_navigation_items.each do |label, path| %>
+            <%= link_to label, path, class: "block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" %>
+          <% end %>
 
-        <div class="my-2 border-t border-slate-100"></div>
-        <% if user_signed_in? %>
-          <p class="truncate px-3 pb-2 text-xs text-slate-500"><%= current_user.name %></p>
-          <%= link_to "로그아웃",
-            destroy_user_session_path,
-            data: { turbo_method: :delete },
-            class: "block rounded-lg px-3 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500" %>
-        <% else %>
-          <div class="grid grid-cols-2 gap-2">
-            <%= link_to "로그인", new_user_session_path, class: "rounded-lg border border-slate-200 px-3 py-2 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" %>
-            <%= link_to "회원가입", new_user_registration_path, class: "rounded-lg bg-slate-950 px-3 py-2 text-center text-sm font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" %>
-          </div>
-        <% end %>
-      </nav>
+          <div class="my-2 border-t border-slate-100"></div>
+          <% if user_signed_in? %>
+            <p class="truncate px-3 pb-2 text-xs text-slate-500"><%= current_user.name %></p>
+            <%= link_to "로그아웃",
+              destroy_user_session_path,
+              data: { turbo_method: :delete },
+              class: "block rounded-lg px-3 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500" %>
+          <% else %>
+            <div class="grid grid-cols-2 gap-2">
+              <%= link_to "로그인", new_user_session_path, class: "rounded-lg border border-slate-200 px-3 py-2 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" %>
+              <%= link_to "회원가입", new_user_registration_path, class: "rounded-lg bg-slate-950 px-3 py-2 text-center text-sm font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" %>
+            </div>
+          <% end %>
+        </nav>
+      </div>
     </details>
   </div>
 </header>

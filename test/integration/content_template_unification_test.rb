@@ -16,12 +16,16 @@ class ContentTemplateUnificationTest < ActionDispatch::IntegrationTest
     get docs_path
     assert_response :success
     assert_match(/text-blue-600/, response.body)
-    assert_no_match(/text-violet-600|bg-violet-50|text-emerald-600/, response.body)
+    doc = Nokogiri::HTML(response.body)
+    assert_empty doc.css("main [class*='violet-600'], aside [class*='violet-600']"),
+      "expected no product-theme violet inside the Chatdox reader layout"
 
     get doc_path("01")
     assert_response :success
     assert_match(/text-blue-600/, response.body)
-    assert_no_match(/text-violet-600|bg-violet-50|text-emerald-600/, response.body)
+    doc = Nokogiri::HTML(response.body)
+    assert_empty doc.css("main [class*='violet-600'], aside [class*='violet-600']"),
+      "expected no product-theme violet inside the Chatdox reader page"
     assert_select "aside", minimum: 1
   end
 

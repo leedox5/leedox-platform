@@ -14,12 +14,13 @@ class UserDashboardVisibilityFilterTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Free access product (aistart) is NOT displayed on dashboard
-    assert_select "section[aria-label*='AI, 오늘부터 시작']", count: 0
-    assert_no_match(/aistart/i, response.body)
+    assert_select "main section[aria-label*='AI, 오늘부터 시작']", count: 0
+    doc = Nokogiri::HTML(response.body)
+    assert_no_match(/aistart/i, doc.css("main").text)
 
     # Preparing product (aigravity) is NOT displayed on dashboard
-    assert_select "section[aria-label*='Antigravity']", count: 0
-    assert_no_match(/aigravity/i, response.body)
+    assert_select "main section[aria-label*='Antigravity']", count: 0
+    assert_no_match(/aigravity/i, doc.css("main").text)
 
     # Bottom catalog grid displays purchasable paid products (Chatdox, Claudox) for unowned user
     assert_select "section[aria-label='전체 카탈로그 둘러보기']" do

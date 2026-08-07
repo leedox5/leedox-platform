@@ -43,6 +43,29 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_select "strong", text: /AI, 오늘부터 시작 — 로그인 없이 5분 무료 가이드/
   end
 
+  test "renders 3-column terminal mockup section and GNB/Footer 3-product links (handoff 0015)" do
+    get root_path
+    assert_response :success
+
+    # Terminal mockup section 3 columns
+    assert_select "p", text: "AIGRAVITY / MASTERY LOG"
+    assert_select "a[href=?]", aigravity_path, text: /무중력 기록 보기/
+
+    # GNB Header 3-product shortcuts
+    assert_select "header" do
+      assert_select "a[href=?]", chatdox_path, text: "Chatdox"
+      assert_select "a[href=?]", claudox_path, text: "Claudox"
+      assert_select "a[href=?]", aigravity_path, text: "Antigravity"
+    end
+
+    # Footer 3-product links
+    assert_select "footer" do
+      assert_select "a[href=?]", chatdox_path, text: "Chatdox"
+      assert_select "a[href=?]", claudox_path, text: "Claudox"
+      assert_select "a[href=?]", aigravity_path, text: "Antigravity"
+    end
+  end
+
   test "hero CHATDOX/CLAUDOX cards are themselves clickable links, not static article blocks (handoff 0023)" do
     get root_path
     assert_response :success
