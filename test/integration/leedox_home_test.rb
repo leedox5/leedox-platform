@@ -20,6 +20,14 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_select "footer a[href=?]", privacy_path
   end
 
+  test "footer links to the FTC 사업자정보확인 lookup for our registration number, opened in a new tab (handoff 0026)" do
+    get root_path
+    assert_response :success
+
+    expected_href = "https://www.ftc.go.kr/bizCommPop.do?wrkr_no=#{CompanyInfo::REGISTRATION_NUMBER.delete('-')}"
+    assert_select "footer a[href=?][target='_blank'][rel='noopener']", expected_href, text: "사업자정보확인"
+  end
+
   test "renders dynamic flagship 3-card catalog and free gateway bar on homepage (handoff 0014)" do
     get root_path
     assert_response :success
