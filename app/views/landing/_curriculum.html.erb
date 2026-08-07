@@ -17,7 +17,7 @@
           <ol class="mt-4 space-y-3 text-sm text-slate-600">
             <% phase_chapters.each do |chapter| %>
               <li>
-                <%= link_to doc_path(chapter[:id]), class: "transition-colors hover:text-blue-600" do %>
+                <%= link_to product_chapter_path("chatdox", chapter[:id]), class: "transition-colors hover:text-blue-600 font-medium" do %>
                   <%= chapter[:id].to_i %>. <%= chapter[:title] %>
                 <% end %>
               </li>

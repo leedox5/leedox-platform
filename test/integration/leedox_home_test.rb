@@ -706,6 +706,21 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", billing_checkout_path, count: 0
   end
 
+  test "Chatdox landing page links all 20 curriculum chapters directly to /content/chatdox/:id and removes Hero sub-boxes" do
+    get chatdox_path
+    assert_response :success
+
+    assert_no_match(/가입 후 10분 안에 첫 SaaS 골격을 실행해볼 수 있습니다/, response.body)
+
+    doc = Nokogiri::HTML(response.body)
+    (1..20).each do |id|
+      padded_id = format("%02d", id)
+      link = doc.at_css("a[href='#{product_chapter_path('chatdox', padded_id)}']")
+      assert link, "expected curriculum link for chapter #{padded_id}"
+      assert_includes link["class"], "hover:text-blue-600"
+    end
+  end
+
   test "Claudox product page includes required structure and links into viewer" do
     get claudox_path
 
