@@ -37,6 +37,17 @@ module ContentThemeHelper
       nav_hover: "hover:text-emerald-600",
       sidebar_current: "bg-emerald-50 font-semibold text-emerald-700",
       sidebar_current_badge: "bg-emerald-600 text-white"
+    },
+    "teal" => {
+      label: "text-teal-600",
+      icon_badge: "bg-teal-50 text-teal-600",
+      icon_badge_hover: "group-hover:bg-teal-100",
+      link_hover_border: "hover:border-teal-200",
+      link_hover_text: "group-hover:text-teal-600",
+      link_hover_arrow: "group-hover:text-teal-400",
+      nav_hover: "hover:text-teal-600",
+      sidebar_current: "bg-teal-50 font-semibold text-teal-700",
+      sidebar_current_badge: "bg-teal-600 text-white"
     }
   }.freeze
 

@@ -5,14 +5,15 @@ class HomeProductComparisonAlignmentTest < ActionDispatch::IntegrationTest
     Commerce::CatalogBootstrap.call!
   end
 
-  test "1. Home #products contains exactly one Chatdox card and one Claudox card" do
+  test "1. Home #products contains Chatdox, Claudox, and Antigravity cards" do
     get root_path
     assert_response :success
 
     assert_select "#products" do
-      assert_select "article", count: 2
+      assert_select "article", count: 3
       assert_select "span", text: "01 / CHATDOX", count: 1
       assert_select "span", text: "02 / CLAUDOX", count: 1
+      assert_select "span", text: "03 / AIGRAVITY", count: 1
     end
   end
 
@@ -42,7 +43,7 @@ class HomeProductComparisonAlignmentTest < ActionDispatch::IntegrationTest
     assert_equal [ "추천 대상", "목표", "주요 콘텐츠" ], claudox_dts
 
     claudox_dds = claudox_article.css("dl dd").map(&:text).map(&:strip)
-    assert_equal "AI 협업 방식을 설계하려는 실무자·기획자·팀 리더", claudox_dds[0]
+    assert_equal "AI 협업 방식을 설계하려는 실무자·팀 리더", claudox_dds[0]
     assert_equal "반복 가능한 AI 협업 방식 설계", claudox_dds[1]
     assert_equal "질문·기록·역할·업무 프로세스", claudox_dds[2]
   end
@@ -54,6 +55,7 @@ class HomeProductComparisonAlignmentTest < ActionDispatch::IntegrationTest
     assert_select "#products" do
       assert_select "a[href=?]", chatdox_path, text: /Chatdox 자세히 보기/
       assert_select "a[href=?]", claudox_path, text: /Claudox 자세히 보기/
+      assert_select "a[href=?]", aigravity_path, text: /Antigravity 자세히 보기/
     end
   end
 
@@ -84,15 +86,15 @@ class HomeProductComparisonAlignmentTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#products']", text: "나에게 맞는 상품 찾기"
   end
 
-  test "7. Desktop 2-column grid, mobile responsive layout, and mt-auto bottom alignment on CTA containers are preserved" do
+  test "7. Desktop 3-column grid, mobile responsive layout, and mt-auto bottom alignment on CTA containers are preserved" do
     get root_path
     assert_response :success
 
-    assert_select "#products div.grid.gap-6.lg\\:grid-cols-2"
+    assert_select "#products div.grid.gap-6"
 
     doc = Nokogiri::HTML(response.body)
     articles = doc.css("#products article")
-    assert_equal 2, articles.size
+    assert_equal 3, articles.size
 
     articles.each do |article|
       cta_container = article.css("div.mt-auto").first

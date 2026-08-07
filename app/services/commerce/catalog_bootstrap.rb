@@ -4,12 +4,16 @@ module Commerce
       "chatdox" => {
         name: "Chatdox",
         tagline: "AI와 함께 SaaS를 기획부터 배포까지 직접 만들어보는 실전 커리큘럼",
-        landing_page_path: "/chatdox"
+        landing_page_path: "/chatdox",
+        theme: "blue",
+        display_order: 2
       },
       "claudox" => {
         name: "Claudox",
         tagline: "Claude를 팀에 합류시켜 실제로 협업한 기록을 그대로 따라가는 콘텐츠",
-        landing_page_path: "/claudox"
+        landing_page_path: "/claudox",
+        theme: "violet",
+        display_order: 3
       },
       # Free content available in full after login (see
       # hq/aistart/content_meta.yml -- guest/trial limits both cover all 5
@@ -27,12 +31,16 @@ module Commerce
         name: "AI, 오늘부터 시작",
         tagline: nil,
         landing_page_path: "/content/aistart",
-        free_access: true
+        free_access: true,
+        theme: "teal",
+        display_order: 1
       },
       "aigravity" => {
         name: "Antigravity 개발 실전",
         tagline: "15년 차 베테랑의 AI 에이전트 무중력 코딩 실전 가이드",
-        landing_page_path: "/aigravity"
+        landing_page_path: "/aigravity",
+        theme: "emerald",
+        display_order: 4
       }
     }.freeze
     CHATDOX_OFFERS = [

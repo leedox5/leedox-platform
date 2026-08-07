@@ -1,6 +1,8 @@
 class PagesController < ApplicationController
   def home
-    # Static landing page: no database query required.
+    products = Product.active.to_a.sort_by(&:display_order)
+    @flagship_products = products.reject(&:gateway?)
+    @gateway_product = products.find(&:gateway?) || Product.find_by(code: "aistart")
   end
 
   def chatdox

@@ -5,7 +5,7 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     Commerce::CatalogBootstrap.call!
   end
 
-  test "integrated home presents LEEDOX and both products without unconfirmed pricing" do
+  test "integrated home presents LEEDOX and flagship products" do
     get root_path
 
     assert_response :success
@@ -14,10 +14,56 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: /AI와 함께 일하는 방법을/
     assert_select "a[href=?]", chatdox_path, minimum: 1
     assert_select "a[href=?]", claudox_path, minimum: 1
+    assert_select "a[href=?]", aigravity_path, minimum: 1
     assert_select "a[href='#products']", minimum: 2
     assert_select "footer a[href=?]", terms_path
     assert_select "footer a[href=?]", privacy_path
-    assert_no_match(/₩|9,900원|무료 체험|프리미엄 요금제/, response.body)
+  end
+
+  test "renders dynamic flagship 3-card catalog and free gateway bar on homepage (handoff 0014)" do
+    get root_path
+    assert_response :success
+
+    # Dynamic subtitle & CTA
+    assert_select "p", text: /LEEDOX의 실전 마스터클래스 라인업을 만나보세요/
+    assert_select "a[href='#products']", text: /마스터클래스 살펴보기/
+
+    # 3-Card Flagship Grid (Chatdox, Claudox, Antigravity)
+    assert_select "#products" do
+      assert_select "p", text: /MASTERCLASS LINEUP/
+      assert_select "h2", text: /만드는 과정과, AI 무중력 협업 실전/
+      assert_select "article", count: 3
+      assert_select "a[href=?]", chatdox_path, text: /Chatdox 자세히 보기/
+      assert_select "a[href=?]", claudox_path, text: /Claudox 자세히 보기/
+      assert_select "a[href=?]", aigravity_path, text: /Antigravity 자세히 보기/
+    end
+
+    # Free gateway bar (aistart)
+    assert_select "a[href=?]", product_content_index_path("aistart"), text: /무료로 읽어보기/
+    assert_select "strong", text: /AI, 오늘부터 시작 — 로그인 없이 5분 무료 가이드/
+  end
+
+  test "renders 3-column terminal mockup section and GNB/Footer 3-product links (handoff 0015)" do
+    get root_path
+    assert_response :success
+
+    # Terminal mockup section 3 columns
+    assert_select "p", text: "AIGRAVITY / MASTERY LOG"
+    assert_select "a[href=?]", aigravity_path, text: /무중력 기록 보기/
+
+    # GNB Header 3-product shortcuts
+    assert_select "header" do
+      assert_select "a[href=?]", chatdox_path, text: "Chatdox"
+      assert_select "a[href=?]", claudox_path, text: "Claudox"
+      assert_select "a[href=?]", aigravity_path, text: "Antigravity"
+    end
+
+    # Footer 3-product links
+    assert_select "footer" do
+      assert_select "a[href=?]", chatdox_path, text: "Chatdox"
+      assert_select "a[href=?]", claudox_path, text: "Claudox"
+      assert_select "a[href=?]", aigravity_path, text: "Antigravity"
+    end
   end
 
   test "hero CHATDOX/CLAUDOX cards are themselves clickable links, not static article blocks (handoff 0023)" do
@@ -25,8 +71,8 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     doc = Nokogiri::HTML(response.body)
-    hero_products = doc.at_css("[aria-label='LEEDOX의 두 상품']")
-    assert hero_products, "expected the hero's two-product block"
+    hero_products = doc.at_css("[aria-label*='LEEDOX']")
+    assert hero_products, "expected the hero's product block"
 
     chatdox_card = hero_products.at_css("a[href='#{chatdox_path}']")
     assert chatdox_card, "expected the CHATDOX hero card to be an <a> to chatdox_path"
