@@ -700,22 +700,33 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_match(/자동 갱신 없는 기간제 선불 라이선스/, response.body)
     assert_match(/구매 준비 중/, response.body)
     assert_no_match(/9,900원|평생 접근|1년 무료 업데이트|7일 이내 100% 환불|언제든 취소|월 구독/, response.body)
-    assert_no_match(/무료 체험|프리미엄형|오픈 알림/, response.body)
+    assert_no_match(/프리미엄형|오픈 알림/, response.body)
     assert_no_match(/선택형 운영 지원|커뮤니티 이용|라이브 오피스아워|코드리뷰 크레딧|아키텍처 클리닉/, response.body)
     assert_select "a[href=?]", docs_path, text: /커리큘럼 문서 보기/
     assert_select "a[href=?]", billing_checkout_path, count: 0
   end
 
-  test "Chatdox landing page links all 20 curriculum chapters directly to /content/chatdox/:id and removes Hero sub-boxes" do
+  test "Chatdox landing page links all 20 curriculum chapters directly to /content/chatdox/:id, includes free trial badge, and renders pricing CTAs" do
     get chatdox_path
     assert_response :success
 
     assert_no_match(/가입 후 10분 안에 첫 SaaS 골격을 실행해볼 수 있습니다/, response.body)
 
+    # Hero 1~2 chapter free trial badge
+    assert_select "a[href=?]", product_chapter_path("chatdox", "01"), text: /1~2 챕터 무료 체험 가능/
+
+    # 4 pricing offer cards CTAs (disabled when sales not enabled, active when enabled)
+    [ 1, 3, 6, 12 ].each do |months|
+      assert_select "article", text: /#{months}개월/ do
+        assert_select "span", text: /#{months}개월 선택/
+      end
+    end
+
     doc = Nokogiri::HTML(response.body)
+    curriculum = doc.at_css("#docs")
     (1..20).each do |id|
       padded_id = format("%02d", id)
-      link = doc.at_css("a[href='#{product_chapter_path('chatdox', padded_id)}']")
+      link = curriculum.at_css("a[href='#{product_chapter_path('chatdox', padded_id)}']")
       assert link, "expected curriculum link for chapter #{padded_id}"
       assert_includes link["class"], "hover:text-blue-600"
     end

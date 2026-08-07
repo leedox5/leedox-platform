@@ -54,8 +54,8 @@ class ApplicationController < ActionController::Base
   # Chatdox omits the :product_code segment (bare /billing/checkout) so every
   # existing link/bookmark/test built before checkout supported other
   # products keeps resolving to the exact same URL.
-  def billing_checkout_path_for(product_code)
-    product_code.to_s == "chatdox" ? billing_checkout_path : billing_checkout_path(product_code)
+  def billing_checkout_path_for(product_code, **options)
+    product_code.to_s == "chatdox" ? billing_checkout_path(options) : billing_checkout_path(product_code, options)
   end
 
   def configure_permitted_parameters
