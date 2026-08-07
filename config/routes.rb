@@ -63,6 +63,7 @@ Rails.application.routes.draw do
   get "/refs", to: "refs#index", as: :refs
   get "/refs/:id", to: "refs#show", as: :ref
 
+  get "/admin/products", to: redirect("/admin/commerce/products")
   get "/admin/payment-docs", to: redirect("/refs"), as: :admin_payment_docs
   get "/admin/payment-docs/:section", to: redirect("/refs/payment-%{section}"), as: :admin_payment_docs_section
 
@@ -79,7 +80,7 @@ Rails.application.routes.draw do
         post :confirm_manual_payment, on: :member
       end
       resources :refund_requests, only: %i[show update], param: :id
-      resources :products, only: %i[index update]
+      resources :products, only: %i[index edit update]
       get "/github_access", to: "github_access#index", as: :github_access
       patch "/github_access/:id/invite", to: "github_access#invite", as: :invite_github_access
       patch "/github_access/:id/revoke", to: "github_access#revoke", as: :revoke_github_access
