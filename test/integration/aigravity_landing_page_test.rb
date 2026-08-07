@@ -25,8 +25,43 @@ class AigravityLandingPageTest < ActionDispatch::IntegrationTest
       assert link, "expected curriculum link for chapter #{padded_id}"
     end
 
+    # Pricing section
+    assert_select "#pricing" do
+      assert_select "h2", text: /기간별 이용 안내/
+      assert_select "p", text: /신규 결제 시스템을 준비 중이며 현재는 구매할 수 없습니다/
+    end
+
     # Bottom Dark Banner & FAQ
     assert_select "h2", text: /지금 바로 무중력 AI 코딩 마스터클래스를 시작하세요/
     assert_select "h2", text: /자주 묻는 질문 \(FAQ\)/
+  end
+
+  test "renders 4 pricing offer cards with Emerald theme and direct checkout CTAs when offers exist" do
+    product = Product.find_by!(code: "aigravity")
+    [ 1, 3, 6, 12 ].each do |months|
+      ProductOffer.create!(
+        product: product,
+        code: "aigravity-#{months}m-v1",
+        version: 1,
+        duration_months: months,
+        supply_amount: 10000 * months,
+        vat_amount: 1000 * months,
+        total_amount: 11000 * months,
+        discount_bps: (months == 12 ? 2000 : (months == 6 ? 1000 : 0)),
+        currency: "KRW",
+        active: true
+      )
+    end
+
+    get aigravity_path
+    assert_response :success
+
+    assert_select "#pricing" do
+      [ 1, 3, 6, 12 ].each do |months|
+        assert_select "article", text: /#{months}개월/ do
+          assert_select "span", text: /#{months}개월 선택/
+        end
+      end
+    end
   end
 end
