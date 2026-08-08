@@ -43,9 +43,9 @@ class SaleStateRegressionTest < ActionDispatch::IntegrationTest
     assert_select "p", text: /최저 #{number_with_delimiter(chatdox_cheapest.total_amount)}원부터/
     assert_select "p", text: /최저 #{number_with_delimiter(claudox_cheapest.total_amount)}원부터/
 
-    # Detail CTA links for logged out user (redirect_to)
-    assert_select "a[href=?]", new_user_session_path(redirect_to: chatdox_path), text: "자세히 보기"
-    assert_select "a[href=?]", new_user_session_path(redirect_to: claudox_path), text: "자세히 보기"
+    # Detail CTA links are direct product links for guests too
+    assert_select "a[href=?]", chatdox_path, text: "자세히 보기"
+    assert_select "a[href=?]", claudox_path, text: "자세히 보기"
 
     # 2. Logged in user view on /pricing
     sign_in(@user)
@@ -67,6 +67,8 @@ class SaleStateRegressionTest < ActionDispatch::IntegrationTest
     # Prices remain displayed from bootstrap catalog even when sales are paused
     assert_select "p", text: /최저 #{number_with_delimiter(chatdox_cheapest.total_amount)}원부터/
     assert_select "p", text: /최저 #{number_with_delimiter(claudox_cheapest.total_amount)}원부터/
+    assert_select "a[href=?]", chatdox_path, text: "자세히 보기"
+    assert_select "a[href=?]", claudox_path, text: "자세히 보기"
   end
 
   test "Logged-out user sign in and seamless return to original checkout destination" do
