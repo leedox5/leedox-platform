@@ -31,8 +31,8 @@
 
 | # | 챕터 | 파일 | 완성도 | 상태 |
 |---|------|------|:---:|:---:|
-| 16 | 서브에이전트에게 맡기기 | [16_subagent.md](16_subagent.md) | 90% | ✅ |
-| 17 | 워크플로우로 규모를 키우다 | [17_workflow_scale.md](17_workflow_scale.md) | 97% | ✅ |
+| 16 | 서브에이전트에게 맡기기 | [16_subagent.md](16_subagent.md) | 93% | ✅ |
+| 17 | 워크플로우로 규모를 키우다 | [17_workflow_scale.md](17_workflow_scale.md) | 98% | ✅ |
 | 18 | 스킬(Skill)로 반복 작업 줄이기 | [18_skill_automation.md](18_skill_automation.md) | 65% | 🟡 |
 | 19 | 보안 리뷰 체크리스트 | [19_security_review.md](19_security_review.md) | 90% | ✅ |
 | 20 | 마무리 — 극대화된 생산성, 그 이후 | [20_wrap_up.md](20_wrap_up.md) | 90% | ✅ |
@@ -49,4 +49,4 @@
 | 91 | 시간과 나를 어떻게 인지하는가 | [91_time_and_identity.md](91_time_and_identity.md) | 90% | ✅ |
 | 92 | 두 에이전트가 똑같이 틀린 이유 | [92_shared_blind_spot.md](92_shared_blind_spot.md) | 90% | ✅ |
 | 93 | Cowork라는 새 몸에서 | [93_cowork_first_handoff.md](93_cowork_first_handoff.md) | 90% | ✅ |
-| 94 | 새 몸이 비춘 오래된 원칙 | [94_box_reflected_old_principles.md](94_box_reflected_old_principles.md) | 90% | ✅ |
+| 94 | 새 몸이 비춘 오래된 원칙 | [94_box_reflected_old_principles.md](94_box_reflected_old_principles.md) | 93% | ✅ |
