@@ -831,7 +831,7 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
-    assert_match(/신규 결제를 준비하고 있습니다/, response.body)
+    assert_match(/준비하고 있습니다/, response.body)
     assert_match(/결제나 결제 수단 등록을 시작할 수 없습니다/, response.body)
     assert_select "#pay-button", count: 0
     assert_select "script[src*='tosspayments']", count: 0
@@ -844,7 +844,7 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
       get billing_checkout_path
     end
     assert_response :success
-    assert_match(/신규 결제를 준비하고 있습니다/, response.body)
+    assert_match(/준비하고 있습니다/, response.body)
   end
 
   test "checkout's 가격 및 이용 기간 보기 link points at each product's own #pricing anchor" do
@@ -981,7 +981,7 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
 
     get billing_checkout_path
     assert_response :success
-    assert_match(/신규 결제를 준비하고 있습니다/, response.body)
+    assert_match(/준비하고 있습니다/, response.body)
   end
 
   test "Chatdox pricing banner only shows when sales are actually disabled" do

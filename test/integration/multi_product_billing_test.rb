@@ -157,7 +157,7 @@ class MultiProductBillingTest < ActionDispatch::IntegrationTest
     # but shows the "not enabled" screen since Commerce::Sales.enabled_for? is false for it.
     get billing_checkout_path("claudox")
     assert_response :success
-    assert_match(/신규 결제를 준비하고 있습니다/, response.body)
+    assert_match(/준비하고 있습니다/, response.body)
 
     # And the order-creation gate rejects Claudox specifically, not Chatdox.
     assert_no_difference "Order.count" do

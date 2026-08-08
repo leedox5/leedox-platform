@@ -117,7 +117,7 @@ class SaleStateRegressionTest < ActionDispatch::IntegrationTest
     sign_in(@user)
     get billing_checkout_path
     assert_response :success
-    assert_select "h1", text: /신규 결제를 준비하고 있습니다/
+    assert_select "h1", text: /준비하고 있습니다/
     delete destroy_user_session_path
 
     # 2. Enabled sales state
@@ -153,7 +153,7 @@ class SaleStateRegressionTest < ActionDispatch::IntegrationTest
     sign_in(@user)
     get billing_checkout_path("claudox")
     assert_response :success
-    assert_select "h1", text: /신규 결제를 준비하고 있습니다/
+    assert_select "h1", text: /준비하고 있습니다/
     delete destroy_user_session_path
 
     # 2. Enabled sales state

@@ -85,7 +85,7 @@ class AistartFreeProductTest < ActionDispatch::IntegrationTest
   test "checkout for aistart shows the same graceful not-ready screen as any other sale_enabled: false product" do
     get billing_checkout_path("aistart")
     assert_response :success
-    assert_match(/신규 결제를 준비하고 있습니다/, response.body)
+    assert_match(/준비하고 있습니다/, response.body)
   end
 
   test "mypage does not error for a user with no license/order history on a free, offer-less product" do

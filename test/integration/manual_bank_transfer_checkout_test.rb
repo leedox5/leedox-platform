@@ -29,7 +29,7 @@ class ManualBankTransferCheckoutTest < ActionDispatch::IntegrationTest
 
     get billing_checkout_path
     assert_response :success
-    assert_no_match(/신규 결제를 준비하고 있습니다/, response.body)
+    assert_no_match(/준비하고 있습니다/, response.body)
     assert_select "input[type='submit'][value=?]", "주문하기"
 
     assert_difference [ "Order.count", "OrderItem.count", "PaymentTransaction.count" ], 1 do

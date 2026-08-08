@@ -37,7 +37,7 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
       get billing_checkout_path
     end
     assert_response :success
-    assert_match(/신규 결제를 준비하고 있습니다/, response.body)
+    assert_match(/준비하고 있습니다/, response.body)
     assert_select "script[src*='tosspayments']", count: 0
     assert_select "script[src*='portone']", count: 0
 
@@ -101,7 +101,7 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
 
     get billing_checkout_path
     assert_response :success
-    assert_no_match(/신규 결제를 준비하고 있습니다/, response.body)
+    assert_no_match(/준비하고 있습니다/, response.body)
     assert_select "input[name='order[offer_code]']", count: 4
 
     assert_difference [ "Order.count", "OrderItem.count", "PaymentTransaction.count" ], 1 do

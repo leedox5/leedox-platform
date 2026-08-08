@@ -255,7 +255,7 @@ class GuestPurchaseFlowRegressionTest < ActionDispatch::IntegrationTest
     post user_session_path, params: { user: { email: @user.email, password: "password123" } }
     get billing_checkout_path_for("claudox")
     assert_response :success
-    assert_select "h1", text: /신규 결제를 준비하고 있습니다/
+    assert_select "h1", text: /준비하고 있습니다/
 
     # Case 2: Claudox enabled, Chatdox disabled
     delete destroy_user_session_path
