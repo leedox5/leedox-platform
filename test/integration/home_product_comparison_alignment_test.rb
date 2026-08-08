@@ -79,7 +79,7 @@ class HomeProductComparisonAlignmentTest < ActionDispatch::IntegrationTest
     # FAQ section
     assert_select "#faq"
     assert_select "#faq p", text: "FAQ"
-    assert_select "#faq h2", text: "두 상품이 궁금하다면"
+    assert_select "#faq h2", text: "상품이 궁금하다면"
 
     # Final home CTA section
     assert_select "p", text: "Make the next move"
