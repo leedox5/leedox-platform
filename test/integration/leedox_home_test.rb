@@ -766,8 +766,9 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
 
     assert_no_match(/가입 후 10분 안에 첫 SaaS 골격을 실행해볼 수 있습니다/, response.body)
 
-    # Hero free trial badge
-    assert_select "a[href=?]", product_chapter_path("chatdox", "01"), text: /무료 체험 가능/
+    # Hero free trial badge (matches the actual guest gate, not the higher trial-user limit)
+    assert_equal 2, ProductContent.for("chatdox").guest_chapter_limit
+    assert_select "a[href=?]", product_chapter_path("chatdox", "01"), text: /2 챕터 무료 체험 가능/
 
     # 4 pricing offer cards CTAs (disabled when sales not enabled, active when enabled)
     [ 1, 3, 6, 12 ].each do |months|

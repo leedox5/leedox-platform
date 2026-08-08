@@ -14,8 +14,10 @@ class AigravityLandingPageTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: /무중력 AI 코딩 마스터클래스/
     assert_select "p", text: /AI-NATIVE STARTER PACKAGE/
 
-    # Hero free trial badge & CTA link to episode 01
-    assert_select "a[href=?]", product_chapter_path("aigravity", "01"), text: /무료 체험 가능/
+    # Hero free trial badge (matches the actual guest gate, not the higher trial-user limit)
+    # & CTA link to episode 01
+    assert_equal 1, ProductContent.for("aigravity").guest_chapter_limit
+    assert_select "a[href=?]", product_chapter_path("aigravity", "01"), text: /1 챕터 무료 체험 가능/
     assert_select "a[href=?]", product_chapter_path("aigravity", "01"), text: /무중력 코딩 시작하기/
 
     # 14 chapters across 4 phases

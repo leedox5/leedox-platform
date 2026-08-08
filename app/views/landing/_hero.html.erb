@@ -7,7 +7,7 @@
         <p class="inline-flex rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-blue-800">
           Production SaaS Starter
         </p>
-        <% chatdox_limit = ProductContent.for("chatdox").trial_chapter_limit %>
+        <% chatdox_limit = ProductContent.for("chatdox").guest_chapter_limit %>
         <%= link_to product_chapter_path("chatdox", "01"), class: "inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-100" do %>
           <span>🎁</span> <%= chatdox_limit %> 챕터 무료 체험 가능
         <% end %>
