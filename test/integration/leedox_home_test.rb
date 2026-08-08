@@ -988,7 +988,7 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     get chatdox_path
 
     assert_response :success
-    assert_match(/신규 결제 시스템을 준비 중이며 현재는 구매할 수 없습니다/, response.body)
+    assert_match(/콘텐츠 판매를 준비 중이며 현재는 구매할 수 없습니다/, response.body)
 
     Commerce::CatalogBootstrap.call!
     original_env = %w[LEEDOX_COMMERCE_ENABLED PAYMENT_PROVIDER
@@ -1004,7 +1004,7 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     get chatdox_path
 
     assert_response :success
-    assert_no_match(/신규 결제 시스템을 준비 중이며 현재는 구매할 수 없습니다/, response.body)
+    assert_no_match(/준비 중이며 현재는 구매할 수 없습니다/, response.body)
     assert_select "a[href=?]", billing_checkout_path, text: /기간제 라이선스 구매/
   ensure
     original_env&.each { |key, value| value.nil? ? ENV.delete(key) : ENV[key] = value }

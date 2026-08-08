@@ -29,7 +29,7 @@ class AigravityLandingPageTest < ActionDispatch::IntegrationTest
     # Pricing section
     assert_select "#pricing" do
       assert_select "h2", text: /기간별 이용 안내/
-      assert_select "p", text: /신규 결제 시스템을 준비 중이며 현재는 구매할 수 없습니다/
+      assert_select "p", text: /콘텐츠 판매를 준비 중이며 현재는 구매할 수 없습니다/
     end
 
     # Bottom Dark Banner & FAQ
