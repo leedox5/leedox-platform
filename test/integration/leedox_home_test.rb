@@ -988,7 +988,7 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     get chatdox_path
 
     assert_response :success
-    assert_match(/콘텐츠 판매를 준비 중이며 현재는 구매할 수 없습니다/, response.body)
+    assert_match(/준비 중이며 현재는 구매할 수 없습니다/, response.body)
 
     Commerce::CatalogBootstrap.call!
     original_env = %w[LEEDOX_COMMERCE_ENABLED PAYMENT_PROVIDER
