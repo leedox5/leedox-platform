@@ -93,6 +93,42 @@ class KoreanLocaleAndDeviseTest < ActionDispatch::IntegrationTest
     assert_match(/흔한 비밀번호는 사용할 수 없습니다/, response.body)
   end
 
+  test "sign-up shows a terms/privacy agreement checkbox linking to /terms and /privacy" do
+    get new_user_registration_path
+    assert_response :success
+
+    assert_select "input[type=checkbox]#user_terms_accepted"
+    assert_select "label[for=user_terms_accepted] a[href=?]", terms_path, text: "이용약관"
+    assert_select "label[for=user_terms_accepted] a[href=?]", privacy_path, text: "개인정보처리방침"
+  end
+
+  test "sign-up is blocked server-side when the terms checkbox is left unchecked" do
+    assert_no_difference "User.count" do
+      post user_registration_path, params: {
+        user: {
+          name: "미동의 유저", email: "no-terms@example.com",
+          password: "password123", password_confirmation: "password123",
+          terms_accepted: "0"
+        }
+      }
+    end
+    assert_response :unprocessable_entity
+    assert_match(/accepted/, response.body)
+  end
+
+  test "sign-up succeeds when the terms checkbox is checked" do
+    assert_difference "User.count", 1 do
+      post user_registration_path, params: {
+        user: {
+          name: "동의 유저", email: "with-terms@example.com",
+          password: "password123", password_confirmation: "password123",
+          terms_accepted: "1"
+        }
+      }
+    end
+    assert_redirected_to dashboard_path
+  end
+
   test "number/date formatting used sitewide is unaffected (numbers still comma-delimited)" do
     Commerce::CatalogBootstrap.call!
 

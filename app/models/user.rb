@@ -40,7 +40,10 @@ class User < ApplicationRecord
 
   enum :role, { user: 0, admin: 1 }
 
+  attr_accessor :terms_accepted
+
   validates :name, presence: true
+  validates :terms_accepted, acceptance: true, on: :create
   validate :password_must_not_be_common, if: -> { password.present? }
 
   def trial_started_at

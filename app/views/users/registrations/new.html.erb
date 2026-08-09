@@ -58,6 +58,16 @@
           required: true %>
       </div>
 
+      <div class="mb-4 flex items-start gap-2">
+        <%= form.check_box :terms_accepted,
+          class: "mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500",
+          required: true %>
+        <%= form.label :terms_accepted, class: "text-sm text-gray-600" do %>
+          <%= link_to "이용약관", terms_path, class: "font-semibold text-blue-600 hover:underline" %> 및
+          <%= link_to "개인정보처리방침", privacy_path, class: "font-semibold text-blue-600 hover:underline" %>에 동의합니다
+        <% end %>
+      </div>
+
       <div class="mb-4">
         <%= form.submit "회원가입",
           class: "w-full rounded-lg bg-blue-500 px-4 py-2 font-bold text-white transition hover:bg-blue-600" %>
