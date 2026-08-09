@@ -1,8 +1,9 @@
 require "test_helper"
 
 # Real end-to-end validation of stage 5 (the final step of the multi-product
-# platform generalization): a genuine, HQ-authored product ("aistart", 5 free
-# chapters) registered purely via Commerce::CatalogBootstrap + a
+# platform generalization): a genuine, HQ-authored product ("aistart", 8 free
+# chapters as of the 2026-08-09 renewal, handoff 0041) registered purely via
+# Commerce::CatalogBootstrap + a
 # sync_curriculum.sh content pull -- zero ProductContent/DocPolicy/
 # ChapterProgress/dashboard/pricing code changes. See
 # leedox_multi_product_platform_stage5_r1 result.md.
@@ -20,18 +21,18 @@ class AistartFreeProductTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "all 5 chapters are readable as a guest, each rendering its own real content" do
+  test "all 8 chapters are readable as a guest, each rendering its own real content" do
     get "/content/aistart"
     assert_response :success
     # No leading number prefix here anymore (leedox_content_template_unification_r1) --
     # the chapter id already shows once in its own icon badge, so the title
-    # itself should be the plain heading text, not "1. 오늘, AI와 첫 만남".
-    assert_match(/오늘, AI와 첫 만남/, response.body)
-    assert_no_match(/1\.\s*오늘, AI와 첫 만남/, response.body)
+    # itself should be the plain heading text, not "1. 오늘, 누군가를 처음 만났다".
+    assert_match(/오늘, 누군가를 처음 만났다/, response.body)
+    assert_no_match(/1\.\s*오늘, 누군가를 처음 만났다/, response.body)
     assert_match(/오늘의 첫 결과물/, response.body)
 
     source = ProductContent.for("aistart")
-    assert_equal 5, source.chapters.size
+    assert_equal 8, source.chapters.size
 
     # Checking status 200 alone wouldn't catch a chapter accidentally
     # rendering the wrong file's content (e.g. an id/slug mixup) -- compare
@@ -47,7 +48,7 @@ class AistartFreeProductTest < ActionDispatch::IntegrationTest
       assert_includes response.body, first_body_line
     end
 
-    get "/content/aistart/06"
+    get "/content/aistart/09"
     assert_response :not_found
     assert_match(/아직 공개되지 않은 챕터입니다/, response.body)
   end

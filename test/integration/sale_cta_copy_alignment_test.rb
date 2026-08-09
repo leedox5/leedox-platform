@@ -101,8 +101,8 @@ class SaleCtaCopyAlignmentTest < ActionDispatch::IntegrationTest
     assert_select "a[href*='chatdox']", text: "자세히 보기"
     assert_select "a[href*='claudox']", text: "자세히 보기"
 
-    # Aistart free product CTA
-    get product_chapter_path("aistart", "05")
+    # Aistart free product CTA (shows on the last chapter)
+    get product_chapter_path("aistart", "08")
     assert_response :success
     assert_select "a[href=?]", new_user_registration_path, text: "회원가입하고 실전 가이드 둘러보기"
   end

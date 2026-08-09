@@ -48,7 +48,7 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
 
     # Free gateway bar (aistart)
     assert_select "a[href=?]", product_content_index_path("aistart"), text: /무료로 읽어보기/
-    assert_select "strong", text: /AI, 오늘부터 시작 — 로그인 없이 5분 무료 가이드/
+    assert_select "strong", text: /AI, 오늘부터 시작 — 로그인 없이 바로 시작하는 무료 가이드/
   end
 
   test "renders 3-column terminal mockup section and GNB/Footer 3-product links (handoff 0015)" do

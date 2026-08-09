@@ -168,7 +168,7 @@ class V1ProductContractRegressionTest < ActionDispatch::IntegrationTest
 
     get product_chapter_path("aistart", "01")
     assert_response :success
-    assert_match(/오늘, AI와 첫 만남/, response.body)
+    assert_match(/오늘, 누군가를 처음 만났다/, response.body)
   end
 
   private

@@ -8,8 +8,8 @@ class AistartCompletionConversionCtaTest < ActionDispatch::IntegrationTest
     @user = User.create!(name: "완독 사용자", email: "aistart-finisher@example.com", password: "password123")
   end
 
-  test "1. Unauthenticated guest viewing Aistart chapter 05 sees confirmed copywriting, sign-up CTA, and pricing link" do
-    get product_chapter_path("aistart", "05")
+  test "1. Unauthenticated guest viewing Aistart's last chapter sees confirmed copywriting, sign-up CTA, and pricing link" do
+    get product_chapter_path("aistart", "08")
     assert_response :success
 
     # Confirmed headlines and copy
@@ -26,9 +26,9 @@ class AistartCompletionConversionCtaTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "2. Logged-in user viewing Aistart chapter 05 sees dashboard CTA instead of sign-up CTA" do
+  test "2. Logged-in user viewing Aistart's last chapter sees dashboard CTA instead of sign-up CTA" do
     post user_session_path, params: { user: { email: @user.email, password: "password123" } }
-    get product_chapter_path("aistart", "05")
+    get product_chapter_path("aistart", "08")
     assert_response :success
 
     assert_select "#aistart-completion-cta" do
@@ -42,14 +42,14 @@ class AistartCompletionConversionCtaTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "3. Aistart index and chapters 01 to 04 do not display completion CTA card" do
+  test "3. Aistart index and chapters before the last one do not display completion CTA card" do
     # Aistart index page
     get product_content_index_path("aistart")
     assert_response :success
     assert_select "#aistart-completion-cta", count: 0
 
-    # Aistart chapters 01 to 04
-    %w[01 02 03 04].each do |id|
+    # Aistart chapters 01 to 07 (everything before the last chapter, 08)
+    %w[01 02 03 04 05 06 07].each do |id|
       get product_chapter_path("aistart", id)
       assert_response :success
       assert_select "#aistart-completion-cta", count: 0
@@ -68,8 +68,8 @@ class AistartCompletionConversionCtaTest < ActionDispatch::IntegrationTest
     assert_select "#aistart-completion-cta", count: 0
   end
 
-  test "5. Unauthenticated guest access to Aistart chapter 05 and other chapters remains 100% free" do
-    %w[01 02 03 04 05].each do |id|
+  test "5. Unauthenticated guest access to all 8 Aistart chapters remains 100% free" do
+    %w[01 02 03 04 05 06 07 08].each do |id|
       get product_chapter_path("aistart", id)
       assert_response :success
       assert_no_match(/로그인 후 이용 가능합니다/, response.body)
@@ -77,7 +77,7 @@ class AistartCompletionConversionCtaTest < ActionDispatch::IntegrationTest
   end
 
   test "6. Unproven marketing claims (3초, 1화 무료, 20% 할인 쿠폰, /register) are not in the new card" do
-    get product_chapter_path("aistart", "05")
+    get product_chapter_path("aistart", "08")
     assert_response :success
 
     cta_card_html = response.body.slice(/id="aistart-completion-cta".*?<\/div>\s*<\/div>\s*<\/div>/m) || response.body

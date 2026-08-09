@@ -16,9 +16,9 @@ module Commerce
         display_order: 3
       },
       # Free content available in full after login (see
-      # hq/aistart/content_meta.yml -- guest/trial limits both cover all 5
-      # chapters, while ProductContentController requires an account for
-      # free_access products). Not for sale: no
+      # hq/aistart/content_meta.yml -- guest/trial limits both cover the
+      # full chapter range, while ProductContentController requires an
+      # account for free_access products). Not for sale: no
       # ProductOffer entries below. sale_enabled stays false like every other
       # product's initial state here, and must stay false permanently for
       # this one specifically -- flipping it on would expose a checkout page
