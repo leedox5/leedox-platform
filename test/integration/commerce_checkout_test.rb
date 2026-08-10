@@ -140,7 +140,7 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
     get billing_checkout_path
 
     assert_response :success
-    assert_match(/자동으로 연장됩니다/, response.body)
+    assert_match(/결제하신 기간이 이어서 적용됩니다/, response.body)
     assert_select "input[type='hidden'][name='order[requested_start_on]'][value=?]", (last_on + 1.day).iso8601
     assert_select "input[type='date'][name='order[requested_start_on]']", count: 0
   end

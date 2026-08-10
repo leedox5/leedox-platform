@@ -31,7 +31,7 @@
         <h2 class="font-bold text-slate-900">서비스 시작일</h2>
         <% if @existing_license %>
           <% extension_start_on = @existing_license.last_usable_on + 1.day %>
-          <p class="mt-3 break-keep text-sm text-slate-600">현재 <%= @product.name %> 기간 뒤인 <strong><%= I18n.l(extension_start_on, locale: :ko, format: :long) %></strong>부터 자동으로 연장됩니다.</p>
+          <p class="mt-3 break-keep text-sm text-slate-600">현재 <%= @product.name %> 기간 뒤인 <strong><%= I18n.l(extension_start_on, locale: :ko, format: :long) %></strong>부터 결제하신 기간이 이어서 적용됩니다.</p>
           <%= form.hidden_field :requested_start_on, value: extension_start_on %>
         <% else %>
           <p class="mt-2 text-sm text-slate-600">오늘부터 7일 이내에서 선택할 수 있습니다.</p>
