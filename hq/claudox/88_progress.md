@@ -46,7 +46,7 @@
 | 번호 | 챕터 | 파일 | 완성도 | 상태 |
 |---|------|------|:---:|:---:|
 | 90 | 세션의 정체를 캐다 | [90_session_mechanics.md](90_session_mechanics.md) | 90% | ✅ |
-| 91 | 시간과 나를 어떻게 인지하는가 | [91_time_and_identity.md](91_time_and_identity.md) | 90% | ✅ |
+| 91 | 시간과 나를 어떻게 인지하는가 | [91_time_and_identity.md](91_time_and_identity.md) | 93% | ✅ |
 | 92 | 두 에이전트가 똑같이 틀린 이유 | [92_shared_blind_spot.md](92_shared_blind_spot.md) | 90% | ✅ |
 | 93 | Cowork라는 새 몸에서 | [93_cowork_first_handoff.md](93_cowork_first_handoff.md) | 90% | ✅ |
 | 94 | 새 몸이 비춘 오래된 원칙 | [94_box_reflected_old_principles.md](94_box_reflected_old_principles.md) | 93% | ✅ |
