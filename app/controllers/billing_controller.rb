@@ -14,6 +14,11 @@ class BillingController < ApplicationController
     return if performed?
 
     @offers = @product.product_offers.active.ordered.select(&:available_at?)
+    # The product page links here with ?offer_code= for the duration the
+    # shopper already picked -- if it's a valid, available offer for this
+    # product, honor it; otherwise fall back to the first offer, same as
+    # before this param existed (handoff 0047).
+    @selected_offer_code = @offers.find { |offer| offer.code == params[:offer_code] }&.code || @offers.first&.code
     @existing_license = current_user.licenses
       .where(product: @product)
       .not_canceled

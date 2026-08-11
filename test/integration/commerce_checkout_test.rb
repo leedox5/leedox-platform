@@ -122,6 +122,48 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
     assert_match(Regexp.new(Regexp.escape(order.public_id.delete("-").first(8).upcase)), response.body)
   end
 
+  test "checkout preselects the offer named in ?offer_code=, not always the first one (handoff 0047)" do
+    enable_chatdox_sales
+    sign_in
+
+    get billing_checkout_path(offer_code: "chatdox-12m-v1")
+    assert_response :success
+    assert_select "input[name='order[offer_code]'][value='chatdox-12m-v1'][checked]"
+    assert_select "input[name='order[offer_code]'][value='chatdox-1m-v1'][checked]", count: 0
+  end
+
+  test "checkout falls back to the first offer when offer_code is missing, blank, or belongs to another product" do
+    enable_chatdox_sales
+    sign_in
+
+    get billing_checkout_path
+    assert_select "input[name='order[offer_code]'][value='chatdox-1m-v1'][checked]"
+
+    get billing_checkout_path(offer_code: "claudox-12m-v1")
+    assert_select "input[name='order[offer_code]'][value='chatdox-1m-v1'][checked]"
+
+    get billing_checkout_path(offer_code: "does-not-exist")
+    assert_select "input[name='order[offer_code]'][value='chatdox-1m-v1'][checked]"
+  end
+
+  test "the preselected offer_code carries through to the order actually created" do
+    enable_chatdox_sales
+    sign_in
+    today = Time.current.in_time_zone(Commerce::PeriodCalculator::KST).to_date
+
+    get billing_checkout_path(offer_code: "chatdox-12m-v1")
+    assert_select "input[name='order[offer_code]'][value='chatdox-12m-v1'][checked]"
+
+    assert_difference "Order.count", 1 do
+      post billing_orders_path, params: {
+        order: { product_code: "chatdox", offer_code: "chatdox-12m-v1", requested_start_on: today }
+      }
+    end
+
+    order = Order.order(:created_at).last
+    assert_equal 12, order.order_items.first.duration_months
+  end
+
   test "existing Chatdox period is displayed as a fixed extension date" do
     enable_chatdox_sales
     sign_in
