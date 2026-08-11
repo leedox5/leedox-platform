@@ -17,26 +17,27 @@
   - `push_handoff_to_curriculum.sh` — (Deprecated) `.local/handoff` push용 레거시 스크립트.
   - `sync_curriculum.sh` — HQ→DEV, handoff와 무관하게 **실제 런타임 콘텐츠**(커리큘럼 문서/claudox/service-desk 요청)를 HQ git 저장소에서 `git archive`로 스냅샷 떠서 `hq/`(git 추적됨, `.local/`이 아님) 아래로 미러. REQ 0022에서 git subtree pull을 대체한 것 — subtree는 HQ 저장소 전체(QA/, SETUP/ 등 안 쓰는 것까지)를 끌어오고 merge conflict가 잦아서, 실제 쓰는 3개 폴더만 골라 받는 방식으로 바꿨다.
 - Handoff 작업 흐름 (Handoff 2.0):
-  1. HQ가 `handoff-agy/<번호_슬러그>/0000.md`를 Source of Truth로 발행한다 (WSL Symlink 0-Copy 실시간 연동 및 Git 이력 영구 보존).
-  2. DEV는 `handoff-agy/<번호_슬러그>/0000.md`를 직접 읽는다.
-  3. DEV는 같은 패키지 폴더(`handoff-agy/<번호_슬러그>/`)에 `result.md`(리비전은 `result_rN.md`)만 작성한다.
+  1. HQ가 `handoff/<번호_슬러그>/0000.md`를 Source of Truth로 발행한다 (WSL Symlink 0-Copy 실시간 연동 및 Git 이력 영구 보존).
+  2. DEV는 `handoff/<번호_슬러그>/0000.md`를 직접 읽는다.
+  3. DEV는 같은 패키지 폴더(`handoff/<번호_슬러그>/`)에 `result.md`(리비전은 `result_rN.md`)만 작성한다.
   4. inbox/completed 이동, `STATUS.md` 작성, HQ 저장소 commit/push는 HQ(Tommy) 권한이다.
-- **권한 경계:** DEV는 `handoff-agy/<번호_슬러그>/` 패키지 내 `result*.md` 외 HQ 저장소 파일을 수정하지 않는다. HQ 저장소 commit/push도 하지 않는다.
-- 기존 `.local/handoff` 및 `handoff` 기록은 보존 대상이다. 새 절차 도입을 이유로 자동 이동/삭제하지 않는다.
+- **권한 경계:** DEV는 `handoff/<번호_슬러그>/` 패키지 내 `result*.md` 외 HQ 저장소 파일을 수정하지 않는다. HQ 저장소 commit/push도 하지 않는다.
+- 기존 `.local/handoff` 기록은 보존 대상이다. 새 절차 도입을 이유로 자동 이동/삭제하지 않는다.
+- **`handoff-agy`라는 이름은 존재하지 않는다.** 실제 심링크는 저장소 루트의 `handoff`(→ HQ의 `handoff` 디렉터리) 하나뿐이다(`ls -la`로 실제 이름 확인 가능). 과거 한 세션에서 "Handoff 2.0 process renewal"이라는 커밋(`c486b39`)이 문서 전체를 `handoff-agy/`로 잘못 고쳐놓았던 적이 있다(2026-08-11 발견, 실제 심링크 rename은 없었던 것으로 보임) — 문서에서 `handoff-agy`가 다시 보이면 오탈자이니 `handoff`로 고칠 것.
 - **이 handoff 워크플로우 자체가 아직 시험 운영(trial) 단계다(2026-07-16 Tommy 확인).** 고정된 프로세스로 여기지 말고, 실제로 작업하면서 걸리는 지점이 보이면 매번 그냥 넘어가지 말고 개선 아이디어를 제안할 것. 지금까지 눈에 띈 것:
   - **스크린샷 주석과 서면 request_rN.md 사이에 정보가 누락될 수 있다.** `/chatdox` R2에서 실제로 겪음(Tommy가 스크린샷에 표시한 것 하나가 서면 스펙에서 빠졌다가 R3에서 확정됨). 서면 요청서를 작성할 때 스크린샷의 모든 표시 항목을 명시적으로 나열하면 이런 누락을 줄일 수 있다.
-- **DEV→HQ 콘텐츠 제안 채널 승인됨(2026-07-16, HQ/Tommy 확인).** `leedox_dev_content_loop_r1`(당시 레거시 `.local/handoff` 절차로 전달)을 HQ가 검토해서 채널 자체와 소재 3건 전부 승인했다. 이후 handoff 운영은 `handoff-agy/` Git 패키지 중심 2.0 체계로 전환되었다.
+- **DEV→HQ 콘텐츠 제안 채널 승인됨(2026-07-16, HQ/Tommy 확인).** `leedox_dev_content_loop_r1`(당시 레거시 `.local/handoff` 절차로 전달)을 HQ가 검토해서 채널 자체와 소재 3건 전부 승인했다. 이후 handoff 운영은 `handoff/` Git 패키지 중심 2.0 체계로 전환되었다.
 
 ## 환경 특이사항
 
 - 이 WSL 네이티브 클론에는 headless 브라우저/스크린샷 도구와 sudo가 없다. 스크린샷이 필요한 검증 요청이 오면 먼저 사용자에게 처리 방법을 물어볼 것 — 많은 경우 curl 기반 HTML/텍스트 검증으로 대체 가능하다.
   - 단, "모바일에서 줄바꿈되는지/한 줄에 들어가는지" 같은 실제 픽셀 렌더링 문제는 curl/HTML 비교로 **코드가 의도대로 반영됐는지**만 확인 가능하고, 실제로 맞는지는 확인 불가능하다. `/chatdox` 정합성 작업(2026-07-16, R1~R3)에서 매 라운드 이 한계에 부딪혔고, 결국 Tommy의 실기기 확인 → 후속 라운드 피드백으로 마무리되는 패턴이 반복됐다. 이런 모바일 CSS 핏 이슈를 받으면 "한 번에 완벽히 맞힌다"를 목표로 하지 말고, 처음부터 "최선의 반응형 처리 + 코드 레벨 검증 + Tommy 실기기 확인이 마지막 단계"라는 흐름을 미리 안내하는 게 낫다.
-- DB는 SQLite. `bin/rails db:migrate`는 development 환경에만 적용된다 — 테스트가 새 스키마를 보게 하려면 `RAILS_ENV=test bin/rails db:schema:load`를 별도로 실행해야 한다.
-- **`git push`로는 코드만 Railway에 자동 배포되고, 마이그레이션은 자동 실행되지 않는다.** 스키마 변경이 있는 작업 뒤에는 배포 후 `railway run bin/rails db:migrate`가 별도로 필요하다는 것을 항상 상기시킬 것(2026-07-16 하루에만 User#name 필드, Subscription 테이블 drop, GitHub access 테이블 drop 세 건 모두 이 문제가 있었다).
+- **개발/테스트 DB는 SQLite, 프로덕션 primary DB는 Postgres다.** `config/database.yml`은 모든 환경에 `adapter: sqlite3`를 적어두고 있지만, 프로덕션에서는 Rails가 `DATABASE_URL` 환경변수를 primary 연결에 우선 적용해서 실제로는 Railway의 Postgres(`postgres.railway.internal`)를 쓴다 — 파일만 읽고 "프로덕션도 SQLite"라고 판단하면 틀린다(2026-08-06 `railway run`으로 `ActiveRecord::Base.configurations`를 직접 조회해 확인). Solid Cache/Queue/Cable(cache/queue/cable 세 역할)은 `DATABASE_URL`의 영향을 안 받아서 프로덕션에서도 여전히 SQLite 파일(`storage/production_*.sqlite3`)이다. `bin/rails db:migrate`는 (로컬) development 환경에만 적용된다 — 테스트가 새 스키마를 보게 하려면 `RAILS_ENV=test bin/rails db:schema:load`를 별도로 실행해야 하고, 프로덕션 Postgres에 반영하려면 배포 후 `railway ssh --service web -- bin/rails db:migrate`가 별도로 필요하다(아래 항목 참고).
+- **`git push`로는 코드만 Railway에 자동 배포되고, 마이그레이션은 자동 실행되지 않는다.** 스키마 변경이 있는 작업 뒤에는 배포 후 마이그레이션이 별도로 필요하다는 것을 항상 상기시킬 것(2026-07-16 하루에만 User#name 필드, Subscription 테이블 drop, GitHub access 테이블 drop 세 건 모두 이 문제가 있었다). **`railway run bin/rails db:migrate`는 로컬에서 실패한다** — `postgres.railway.internal` DNS가 Railway 네트워크 안에서만 풀리기 때문. 대신 `railway ssh --service web -- bin/rails db:migrate`(서비스가 여러 개면 `--service web` 필수, 안 붙이면 "Multiple services found" 에러)를 쓸 것 — 0045 R2에서 실제로 이 방식으로 프로덕션 마이그레이션을 성공시켰다.
 
 ## 작업 규칙 (Tommy와의 협업 패턴)
 
-- **모든 작업이 handoff를 타지는 않는다(2026-07-16 Tommy 확인).** 정식 handoff가 필요한 경우 현재 기준 문서는 `handoff-agy/<번호_슬러그>/0000.md`다. 간단한 건 대화로 바로 요청할 수 있다.
+- **모든 작업이 handoff를 타지는 않는다(2026-07-16 Tommy 확인).** 정식 handoff가 필요한 경우 현재 기준 문서는 `handoff/<번호_슬러그>/0000.md`다. 간단한 건 대화로 바로 요청할 수 있다.
 - handoff 작업 시 DEV는 활성 패키지의 `0000.md`를 기준으로 수행하고, 같은 폴더의 `result*.md`만 작성한다(다른 HQ 파일 수정 금지).
 - 구현 후에는 거의 항상 커밋 + push, 그리고 `result.md`로 (조사 결과 / 실제 채택한 설계와 제안 대비 달라진 점 + 이유 / 변경·삭제 파일 / 테스트 결과 / 미결정 사항) 보고하는 게 표준 패턴이다.
 - **request.md의 "현재 코드 확인 완료, 재조사 불필요"를 그대로 믿지 말 것.** 실제로 매 작업마다 request.md가 나열하지 않은 관련 참조가 더 있었다(예: Toss/Subscription 제거 때 admin 컨트롤러 4곳 + `Commerce::Reconciliation`/`EventLogger`, GitHub access 단순화 때 `event_recorder.rb`/`task_factory.rb` + `Commerce::Reconciliation`). 삭제·리팩터링 대상 클래스/모델명으로 항상 sitewide grep을 먼저 돌려 숨은 참조를 확인한다.

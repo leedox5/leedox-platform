@@ -1,17 +1,22 @@
 # AGENTS.md
 
 이 저장소에서 작업하는 코딩 에이전트를 위한 가이드다. Claude Code이고 작업이
-`handoff-agy/<번호_슬러그>/` 패키지나 DEV/HQ 저장소 구조와 관련 있다면 **`CLAUDE.md`를 먼저
+`handoff/<번호_슬러그>/` 패키지나 DEV/HQ 저장소 구조와 관련 있다면 **`CLAUDE.md`를 먼저
 읽을 것** — 그 워크플로우는 여기가 아니라 거기 문서화돼 있다(중복해서 따로
 관리하면 둘이 어긋난다). 이 파일은 그 워크플로우와 무관하게 어떤 에이전트든
 필요한 아키텍처/컨벤션 지도다.
 
 ## 이 저장소가 뭔가
 
-Rails 8.1 앱(Ruby 3.4)이 작은 다상품 콘텐츠 플랫폼을 서비스한다 — 3개 상품
-(Chatdox, Claudox, 무료 입문 상품 `aistart`)이 하나의 콘텐츠 파이프라인을
-공유하고, 유료 두 상품엔 커머스/결제 레이어가 붙어 있다. 개발/테스트는 SQLite,
-프로덕션은 Postgres(Railway). Tailwind + Turbo/Stimulus + importmap, Node 빌드 없음.
+Rails 8.1 앱(Ruby 3.4)이 작은 다상품 콘텐츠 플랫폼을 서비스한다 — 4개 상품
+(Chatdox, Claudox, Antigravity(`aigravity`), 무료 입문 상품 `aistart`)이 하나의
+콘텐츠 파이프라인을 공유하고, 유료 세 상품(Chatdox/Claudox/Antigravity)엔
+커머스/결제 레이어가 붙어 있다. `aistart`만 `free_access: true`로 영구 무료다.
+개발/테스트 DB는 SQLite, 프로덕션 primary DB는 Postgres(Railway) —
+`config/database.yml`엔 전부 sqlite3로 적혀 있지만 프로덕션은 `DATABASE_URL`이
+그 값을 덮어써서 실제로는 Postgres를 쓴다(Solid Cache/Queue/Cable 세 역할만
+`DATABASE_URL`의 영향을 안 받아 SQLite로 남는다). Tailwind + Turbo/Stimulus +
+importmap, Node 빌드 없음.
 
 ## 핵심 추상화: `ProductContent`
 
