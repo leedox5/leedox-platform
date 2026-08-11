@@ -33,6 +33,8 @@ class ProductEntitlementAccessTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     get claudox_chapter_path("06")
-    assert_redirected_to root_path
+    # Logged-in users hitting a locked chapter land on that product's own
+    # pricing section now, not the generic home redirect (handoff 0045 R2-4).
+    assert_redirected_to "#{claudox_path}#pricing"
   end
 end

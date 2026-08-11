@@ -53,8 +53,13 @@ class ProductContent::FilesystemSource
     meta.licensed_chapter_ranges
   end
 
+  # guest and trial are independent knobs (handoff 0045 R2) -- each reads its
+  # own admin DB column now, falling back to content_meta.yml's own value for
+  # that same concept. Before this, both read the single trial_chapter_limit
+  # column, so setting it in admin silently made "trial" mean nothing beyond
+  # "guest" (see 0045 result.md for how that was found).
   def guest_chapter_limit
-    db_limit = Product.find_by(code: product_code)&.trial_chapter_limit
+    db_limit = Product.find_by(code: product_code)&.guest_chapter_limit
     db_limit.presence || meta.guest_chapter_limit
   end
 

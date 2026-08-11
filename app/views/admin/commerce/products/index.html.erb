@@ -19,7 +19,7 @@
             <tr>
               <th class="px-4 py-3 whitespace-nowrap">상품 정보</th>
               <th class="px-4 py-3 whitespace-nowrap">상태 설정</th>
-              <th class="px-4 py-3 whitespace-nowrap">무료 체험 한도</th>
+              <th class="px-4 py-3 whitespace-nowrap">게스트 / 체험 한도</th>
               <th class="px-4 py-3 whitespace-nowrap">동적 요금제 (ProductOffer)</th>
               <th class="px-4 py-3 text-right whitespace-nowrap">설정/수정 ⚙️</th>
             </tr>
@@ -45,7 +45,9 @@
                 </td>
                 <td class="px-4 py-4 whitespace-nowrap">
                   <span class="inline-block font-semibold text-slate-800 whitespace-nowrap">
-                    <%= product.trial_chapter_limit.present? ? "#{product.trial_chapter_limit} 챕터 (DB)" : "#{ProductContent.for(product.code).trial_chapter_limit} 챕터 (기본)" %>
+                    게스트 <%= product.guest_chapter_limit.present? ? "#{product.guest_chapter_limit} (DB)" : "#{ProductContent.for(product.code).guest_chapter_limit} (기본)" %>
+                    /
+                    체험 <%= product.trial_chapter_limit.present? ? "#{product.trial_chapter_limit} (DB)" : "#{ProductContent.for(product.code).trial_chapter_limit} (기본)" %>
                   </span>
                 </td>
                 <td class="px-4 py-4">

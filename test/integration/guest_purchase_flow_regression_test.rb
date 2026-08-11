@@ -287,13 +287,14 @@ class GuestPurchaseFlowRegressionTest < ActionDispatch::IntegrationTest
     get product_chapter_path("aistart", "01")
     assert_response :success
 
-    # Paid chapter access blocked for unlicensed user
+    # Paid chapter access blocked for unlicensed user -- redirected to that
+    # product's own pricing section, not the generic home page (0045 R2-4).
     post user_session_path, params: { user: { email: @user.email, password: "password123" } }
     get product_chapter_path("chatdox", "06")
-    assert_redirected_to root_path
+    assert_redirected_to "#{chatdox_path}#pricing"
 
     get product_chapter_path("claudox", "06")
-    assert_redirected_to root_path
+    assert_redirected_to "#{claudox_path}#pricing"
   end
 
   private

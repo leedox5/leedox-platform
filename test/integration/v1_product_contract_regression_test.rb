@@ -72,9 +72,10 @@ class V1ProductContractRegressionTest < ActionDispatch::IntegrationTest
     get product_chapter_path("chatdox", "06")
     assert_response :success
 
-    # Chatdox active license -> Claudox paid chapter 06 blocked and redirected
+    # Chatdox active license -> Claudox paid chapter 06 blocked, redirected to
+    # Claudox's own pricing section (handoff 0045 R2-4), not the generic home page.
     get product_chapter_path("claudox", "06")
-    assert_redirected_to root_path
+    assert_redirected_to "#{claudox_path}#pricing"
   end
 
   test "2-b. Active Claudox license grants Claudox paid web content access only" do
@@ -85,30 +86,34 @@ class V1ProductContractRegressionTest < ActionDispatch::IntegrationTest
     get product_chapter_path("claudox", "06")
     assert_response :success
 
-    # Claudox active license -> Chatdox paid chapter 06 blocked and redirected
+    # Claudox active license -> Chatdox paid chapter 06 blocked, redirected to
+    # Chatdox's own pricing section (handoff 0045 R2-4), not the generic home page.
     get product_chapter_path("chatdox", "06")
-    assert_redirected_to root_path
+    assert_redirected_to "#{chatdox_path}#pricing"
   end
 
   test "3. Scheduled, expired, and canceled licenses do not grant paid web content access" do
     sign_in(@user)
 
+    # Logged-in users hitting a locked chapter land on that product's own
+    # pricing section now, not the generic home redirect (handoff 0045 R2-4).
+
     # Scheduled license (future)
     scheduled = create_scheduled_license(user: @user, product: @chatdox)
     get product_chapter_path("chatdox", "06")
-    assert_redirected_to root_path
+    assert_redirected_to "#{chatdox_path}#pricing"
     scheduled.destroy
 
     # Expired license (past)
     expired = create_expired_license(user: @user, product: @chatdox)
     get product_chapter_path("chatdox", "06")
-    assert_redirected_to root_path
+    assert_redirected_to "#{chatdox_path}#pricing"
     expired.destroy
 
     # Canceled license
     canceled = create_canceled_license(user: @user, product: @chatdox)
     get product_chapter_path("chatdox", "06")
-    assert_redirected_to root_path
+    assert_redirected_to "#{chatdox_path}#pricing"
   end
 
   test "4. GitHub Lab UI entry points and routes are completely disabled in V1" do

@@ -46,7 +46,7 @@ class Admin::Commerce::ProductsController < Admin::BaseController
   private
 
   def product_params
-    params.require(:product).permit(:name, :sale_enabled, :free_access, :trial_chapter_limit, :active)
+    params.require(:product).permit(:name, :sale_enabled, :free_access, :guest_chapter_limit, :trial_chapter_limit, :active)
   end
 
   def ensure_offers_exist_for(product)

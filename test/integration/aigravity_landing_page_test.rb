@@ -77,11 +77,14 @@ class AigravityLandingPageTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", aigravity_path, text: /자세히 보기/
   end
 
-  test "enforces admin DB trial_chapter_limit override dynamically" do
+  test "enforces admin DB guest_chapter_limit override dynamically, independently of trial_chapter_limit (handoff 0045 R2)" do
     product = Product.find_by!(code: "aigravity")
-    product.update!(trial_chapter_limit: 2)
+    # guest_chapter_limit and trial_chapter_limit are separate columns now --
+    # setting one must not move the other (that coupling was exactly the bug
+    # 0045 investigated and R2 fixed).
+    product.update!(guest_chapter_limit: 2, trial_chapter_limit: 9)
 
-    assert_equal 2, ProductContent.for("aigravity").trial_chapter_limit
+    assert_equal 9, ProductContent.for("aigravity").trial_chapter_limit
     assert_equal 2, ProductContent.for("aigravity").guest_chapter_limit
 
     # Hero badge reflects updated limit

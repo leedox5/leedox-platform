@@ -31,7 +31,9 @@ class ClaudoxAppendixChaptersTest < ActionDispatch::IntegrationTest
     assert user.trial_active?
 
     get claudox_chapter_path("90")
-    assert_redirected_to root_path
+    # Logged-in users hitting a locked chapter land on that product's own
+    # pricing section now, not the generic home redirect (handoff 0045 R2-4).
+    assert_redirected_to "#{claudox_path}#pricing"
   end
 
   test "a Claudox-licensed user can open an appendix chapter, and it has no completion UI" do
@@ -84,7 +86,9 @@ class ClaudoxAppendixChaptersTest < ActionDispatch::IntegrationTest
     get doc_path("05")
     assert_response :success
     get doc_path("06")
-    assert_redirected_to root_path
+    # Logged-in users hitting a locked chapter land on that product's own
+    # pricing section now, not the generic home redirect (handoff 0045 R2-4).
+    assert_redirected_to "#{chatdox_path}#pricing"
 
     product = Product.find_by!(code: "chatdox")
     today = Time.current.in_time_zone(Commerce::PeriodCalculator::KST).to_date

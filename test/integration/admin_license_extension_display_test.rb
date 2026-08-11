@@ -114,7 +114,9 @@ class AdminLicenseExtensionDisplayTest < ActionDispatch::IntegrationTest
     login_as(@user)
     assert_not @user.licensed_for?("chatdox")
     get product_chapter_path("chatdox", "06")
-    assert_redirected_to root_path
+    # Logged-in users hitting a locked chapter land on that product's own
+    # pricing section now, not the generic home redirect (handoff 0045 R2-4).
+    assert_redirected_to "#{chatdox_path}#pricing"
 
     # Customer dashboard displays pre-0020 consistent unowned status without contradictory scheduled badge
     get dashboard_path

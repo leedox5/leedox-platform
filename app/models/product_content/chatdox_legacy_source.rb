@@ -96,8 +96,11 @@ class ProductContent::ChatdoxLegacySource
     [ 1..20 ]
   end
 
+  # See FilesystemSource#guest_chapter_limit -- same 0045 R2 split, each
+  # concept now reads its own admin DB column instead of both sharing
+  # trial_chapter_limit.
   def guest_chapter_limit
-    db_limit = Product.find_by(code: "chatdox")&.trial_chapter_limit
+    db_limit = Product.find_by(code: "chatdox")&.guest_chapter_limit
     db_limit.presence || 2
   end
 

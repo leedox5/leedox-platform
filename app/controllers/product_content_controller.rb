@@ -66,6 +66,16 @@ class ProductContentController < ApplicationController
     end
 
     render formats: :html
+  rescue Pundit::NotAuthorizedError
+    # ApplicationController's rescue_from is shared by 13+ unrelated authorize
+    # call sites app-wide (admin access, refunds, ...), so it stays generic on
+    # purpose -- this local rescue gives locked *chapters* specifically a
+    # context-aware landing spot instead (handoff 0045 R2-4). Guests are
+    # deliberately left alone: re-raising lets them fall through to the
+    # existing sign-in redirect, whose messaging is already contextual enough.
+    raise unless user_signed_in?
+
+    redirect_to locked_chapter_redirect_path, alert: "이 챕터는 라이선스가 필요합니다. 아래에서 이용 기간을 선택할 수 있습니다."
   end
 
   def image
@@ -154,6 +164,13 @@ class ProductContentController < ApplicationController
     when "claudox" then claudox_chapter_path(id)
     else product_chapter_path(product_code, id)
     end
+  end
+
+  def locked_chapter_redirect_path
+    path = @product&.landing_page_path
+    return root_path if path.blank?
+
+    "#{path}#pricing"
   end
 
   def strip_leading_heading(raw_markdown)

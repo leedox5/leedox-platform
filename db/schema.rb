@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_07_052212) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_11_062315) do
   create_table "chapter_progresses", force: :cascade do |t|
     t.string "chapter_id", null: false
     t.datetime "completed_at"
@@ -168,6 +168,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_07_052212) do
     t.string "code", null: false
     t.datetime "created_at", null: false
     t.boolean "free_access", default: false, null: false
+    t.integer "guest_chapter_limit"
     t.string "landing_page_path"
     t.string "name", null: false
     t.boolean "sale_enabled", default: false, null: false
