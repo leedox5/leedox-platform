@@ -16,7 +16,7 @@ Claude.md 파일에 초안을 쓰고 다듬어달라고 부탁했더니, 스토�
 > I'd like to add one more rule about our job.
 > When I chat in English, I want you to correct briefly what I'm saying and then your real answer because I want to improve my English skill.
 
-이 요청 자체도 바로 교정이 돌아왔다 — "about our job"보다 "for how we work"가 더 자연스럽다는 것, 그리고 문장 구조를 조금 다듬어준 것. 그렇게 두 번째 규칙도 실전 예시와 함께 자리를 잡았다. (자세한 교정 과정은 [English.md](English.md)에 기록해두었다.)
+이 요청 자체도 바로 교정이 돌아왔다 — "about our job"보다 "for how we work"가 더 자연스럽다는 것, 그리고 문장 구조를 조금 다듬어준 것. 그렇게 두 번째 규칙도 실전 예시와 함께 자리를 잡았다. (자세한 교정 과정은 English.md에 기록해두었다.)
 
 이렇게 두 가지 규칙이 생겼다.
 

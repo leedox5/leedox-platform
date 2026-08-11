@@ -12,7 +12,7 @@
 | 4 | 본격적인 작업 — 생산성이 달라지다 | [04_real_work.md](04_real_work.md) | 95% | ✅ |
 | 5 | 기억을 심다 — 메모리와 CLAUDE.md | [05_memory_claude_md.md](05_memory_claude_md.md) | 90% | ✅ |
 | 6 | 글쓰기를 맡기다 — 문서 다듬기 협업 | [06_writing_polish.md](06_writing_polish.md) | 90% | ✅ |
-| 7 | 영어로 대화하기 — 교정받으며 배우기 | [07_english_practice.md](07_english_practice.md) | 85% | ✅ |
+| 7 | 영어로 대화하기 — 교정받으며 배우기 | [07_english_practice.md](07_english_practice.md) | 93% | ✅ |
 | 8 | 질문과 답변 — QNA로 지식 쌓기 | [08_qna.md](08_qna.md) | 85% | ✅ |
 
 ## Part 2. 중급 (9~15장)
