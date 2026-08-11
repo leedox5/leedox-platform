@@ -51,3 +51,4 @@
 | 93 | Cowork라는 새 몸에서 | [93_cowork_first_handoff.md](93_cowork_first_handoff.md) | 90% | ✅ |
 | 94 | 새 몸이 비춘 오래된 원칙 | [94_box_reflected_old_principles.md](94_box_reflected_old_principles.md) | 93% | ✅ |
 | 96 | 몸은 하나인데 손은 안 닿는다 | [96_body_one_hands_two.md](96_body_one_hands_two.md) | 90% | ✅ |
+| 98 | 손이 안 닿는 게 아니라, 손을 대지 않는 것 | [98_hands_off_credentials.md](98_hands_off_credentials.md) | 90% | ✅ |

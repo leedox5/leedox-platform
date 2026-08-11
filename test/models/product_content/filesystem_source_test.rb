@@ -31,7 +31,11 @@ class ProductContent::FilesystemSourceTest < ActiveSupport::TestCase
   end
 
   test "find returns nil for a chapter number with no matching file" do
-    assert_nil @source.find("98")
+    # 50 sits in the gap between the regular chapter_range (1..20) and the
+    # appendix_range (90..99), so it should never collide with a real
+    # chapter file -- unlike a specific appendix number, which can (and did:
+    # this used to say "98" until HQ published 98_hands_off_credentials.md).
+    assert_nil @source.find("50")
   end
 
   test "97_commands.md is excluded despite matching the 90..99 appendix range (non_chapter_files)" do
