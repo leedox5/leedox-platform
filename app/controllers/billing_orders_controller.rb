@@ -73,7 +73,11 @@ class BillingOrdersController < ApplicationController
       provider: checkout_provider
     )
     redirect_to billing_order_path(order.public_id), notice: "현재 상품 조건으로 새 주문을 만들었습니다."
-  rescue Commerce::RetryOrder::Unavailable => e
+  rescue Commerce::RetryOrder::Unavailable, Commerce::OrderCreator::Unavailable => e
+    # RetryOrder calls OrderCreator internally (see Commerce::RetryOrder), so
+    # OrderCreator's own Unavailable reasons (e.g. the 12-month license-start
+    # cap, handoff 0043) can surface here too, not just RetryOrder's -- both
+    # mean "this order can't proceed as-is," so both land on the same alert.
     Rails.logger.warn("Commerce retry rejected: #{e.class.name}")
     redirect_to dashboard_path, alert: "결제 재시도 조건을 확인해 주세요."
   end

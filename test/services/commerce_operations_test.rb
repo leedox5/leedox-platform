@@ -97,6 +97,29 @@ class CommerceOperationsTest < ActiveSupport::TestCase
     assert retry_order.commerce_audit_events.exists?(action: "retry_order_created", actor: @buyer)
   end
 
+  test "order creation is rejected once the license chain would start more than 12 months out (handoff 0043)" do
+    License.create!(
+      user: @buyer, product: @product, source: "coupon", status: "scheduled",
+      starts_on: @at.to_date, last_usable_on: @at.to_date + 13.months,
+      access_ends_at: KST.local(*(@at.to_date + 13.months + 1.day).then { |d| [ d.year, d.month, d.day ] })
+    )
+
+    assert_raises(Commerce::OrderCreator::Unavailable) { create_order(at: @at) }
+  end
+
+  test "retrying an order is rejected the same way once the license chain has grown past 12 months out" do
+    source = create_order(at: @at - 31.minutes)
+    License.create!(
+      user: @buyer, product: @product, source: "coupon", status: "scheduled",
+      starts_on: @at.to_date, last_usable_on: @at.to_date + 13.months,
+      access_ends_at: KST.local(*(@at.to_date + 13.months + 1.day).then { |d| [ d.year, d.month, d.day ] })
+    )
+
+    assert_raises(Commerce::OrderCreator::Unavailable) do
+      Commerce::RetryOrder.call!(source_order: source, user: @buyer, provider: "portone", at: @at)
+    end
+  end
+
   test "retry remains closed with the commerce gate disabled" do
     source = create_order(at: @at - 31.minutes)
     ENV["LEEDOX_COMMERCE_ENABLED"] = "false"

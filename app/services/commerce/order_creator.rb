@@ -41,6 +41,17 @@ module Commerce
         requested_start_on: requested_start_on,
         at: @at
       )
+      # KakaoPay only allows recurring/short-cycle billing for products where
+      # payment-to-access-start stays within 12 months (handoff 0043) -- a
+      # license already stacked far enough out (real repeat purchases, or
+      # admin free grants like the ones that caused this) must block further
+      # checkout stacking here rather than silently scheduling a start date
+      # years away. Admin free grants (Commerce::GrantFreeLicense ->
+      # LicenseScheduler.grant!) intentionally bypass OrderCreator entirely,
+      # so this cap does not apply to them -- see result.md for why.
+      if period.starts_on > max_license_start_on
+        raise Unavailable, "license start date exceeds 12 months from purchase date"
+      end
 
       ApplicationRecord.transaction do
         order = Order.create!(
@@ -71,6 +82,10 @@ module Commerce
     end
 
     private
+
+    def max_license_start_on
+      @at.in_time_zone(Commerce::PeriodCalculator::KST).to_date + 12.months
+    end
 
     def resolve_requested_start(product, offer)
       existing_period = @user.licenses

@@ -24,6 +24,15 @@ class BillingController < ApplicationController
     @minimum_start_on = kst_today
     @maximum_start_on = kst_today + 7.days
 
+    if @existing_license
+      @extension_start_on = @existing_license.last_usable_on + 1.day
+      # Mirrors Commerce::OrderCreator's own 12-month cap (handoff 0043) so the
+      # checkout page never shows a purchasable form for a start date the
+      # server would reject anyway -- this is the proactive UI half of that
+      # guard, not a replacement for it.
+      @license_stacking_capped = @extension_start_on > (kst_today + 12.months)
+    end
+
     render :checkout_enabled
   end
 

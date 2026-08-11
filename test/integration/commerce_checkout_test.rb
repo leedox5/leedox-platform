@@ -145,6 +145,35 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
     assert_select "input[type='date'][name='order[requested_start_on]']", count: 0
   end
 
+  test "checkout blocks further stacking once the license chain already runs past 12 months out (handoff 0043)" do
+    enable_chatdox_sales
+    sign_in
+    today = Time.current.in_time_zone(Commerce::PeriodCalculator::KST).to_date
+    last_on = today + 13.months
+    License.create!(
+      user: @user,
+      product: @product,
+      source: "coupon",
+      status: "scheduled",
+      starts_on: today,
+      last_usable_on: last_on,
+      access_ends_at: Commerce::PeriodCalculator::KST.local(*(last_on + 1.day).then { |date| [ date.year, date.month, date.day ] })
+    )
+
+    get billing_checkout_path
+    assert_response :success
+    assert_select "#license-stacking-capped-notice"
+    assert_select "input[name='order[offer_code]']", count: 0
+    assert_select "input[type='submit']", count: 0
+
+    assert_no_difference [ "Order.count", "OrderItem.count", "PaymentTransaction.count" ] do
+      post billing_orders_path, params: {
+        order: { product_code: "chatdox", offer_code: "chatdox-1m-v1", requested_start_on: today }
+      }
+    end
+    assert_redirected_to billing_checkout_path
+  end
+
   test "Claudox has no purchase path even when global commerce is enabled" do
     ENV["LEEDOX_COMMERCE_ENABLED"] = "true"
     Product.find_by!(code: "claudox").update!(sale_enabled: false)

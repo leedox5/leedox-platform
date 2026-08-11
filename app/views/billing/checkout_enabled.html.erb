@@ -10,43 +10,54 @@
       <p class="mt-3 break-keep text-sm leading-6 text-slate-600">자동 갱신 없이 선택한 기간을 한 번 결제합니다. 금액은 모두 VAT 포함입니다.</p>
     </div>
 
-    <%= form_with url: billing_orders_path, scope: :order, class: "space-y-8" do |form| %>
-      <%= form.hidden_field :product_code, value: @product.code %>
-
-      <fieldset>
-        <legend class="text-lg font-bold text-slate-900">이용 기간</legend>
-        <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <% @offers.each_with_index do |offer, index| %>
-            <label class="cursor-pointer rounded-2xl border border-blue-100 bg-white p-5 shadow-sm has-[:checked]:border-blue-600 has-[:checked]:ring-2 has-[:checked]:ring-blue-100">
-              <%= form.radio_button :offer_code, offer.code, checked: index.zero?, class: "text-blue-600" %>
-              <span class="ml-2 font-bold text-slate-900"><%= offer.duration_months %>개월</span>
-              <strong class="mt-4 block text-2xl text-slate-950"><%= number_to_currency(offer.total_amount, unit: "원", format: "%n%u", precision: 0) %></strong>
-              <span class="mt-1 block text-xs text-slate-500">공급가 <%= number_with_delimiter(offer.supply_amount) %>원 + VAT <%= number_with_delimiter(offer.vat_amount) %>원</span>
-            </label>
-          <% end %>
+    <% if @license_stacking_capped %>
+      <div class="rounded-2xl border border-amber-200 bg-amber-50 p-6" id="license-stacking-capped-notice">
+        <h2 class="font-bold text-amber-900">지금은 새로 결제할 수 없습니다</h2>
+        <p class="mt-3 break-keep text-sm leading-6 text-amber-800">
+          현재 <%= @product.name %> 이용 기간이 <strong><%= I18n.l(@existing_license.last_usable_on, locale: :ko, format: :long) %></strong>까지 이미 예약되어 있어, 지금 결제하면 새 이용 시작일(<%= I18n.l(@extension_start_on, locale: :ko, format: :long) %>)이 오늘로부터 12개월을 넘어갑니다. 기존 이용 기간이 끝나갈 무렵 다시 결제해 주세요.
+        </p>
+        <div class="mt-5 flex flex-wrap gap-3">
+          <%= link_to "마이페이지로 이동", mypage_path, class: "inline-flex items-center justify-center rounded-xl border border-amber-300 bg-white px-5 py-3 text-sm font-bold text-amber-900 transition hover:bg-amber-100" %>
         </div>
-      </fieldset>
-
-      <section class="rounded-2xl border border-slate-200 bg-white p-6">
-        <h2 class="font-bold text-slate-900">서비스 시작일</h2>
-        <% if @existing_license %>
-          <% extension_start_on = @existing_license.last_usable_on + 1.day %>
-          <p class="mt-3 break-keep text-sm text-slate-600">현재 <%= @product.name %> 기간 뒤인 <strong><%= I18n.l(extension_start_on, locale: :ko, format: :long) %></strong>부터 결제하신 기간이 이어서 적용됩니다.</p>
-          <%= form.hidden_field :requested_start_on, value: extension_start_on %>
-        <% else %>
-          <p class="mt-2 text-sm text-slate-600">오늘부터 7일 이내에서 선택할 수 있습니다.</p>
-          <%= form.date_field :requested_start_on,
-            value: @minimum_start_on,
-            min: @minimum_start_on,
-            max: @maximum_start_on,
-            required: true,
-            class: "mt-4 rounded-lg border border-slate-300 px-4 py-2" %>
-        <% end %>
-      </section>
-
-      <div class="flex justify-end">
-        <%= form.submit "주문하기", class: "rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-700" %>
       </div>
+    <% else %>
+      <%= form_with url: billing_orders_path, scope: :order, class: "space-y-8" do |form| %>
+        <%= form.hidden_field :product_code, value: @product.code %>
+
+        <fieldset>
+          <legend class="text-lg font-bold text-slate-900">이용 기간</legend>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <% @offers.each_with_index do |offer, index| %>
+              <label class="cursor-pointer rounded-2xl border border-blue-100 bg-white p-5 shadow-sm has-[:checked]:border-blue-600 has-[:checked]:ring-2 has-[:checked]:ring-blue-100">
+                <%= form.radio_button :offer_code, offer.code, checked: index.zero?, class: "text-blue-600" %>
+                <span class="ml-2 font-bold text-slate-900"><%= offer.duration_months %>개월</span>
+                <strong class="mt-4 block text-2xl text-slate-950"><%= number_to_currency(offer.total_amount, unit: "원", format: "%n%u", precision: 0) %></strong>
+                <span class="mt-1 block text-xs text-slate-500">공급가 <%= number_with_delimiter(offer.supply_amount) %>원 + VAT <%= number_with_delimiter(offer.vat_amount) %>원</span>
+              </label>
+            <% end %>
+          </div>
+        </fieldset>
+
+        <section class="rounded-2xl border border-slate-200 bg-white p-6">
+          <h2 class="font-bold text-slate-900">서비스 시작일</h2>
+          <% if @existing_license %>
+            <p class="mt-3 break-keep text-sm text-slate-600">현재 <%= @product.name %> 기간 뒤인 <strong><%= I18n.l(@extension_start_on, locale: :ko, format: :long) %></strong>부터 결제하신 기간이 이어서 적용됩니다.</p>
+            <%= form.hidden_field :requested_start_on, value: @extension_start_on %>
+          <% else %>
+            <p class="mt-2 text-sm text-slate-600">오늘부터 7일 이내에서 선택할 수 있습니다.</p>
+            <%= form.date_field :requested_start_on,
+              value: @minimum_start_on,
+              min: @minimum_start_on,
+              max: @maximum_start_on,
+              required: true,
+              class: "mt-4 rounded-lg border border-slate-300 px-4 py-2" %>
+          <% end %>
+        </section>
+
+        <div class="flex justify-end">
+          <%= form.submit "주문하기", class: "rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-700" %>
+        </div>
+      <% end %>
     <% end %>
   </main>
 
