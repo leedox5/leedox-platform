@@ -32,7 +32,7 @@
 | # | 챕터 | 파일 | 완성도 | 상태 |
 |---|------|------|:---:|:---:|
 | 16 | 서브에이전트에게 맡기기 | [16_subagent.md](16_subagent.md) | 93% | ✅ |
-| 17 | 워크플로우로 규모를 키우다 | [17_workflow_scale.md](17_workflow_scale.md) | 98% | ✅ |
+| 17 | 워크플로우로 규모를 키우다 | [17_workflow_scale.md](17_workflow_scale.md) | 99% | ✅ |
 | 18 | 스킬(Skill)로 반복 작업 줄이기 | [18_skill_automation.md](18_skill_automation.md) | 65% | 🟡 |
 | 19 | 보안 리뷰 체크리스트 | [19_security_review.md](19_security_review.md) | 90% | ✅ |
 | 20 | 마무리 — 극대화된 생산성, 그 이후 | [20_wrap_up.md](20_wrap_up.md) | 90% | ✅ |
