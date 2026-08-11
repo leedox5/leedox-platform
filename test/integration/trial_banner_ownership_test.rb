@@ -1,7 +1,7 @@
 require "test_helper"
 
 class TrialBannerOwnershipTest < ActionDispatch::IntegrationTest
-  BANNER_TEXT = "보유하지 않은 상품도 앞부분 챕터를 무료로 볼 수 있습니다"
+  BANNER_TEXT = "체험 기간에는 상품별로 더 많은 챕터가 열립니다"
 
   setup do
     Commerce::CatalogBootstrap.call!

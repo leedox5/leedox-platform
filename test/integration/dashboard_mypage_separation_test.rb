@@ -70,7 +70,7 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
 
     get dashboard_path
     assert_response :success
-    assert_match(/무료 Trial/, response.body)
+    assert_match(/무료 체험/, response.body)
 
     get mypage_path
     assert_response :success

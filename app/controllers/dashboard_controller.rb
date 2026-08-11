@@ -44,6 +44,12 @@ class DashboardController < ApplicationController
       product: product,
       total: total,
       accessible: accessible_chapter_count(source, total),
+      # What this same product drops back to once trial ends (handoff 0046) --
+      # always computed, regardless of the viewer's current state, so the view
+      # can decide when it's actually worth showing (trial-active, unlicensed,
+      # and only when it differs from `accessible`). Per-product because
+      # guest/trial limits are set per product, not globally.
+      accessible_after_trial: [ total, source.guest_chapter_limit ].min,
       completed_count: completed_count,
       progress_percent: progress_percent(completed_count, total),
       recent_chapters: completed_ids.first(3).filter_map { |id| source.find(id) },

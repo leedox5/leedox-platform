@@ -18,7 +18,12 @@
 
     <% if current_user.trial_active? && @has_unowned_product %>
       <p class="mb-6 rounded-lg border border-violet-100 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-700">
-        무료 Trial <%= current_user.trial_days_remaining %>일 남음 — 보유하지 않은 상품도 앞부분 챕터를 무료로 볼 수 있습니다.
+        무료 체험 D-<%= current_user.trial_days_remaining %> · <%= I18n.l(current_user.trial_ends_on, locale: :ko, format: :long) %>까지 — 체험 기간에는 상품별로 더 많은 챕터가 열립니다. 기간이 끝나면 비로그인 방문자와 같은 범위로 돌아갑니다.
+      </p>
+    <% elsif current_user.trial_recently_expired? && @has_unowned_product %>
+      <p class="mb-6 rounded-lg border border-amber-100 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+        무료 체험 기간이 끝났습니다. 지금은 비로그인 방문자와 같은 범위까지 열려 있습니다. 이어서 읽으려면 라이선스를 확인해보세요.
+        <%= link_to "가격 보기 →", pricing_path, class: "underline decoration-amber-400 underline-offset-2 hover:text-amber-900" %>
       </p>
     <% end %>
 
@@ -131,8 +136,12 @@
                   <%= product_status_badge(current_user, product) %>
                 </div>
                 <p class="mt-2 text-sm text-gray-600 leading-relaxed"><%= product.tagline %></p>
+                <% trial_boost = current_user.trial_active? && pd[:accessible] != pd[:accessible_after_trial] %>
                 <div class="mt-4 rounded-md bg-gray-50 p-3 text-xs text-gray-500">
-                  <p class="font-medium text-gray-700">접근 가능 문서: <%= pd[:accessible] %>/<%= pd[:total] %></p>
+                  <p class="font-medium text-gray-700">접근 가능 문서: <%= pd[:accessible] %>/<%= pd[:total] %><%= " (체험 중)" if trial_boost %></p>
+                  <% if trial_boost %>
+                    <p class="mt-0.5 text-gray-500"><%= I18n.l(current_user.trial_ends_on, locale: :ko, format: :long) %> 이후 <%= pd[:accessible_after_trial] %>/<%= pd[:total] %></p>
+                  <% end %>
                   <p class="mt-0.5"><%= product_period_text(current_user, product) %></p>
                 </div>
               </div>
