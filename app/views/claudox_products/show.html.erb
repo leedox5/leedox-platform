@@ -6,7 +6,13 @@
   <main>
     <section class="border-b border-violet-100 bg-white py-16 sm:py-20">
       <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
-        <p class="text-sm font-black uppercase tracking-[0.18em] text-violet-700">WORK WITH AI</p>
+        <div class="flex flex-wrap items-center gap-2">
+          <p class="text-sm font-black uppercase tracking-[0.18em] text-violet-700">WORK WITH AI</p>
+          <% claudox_limit = ProductContent.for("claudox").guest_chapter_limit %>
+          <%= link_to product_chapter_path("claudox", "01"), class: "inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-100" do %>
+            <span>🎁</span> <%= claudox_limit %> 챕터 무료 체험 가능
+          <% end %>
+        </div>
         <h1 class="mt-3 break-keep text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">클로드가 들어온 날, 팀이 달라졌다</h1>
         <p class="mt-5 max-w-3xl break-keep text-lg leading-8 text-slate-700">좋은 답변 하나를 넘어, AI와 함께 일하는 관계와 시스템을 만드는 실제 협업 기록입니다.</p>
 
@@ -63,6 +69,33 @@
         </div>
       </div>
     </section>
+
+    <% if @appendix_chapters.any? %>
+      <section class="bg-white py-14 sm:py-16">
+        <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
+          <div class="mb-7">
+            <h2 class="text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">부록 (특별판)</h2>
+            <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600">정규 20장에는 담기지 않은 뒷이야기입니다. 세션과 기억의 구조, 자격증명 정책, 새로운 작업 환경으로의 이주처럼, 실제로 부딪히고 나서야 알게 된 것들을 따로 모았습니다. 라이선스 기간 동안 20장과 함께 열람할 수 있습니다.</p>
+          </div>
+
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <% @appendix_chapters.each do |chapter| %>
+              <%= link_to product_chapter_path("claudox", chapter[:id]), class: "group block rounded-xl border border-slate-200 bg-slate-50 p-4 transition-all hover:border-violet-300 hover:bg-violet-50/60" do %>
+                <div class="flex items-center justify-between gap-2">
+                  <p class="text-sm font-black text-slate-700">부록 <%= chapter[:id] %></p>
+                  <% if chapter[:accessible] %>
+                    <span class="rounded-full bg-violet-100 px-2.5 py-1 text-[11px] font-bold text-violet-700">열람 가능</span>
+                  <% else %>
+                    <span class="rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-bold text-slate-500">🔒 잠금</span>
+                  <% end %>
+                </div>
+                <p class="mt-2 text-sm leading-6 text-slate-700 font-medium"><%= chapter[:title] %></p>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </section>
+    <% end %>
 
     <section class="bg-violet-50/50 py-14 sm:py-16">
       <div class="mx-auto w-full max-w-3xl px-4 sm:px-6">
