@@ -184,7 +184,9 @@ class ProductContentController < ApplicationController
   end
 
   def render_markdown(raw_markdown)
-    renderer = Redcarpet::Render::HTML.new(
+    renderer = ProductContent::LinkRewritingRenderer.new(
+      product_code: @product_code,
+      chapters: @source.chapters,
       hard_wrap: true,
       link_attributes: { target: "_blank", rel: "noopener noreferrer" }
     )

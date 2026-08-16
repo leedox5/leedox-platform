@@ -42,6 +42,25 @@ class SyntheticProductContentTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "relative .md links resolve to the matching chapter, or drop to plain text when nothing matches (handoff 0049)" do
+    File.write(@product_path.join("01_intro.md"), <<~MARKDOWN)
+      # 소개
+
+      합성 상품 테스트 본문입니다.
+
+      다음 장은 [02_next.md](02_next.md)에 있고, [QNA.md](QNA.md)는 없습니다.
+      외부 링크는 [그대로](https://example.com) 유지됩니다.
+    MARKDOWN
+
+    get "/content/#{@product_code}/01"
+    assert_response :success
+
+    assert_select "a[href=?]", product_chapter_path(@product_code, "02"), text: "02_next.md"
+    assert_select "a", text: "QNA.md", count: 0
+    assert_match(/QNA\.md는 없습니다/, response.body)
+    assert_select "a[href='https://example.com'][target='_blank']", text: "그대로"
+  end
+
   test "a chapter id with no file at all 404s with the FilesystemSource message" do
     get "/content/#{@product_code}/03"
     assert_response :not_found
