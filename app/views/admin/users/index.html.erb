@@ -63,7 +63,10 @@
                         <%= button_to "#{product.name} 1년 무료 부여",
                           grant_free_license_admin_user_path(user, product_code: product.code),
                           method: :post,
-                          data: { turbo_confirm: grant_free_license_confirm_message(user, product) },
+                          data: {
+                            turbo_confirm: grant_free_license_confirm_message(user, product),
+                            turbo_submits_with: "부여 중..."
+                          },
                           class: "rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50" %>
                       <% end %>
                     </div>

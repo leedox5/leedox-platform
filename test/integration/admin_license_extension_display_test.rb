@@ -204,6 +204,41 @@ class AdminLicenseExtensionDisplayTest < ActionDispatch::IntegrationTest
     assert_select "div", text: /최종 종료일: 2027\.09\.05/
   end
 
+  test "8. Confirm message identifies the target by email and warns (without blocking) once the grant pushes past 12 months out (handoff 0050)" do
+    login_as(@admin)
+
+    get admin_users_path
+    assert_response :success
+    assert_select "button[data-turbo-confirm*='user-ext@example.com']"
+    assert_select "button[data-turbo-confirm*='⚠']", count: 0
+    assert_select "button[data-turbo-submits-with]"
+
+    # An existing license that already runs past 12 months from today means
+    # the next grant's start date (last_usable_on + 1 day) exceeds it too --
+    # same math as Commerce::OrderCreator#max_license_start_on, mirrored here
+    # for display only (handoff 0050 explicitly leaves grants unblocked).
+    today = Time.current.in_time_zone(KST).to_date
+    far_out_end = today + 13.months
+    License.create!(
+      user: @user,
+      product: @chatdox,
+      source: "coupon",
+      status: "scheduled",
+      starts_on: today,
+      last_usable_on: far_out_end - 1.day,
+      access_ends_at: KST.local(far_out_end.year, far_out_end.month, far_out_end.day)
+    )
+
+    get admin_users_path
+    assert_response :success
+    assert_select "button[data-turbo-confirm*='⚠ 이 부여로 만료일이 오늘부터 12개월을 넘어섭니다']"
+
+    # The warning does not block the grant -- it's still allowed to go through.
+    assert_difference "License.count", 1 do
+      post grant_free_license_admin_user_path(@user, product_code: "chatdox")
+    end
+  end
+
   test "7. Non-regression of double-click stacking, authorization, audit events, and non-grantable products" do
     # Non-admin cannot grant free license
     login_as(@user)

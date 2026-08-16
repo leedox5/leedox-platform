@@ -86,17 +86,40 @@ module Admin::UsersHelper
     )
   end
 
+  # Free grants go through the same LicenseScheduler stacking math as a paid
+  # order, but skip OrderCreator's own 12-month-out cap entirely (that check
+  # lives in OrderCreator#max_license_start_on, not LicenseScheduler, and a
+  # free grant never touches OrderCreator) -- so unlike checkout, nothing
+  # here blocks it. That's intentional (handoff 0050): a free grant is a
+  # deliberate admin action, not a shopper checking out, so the admin gets a
+  # warning instead of a hard stop and decides for themselves.
+  def free_grant_exceeds_twelve_months?(preview, at: Time.current)
+    preview.starts_on > (at.in_time_zone(Commerce::PeriodCalculator::KST).to_date + 12.months)
+  end
+
+  # data-turbo-confirm only renders a native confirm() -- there's no HTML
+  # behind it to style, so the "current expiry / new expiry" facts the admin
+  # needs before clicking have to fit in this plain-text message (handoff
+  # 0050). Identifies the target by email, not just name, since admin/test
+  # accounts routinely share the same display name (see this file's own
+  # fixtures) and email is what's actually unique.
   def grant_free_license_confirm_message(user, product)
     current_period = contiguous_license_period(user, product)
     preview = preview_free_license_grant(user, product)
     new_period_str = "#{preview.starts_on.strftime('%Y.%m.%d')} ~ #{preview.last_usable_on.strftime('%Y.%m.%d')}"
     final_end_str = preview.last_usable_on.strftime("%Y.%m.%d")
 
-    if current_period
+    message = if current_period
       current_end_str = current_period[:last_usable_on].strftime("%Y.%m.%d")
-      "#{user.name}님은 이미 #{product.name} 라이선스가 있습니다 (현재 종료일: #{current_end_str}). 1년을 추가로 부여하시겠습니까?\n(추가 기간: #{new_period_str}, 최종 종료일: #{final_end_str})"
+      "#{user.name}(#{user.email})님은 이미 #{product.name} 라이선스가 있습니다 (현재 종료일: #{current_end_str}). 1년을 추가로 부여하시겠습니까?\n(추가 기간: #{new_period_str}, 최종 종료일: #{final_end_str})"
     else
-      "#{user.name}님에게 #{product.name} 1년 무료 라이선스를 부여하시겠습니까? (이용 기간: #{new_period_str})"
+      "#{user.name}(#{user.email})님에게 #{product.name} 1년 무료 라이선스를 부여하시겠습니까? (현재 라이선스 없음 → 이용 기간: #{new_period_str})"
     end
+
+    if free_grant_exceeds_twelve_months?(preview)
+      message += "\n\n⚠ 이 부여로 만료일이 오늘부터 12개월을 넘어섭니다 (최종 종료일: #{final_end_str})."
+    end
+
+    message
   end
 end
