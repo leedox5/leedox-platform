@@ -13,19 +13,26 @@
 	@apply mt-6 mb-2 text-xl font-semibold text-slate-900;
 }
 
-.doc-content p,
-.doc-content li {
-	@apply leading-7 text-slate-700;
+.doc-content p {
+	@apply mb-7 leading-7 text-slate-700;
 }
 
-.doc-content ul,
-.doc-content ol {
+.doc-content li {
+	@apply mb-2 leading-7 text-slate-700;
+}
+
+.doc-content ul {
 	@apply my-4 ml-6 list-disc;
+}
+
+.doc-content ol {
+	@apply my-4 ml-6 list-decimal;
 }
 
 .doc-content code {
 	@apply rounded bg-slate-100 px-1 py-0.5 text-sm text-slate-800;
 	font-family: "D2Coding", "JetBrains Mono", "Fira Code", "Consolas", "Menlo", monospace;
+	overflow-wrap: anywhere;
 }
 
 .doc-content pre {
@@ -52,6 +59,15 @@
 
 .doc-content blockquote {
 	@apply my-5 border-l-4 border-blue-200 bg-blue-50 px-4 py-3 text-slate-700;
+}
+
+/* A padded/bordered box (blockquote) or a list item shows its last child's
+   own margin-bottom as leftover space inside the box (handoff 0048 R2) --
+   the box's own padding/spacing already provides the boundary, so the
+   child's trailing margin is redundant there specifically. */
+.doc-content blockquote > :last-child,
+.doc-content li > :last-child {
+	margin-bottom: 0;
 }
 
 .doc-content table {
