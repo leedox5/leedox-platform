@@ -60,6 +60,29 @@ class CommerceCheckoutSubmissionTest < ActiveSupport::TestCase
     assert_equal "pending", first.reload.status
   end
 
+  test "a stale evidence-free pending order under a different provider is abandoned, not silently reused (handoff: KakaoPay checkout choice)" do
+    stale_manual = submit(offer_code: "chatdox-1m-v1", provider: "manual")
+
+    assert_difference "Order.count", 1 do
+      fresh_kakaopay = submit(offer_code: "chatdox-1m-v1", provider: "portone")
+      assert_not_equal stale_manual, fresh_kakaopay
+      assert_equal "portone", fresh_kakaopay.provider
+    end
+
+    assert_equal "abandoned", stale_manual.reload.status
+  end
+
+  test "a pending order under a different provider WITH evidence is left alone, not silently replaced" do
+    in_flight_portone = submit(offer_code: "chatdox-1m-v1", provider: "portone")
+    in_flight_portone.payment_transaction.update!(provider_status: "PAID")
+
+    assert_no_difference "Order.count" do
+      result = submit(offer_code: "chatdox-1m-v1", provider: "manual")
+      assert_equal in_flight_portone, result
+    end
+    assert_equal "pending", in_flight_portone.reload.status
+  end
+
   test "a paid order for the same product does not block or get touched by a fresh checkout submission" do
     paid = submit(offer_code: "chatdox-1m-v1")
     Commerce::OrderFinalizer.call!(
@@ -85,13 +108,13 @@ class CommerceCheckoutSubmissionTest < ActiveSupport::TestCase
 
   private
 
-  def submit(offer_code:, at: @at)
+  def submit(offer_code:, at: @at, provider: "portone")
     Commerce::CheckoutSubmission.call!(
       user: @buyer,
       product_code: "chatdox",
       offer_code: offer_code,
       requested_start_on: at.in_time_zone(KST).to_date,
-      provider: "portone",
+      provider: provider,
       at: at
     )
   end

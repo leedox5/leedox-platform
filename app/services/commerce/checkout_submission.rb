@@ -31,7 +31,14 @@ module Commerce
       existing_pending = find_existing_pending(product)
 
       if existing_pending
-        return existing_pending if existing_pending.order_items.first!.offer_code == @offer_code
+        # Reuse only if it's still the same thing the customer is asking for
+        # right now -- same product/duration AND same payment method. A
+        # provider mismatch (handoff: KakaoPay checkout choice) must not
+        # silently hand back an old order under a different payment method
+        # the customer isn't currently choosing (e.g. a stale manual-transfer
+        # order from weeks ago, just because today's duration happens to
+        # match) -- that would ignore what they picked today entirely.
+        return existing_pending if existing_pending.order_items.first!.offer_code == @offer_code && existing_pending.provider == @provider
         return existing_pending unless Commerce::PendingOrderAssessment.evidence_free?(order: existing_pending)
       end
 
