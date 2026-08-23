@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_11_062315) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_23_222345) do
   create_table "chapter_progresses", force: :cascade do |t|
     t.string "chapter_id", null: false
     t.datetime "completed_at"
@@ -66,7 +66,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_11_062315) do
     t.index ["order_item_id"], name: "index_licenses_on_order_item_id", unique: true
     t.index ["product_id"], name: "index_licenses_on_product_id"
     t.index ["user_id", "product_id", "access_ends_at"], name: "index_licenses_on_user_product_access_end"
-    t.index ["user_id", "product_id", "starts_on"], name: "index_licenses_on_user_product_start", unique: true
+    t.index ["user_id", "product_id", "starts_on"], name: "index_licenses_on_user_product_start", unique: true, where: "status != 'canceled'"
     t.index ["user_id"], name: "index_licenses_on_user_id"
   end
 
