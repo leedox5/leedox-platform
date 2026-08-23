@@ -19,6 +19,7 @@ class BillingController < ApplicationController
     # product, honor it; otherwise fall back to the first offer, same as
     # before this param existed (handoff 0047).
     @selected_offer_code = @offers.find { |offer| offer.code == params[:offer_code] }&.code || @offers.first&.code
+    @kakaopay_available = Payments::Configuration.current.kakaopay_ready?
     @existing_license = current_user.licenses
       .where(product: @product)
       .not_canceled

@@ -71,12 +71,17 @@
       try {
         const response = await PortOne.requestPayment({
           storeId: <%= raw json_escape(@portone_store_id.to_json) %>,
-          channelKey: <%= raw json_escape(@portone_channel_key.to_json) %>,
+          channelKey: <%= raw json_escape(@portone_kakaopay_channel_key.to_json) %>,
           paymentId: <%= raw json_escape(@order.public_id.to_json) %>,
           orderName: <%= raw json_escape("#{@order_item.product_name} #{@order_item.duration_months}개월".to_json) %>,
           totalAmount: <%= @order.total_amount %>,
           currency: <%= raw json_escape(@order.currency.to_json) %>,
-          payMethod: "CARD",
+          payMethod: "EASY_PAY",
+          // KakaoPay only supports IFRAME on PC and REDIRECTION on mobile
+          // (PortOne KakaoPay integration docs) -- the SDK itself picks
+          // whichever matches where it's actually running, so this object
+          // is just declaring both, not something we compute ourselves.
+          windowType: { pc: "IFRAME", mobile: "REDIRECTION" },
           customer: { email: <%= raw json_escape(current_user.email.to_json) %> },
           redirectUrl: <%= raw json_escape(billing_success_url.to_json) %>
         });

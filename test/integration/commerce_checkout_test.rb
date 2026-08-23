@@ -3,7 +3,7 @@ require "test_helper"
 class CommerceCheckoutTest < ActionDispatch::IntegrationTest
   PAYMENT_ENV_KEYS = %w[
     LEEDOX_COMMERCE_ENABLED PAYMENT_PROVIDER
-    PORTONE_API_SECRET PORTONE_STORE_ID PORTONE_CHANNEL_KEY
+    PORTONE_API_SECRET PORTONE_STORE_ID PORTONE_CHANNEL_KEY PORTONE_KAKAOPAY_CHANNEL_KEY
     PORTONE_WEBHOOK_SECRET PAYMENT_PRICE_AMOUNT BANK_TRANSFER_ACCOUNT_INFO
   ].freeze
 
@@ -162,6 +162,52 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
 
     order = Order.order(:created_at).last
     assert_equal 12, order.order_items.first.duration_months
+  end
+
+  test "checkout offers KakaoPay vs manual bank transfer, KakaoPay preselected, when PortOne is fully configured" do
+    enable_chatdox_sales
+
+    sign_in
+    get billing_checkout_path
+    assert_select "input[name='order[payment_method]'][value='kakaopay'][checked]"
+    assert_select "input[name='order[payment_method]'][value='manual']"
+  end
+
+  test "no payment method choice is shown, and checkout falls back to manual, without a KakaoPay channel key (handoff 0050)" do
+    enable_chatdox_sales
+    ENV.delete("PORTONE_KAKAOPAY_CHANNEL_KEY")
+
+    sign_in
+    get billing_checkout_path
+    assert_select "input[name='order[payment_method]']", count: 0
+
+    today = Time.current.in_time_zone(Commerce::PeriodCalculator::KST).to_date
+    post billing_orders_path, params: {
+      order: { product_code: "chatdox", offer_code: "chatdox-1m-v1", requested_start_on: today }
+    }
+    assert_equal "manual", Order.order(:created_at).last.provider
+  end
+
+  test "choosing 무통장입금 always creates a manual order, even though PortOne/KakaoPay is fully configured" do
+    enable_chatdox_sales
+    sign_in
+    today = Time.current.in_time_zone(Commerce::PeriodCalculator::KST).to_date
+
+    post billing_orders_path, params: {
+      order: { product_code: "chatdox", offer_code: "chatdox-1m-v1", requested_start_on: today, payment_method: "manual" }
+    }
+    assert_equal "manual", Order.order(:created_at).last.provider
+  end
+
+  test "the default (no payment_method submitted, or kakaopay) creates a portone order when KakaoPay is ready" do
+    enable_chatdox_sales
+    sign_in
+    today = Time.current.in_time_zone(Commerce::PeriodCalculator::KST).to_date
+
+    post billing_orders_path, params: {
+      order: { product_code: "chatdox", offer_code: "chatdox-1m-v1", requested_start_on: today }
+    }
+    assert_equal "portone", Order.order(:created_at).last.provider
   end
 
   test "existing Chatdox period is displayed as a fixed extension date" do
@@ -366,6 +412,7 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
     ENV["PORTONE_API_SECRET"] = "test-api-secret"
     ENV["PORTONE_STORE_ID"] = "test-store-id"
     ENV["PORTONE_CHANNEL_KEY"] = "test-channel-key"
+    ENV["PORTONE_KAKAOPAY_CHANNEL_KEY"] = "test-kakaopay-channel-key"
     ENV["PORTONE_WEBHOOK_SECRET"] = "test-portone-webhook-secret"
     @product.update!(sale_enabled: true)
   end

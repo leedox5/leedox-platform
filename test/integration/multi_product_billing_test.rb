@@ -3,7 +3,7 @@ require "test_helper"
 class MultiProductBillingTest < ActionDispatch::IntegrationTest
   ENV_KEYS = %w[
     LEEDOX_COMMERCE_ENABLED PAYMENT_PROVIDER
-    PORTONE_API_SECRET PORTONE_STORE_ID PORTONE_CHANNEL_KEY PORTONE_WEBHOOK_SECRET
+    PORTONE_API_SECRET PORTONE_STORE_ID PORTONE_CHANNEL_KEY PORTONE_KAKAOPAY_CHANNEL_KEY PORTONE_WEBHOOK_SECRET
     BANK_TRANSFER_ACCOUNT_INFO
   ].freeze
 
@@ -225,6 +225,7 @@ class MultiProductBillingTest < ActionDispatch::IntegrationTest
       "PORTONE_API_SECRET" => "test-api-secret",
       "PORTONE_STORE_ID" => "test-store-id",
       "PORTONE_CHANNEL_KEY" => "test-channel-key",
+      "PORTONE_KAKAOPAY_CHANNEL_KEY" => "test-kakaopay-channel-key",
       "PORTONE_WEBHOOK_SECRET" => "test-portone-webhook-secret"
     )
   end

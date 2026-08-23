@@ -38,6 +38,22 @@
           </div>
         </fieldset>
 
+        <% if @kakaopay_available %>
+          <fieldset class="rounded-2xl border border-slate-200 bg-white p-6">
+            <legend class="px-1 text-lg font-bold text-slate-900">결제 수단</legend>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+              <label class="flex cursor-pointer items-center justify-center rounded-xl border border-blue-100 py-3 text-sm font-semibold text-slate-700 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-700">
+                <%= form.radio_button :payment_method, "kakaopay", checked: true, class: "sr-only" %>
+                카카오페이
+              </label>
+              <label class="flex cursor-pointer items-center justify-center rounded-xl border border-blue-100 py-3 text-sm font-semibold text-slate-700 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-700">
+                <%= form.radio_button :payment_method, "manual", class: "sr-only" %>
+                무통장입금
+              </label>
+            </div>
+          </fieldset>
+        <% end %>
+
         <section class="rounded-2xl border border-slate-200 bg-white p-6">
           <h2 class="font-bold text-slate-900">서비스 시작일</h2>
           <% if @existing_license %>

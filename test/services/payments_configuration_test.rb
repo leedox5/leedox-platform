@@ -3,7 +3,7 @@ require "test_helper"
 class PaymentsConfigurationTest < ActiveSupport::TestCase
   KEYS = %w[
     PAYMENT_PROVIDER
-    PORTONE_API_SECRET PORTONE_STORE_ID PORTONE_CHANNEL_KEY PORTONE_WEBHOOK_SECRET
+    PORTONE_API_SECRET PORTONE_STORE_ID PORTONE_CHANNEL_KEY PORTONE_KAKAOPAY_CHANNEL_KEY PORTONE_WEBHOOK_SECRET
   ].freeze
 
   setup do
@@ -27,6 +27,21 @@ class PaymentsConfigurationTest < ActiveSupport::TestCase
     assert portone.ready?
     assert portone.checkout_ready?
     assert portone.webhook_ready?
+  end
+
+  test "kakaopay_ready? requires checkout_ready? plus its own channel key" do
+    portone = Payments::Configuration.new(provider: "portone")
+    assert_not portone.kakaopay_ready?
+
+    ENV["PORTONE_API_SECRET"] = "test-api"
+    ENV["PORTONE_STORE_ID"] = "test-store"
+    ENV["PORTONE_CHANNEL_KEY"] = "test-channel"
+    ENV["PORTONE_WEBHOOK_SECRET"] = "test-webhook"
+    assert portone.checkout_ready?
+    assert_not portone.kakaopay_ready?, "checkout_ready? alone must not be enough -- KakaoPay needs its own channel key"
+
+    ENV["PORTONE_KAKAOPAY_CHANNEL_KEY"] = "test-kakaopay-channel"
+    assert portone.kakaopay_ready?
   end
 
   test "invalid provider fails closed" do

@@ -25,6 +25,16 @@ module Payments
       provider == "portone" && ready?
     end
 
+    # KakaoPay is currently the only PortOne payment method offered at
+    # checkout (card is configured but not customer-facing for now -- see
+    # PORTONE_CHANNEL_KEY/PORTONE_KAKAOPAY_CHANNEL_KEY, distinct PortOne
+    # channels). Centralized here so BillingController (offering the choice)
+    # and BillingOrdersController (deciding the order's actual provider) can't
+    # drift out of sync on what "ready" means.
+    def kakaopay_ready?
+      checkout_ready? && ENV["PORTONE_KAKAOPAY_CHANNEL_KEY"].present?
+    end
+
     def webhook_ready?
       valid_provider? && missing_webhook_keys.empty?
     end

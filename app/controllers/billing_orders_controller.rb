@@ -8,7 +8,7 @@ class BillingOrdersController < ApplicationController
       product_code: order_params.fetch(:product_code),
       offer_code: order_params.fetch(:offer_code),
       requested_start_on: order_params[:requested_start_on],
-      provider: checkout_provider
+      provider: checkout_provider(payment_method: order_params[:payment_method])
     )
 
     redirect_to billing_order_path(order.public_id)
@@ -36,8 +36,12 @@ class BillingOrdersController < ApplicationController
     if @order.provider == Order::MANUAL_PROVIDER
       @bank_transfer_account_info = ENV.fetch("BANK_TRANSFER_ACCOUNT_INFO", "")
     else
+      # KakaoPay is the only PortOne payment method offered right now (see
+      # Payments::Configuration#kakaopay_ready?, which gates whether an order
+      # can even reach provider: "portone" at creation) -- an order here
+      # always means the customer chose KakaoPay at checkout.
       @portone_store_id = ENV.fetch("PORTONE_STORE_ID", "")
-      @portone_channel_key = ENV.fetch("PORTONE_CHANNEL_KEY", "")
+      @portone_kakaopay_channel_key = ENV.fetch("PORTONE_KAKAOPAY_CHANNEL_KEY", "")
     end
   end
 
@@ -85,7 +89,7 @@ class BillingOrdersController < ApplicationController
   private
 
   def order_params
-    params.require(:order).permit(:product_code, :offer_code, :requested_start_on)
+    params.require(:order).permit(:product_code, :offer_code, :requested_start_on, :payment_method)
   end
 
   def ensure_create_product_sales_enabled
@@ -109,11 +113,19 @@ class BillingOrdersController < ApplicationController
     false
   end
 
-  # PortOne when it's fully configured, manual bank transfer otherwise -- this
-  # is what lets checkout stay open even while PortOne approval is pending.
-  def checkout_provider
+  # PortOne (KakaoPay, currently the only payment method offered there) when
+  # it's fully configured, manual bank transfer otherwise -- this is what
+  # lets checkout stay open even while PortOne approval is pending. A
+  # customer explicitly choosing 무통장입금 on the checkout form always wins,
+  # even when PortOne is ready (checkout_enabled.html.erb only shows that
+  # option when @kakaopay_available, so this can't silently downgrade a
+  # customer who actually wanted to pay by KakaoPay). `retry` calls this with
+  # no payment_method -- same auto-decide behavior as before this choice existed.
+  def checkout_provider(payment_method: nil)
+    return Order::MANUAL_PROVIDER if payment_method == "manual"
+
     configuration = Payments::Configuration.current
-    configuration.checkout_ready? ? configuration.provider : Order::MANUAL_PROVIDER
+    configuration.kakaopay_ready? ? configuration.provider : Order::MANUAL_PROVIDER
   end
 
   def retryable?(order, assessment)
