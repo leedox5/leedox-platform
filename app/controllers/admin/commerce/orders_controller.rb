@@ -32,6 +32,14 @@ class Admin::Commerce::OrdersController < Admin::BaseController
   rescue Commerce::ConfirmManualPayment::Unavailable => e
     Rails.logger.warn("Commerce manual payment confirmation rejected: #{e.class.name}")
     redirect_to admin_commerce_order_path(params[:id]), alert: "무통장입금 대기 중인 주문만 확인할 수 있습니다."
+  rescue ActiveRecord::ActiveRecordError => e
+    # OrderFinalizer already logs commerce.order_finalization_failed before
+    # re-raising -- this only turns that into a page instead of a 500. Seen
+    # in production (2026-08-24): confirming a stale duplicate manual order
+    # whose user/product/start-date already had a real license hit the
+    # licenses unique index and crashed instead of explaining why.
+    Rails.logger.warn("Commerce manual payment confirmation failed to persist: #{e.class.name}")
+    redirect_to admin_commerce_order_path(params[:id]), alert: "이 주문을 확인할 수 없습니다 — 같은 사용자·상품·시작일로 이미 라이선스가 존재합니다. 중복 주문인지 확인해 주세요."
   end
 
   private

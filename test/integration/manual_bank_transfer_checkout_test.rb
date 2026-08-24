@@ -94,6 +94,38 @@ class ManualBankTransferCheckoutTest < ActionDispatch::IntegrationTest
     assert_equal "무통장입금 대기 중인 주문만 확인할 수 있습니다.", flash[:alert]
   end
 
+  test "confirming a stale duplicate order that collides with an existing (now-expired) license fails gracefully, not with a 500 (production incident 2026-08-24)" do
+    # Reproduces the exact production shape: an order created weeks ago whose
+    # requested_start_on is frozen at that old date, and a real license that
+    # already covers (and by now has expired past) that same start date --
+    # LicenseScheduler's own staggering only kicks in for licenses that
+    # haven't ended yet (access_ends_at > now), so an already-expired license
+    # doesn't shift the stale order's start date away from the collision.
+    old_start = 40.days.ago.in_time_zone(Commerce::PeriodCalculator::KST).to_date
+    old_end = old_start + 30.days
+    License.create!(
+      user: @buyer, product: @product, source: "paid", status: "active",
+      starts_on: old_start, last_usable_on: old_end - 1.day,
+      access_ends_at: Commerce::PeriodCalculator::KST.local(old_end.year, old_end.month, old_end.day)
+    )
+    # OrderCreator itself would reject a requested_start_on this far in the
+    # past (Commerce::PeriodCalculator.validate_start! only allows the
+    # purchase date .. +7 days) -- the real production order passed that
+    # check weeks ago, when it WAS the purchase date, and has simply sat
+    # pending since. update_column reproduces that frozen historical state
+    # without needing to time-travel the whole order-creation call.
+    stale_order = create_manual_order(@buyer)
+    stale_order.update_column(:requested_start_on, old_start)
+    sign_in(@admin)
+
+    assert_no_difference [ "License.count", "PaymentTransaction.count" ] do
+      post confirm_manual_payment_admin_commerce_order_path(stale_order.public_id)
+    end
+    assert_redirected_to admin_commerce_order_path(stale_order.public_id)
+    assert_match(/이미 라이선스가 존재합니다/, flash[:alert])
+    assert_equal "pending", stale_order.reload.status
+  end
+
   test "confirming a portone order is rejected -- the action is manual-only" do
     ENV.update(
       "PAYMENT_PROVIDER" => "portone",
