@@ -28,10 +28,10 @@
       <div><%= form.label :public_response, "고객 공개 안내", class: "block text-sm font-bold" %><%= form.text_area :public_response, maxlength: 2_000, rows: 4, class: "mt-2 w-full rounded-lg border border-slate-300 p-3" %></div>
       <div><%= form.label :internal_note, "내부 판단 근거 (고객 비공개)", class: "block text-sm font-bold" %><%= form.text_area :internal_note, maxlength: 2_000, rows: 4, class: "mt-2 w-full rounded-lg border border-slate-300 p-3" %></div>
       <div class="flex flex-wrap gap-3">
-        <% actions = case @refund_request.status; when "requested" then [["검토 시작", "start_review"]]; when "reviewing" then [["승인", "approve"], ["거절", "reject"], ["메모 저장", "update_notes"]]; when "approved" then [["외부 처리 대기", "mark_processing"], ["메모 저장", "update_notes"]]; else [["메모 저장", "update_notes"]]; end %>
+        <% actions = case @refund_request.status; when "requested" then [["검토 시작", "start_review"]]; when "reviewing" then [["승인", "approve"], ["거절", "reject"], ["메모 저장", "update_notes"]]; when "approved" then [["외부 처리 대기", "mark_processing"], ["메모 저장", "update_notes"]]; when "processing" then [["환불 완료 확정 (라이선스 취소)", "confirm_refunded"], ["환불 실패로 표시", "mark_failed"], ["메모 저장", "update_notes"]]; else [["메모 저장", "update_notes"]]; end %>
         <% actions.each do |label, action_name| %><button type="submit" name="refund_request[action_name]" value="<%= action_name %>" class="rounded-lg bg-slate-900 px-4 py-2 font-bold text-white"><%= label %></button><% end %>
       </div>
-      <p class="text-xs text-slate-500">승인과 외부 처리 대기는 실제 PG 환불 완료가 아닙니다. 이 화면에서는 refunded 확정, Order 상태 변경과 License 변경을 수행하지 않습니다.</p>
+      <p class="text-xs text-slate-500">승인과 외부 처리 대기는 실제 PG 환불 완료가 아닙니다. PortOne 콘솔(또는 API)에서 실제로 취소를 처리한 뒤, 여기서 "환불 완료 확정"을 눌러야 라이선스가 취소됩니다.</p>
     <% end %>
 
     <section class="mt-5 rounded-2xl border border-slate-200 bg-white p-6"><h2 class="font-bold">감사 이력</h2><ul class="mt-3 divide-y divide-slate-100 text-sm"><% @audits.each do |audit| %><li class="py-3"><strong><%= audit.action %></strong> · <%= audit.from_state || "-" %> → <%= audit.to_state || "-" %> · actor <%= audit.actor ? masked_email(audit.actor) : "system" %> · <%= audit.occurred_at %></li><% end %></ul></section>

@@ -4,6 +4,7 @@ class CommerceAuditEvent < ApplicationRecord
     refund_requested refund_review_started refund_approved refund_rejected
     refund_processing_started refund_notes_updated late_provider_success_observed
     product_sale_toggled product_pricing_updated manual_payment_confirmed free_license_granted
+    refund_confirmed refund_failed
   ].freeze
 
   belongs_to :actor, class_name: "User", optional: true

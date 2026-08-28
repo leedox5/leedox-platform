@@ -119,6 +119,26 @@ class CommerceOperationsAccessTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "full admin refund review through confirm_refunded cancels the license via the real controller/routes" do
+    order = finalized_order(@buyer)
+    request_record = Commerce::RefundRequestSubmission.call!(user: @buyer, order: order, reason_code: "other", customer_note: nil)
+    sign_in(@admin)
+
+    patch admin_commerce_refund_request_path(request_record.public_id), params: { refund_request: { action_name: "start_review" } }
+    patch admin_commerce_refund_request_path(request_record.public_id), params: { refund_request: { action_name: "approve" } }
+    patch admin_commerce_refund_request_path(request_record.public_id), params: { refund_request: { action_name: "mark_processing" } }
+    assert_equal "processing", request_record.reload.status
+
+    patch admin_commerce_refund_request_path(request_record.public_id), params: { refund_request: { action_name: "confirm_refunded" } }
+    assert_redirected_to admin_commerce_refund_request_path(request_record.public_id)
+
+    request_record.reload
+    assert_equal "refunded", request_record.status
+    assert request_record.external_refund_confirmed?
+    assert_equal "canceled", order.licenses.sole.reload.status
+    assert_not Entitlements::ProductAccess.licensed?(user: @buyer, product_code: "chatdox")
+  end
+
   test "admin review rejects state spoofing and approval leaves order payment and license unchanged" do
     order = finalized_order(@buyer)
     request_record = Commerce::RefundRequestSubmission.call!(user: @buyer, order: order, reason_code: "other", customer_note: nil)

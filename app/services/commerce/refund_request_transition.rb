@@ -4,7 +4,12 @@ module Commerce
       "start_review" => [ "reviewing", "refund_review_started" ],
       "approve" => [ "approved", "refund_approved" ],
       "reject" => [ "rejected", "refund_rejected" ],
-      "mark_processing" => [ "processing", "refund_processing_started" ]
+      "mark_processing" => [ "processing", "refund_processing_started" ],
+      # "processing" -> "refunded" goes through Commerce::ConfirmRefund
+      # instead (it also has to cancel the order's license atomically), not
+      # this generic transition -- mark_failed has no such side effect, so it
+      # stays here.
+      "mark_failed" => [ "failed", "refund_failed" ]
     }.freeze
 
     def self.call!(refund_request:, actor:, action:, public_response: nil, internal_note: nil, at: Time.current)
@@ -19,6 +24,7 @@ module Commerce
         if target_status
           attributes.merge!(timestamps_for(target_status, at))
           attributes[:provider_refund_status] = "pending" if target_status == "processing"
+          attributes[:provider_refund_status] = "failed" if target_status == "failed"
           refund_request.transition_to!(target_status, attributes)
           Commerce::AuditRecorder.record!(
             actor: actor,
