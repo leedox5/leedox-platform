@@ -209,6 +209,63 @@ class CommerceOperationsAccessTest < ActionDispatch::IntegrationTest
     assert_equal first_redirect, response.location
   end
 
+  test "admin dashboard and refund requests index surface open refund requests (handoff 0051 R2-1)" do
+    order = finalized_order(@buyer)
+    request_record = Commerce::RefundRequestSubmission.call!(user: @buyer, order: order, reason_code: "other", customer_note: nil)
+    sign_in(@admin)
+
+    get admin_dashboard_path
+    assert_response :success
+    assert_match(/환불 대기 1건 검토가 필요합니다/, response.body)
+
+    get admin_commerce_refund_requests_path
+    assert_response :success
+    assert_select "a[href=?]", admin_commerce_refund_request_path(request_record.public_id), text: "검토하기"
+
+    Commerce::RefundRequestTransition.call!(refund_request: request_record, actor: @admin, action: "start_review")
+    Commerce::RefundRequestTransition.call!(refund_request: request_record, actor: @admin, action: "approve")
+    Commerce::RefundRequestTransition.call!(refund_request: request_record, actor: @admin, action: "mark_processing")
+    Commerce::ConfirmRefund.call!(refund_request: request_record.reload, actor: @admin)
+
+    get admin_dashboard_path
+    assert_no_match(/환불 대기 \d+건 검토가 필요합니다/, response.body)
+    get admin_commerce_refund_requests_path
+    assert_select "a", text: "검토하기", count: 0
+  end
+
+  test "mypage shows order date/id/payment method/license period and hides the refund link once the license has expired (handoff 0051 R2-2/R2-3)" do
+    order = finalized_order(@buyer)
+    order.licenses.sole.update_columns(
+      starts_on: 40.days.ago.to_date, last_usable_on: 10.days.ago.to_date, access_ends_at: 9.days.ago
+    )
+    sign_in(@buyer)
+
+    reference = order.public_id.delete("-").first(8).upcase
+    get mypage_path
+    assert_response :success
+    assert_match(/주문번호 #{Regexp.escape(reference)}/, response.body)
+    assert_match(/카카오페이/, response.body)
+    assert_match(/이용 기간/, response.body)
+    assert_select "a", text: "환불 요청", count: 0
+    assert_match(/이용이 끝난 건은 환불이 제한됩니다/, response.body)
+  end
+
+  test "mypage paginates orders past the first 10 instead of hiding older ones entirely (handoff 0051 R2-2)" do
+    11.times { finalized_order(@buyer) }
+    sign_in(@buyer)
+
+    get mypage_path
+    assert_response :success
+    assert_select "li.py-3", count: 10
+    assert_select "a", text: "다음 →"
+    assert_select "a", text: "← 이전", count: 0
+
+    get mypage_path(orders_page: 2)
+    assert_response :success
+    assert_select "li.py-3", count: 1
+    assert_select "a", text: "← 이전"
+  end
+
   private
 
   def sign_in(user)

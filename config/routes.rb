@@ -79,7 +79,7 @@ Rails.application.routes.draw do
         post :abandon, on: :member
         post :confirm_manual_payment, on: :member
       end
-      resources :refund_requests, only: %i[show update], param: :id
+      resources :refund_requests, only: %i[index show update], param: :id
       resources :products, only: %i[index edit update]
       get "/github_access", to: "github_access#index", as: :github_access
       patch "/github_access/:id/invite", to: "github_access#invite", as: :invite_github_access

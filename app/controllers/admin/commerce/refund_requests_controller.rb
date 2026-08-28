@@ -1,4 +1,10 @@
 class Admin::Commerce::RefundRequestsController < Admin::BaseController
+  # Oldest first -- these are a review queue (FIFO), not a change log (which
+  # would sort newest first, like the orders index does).
+  def index
+    @refund_requests = refund_scope.merge(RefundRequest.open).order(created_at: :asc)
+  end
+
   def show
     @refund_request = refund_scope.find_by!(public_id: params[:id])
     @order = @refund_request.order

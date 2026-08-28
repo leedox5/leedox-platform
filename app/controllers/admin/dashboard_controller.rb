@@ -6,5 +6,6 @@ class Admin::DashboardController < Admin::BaseController
     @trial_users = User.where(created_at: 7.days.ago..).count
     @recent_users = User.order(created_at: :desc).limit(5)
     @recent_transactions = PaymentTransaction.order(created_at: :desc).limit(5)
+    @open_refund_requests_count = RefundRequest.open.count
   end
 end

@@ -53,8 +53,22 @@
             <% order_refund_requests = order.refund_requests.to_a %>
             <% open_refund = order_refund_requests.find(&:open?) %>
             <% completed_refund = order_refund_requests.find { |request| request.status == "refunded" } %>
+            <% # Reuses the same License#effective_status every other screen (dashboard,
+               # license cards above) already reads, rather than a display-only expiry
+               # check of its own -- this project has been burned before by display and
+               # actual access logic drifting apart. %>
+            <% order_licenses = order.licenses.to_a %>
+            <% all_licenses_expired = order_licenses.any? && order_licenses.all? { |license| license.effective_status == "expired" } %>
             <div class="flex flex-wrap items-center justify-between gap-2">
-              <span class="text-slate-700"><%= order.order_items.first&.product_name || "상품" %> · <%= number_with_delimiter(order.total_amount) %>원</span>
+              <div class="min-w-0">
+                <span class="text-slate-700"><%= order.order_items.first&.product_name || "상품" %> · <%= number_with_delimiter(order.total_amount) %>원</span>
+                <p class="mt-0.5 break-keep text-xs text-slate-500">
+                  <%= I18n.l(order.created_at.to_date, locale: :ko, format: :long) %> · 주문번호 <%= manual_transfer_reference(order) %> · <%= provider_label(order.provider) %>
+                  <% if order_licenses.any? %>
+                    · 이용 기간 <%= I18n.l(order_licenses.map(&:starts_on).min, locale: :ko, format: :long) %> ~ <%= I18n.l(order_licenses.map(&:last_usable_on).max, locale: :ko, format: :long) %>
+                  <% end %>
+                </p>
+              </div>
               <div class="flex flex-wrap items-center gap-3">
                 <% # Order itself has no "refunded" status (see app/models/order.rb) -- it stays
                    # "paid" forever, so a completed refund has to override the label here rather
@@ -64,7 +78,7 @@
                   <%= link_to "환불 요청 확인", refund_request_path(open_refund.public_id), class: "font-semibold text-indigo-700 hover:underline" %>
                 <% elsif completed_refund %>
                   <%= link_to "환불 내역 보기", refund_request_path(completed_refund.public_id), class: "font-semibold text-indigo-700 hover:underline" %>
-                <% elsif order.status == "paid" %>
+                <% elsif order.status == "paid" && !all_licenses_expired %>
                   <%= link_to "환불 요청", new_billing_order_refund_request_path(order.public_id), class: "font-semibold text-indigo-700 hover:underline" %>
                 <% elsif (order.status == "abandoned" || (order.status == "pending" && Commerce::PendingOrderAssessment.call(order: order).safe_to_abandon)) && Commerce::Sales.enabled_for_code?(order.order_items.first&.product_code) %>
                   <%= link_to "새 주문으로 재시도", retry_billing_order_path(order.public_id), class: "font-semibold text-blue-700 hover:underline" %>
@@ -73,10 +87,24 @@
             </div>
             <% if order.status == "pending" %>
               <p class="mt-1 text-xs text-slate-500">결제가 완료되지 않은 주문입니다.</p>
+            <% elsif order.status == "paid" && all_licenses_expired && !open_refund && !completed_refund %>
+              <p class="mt-1 text-xs text-slate-500">이용이 끝난 건은 환불이 제한됩니다. 문의는 leedox@naver.com으로 보내주세요.</p>
             <% end %>
           </li>
         <% end %>
       </ul>
+      <% if orders_page.present? && (orders_page > 1 || has_more_orders) %>
+        <div class="mt-4 flex items-center justify-between gap-3 text-sm">
+          <% if orders_page > 1 %>
+            <%= link_to "← 이전", mypage_path(orders_page: orders_page - 1), class: "font-semibold text-blue-600 hover:text-blue-700" %>
+          <% else %>
+            <span></span>
+          <% end %>
+          <% if has_more_orders %>
+            <%= link_to "다음 →", mypage_path(orders_page: orders_page + 1), class: "font-semibold text-blue-600 hover:text-blue-700" %>
+          <% end %>
+        </div>
+      <% end %>
     </div>
   <% end %>
 </section>

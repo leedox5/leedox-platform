@@ -17,4 +17,8 @@ module CommerceHelper
       "failed" => "처리 실패"
     }.fetch(status, status)
   end
+
+  def provider_label(provider)
+    { "portone" => "카카오페이", "manual" => "무통장입금" }.fetch(provider, provider)
+  end
 end

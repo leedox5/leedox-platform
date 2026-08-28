@@ -1,0 +1,40 @@
+<% content_for :title, "환불 대기 목록" %>
+
+<div class="min-h-screen bg-slate-50">
+  <%= render "shared/header" %>
+  <main class="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+    <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="text-sm font-black uppercase tracking-[0.18em] text-indigo-700">Admin Commerce</p>
+        <h1 class="mt-2 break-keep text-3xl font-black text-slate-950">환불 대기 <%= @refund_requests.size %>건</h1>
+        <p class="mt-2 text-sm text-slate-600">접수·검토중·승인·외부 처리 대기 상태의 환불 요청만 보여줍니다(오래된 순).</p>
+      </div>
+      <%= link_to "관리자 대시보드", admin_dashboard_path, class: "text-sm font-bold text-blue-700 hover:underline" %>
+    </header>
+
+    <section class="mt-7 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="min-w-[900px] w-full divide-y divide-slate-200 text-sm">
+          <thead class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+            <tr><th class="px-4 py-3">접수일</th><th class="px-4 py-3">사용자</th><th class="px-4 py-3">상품·금액</th><th class="px-4 py-3">상태</th><th class="px-4 py-3">사유</th><th class="px-4 py-3"></th></tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <% @refund_requests.each do |request| %>
+              <% order = request.order %>
+              <% item = order.order_items.first %>
+              <tr class="align-top">
+                <td class="px-4 py-4"><%= I18n.l(request.created_at.to_date, locale: :ko, format: :long) %></td>
+                <td class="px-4 py-4"><%= masked_email(request.user) %></td>
+                <td class="px-4 py-4"><strong><%= item&.product_name %></strong><p class="text-xs text-slate-500"><%= number_with_delimiter(order.total_amount) %>원</p></td>
+                <td class="px-4 py-4 font-bold text-indigo-700"><%= refund_status_label(request.status) %></td>
+                <td class="px-4 py-4 text-slate-600"><%= request.reason_code %></td>
+                <td class="px-4 py-4"><%= link_to "검토하기", admin_commerce_refund_request_path(request.public_id), class: "font-bold text-blue-700 hover:underline" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <% if @refund_requests.empty? %><p class="p-8 text-center text-slate-500">대기 중인 환불 요청이 없습니다.</p><% end %>
+    </section>
+  </main>
+</div>
