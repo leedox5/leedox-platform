@@ -5,6 +5,8 @@ class CommerceConfirmRefundTest < ActiveSupport::TestCase
 
   setup do
     Commerce::CatalogBootstrap.call!
+    @previous_flag = ENV["LEEDOX_COMMERCE_ENABLED"]
+    ENV["LEEDOX_COMMERCE_ENABLED"] = "true"
     Product.find_by!(code: "chatdox").update!(sale_enabled: true)
     @admin = User.create!(name: "관리자", email: "confirm-refund-admin@example.com", password: "password123", role: :admin)
     @buyer = User.create!(name: "구매자", email: "confirm-refund-buyer@example.com", password: "password123")
@@ -22,6 +24,10 @@ class CommerceConfirmRefundTest < ActiveSupport::TestCase
     @refund_request = Commerce::RefundRequestSubmission.call!(
       user: @buyer, order: @order.reload, reason_code: "before_service_start", customer_note: "테스트"
     )
+  end
+
+  teardown do
+    @previous_flag.nil? ? ENV.delete("LEEDOX_COMMERCE_ENABLED") : ENV["LEEDOX_COMMERCE_ENABLED"] = @previous_flag
   end
 
   test "confirming a refund in 'processing' cancels the order's license and records provider confirmation" do
