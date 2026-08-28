@@ -77,7 +77,7 @@ module Commerce
       add_issue(:paid_order_open_refund, order) if order.status == "paid" && requests.any?(&:open?)
       requests.select { |request| request.status == "refunded" }.each do |request|
         add_issue(:refund_without_provider_confirmation, order) unless request.external_refund_confirmed?
-        add_issue(:refunded_license_policy_unresolved, order) if request.external_refund_confirmed? && order.licenses.any?
+        add_issue(:refunded_license_policy_unresolved, order) if request.external_refund_confirmed? && order.licenses.not_canceled.any?
       end
     end
 

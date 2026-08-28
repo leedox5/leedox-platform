@@ -108,6 +108,21 @@ class CommerceReconciliationTest < ActiveSupport::TestCase
     assert_equal before, database_snapshot
   end
 
+  test "a confirmed refund whose license was actually canceled (via Commerce::ConfirmRefund) does not report refunded_license_policy_unresolved" do
+    order = finalized_order
+    refund = Commerce::RefundRequestSubmission.call!(user: order.user, order: order, reason_code: "other", customer_note: nil, at: @at)
+    admin = User.create!(name: "관리자", email: "reconciliation-admin@example.com", password: "password123", role: :admin)
+    Commerce::RefundRequestTransition.call!(refund_request: refund, actor: admin, action: "start_review", at: @at)
+    Commerce::RefundRequestTransition.call!(refund_request: refund, actor: admin, action: "approve", at: @at)
+    Commerce::RefundRequestTransition.call!(refund_request: refund, actor: admin, action: "mark_processing", at: @at)
+    Commerce::ConfirmRefund.call!(refund_request: refund.reload, actor: admin, at: @at)
+
+    report = Commerce::Reconciliation.call(stale_after: 30.minutes, at: @at, log: false)
+    order_codes = report.issues.select { |issue| issue.order_public_id == order.public_id }.map(&:code)
+
+    assert_not_includes order_codes, "refunded_license_policy_unresolved"
+  end
+
   test "reconciliation reports duplicate open refund rows if database integrity is bypassed" do
     order = finalized_order
     duplicate_relation = Object.new
