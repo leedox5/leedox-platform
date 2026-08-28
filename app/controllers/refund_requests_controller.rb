@@ -11,6 +11,10 @@ class RefundRequestsController < ApplicationController
       redirect_to refund_request_path(open_request.public_id), notice: "이미 접수된 환불 요청이 있습니다."
       return
     end
+    if (completed_request = @order.refund_requests.find_by(status: "refunded"))
+      redirect_to refund_request_path(completed_request.public_id), notice: "이미 환불이 완료된 주문입니다."
+      return
+    end
 
     @refund_request = RefundRequest.new(order: @order, user: current_user, full_request: true)
   end

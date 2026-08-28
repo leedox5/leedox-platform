@@ -137,6 +137,19 @@ class CommerceOperationsAccessTest < ActionDispatch::IntegrationTest
     assert request_record.external_refund_confirmed?
     assert_equal "canceled", order.licenses.sole.reload.status
     assert_not Entitlements::ProductAccess.licensed?(user: @buyer, product_code: "chatdox")
+
+    # mypage's order status badge and refund link both have to read the
+    # refund outcome, not just Order#status (which stays "paid" forever --
+    # there's no "refunded" order status). Before this fix, a refunded order
+    # kept showing "결제 완료" and offered a fresh "환불 요청" link.
+    delete destroy_user_session_path
+    sign_in(@buyer)
+    get mypage_path
+    assert_response :success
+    assert_match(/환불 완료/, response.body)
+    assert_no_match(/결제 완료/, response.body)
+    assert_select "a", text: "환불 내역 보기"
+    assert_select "a", text: "환불 요청", count: 0
   end
 
   test "admin review rejects state spoofing and approval leaves order payment and license unchanged" do

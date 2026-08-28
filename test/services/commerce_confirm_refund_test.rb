@@ -75,6 +75,17 @@ class CommerceConfirmRefundTest < ActiveSupport::TestCase
     assert_equal "active", @order.licenses.sole.reload.status
   end
 
+  test "a second refund request is rejected once the first one is confirmed refunded (mypage display bug companion)" do
+    Commerce::RefundRequestTransition.call!(refund_request: @refund_request, actor: @admin, action: "start_review")
+    Commerce::RefundRequestTransition.call!(refund_request: @refund_request, actor: @admin, action: "approve")
+    Commerce::RefundRequestTransition.call!(refund_request: @refund_request, actor: @admin, action: "mark_processing")
+    Commerce::ConfirmRefund.call!(refund_request: @refund_request.reload, actor: @admin)
+
+    assert_raises(Commerce::RefundRequestSubmission::Unavailable) do
+      Commerce::RefundRequestSubmission.call!(user: @buyer, order: @order.reload, reason_code: "other", customer_note: nil)
+    end
+  end
+
   test "mark_failed transitions to failed without touching the license" do
     Commerce::RefundRequestTransition.call!(refund_request: @refund_request, actor: @admin, action: "start_review")
     Commerce::RefundRequestTransition.call!(refund_request: @refund_request, actor: @admin, action: "approve")

@@ -50,13 +50,20 @@
       <ul class="mt-3 divide-y divide-slate-100 text-sm">
         <% orders.each do |order| %>
           <li class="py-3">
+            <% order_refund_requests = order.refund_requests.to_a %>
+            <% open_refund = order_refund_requests.find(&:open?) %>
+            <% completed_refund = order_refund_requests.find { |request| request.status == "refunded" } %>
             <div class="flex flex-wrap items-center justify-between gap-2">
               <span class="text-slate-700"><%= order.order_items.first&.product_name || "상품" %> · <%= number_with_delimiter(order.total_amount) %>원</span>
               <div class="flex flex-wrap items-center gap-3">
-                <span class="font-semibold text-slate-600"><%= { "pending" => "결제 대기", "paid" => "결제 완료", "failed" => "결제 실패", "canceled" => "취소", "abandoned" => "결제 이탈" }.fetch(order.status) %></span>
-                <% open_refund = order.refund_requests.find(&:open?) %>
+                <% # Order itself has no "refunded" status (see app/models/order.rb) -- it stays
+                   # "paid" forever, so a completed refund has to override the label here rather
+                   # than being read off order.status directly. %>
+                <span class="font-semibold text-slate-600"><%= completed_refund ? "환불 완료" : { "pending" => "결제 대기", "paid" => "결제 완료", "failed" => "결제 실패", "canceled" => "취소", "abandoned" => "결제 이탈" }.fetch(order.status) %></span>
                 <% if open_refund %>
                   <%= link_to "환불 요청 확인", refund_request_path(open_refund.public_id), class: "font-semibold text-indigo-700 hover:underline" %>
+                <% elsif completed_refund %>
+                  <%= link_to "환불 내역 보기", refund_request_path(completed_refund.public_id), class: "font-semibold text-indigo-700 hover:underline" %>
                 <% elsif order.status == "paid" %>
                   <%= link_to "환불 요청", new_billing_order_refund_request_path(order.public_id), class: "font-semibold text-indigo-700 hover:underline" %>
                 <% elsif (order.status == "abandoned" || (order.status == "pending" && Commerce::PendingOrderAssessment.call(order: order).safe_to_abandon)) && Commerce::Sales.enabled_for_code?(order.order_items.first&.product_code) %>
