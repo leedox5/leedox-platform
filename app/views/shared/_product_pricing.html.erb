@@ -56,7 +56,7 @@
       <% if pricing_sales_enabled %>
         <div class="mt-5 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-4">
           <%= link_to "기간제 라이선스 구매", billing_checkout_path_for(product_code),
-            class: "inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700" %>
+            class: "inline-flex items-center justify-center rounded-lg #{btn_bg_class} px-6 py-3 text-sm font-semibold text-white transition" %>
           <p class="break-keep text-xs leading-5 text-slate-500">
             구매 절차: 로그인 또는 회원가입 → 이용 기간 확인 → 결제 → 대시보드에서 콘텐츠 이용
           </p>

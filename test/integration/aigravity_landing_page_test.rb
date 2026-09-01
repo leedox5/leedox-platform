@@ -14,10 +14,10 @@ class AigravityLandingPageTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: /무중력 AI 코딩 마스터클래스/
     assert_select "p", text: /AI-NATIVE STARTER PACKAGE/
 
-    # Hero free trial badge (matches the actual guest gate, not the higher trial-user limit)
+    # Hero free trial badge (matches trial_chapter_limit)
     # & CTA link to episode 01
-    assert_equal 1, ProductContent.for("aigravity").guest_chapter_limit
-    assert_select "a[href=?]", product_chapter_path("aigravity", "01"), text: /1 챕터 무료 체험 가능/
+    assert_equal 3, ProductContent.for("aigravity").trial_chapter_limit
+    assert_select "a[href=?]", product_chapter_path("aigravity", "01"), text: /3 챕터 무료 체험 가능/
     assert_select "a[href=?]", product_chapter_path("aigravity", "01"), text: /무중력 코딩 시작하기/
 
     # 14 chapters across 4 phases
@@ -37,6 +37,8 @@ class AigravityLandingPageTest < ActionDispatch::IntegrationTest
     # Bottom Dark Banner & FAQ
     assert_select "h2", text: /지금 바로 무중력 AI 코딩 마스터클래스를 시작하세요/
     assert_select "h2", text: /자주 묻는 질문 \(FAQ\)/
+    assert_select "code", text: "handoff/"
+    assert_select "code", text: "handoff-agy/", count: 0
   end
 
   test "renders 4 pricing offer cards with Emerald theme and direct checkout CTAs when offers exist" do
@@ -66,6 +68,14 @@ class AigravityLandingPageTest < ActionDispatch::IntegrationTest
         end
       end
     end
+
+    # When sales are enabled, the bottom checkout button uses the Emerald theme
+    product.update!(active: true, sale_enabled: true)
+    get aigravity_path
+    assert_response :success
+    assert_select "a[href=?]", billing_checkout_path(product_code: "aigravity"), text: /기간제 라이선스 구매/ do |elements|
+      assert_includes elements.first["class"], "bg-emerald-600"
+    end
   end
 
   test "pricing page links Antigravity product to /aigravity landing page" do
@@ -77,7 +87,7 @@ class AigravityLandingPageTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", aigravity_path, text: /자세히 보기/
   end
 
-  test "enforces admin DB guest_chapter_limit override dynamically, independently of trial_chapter_limit (handoff 0045 R2)" do
+  test "enforces admin DB guest_chapter_limit and trial_chapter_limit overrides dynamically (handoff 0045 R2 & 0017)" do
     product = Product.find_by!(code: "aigravity")
     # guest_chapter_limit and trial_chapter_limit are separate columns now --
     # setting one must not move the other (that coupling was exactly the bug
@@ -87,10 +97,10 @@ class AigravityLandingPageTest < ActionDispatch::IntegrationTest
     assert_equal 9, ProductContent.for("aigravity").trial_chapter_limit
     assert_equal 2, ProductContent.for("aigravity").guest_chapter_limit
 
-    # Hero badge reflects updated limit
+    # Hero badge reflects updated trial_chapter_limit
     get aigravity_path
     assert_response :success
-    assert_select "a[href=?]", product_chapter_path("aigravity", "01"), text: /2 챕터 무료 체험 가능/
+    assert_select "a[href=?]", product_chapter_path("aigravity", "01"), text: /9 챕터 무료 체험 가능/
 
     # Accessing chapter 02 is allowed as guest
     get product_chapter_path("aigravity", "02")
