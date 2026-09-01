@@ -75,11 +75,10 @@ ProductContent.for(product_code) # -> 소스 객체
   `app/helpers/content_theme_helper.rb`의 `ACCENT_CLASSES` 룩업을 거친다 —
   나올 수 있는 클래스가 전부 완전한 문자열로 적혀 있다. 새로 동적으로 보이는
   클래스가 필요하면 이 패턴을 따를 것.
-- **`hq/` 아래를 직접 고치지 말 것.** 그 콘텐츠는 별도 저장소에서
-  `script/sync_curriculum.sh`로 미러링돼 들어오고, 다음 동기화 때 덮어써진다.
-  `hq/` 아래 `content_meta.yml`에 새 필드가 필요하면, 실제 콘텐츠를 관리하는
-  저장소에도 동일하게 반영돼야 다음 동기화 때 안 사라진다 — 알아서 처리됐다고
-  가정하지 말고 이 점을 명시적으로 알릴 것.
+- **콘텐츠 동기화 및 양방향 정제 규칙 (`hq/AGENTS.md` 제6항).** `hq/` 콘텐츠의 원본은
+  HQ 저장소이며 `script/sync_curriculum.sh`로 미러링된다. 단, DEV 에이전트는 플랫폼
+  뷰어 UX 및 마크다운 렌더링 최적화를 위한 정제/리팩토링 권한을 가지며, 정제 시
+  HQ로 역SYNC 알림을 전달하여 HQ Git에 커밋/푸시함으로써 양방향 정합성을 유지한다.
 - **커밋 메시지**는 Claude Code가 변경했다면 `Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>`
   로 끝맺는다.
 
