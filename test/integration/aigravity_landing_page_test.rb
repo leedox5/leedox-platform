@@ -5,7 +5,7 @@ class AigravityLandingPageTest < ActionDispatch::IntegrationTest
     Commerce::CatalogBootstrap.call!
   end
 
-  test "renders /aigravity landing page with Emerald theme, starter badge, and 14 chapter links" do
+  test "renders /aigravity landing page with Emerald theme, starter badge, and 15 chapter links" do
     get aigravity_path
     assert_response :success
 
@@ -20,13 +20,14 @@ class AigravityLandingPageTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", product_chapter_path("aigravity", "01"), text: /3 챕터 무료 체험 가능/
     assert_select "a[href=?]", product_chapter_path("aigravity", "01"), text: /무중력 코딩 시작하기/
 
-    # 14 chapters across 4 phases
+    # 15 chapters across 4 phases
     doc = Nokogiri::HTML(response.body)
-    (1..14).each do |id|
+    (1..15).each do |id|
       padded_id = format("%02d", id)
       link = doc.at_css("a[href='#{product_chapter_path('aigravity', padded_id)}']")
       assert link, "expected curriculum link for chapter #{padded_id}"
     end
+    assert_select "h3", text: /Handoff 2.0 계약 발주, 무중력 스프린트 & 자율 PR 배포/
 
     # Pricing section
     assert_select "#pricing" do

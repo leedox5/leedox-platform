@@ -17,15 +17,15 @@ phases:
   - key: phase3
     label: "3단계"
     title: "실무 코드베이스 고도화 & 서브에이전트 병렬 협업"
-    description: "레거시 DB 리팩토링, 서브에이전트 병렬 구동 및 파일 기반 Handoff 계약"
+    description: "레거시 DB 리팩토링, 서브에이전트 병렬 구동 및 무모킹 자동화 검증"
     range: "8..10"
   - key: phase4
     label: "4단계"
-    title: "Handoff 2.0 프로토콜, 디펜시브 코딩 & 자율 PR 배포"
-    description: "디펜시브 코딩 가드, Devise 전환 퍼널 및 GitHub CLI 자율 PR/Merge 파이프라인"
-    range: "11..14"
+    title: "Handoff 2.0 계약 발주, 무중력 스프린트 & 자율 PR 배포"
+    description: "Handoff 2.0 스펙 계약 발주, 1시간 무중력 스프린트, 디펜시브 코딩 및 GitHub CLI 자율 PR/Merge 파이프라인"
+    range: "11..15"
 
-chapter_range: "1..14"
+chapter_range: "1..15"
 
 theme:
   accent: emerald
