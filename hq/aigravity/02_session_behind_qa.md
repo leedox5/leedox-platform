@@ -104,12 +104,6 @@ ANTIGRAVITY: 네! d:/0002/hq/.local/CONTEXT_SEESION.pdf 파일을 아주 잘 읽
 2. **Database & Schema-First 원칙**: 백엔드 고도화 시 데이터 무결성과 스키마 검증을 최우선 단계로 지정.
 3. **엄격한 Definition of Done (DoD)**: 단순 완성이 아닌 `문서 작성 + 리뷰 + 실습 검증 + content_meta.yml` 4단계를 완료로 지정.
 
----
-
-## 🔗 다음 에피소드 안내
-- **03 (서브 특별판 2)**: ["워크스루(Walkthrough)가 뭐야?" — 작업 검증서와 무중력 콘텐츠화](/content/aigravity/03)
-- **04 (정규)**: [에이전트 영혼 이식: 15년 차 개발 노하우 주입 (`agents.md`)](/content/aigravity/04)
-
 
 
 

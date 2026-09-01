@@ -57,9 +57,3 @@
 > - **Symlink Zero-Copy Sync (심볼릭링크 제로카피 동기화)**: HQ의 `handoff/`와 DEV 플랫폼 간 심볼릭링크를 구축하여 복사/복제 지연 시간 0(Zero Latency)으로 실시간 요청/결과를 공유하는 인프라 연동 기법.
 > - **PR Required Guard (PR 필요성 가드)**: 1시간 미만 소규모 UI 수정(`PR Required: No`)과 대규모 구조 개편(`PR Required: Yes`)을 계약서상에 명시하여 개발 속도와 품질을 유연하게 제어하는 기법.
 > - **Master Courier Role (마스터 배달원 역할)**: 디렉터 토미(Tommy)가 단순한 유저를 넘어 에이전트 간의 스펙 계약과 마음 담긴 편지를 주고받게 해주는 중앙 총괄 리더 서사.
-
----
-
-## 🔗 다음 에피소드 안내
-- **13 (정규)**: [디펜시브 코딩과 무모킹(No-Mock) 테스트 철학](/content/aigravity/13)
-- **14 (정규)**: [Devise 전환 퍼널 & 자율 PR 워크플로우](/content/aigravity/14)

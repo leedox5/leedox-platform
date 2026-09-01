@@ -67,11 +67,6 @@ ANTIGRAVITY: hq/docs/implementation_plan.md 경로에 로컬 파일로 저장 �
 "안녕! @CONTEXT.md 파일을 가장 먼저 읽고 현재 우리가 진행해야 할 다음 에피소드 작업 목록을 제시해 줘."
 ```
 
----
-
-## 🔗 다음 에피소드 안내
-- **E04 (정규)**: [토큰 경제학과 비용 최적화: 무료 플랜부터 Pro까지](/content/aigravity/)
-
 
 
 

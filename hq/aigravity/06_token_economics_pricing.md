@@ -49,12 +49,6 @@ Antigravity를 사용하다 보면 무료 플랜(Free Tier)이나 기본 플랜�
 > - **Simple Definition**: The maximum number of requests or tokens you can use within a specific timeframe.
 > - **Practical Meaning**: 무료 사용자의 무분별한 서버 과부하를 막기 위한 제한 조치. 개발 생산성을 높이려면 Pro 플랜(₩29,000/월)을 통해 4배 높은 한도를 확보하는 것이 실무적으로 훨씬 이득임.
 
----
-
-## 🔗 다음 에피소드 안내
-- **07 (서브 특별판)**: [쿼터 초과와 Google AI Pro 결제 & 4배 한도 해금 실전 비하인드](/content/aigravity/07)
-- **08 (정규)**: [실무 레거시 코드 파악과 안전한 DB/API 리팩토링](/content/aigravity/08)
-
 
 
 

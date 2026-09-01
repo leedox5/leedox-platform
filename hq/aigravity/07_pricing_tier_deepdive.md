@@ -40,11 +40,6 @@
 > - **Simple Definition**: The ratio between net profit and cost of investment.
 > - **Practical Meaning**: 월 29,000원의 구독 비용으로 에이전트의 4배 한도를 확보함으로써 단 몇 분 만에 며칠 분량의 개발 노고를 아끼는 압도적 가성비 수치.
 
----
-
-## 🔗 다음 에피소드 안내
-- **08 (정규)**: [실무 레거시 코드 파악과 안전한 DB/API 리팩토링](/content/aigravity/08)
-
 
 
 

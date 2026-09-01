@@ -92,10 +92,3 @@ Gemini 3.6 Flash (High)
 ### 과제 1: CLI PATH 설치 및 새로고침
 `images/0007.png`와 같이 `CLI not found` 오류가 발생했을 경우 `agy` 명령어의 PATH 경로를 잡고 에이전트를 재연동해 보세요.
 
----
-
-## 🔗 다음 에피소드 안내
-- **02 (서브 특별판 1)**: [세션 비하인드 & 돌발 Q&A 딥다이브: Gemini 관계와 PDF 파싱](/content/aigravity/02)
-- **03 (서브 특별판 2)**: ["워크스루(Walkthrough)가 뭐야?" — 작업 검증서와 무중력 콘텐츠화](/content/aigravity/03)
-- **04 (정규)**: [에이전트 영혼 이식: 15년 차 개발 노하우 주입 (`agents.md`)](/content/aigravity/04)
-
