@@ -12,6 +12,7 @@ set -euo pipefail
 #   HQ docs/                 -> DEV hq/chatdox/
 #   HQ claudox/               -> DEV hq/claudox/
 #   HQ aistart/               -> DEV hq/aistart/
+#   HQ aigravity/             -> DEV hq/aigravity/
 #   HQ service-desk/requests/ -> DEV hq/service-desk/
 #
 # Each product's folder needs its own sync_one line below -- this is the one
@@ -113,13 +114,6 @@ sync_one() {
   if [[ -n "$ONLY_PRODUCT" ]] && [[ -n "$product_code" ]] && [[ "$product_code" != "$ONLY_PRODUCT" ]]; then
     echo "  $src -> (skipped, --only filter active)"
     return 0
-  fi
-  if [[ "$product_code" == "aigravity" ]] && [[ -z "$CLI_REPO" ]]; then
-    if [[ "$ONLY_PRODUCT" == "aigravity" ]]; then
-      echo "Error: Syncing 'aigravity' requires an explicit --repo option." >&2
-      echo "Example: $0 --repo=/mnt/d/0002/hq --only=aigravity" >&2
-      exit 1
-    fi
   fi
   if [[ ! -d "$TMP_DIR/$src" ]]; then
     echo "  $src -> (skipped, not present in $REF)"

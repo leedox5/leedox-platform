@@ -41,10 +41,10 @@ bin/setup        # bundle install, db:prepare, 로그/tmp 정리 후 bin/dev 실
 
 ## 콘텐츠
 
-`hq/`(`hq/chatdox/`, `hq/claudox/`, `hq/aistart/`) 아래 챕터 콘텐츠는 이 저장소에서
-직접 작성하는 게 아니다 — 별도 커리큘럼 저장소에서 `script/sync_curriculum.sh`로
-미러링해온다. `hq/` 아래 파일을 직접 고쳐도 다음 동기화 때 덮어써진다. DEV/HQ 구조와
-handoff 워크플로우 전체는 `CLAUDE.md`를 참고.
+`hq/`(`hq/chatdox/`, `hq/claudox/`, `hq/aistart/`, `hq/aigravity/`) 아래 챕터 콘텐츠는
+이 저장소에서 직접 작성하는 게 아니다 — 중앙 HQ(`leedox-hq`) checkout에서
+`script/sync_curriculum.sh`로 미러링해온다. `hq/` 아래 파일을 직접 고쳐도 다음 동기화 때
+덮어써진다. DEV/HQ 구조와 handoff 워크플로우 전체는 `CLAUDE.md`를 참고.
 
 ## 테스트 & 검사
 
