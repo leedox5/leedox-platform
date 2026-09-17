@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_23_222345) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_17_120100) do
   create_table "chapter_progresses", force: :cascade do |t|
     t.string "chapter_id", null: false
     t.datetime "completed_at"
@@ -36,6 +36,38 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_23_222345) do
     t.index ["action", "occurred_at"], name: "index_commerce_audit_events_on_action_and_occurred_at"
     t.index ["actor_id"], name: "index_commerce_audit_events_on_actor_id"
     t.index ["auditable_type", "auditable_id", "occurred_at"], name: "index_commerce_audits_on_target_and_time"
+  end
+
+  create_table "content_bundles", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "customer_title"
+    t.string "internal_name", null: false
+    t.integer "owner_id"
+    t.integer "position", default: 0, null: false
+    t.integer "product_id"
+    t.string "status", default: "draft", null: false
+    t.datetime "updated_at", null: false
+    t.string "visibility", default: "public", null: false
+    t.index ["owner_id"], name: "index_content_bundles_on_owner_id"
+    t.index ["product_id"], name: "index_content_bundles_on_product_id"
+  end
+
+  create_table "content_episodes", force: :cascade do |t|
+    t.integer "author_id"
+    t.text "body"
+    t.integer "bundle_id", null: false
+    t.datetime "created_at", null: false
+    t.string "customer_title"
+    t.text "evidence_note"
+    t.string "evidence_status"
+    t.string "internal_ref"
+    t.integer "position", default: 0, null: false
+    t.datetime "published_at"
+    t.string "status", default: "draft", null: false
+    t.datetime "updated_at", null: false
+    t.index ["author_id"], name: "index_content_episodes_on_author_id"
+    t.index ["bundle_id", "position"], name: "index_content_episodes_on_bundle_id_and_position"
+    t.index ["bundle_id"], name: "index_content_episodes_on_bundle_id"
   end
 
   create_table "external_account_links", force: :cascade do |t|
@@ -247,6 +279,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_23_222345) do
 
   add_foreign_key "chapter_progresses", "users"
   add_foreign_key "commerce_audit_events", "users", column: "actor_id"
+  add_foreign_key "content_bundles", "products"
+  add_foreign_key "content_bundles", "users", column: "owner_id"
+  add_foreign_key "content_episodes", "content_bundles", column: "bundle_id"
+  add_foreign_key "content_episodes", "users", column: "author_id"
   add_foreign_key "external_account_links", "users"
   add_foreign_key "licenses", "order_items"
   add_foreign_key "licenses", "products"

@@ -44,8 +44,11 @@ class ProductContentController < ApplicationController
       return
     end
 
-    file_path = chapter_file_path(slug)
-    unless file_path
+    # Goes through the source (handoff 0053 result.md §2.2-A) rather than
+    # reading hq/<product_code>/#{slug}.md directly -- a DB-backed source
+    # (ProductContent::DatabaseSource) has no such file.
+    raw_body = @source.body(slug)
+    unless raw_body
       render plain: "챕터를 찾을 수 없습니다.", status: :not_found
       return
     end
@@ -58,7 +61,7 @@ class ProductContentController < ApplicationController
     # always match the file's heading text; that's still true, but it no
     # longer matters here since this only strips whatever heading line is
     # actually in the file, independent of what title is displayed above it).
-    raw_markdown = strip_leading_heading(File.read(file_path))
+    raw_markdown = strip_leading_heading(raw_body)
     @content_html = render_markdown(raw_markdown)
 
     @chapter_progress = if user_signed_in?
@@ -175,12 +178,6 @@ class ProductContentController < ApplicationController
 
   def strip_leading_heading(raw_markdown)
     raw_markdown.sub(/\A\s*#[^\n]*\n?/, "")
-  end
-
-  def chapter_file_path(slug)
-    @source.path.children.find do |candidate|
-      candidate.file? && candidate.extname == ".md" && candidate.basename(".md").to_s == slug
-    end
   end
 
   def render_markdown(raw_markdown)

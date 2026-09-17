@@ -128,6 +128,11 @@ class ProductContent::ChatdoxLegacySource
     ContentManifest.last_updated_at(DOCS_PATH, slug)
   end
 
+  def body(slug)
+    file_path = DOCS_PATH.join("#{slug}.md")
+    File.read(file_path) if File.exist?(file_path)
+  end
+
   # Hardcoded, not data-driven -- unlike FilesystemSource's theme (which
   # reads hq/<product_code>/content_meta.yml), Chatdox has no content_meta.yml
   # of its own to read from (see the class comment for why it can't move to

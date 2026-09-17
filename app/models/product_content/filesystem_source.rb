@@ -84,6 +84,14 @@ class ProductContent::FilesystemSource
     ContentManifest.last_updated_at(path, slug)
   end
 
+  # Counterpart to #chapters' slug (see ProductContentController#show,
+  # handoff 0053 result.md §2.2-A -- the controller used to resolve this file
+  # itself via @source.path.children instead of asking the source for it).
+  def body(slug)
+    file_path = path.join("#{slug}.md")
+    File.read(file_path) if File.exist?(file_path)
+  end
+
   def theme
     meta.theme
   end

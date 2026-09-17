@@ -14,17 +14,20 @@
 #   #last_updated_at(slug)    -> ActiveSupport::TimeWithZone
 #   #missing_chapter_message  -> String (shown when #find returns nil)
 #   #editorial_status(id)     -> Symbol, admin-only, shape may vary per source
+#   #body(slug)               -> String | nil (chapter markdown body, see ProductContentController#show)
 #
 # A product with no entry in the registry gets FilesystemSource automatically
-# -- that's what makes "new product = content folder + Product row" true. Only
-# Chatdox is registered, because it can't safely use FilesystemSource yet (see
-# ProductContent::ChatdoxLegacySource).
+# -- that's what makes "new product = content folder + Product row" true.
+# Chatdox is registered because it can't safely use FilesystemSource yet (see
+# ProductContent::ChatdoxLegacySource). "content_lab" is registered because it
+# has no hq/ folder at all -- its content lives in ContentBundle/ContentEpisode
+# instead (handoff 0053 R2 vertical slice, see ProductContent::DatabaseSource).
 class ProductContent
   def self.for(product_code)
     registry.fetch(product_code, FilesystemSource).new(product_code)
   end
 
   def self.registry
-    { "chatdox" => ChatdoxLegacySource }
+    { "chatdox" => ChatdoxLegacySource, "content_lab" => DatabaseSource }
   end
 end
