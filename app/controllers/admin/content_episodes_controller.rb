@@ -13,7 +13,7 @@ class Admin::ContentEpisodesController < Admin::BaseController
   # across every state, so it's the one case rejected).
   VALID_STATUSES = %w[draft in_review published unpublished].freeze
 
-  before_action :set_episode, only: %i[edit update show transition publish unpublish]
+  before_action :set_episode, only: %i[edit update show transition publish unpublish destroy]
 
   helper_method :render_preview_markdown
 
@@ -82,6 +82,24 @@ class Admin::ContentEpisodesController < Admin::BaseController
 
   def unpublish
     apply_transition("unpublished")
+  end
+
+  # Handoff 0055 follow-up -- deliberately the simplest possible operation:
+  # no archive/trash/restore, no renumbering of the remaining episodes
+  # (their position/body/status are untouched), and a bundle with zero or
+  # one episode left is fine. content_takeaways/content_revisions cascade
+  # via the existing `dependent: :destroy` associations on ContentEpisode
+  # (see app/models/content_episode.rb) -- no new destroy logic needed for
+  # those. The "irreversible" and "this is published" warnings live in the
+  # confirm dialog on the edit view, not here -- this action doesn't
+  # re-check status before destroying (published episodes can be deleted;
+  # the warning is what's supposed to stop a careless click, not a second
+  # server-side gate).
+  def destroy
+    bundle = @episode.bundle
+    title = @episode.customer_title.presence || "(제목 없음)"
+    @episode.destroy!
+    redirect_to edit_admin_content_bundle_path(bundle), notice: "\"#{title}\" 편을 삭제했습니다."
   end
 
   private

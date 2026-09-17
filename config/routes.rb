@@ -85,7 +85,7 @@ Rails.application.routes.draw do
     # edit/update/show/custom member routes drop the bundle_id prefix once
     # the episode itself has an id.
     resources :content_bundles, only: %i[index new create edit update] do
-      resources :content_episodes, only: %i[new create edit update show], shallow: true do
+      resources :content_episodes, only: %i[new create edit update show destroy], shallow: true do
         member do
           patch :transition
           patch :publish
