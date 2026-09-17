@@ -22,14 +22,121 @@ class ProductContentController < ApplicationController
   # this changes nothing for them.
   before_action :enforce_active_product, only: %i[index show]
 
+  # Handoff 0055 -- DB-backed products (ProductContent::DatabaseSource) get
+  # an entirely separate Product -> Bundle -> Episode flow here, branched by
+  # source *class*, not by inspecting the URL. File-based products
+  # (FilesystemSource/ChatdoxLegacySource) go through the original flat
+  # #index/#show below completely unchanged -- see result.md §3 for why a
+  # shared 2-segment route can't otherwise tell "/content/x/01" (an episode
+  # id, flat products) apart from "/content/x/some-bundle" (a bundle slug,
+  # DB products) by shape alone.
   def index
-    load_common
+    @product_code = params[:product_code]
+    @source = ProductContent.for(@product_code)
+
+    if @source.is_a?(ProductContent::DatabaseSource)
+      index_bundles
+    else
+      load_common
+    end
   end
 
   def show
     @product_code = params[:product_code]
     request.format = :html
+    @source = ProductContent.for(@product_code)
 
+    if @source.is_a?(ProductContent::DatabaseSource)
+      params[:episode_id].present? ? show_bundle_episode : show_bundle_index
+    else
+      show_flat_episode
+    end
+  rescue Pundit::NotAuthorizedError
+    # ApplicationController's rescue_from is shared by 13+ unrelated authorize
+    # call sites app-wide (admin access, refunds, ...), so it stays generic on
+    # purpose -- this local rescue gives locked *chapters* specifically a
+    # context-aware landing spot instead (handoff 0045 R2-4). Guests are
+    # deliberately left alone: re-raising lets them fall through to the
+    # existing sign-in redirect, whose messaging is already contextual enough.
+    raise unless user_signed_in?
+
+    redirect_to locked_chapter_redirect_path, alert: "이 챕터는 라이선스가 필요합니다. 아래에서 이용 기간을 선택할 수 있습니다."
+  end
+
+  def image
+    serve_chapter_image(ProductContent.for(params[:product_code]).images_path, params[:filename])
+  end
+
+  private
+
+  # --- DB bundle-scoped flow (handoff 0055) ---
+
+  def index_bundles
+    set_display_product
+    @bundles = @source.bundles
+    render :bundle_list
+  end
+
+  def show_bundle_index
+    set_display_product
+    @bundle = @source.find_bundle(params[:id])
+    return render_missing_chapter if @bundle.nil?
+
+    @episodes = @source.episodes_for_bundle(@bundle)
+    render :bundle_show
+  end
+
+  def show_bundle_episode
+    set_display_product
+    @bundle = @source.find_bundle(params[:bundle_slug])
+    return render_missing_chapter if @bundle.nil?
+
+    @current_episode = @source.find_episode_in_bundle(@bundle, params[:episode_id])
+    return render_missing_chapter if @current_episode.nil?
+
+    authorize episode_policy_hash(@current_episode), :view?, policy_class: DocPolicy
+
+    @episodes = @source.episodes_for_bundle(@bundle)
+    @content_html = render_bundle_markdown(strip_leading_heading(@current_episode.body.to_s))
+    @takeaways = @current_episode.content_takeaways.ordered.map do |takeaway|
+      { kind: takeaway.kind, body_html: render_bundle_markdown(takeaway.body.to_s) }
+    end
+    @last_updated_at = @current_episode.updated_at
+
+    render :bundle_episode
+  end
+
+  def set_display_product
+    @product = Product.find_by(code: @product_code)
+    @display_name = @product&.name || @product_code.titleize
+  end
+
+  def render_missing_chapter
+    render plain: @source.missing_chapter_message, status: :not_found
+  end
+
+  def episode_policy_hash(episode)
+    { id: episode.display_id, product_code: @product_code }
+  end
+
+  def render_bundle_markdown(raw_markdown)
+    html = Redcarpet::Markdown.new(
+      Redcarpet::Render::HTML.new,
+      autolink: true, tables: true, fenced_code_blocks: true, strikethrough: true, superscript: true
+    ).render(raw_markdown)
+    render_checklist_items(html).html_safe
+  end
+
+  # --- File-based flat flow (unchanged since before handoff 0055) ---
+
+  def enforce_active_product
+    product = Product.find_by(code: params[:product_code])
+    return if product.nil? || product.active?
+
+    render plain: "아직 공개되지 않은 콘텐츠입니다.", status: :not_found
+  end
+
+  def show_flat_episode
     load_common
     @current_id = params[:id].to_s.rjust(2, "0")
     @current_chapter = @source.find(@current_id)
@@ -80,29 +187,6 @@ class ProductContentController < ApplicationController
     end
 
     render formats: :html
-  rescue Pundit::NotAuthorizedError
-    # ApplicationController's rescue_from is shared by 13+ unrelated authorize
-    # call sites app-wide (admin access, refunds, ...), so it stays generic on
-    # purpose -- this local rescue gives locked *chapters* specifically a
-    # context-aware landing spot instead (handoff 0045 R2-4). Guests are
-    # deliberately left alone: re-raising lets them fall through to the
-    # existing sign-in redirect, whose messaging is already contextual enough.
-    raise unless user_signed_in?
-
-    redirect_to locked_chapter_redirect_path, alert: "이 챕터는 라이선스가 필요합니다. 아래에서 이용 기간을 선택할 수 있습니다."
-  end
-
-  def image
-    serve_chapter_image(ProductContent.for(params[:product_code]).images_path, params[:filename])
-  end
-
-  private
-
-  def enforce_active_product
-    product = Product.find_by(code: params[:product_code])
-    return if product.nil? || product.active?
-
-    render plain: "아직 공개되지 않은 콘텐츠입니다.", status: :not_found
   end
 
   def load_common

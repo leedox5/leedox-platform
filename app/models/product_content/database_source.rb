@@ -108,9 +108,45 @@ class ProductContent::DatabaseSource
     end
   end
 
-  private
+  # --- Bundle-scoped browsing (handoff 0055) ---
+  #
+  # #chapters/#find/#body/#takeaways above stay as they were (flat, product-
+  # wide, position-keyed) for interface back-compat, but nothing in the
+  # customer-facing controller calls them anymore for this source -- once a
+  # product has more than one bundle, "the episode at position 01" is
+  # ambiguous product-wide and only well-defined within one bundle (see
+  # result.md §2). These methods are the actual customer/admin path now.
 
   def bundles
+    return ContentBundle.none unless self.class.tables_ready?
+
+    ContentBundle.published.joins(:product).where(products: { code: product_code }).order(:position)
+  end
+
+  def find_bundle(slug)
+    return nil if slug.blank?
+
+    bundles.find_by(slug: slug.to_s)
+  end
+
+  def episodes_for_bundle(bundle)
+    bundle.content_episodes.published.ordered
+  end
+
+  def find_episode_in_bundle(bundle, episode_id)
+    id_str = episode_id.to_s
+    episodes_for_bundle(bundle).to_a.find do |episode|
+      episode.display_id == id_str || episode.display_id == id_str.rjust(2, "0")
+    end
+  end
+
+  private
+
+  # Unlike the public #bundles (handoff 0055, filtered to published), this
+  # includes every status -- kept only so the legacy flat #chapters/#find
+  # below still see every bundle's episodes, matching their pre-0055
+  # behavior for interface back-compat.
+  def all_bundles_for_product
     ContentBundle.joins(:product).where(products: { code: product_code }).order(:position)
   end
 
@@ -123,27 +159,26 @@ class ProductContent::DatabaseSource
   def episodes
     return ContentEpisode.none unless self.class.tables_ready?
 
-    ContentEpisode.where(bundle_id: bundles.select(:id)).published.ordered
+    ContentEpisode.where(bundle_id: all_bundles_for_product.select(:id)).published.ordered
   end
 
   def chapter_hash(episode)
-    id = episode_id(episode)
+    id = episode.display_id
     {
       id: id,
       slug: id,
-      title: episode.customer_title.presence || episode.internal_ref.presence || "제목 없음",
+      # internal_ref is admin-only (handoff 0054 R2 §4 -- never customer-
+      # visible) and must never be a title fallback here (was, until this
+      # handoff -- see result.md §2's bugfix note).
+      title: episode.customer_title.presence || "제목 없음",
       product_code: product_code,
       available: true,
       kind: :chapter
     }
   end
 
-  def episode_id(episode)
-    episode.position.to_s.rjust(2, "0")
-  end
-
   def episode_for(id)
     id_str = id.to_s
-    episodes.find { |episode| episode_id(episode) == id_str || episode_id(episode) == id_str.rjust(2, "0") }
+    episodes.find { |episode| episode.display_id == id_str || episode.display_id == id_str.rjust(2, "0") }
   end
 end

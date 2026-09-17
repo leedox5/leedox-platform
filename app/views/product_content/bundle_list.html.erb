@@ -1,0 +1,19 @@
+<div class="min-h-screen bg-white">
+  <%= render "shared/header" %>
+  <main class="mx-auto max-w-3xl px-5 py-10 sm:px-7">
+    <h1 class="text-2xl font-bold text-gray-900"><%= @display_name %></h1>
+
+    <div class="mt-8 space-y-4">
+      <% @bundles.each do |bundle| %>
+        <%= link_to product_chapter_path(@product_code, bundle.slug),
+          class: "block rounded-xl border border-gray-200 p-5 transition hover:border-blue-300 hover:bg-blue-50/40" do %>
+          <h2 class="text-lg font-bold text-gray-900"><%= bundle.customer_title.presence || bundle.internal_name %></h2>
+          <p class="mt-1 text-sm text-gray-500"><%= bundle.content_episodes.published.count %>편</p>
+        <% end %>
+      <% end %>
+      <% if @bundles.empty? %>
+        <p class="text-gray-500">아직 공개된 콘텐츠가 없습니다.</p>
+      <% end %>
+    </div>
+  </main>
+</div>

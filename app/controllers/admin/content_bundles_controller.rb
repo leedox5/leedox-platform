@@ -38,6 +38,6 @@ class Admin::ContentBundlesController < Admin::BaseController
   private
 
   def bundle_params
-    params.require(:content_bundle).permit(:internal_name, :customer_title, :status, :position, :product_id)
+    params.require(:content_bundle).permit(:internal_name, :customer_title, :status, :position, :product_id, :slug)
   end
 end

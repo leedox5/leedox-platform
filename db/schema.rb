@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_17_130300) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_17_153000) do
   create_table "chapter_progresses", force: :cascade do |t|
     t.string "chapter_id", null: false
     t.datetime "completed_at"
@@ -45,10 +45,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_130300) do
     t.integer "owner_id"
     t.integer "position", default: 0, null: false
     t.integer "product_id"
+    t.string "slug"
     t.string "status", default: "draft", null: false
     t.datetime "updated_at", null: false
     t.string "visibility", default: "public", null: false
     t.index ["owner_id"], name: "index_content_bundles_on_owner_id"
+    t.index ["product_id", "slug"], name: "index_content_bundles_on_product_id_and_slug", unique: true
     t.index ["product_id"], name: "index_content_bundles_on_product_id"
   end
 

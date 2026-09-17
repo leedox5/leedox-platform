@@ -15,7 +15,7 @@ class AdminContentAuthoringTest < ActionDispatch::IntegrationTest
   end
 
   test "non-admins and guests cannot reach any admin content authoring URL" do
-    bundle = ContentBundle.create!(product: @product, internal_name: "차단 테스트")
+    bundle = ContentBundle.create!(product: @product, internal_name: "차단 테스트", slug: "blocked-test")
 
     get admin_content_bundles_path
     assert_redirected_to new_user_session_path
@@ -31,7 +31,11 @@ class AdminContentAuthoringTest < ActionDispatch::IntegrationTest
     sign_in_as(@admin)
 
     # 1. create bundle
-    post admin_content_bundles_path, params: { content_bundle: { internal_name: "R3 검증 묶음", product_id: @product.id, status: "draft" } }
+    # Bundle itself is published from the start (handoff 0055 §4.2 -- bundle
+    # status gates whether it appears in the Product's list/URL at all); the
+    # individual episode inside still goes through its own draft -> publish
+    # -> unpublish lifecycle independently, which is what this test tracks.
+    post admin_content_bundles_path, params: { content_bundle: { internal_name: "R3 검증 묶음", product_id: @product.id, slug: "r3-verify", status: "published" } }
     bundle = ContentBundle.last
     assert_redirected_to edit_admin_content_bundle_path(bundle)
 
@@ -55,7 +59,7 @@ class AdminContentAuthoringTest < ActionDispatch::IntegrationTest
     assert_match(/체크리스트/, response.body)
 
     # 5. draft is invisible on the customer path
-    get "/content/content_lab/01"
+    get "/content/content_lab/r3-verify/01"
     assert_response :not_found
 
     # 6. publish
@@ -67,7 +71,7 @@ class AdminContentAuthoringTest < ActionDispatch::IntegrationTest
     delete destroy_user_session_path
 
     # 7. customer (no admin session) sees title, body and takeaway
-    get "/content/content_lab/01"
+    get "/content/content_lab/r3-verify/01"
     assert_redirected_to new_user_session_path # not licensed yet
 
     today = Time.current.in_time_zone(Commerce::PeriodCalculator::KST).to_date
@@ -79,7 +83,7 @@ class AdminContentAuthoringTest < ActionDispatch::IntegrationTest
     )
     sign_in_as(@user)
 
-    get "/content/content_lab/01"
+    get "/content/content_lab/r3-verify/01"
     assert_response :success
     assert_match(/초안 본문입니다/, response.body)
     assert_match(/체크리스트/, response.body)
@@ -115,12 +119,12 @@ class AdminContentAuthoringTest < ActionDispatch::IntegrationTest
     delete destroy_user_session_path
     sign_in_as(@user)
 
-    get "/content/content_lab/01"
+    get "/content/content_lab/r3-verify/01"
     assert_response :not_found
   end
 
   test "an inactive Product blocks the customer index and direct chapter URL, but not the admin authoring UI" do
-    bundle = ContentBundle.create!(product: @product, internal_name: "비활성 테스트")
+    bundle = ContentBundle.create!(product: @product, internal_name: "비활성 테스트", slug: "inactive-test", status: "published")
     episode = bundle.content_episodes.create!(customer_title: "비활성 편", position: 1, body: "본문", status: "published")
 
     get "/content/content_lab"
@@ -131,7 +135,7 @@ class AdminContentAuthoringTest < ActionDispatch::IntegrationTest
     get "/content/content_lab"
     assert_response :not_found
 
-    get "/content/content_lab/01"
+    get "/content/content_lab/inactive-test/01"
     assert_response :not_found
 
     sign_in_as(@admin)
@@ -140,7 +144,7 @@ class AdminContentAuthoringTest < ActionDispatch::IntegrationTest
   end
 
   test "removing content_lab from ProductContent.registry falls back safely (404, not 500) and leaves other products untouched" do
-    bundle = ContentBundle.create!(product: @product, internal_name: "레지스트리 제거 테스트")
+    bundle = ContentBundle.create!(product: @product, internal_name: "레지스트리 제거 테스트", slug: "registry-removal-test", status: "published")
     bundle.content_episodes.create!(customer_title: "편", position: 1, body: "본문", status: "published")
 
     original_registry = ProductContent.registry
@@ -150,7 +154,7 @@ class AdminContentAuthoringTest < ActionDispatch::IntegrationTest
       assert_response :success # FilesystemSource fallback with no hq/content_lab folder: empty list, not an error
       assert_no_match(/편/, response.body)
 
-      get "/content/content_lab/01"
+      get "/content/content_lab/registry-removal-test/01"
       assert_response :not_found
     ensure
       ProductContent.define_singleton_method(:registry) { original_registry }

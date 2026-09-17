@@ -23,6 +23,13 @@ class ContentEpisode < ApplicationRecord
     status == "published"
   end
 
+  # Handoff 0055 -- the customer/admin-preview "chapter number" for this
+  # episode, scoped to its own bundle (position is only unique within a
+  # bundle, never globally -- see ProductContent::DatabaseSource).
+  def display_id
+    position.to_s.rjust(2, "0")
+  end
+
   private
 
   # Runs inside the same transaction as the update itself (see Rails' save

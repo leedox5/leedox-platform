@@ -33,6 +33,11 @@ Rails.application.routes.draw do
   get "/content/:product_code", to: "product_content#index", as: :product_content_index
   get "/content/:product_code/images/*filename", to: "product_content#image", as: :product_content_image, format: false
   get "/content/:product_code/:id", to: "product_content#show", as: :product_chapter
+  # Handoff 0055 -- DB-backed products only. Segment count alone disambiguates
+  # from the 2-segment route above (a 3-segment URL never matches it), so
+  # there's no routing ambiguity even though both point at #show -- see
+  # result.md §3 and ProductContentController#show's source-class branch.
+  get "/content/:product_code/:bundle_slug/:episode_id", to: "product_content#show", as: :product_bundle_episode
   get "/service-desk", to: "service_desk#index", as: :service_desk
   get "/service-desk/new", to: "service_desk#new", as: :new_service_desk_request
   post "/service-desk", to: "service_desk#create"

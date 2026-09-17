@@ -8,7 +8,7 @@ class AdminContentEpisodeLifecycleAndPreviewTest < ActionDispatch::IntegrationTe
   setup do
     @product = Product.create!(code: "content_lab", name: "Content Lab", active: true)
     @admin = User.create!(name: "관리자", email: "lifecycle-admin-#{SecureRandom.hex(3)}@example.com", password: "password123", role: :admin)
-    @bundle = ContentBundle.create!(product: @product, internal_name: "라이프사이클 테스트")
+    @bundle = ContentBundle.create!(product: @product, internal_name: "라이프사이클 테스트", slug: "lifecycle-test", status: "published")
     @episode = @bundle.content_episodes.create!(customer_title: "편 A", position: 1, body: "- [ ] 할 일\n- [x] 완료한 일\n- 일반 항목", status: "draft")
     post user_session_path, params: { user: { email: @admin.email, password: "password123" } }
   end
@@ -62,7 +62,7 @@ class AdminContentEpisodeLifecycleAndPreviewTest < ActionDispatch::IntegrationTe
 
     @episode.update!(status: "published")
     delete destroy_user_session_path
-    get "/content/content_lab/01"
+    get "/content/content_lab/lifecycle-test/01"
     assert_no_match(/관리자 전용 메모/, response.body)
   end
 
@@ -85,7 +85,7 @@ class AdminContentEpisodeLifecycleAndPreviewTest < ActionDispatch::IntegrationTe
     assert_no_match(/\[ \]|\[x\]/, response.body)
 
     @episode.update!(status: "published")
-    get "/content/content_lab/01"
+    get "/content/content_lab/lifecycle-test/01"
     assert_response :success
     assert_select "input[type=checkbox][disabled]", count: 2
     assert_select "input[type=checkbox][checked]", count: 1
