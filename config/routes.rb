@@ -74,6 +74,20 @@ Rails.application.routes.draw do
     resources :users, only: %i[index update] do
       post :grant_free_license, on: :member
     end
+    # Handoff 0053 R3 -- minimal admin authoring UI for DB-backed content
+    # bundles/episodes/takeaways. `shallow: true` keeps new/create nested
+    # under the bundle (an episode needs its bundle_id to be created) while
+    # edit/update/show/custom member routes drop the bundle_id prefix once
+    # the episode itself has an id.
+    resources :content_bundles, only: %i[index new create edit update] do
+      resources :content_episodes, only: %i[new create edit update show], shallow: true do
+        member do
+          patch :publish
+          patch :unpublish
+        end
+        resources :content_takeaways, only: %i[new create edit update], shallow: true
+      end
+    end
     namespace :commerce do
       resources :orders, only: %i[index show], param: :id do
         post :abandon, on: :member

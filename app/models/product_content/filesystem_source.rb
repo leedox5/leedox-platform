@@ -92,6 +92,12 @@ class ProductContent::FilesystemSource
     File.read(file_path) if File.exist?(file_path)
   end
 
+  # No takeaway-asset concept for HQ markdown content -- see
+  # ProductContent::DatabaseSource for the source that actually has these.
+  def takeaways(_slug)
+    []
+  end
+
   def theme
     meta.theme
   end

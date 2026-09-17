@@ -84,6 +84,23 @@
           ) %>
         </div>
 
+        <% if @takeaways.present? %>
+          <div class="mt-10 space-y-4">
+            <% @takeaways.each do |takeaway| %>
+              <div class="rounded-xl border border-amber-200 bg-amber-50 p-5">
+                <p class="text-xs font-bold uppercase tracking-wide text-amber-700"><%= takeaway[:kind] %></p>
+                <div class="doc-content mt-2 max-w-none text-sm">
+                  <%= sanitize(
+                    takeaway[:body_html],
+                    tags: %w[h1 h2 h3 h4 h5 h6 p br hr ul ol li pre code blockquote strong em a img table thead tbody tr th td],
+                    attributes: %w[href target rel src alt]
+                  ) %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
         <% if @product_code == "aistart" && @chapters.last && @current_id == @chapters.last[:id] %>
           <div id="aistart-completion-cta" class="mt-12 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/70 via-white to-blue-50/70 p-6 shadow-sm sm:p-8">
             <div class="max-w-2xl">

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_17_120100) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_17_130300) do
   create_table "chapter_progresses", force: :cascade do |t|
     t.string "chapter_id", null: false
     t.datetime "completed_at"
@@ -58,9 +58,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_120100) do
     t.integer "bundle_id", null: false
     t.datetime "created_at", null: false
     t.string "customer_title"
-    t.text "evidence_note"
-    t.string "evidence_status"
     t.string "internal_ref"
+    t.integer "lock_version", default: 0, null: false
     t.integer "position", default: 0, null: false
     t.datetime "published_at"
     t.string "status", default: "draft", null: false
@@ -68,6 +67,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_120100) do
     t.index ["author_id"], name: "index_content_episodes_on_author_id"
     t.index ["bundle_id", "position"], name: "index_content_episodes_on_bundle_id_and_position"
     t.index ["bundle_id"], name: "index_content_episodes_on_bundle_id"
+  end
+
+  create_table "content_revisions", force: :cascade do |t|
+    t.text "body_snapshot"
+    t.datetime "created_at", null: false
+    t.integer "editor_id"
+    t.integer "episode_id", null: false
+    t.text "note"
+    t.datetime "updated_at", null: false
+    t.index ["editor_id"], name: "index_content_revisions_on_editor_id"
+    t.index ["episode_id"], name: "index_content_revisions_on_episode_id"
+  end
+
+  create_table "content_takeaways", force: :cascade do |t|
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.integer "episode_id", null: false
+    t.string "kind", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["episode_id", "position"], name: "index_content_takeaways_on_episode_id_and_position"
+    t.index ["episode_id"], name: "index_content_takeaways_on_episode_id"
   end
 
   create_table "external_account_links", force: :cascade do |t|
@@ -283,6 +304,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_120100) do
   add_foreign_key "content_bundles", "users", column: "owner_id"
   add_foreign_key "content_episodes", "content_bundles", column: "bundle_id"
   add_foreign_key "content_episodes", "users", column: "author_id"
+  add_foreign_key "content_revisions", "content_episodes", column: "episode_id"
+  add_foreign_key "content_revisions", "users", column: "editor_id"
+  add_foreign_key "content_takeaways", "content_episodes", column: "episode_id"
   add_foreign_key "external_account_links", "users"
   add_foreign_key "licenses", "order_items"
   add_foreign_key "licenses", "products"

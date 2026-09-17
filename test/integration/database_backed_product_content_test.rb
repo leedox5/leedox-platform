@@ -25,10 +25,14 @@ class DatabaseBackedProductContentTest < ActionDispatch::IntegrationTest
     assert_match(/발행된 편/, response.body)
   end
 
-  test "a draft episode 404s even though it's listed, same as an unwritten filesystem chapter" do
+  test "a draft episode is fully invisible -- not in the index, and 404s as 'not found' rather than 'not available' (R3 §5 fix)" do
+    get "/content/content_lab"
+    assert_response :success
+    assert_no_match(/초안 편/, response.body)
+
     get "/content/content_lab/02"
     assert_response :not_found
-    assert_match(/아직 공개되지 않은 챕터입니다/, response.body)
+    assert_match(/아직 공개되지 않은 콘텐츠입니다/, response.body)
   end
 
   test "guest access is blocked (no numeric-chapter guest/trial preview for DB content)" do

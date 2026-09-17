@@ -15,6 +15,7 @@
 #   #missing_chapter_message  -> String (shown when #find returns nil)
 #   #editorial_status(id)     -> Symbol, admin-only, shape may vary per source
 #   #body(slug)               -> String | nil (chapter markdown body, see ProductContentController#show)
+#   #takeaways(slug)          -> Array<Hash> (kind/body pairs; [] for sources with no takeaway concept)
 #
 # A product with no entry in the registry gets FilesystemSource automatically
 # -- that's what makes "new product = content folder + Product row" true.

@@ -133,6 +133,10 @@ class ProductContent::ChatdoxLegacySource
     File.read(file_path) if File.exist?(file_path)
   end
 
+  def takeaways(_slug)
+    []
+  end
+
   # Hardcoded, not data-driven -- unlike FilesystemSource's theme (which
   # reads hq/<product_code>/content_meta.yml), Chatdox has no content_meta.yml
   # of its own to read from (see the class comment for why it can't move to

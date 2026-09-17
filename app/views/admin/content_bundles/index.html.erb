@@ -1,0 +1,47 @@
+<% content_for :title, "콘텐츠 묶음 관리" %>
+
+<div class="min-h-screen bg-slate-50">
+  <%= render "shared/header" %>
+  <main class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="text-sm font-bold uppercase tracking-[0.2em] text-blue-700">Admin Content</p>
+        <h1 class="mt-2 text-3xl font-black text-slate-950">콘텐츠 묶음 관리</h1>
+        <p class="mt-2 text-slate-600">DB에서 직접 저작·게시하는 신규 콘텐츠 묶음(handoff 0053 수직 절단)입니다.</p>
+      </div>
+      <%= link_to "+ 새 묶음", new_admin_content_bundle_path, class: "inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700" %>
+    </header>
+
+    <section class="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <table class="min-w-full divide-y divide-slate-200 text-sm">
+        <thead class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+          <tr>
+            <th class="px-4 py-3">내부 이름</th>
+            <th class="px-4 py-3">고객 노출 제목</th>
+            <th class="px-4 py-3">상품 코드</th>
+            <th class="px-4 py-3">상태</th>
+            <th class="px-4 py-3">편 수</th>
+            <th class="px-4 py-3 text-right">관리</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% @bundles.each do |bundle| %>
+            <tr>
+              <td class="px-4 py-4 font-semibold text-slate-900"><%= bundle.internal_name %></td>
+              <td class="px-4 py-4 text-slate-600"><%= bundle.customer_title.presence || "—" %></td>
+              <td class="px-4 py-4 text-slate-600"><%= bundle.product&.code || "(미연결)" %></td>
+              <td class="px-4 py-4">
+                <span class="inline-block rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700"><%= bundle.status %></span>
+              </td>
+              <td class="px-4 py-4 text-slate-600"><%= bundle.content_episodes.size %></td>
+              <td class="px-4 py-4 text-right">
+                <%= link_to "편집", edit_admin_content_bundle_path(bundle), class: "font-semibold text-blue-700 hover:underline" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <% if @bundles.empty? %><p class="p-8 text-center text-slate-500">등록된 묶음이 없습니다.</p><% end %>
+    </section>
+  </main>
+</div>

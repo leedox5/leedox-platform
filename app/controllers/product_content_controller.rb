@@ -14,6 +14,13 @@ class ProductContentController < ApplicationController
 
   helper_method :product_content_index_path_for, :product_chapter_path_for
 
+  # Handoff 0053 R3 §7 -- deactivating a Product (or removing its
+  # ProductContent.registry entry, which falls back to an empty
+  # FilesystemSource scan) must block direct URL access, not just listings.
+  # All four existing filesystem-backed products are active: true today, so
+  # this changes nothing for them.
+  before_action :enforce_active_product, only: %i[index show]
+
   def index
     load_common
   end
@@ -63,6 +70,9 @@ class ProductContentController < ApplicationController
     # actually in the file, independent of what title is displayed above it).
     raw_markdown = strip_leading_heading(raw_body)
     @content_html = render_markdown(raw_markdown)
+    @takeaways = @source.takeaways(slug).map do |takeaway|
+      { kind: takeaway[:kind], body_html: render_markdown(takeaway[:body].to_s) }
+    end
 
     @chapter_progress = if user_signed_in?
       current_user.chapter_progresses.find_by(chapter_id: @current_id, product_code: @product_code)
@@ -86,6 +96,13 @@ class ProductContentController < ApplicationController
   end
 
   private
+
+  def enforce_active_product
+    product = Product.find_by(code: params[:product_code])
+    return if product.nil? || product.active?
+
+    render plain: "아직 공개되지 않은 콘텐츠입니다.", status: :not_found
+  end
 
   def load_common
     @product_code ||= params[:product_code]

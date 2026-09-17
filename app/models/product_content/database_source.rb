@@ -1,4 +1,4 @@
-# Vertical-slice content source (handoff 0053 R2) -- reads chapters from
+# Vertical-slice content source (handoff 0053 R2/R3) -- reads chapters from
 # ContentBundle/ContentEpisode instead of scanning hq/<product_code>/*.md.
 # Registered explicitly in ProductContent.registry (same pattern as
 # ChatdoxLegacySource) rather than picked up automatically, since an
@@ -9,11 +9,33 @@
 # 0053 result.md §2.2-B/§9), which doesn't hold for freely-ordered episodes.
 # Returning a negative guest/trial limit here disables both previews rather
 # than reusing that numeric assumption.
+#
+# #chapters/#find only ever see `status: "published"` episodes (R3 §5 --
+# draft/unpublished must be invisible from the customer path entirely, not
+# just blocked on single-episode fetch). Admin preview of a draft is a
+# completely separate code path (Admin::ContentEpisodesController#show)
+# that never touches this class, so there's no query-param or mode flag
+# here that could leak a draft to a non-admin request.
 class ProductContent::DatabaseSource
   attr_reader :product_code
 
   def initialize(product_code)
     @product_code = product_code
+  end
+
+  # Guards every query below against a real gap found in R3 review: this
+  # class's code can be deployed (registered in ProductContent.registry)
+  # before its migration has actually run against a given database -- e.g.
+  # production right now, where "content_lab" is registered but
+  # content_bundles/content_episodes don't exist yet. Without this,
+  # #chapters/#find would raise ActiveRecord::StatementInvalid (undefined
+  # table) on any direct request, a 500 rather than the same 404 an
+  # unregistered or empty product already gets. table_exists? is a cheap
+  # schema-cache check, not a query against the table itself, so it's safe
+  # to call even when the table genuinely doesn't exist.
+  def self.tables_ready?
+    ActiveRecord::Base.connection.table_exists?(:content_bundles) &&
+      ActiveRecord::Base.connection.table_exists?(:content_episodes)
   end
 
   def path
@@ -75,14 +97,33 @@ class ProductContent::DatabaseSource
     episode_for(slug)&.body
   end
 
+  # See ProductContent's interface comment -- FilesystemSource/
+  # ChatdoxLegacySource return [] here (no takeaway concept for them).
+  def takeaways(slug)
+    episode = episode_for(slug)
+    return [] unless episode
+
+    episode.content_takeaways.ordered.map do |takeaway|
+      { kind: takeaway.kind, body: takeaway.body }
+    end
+  end
+
   private
 
   def bundles
     ContentBundle.joins(:product).where(products: { code: product_code }).order(:position)
   end
 
+  # Only published episodes are visible through this source at all -- there
+  # is no "available: false but listed" state for DB content (unlike
+  # FilesystemSource, where a registered-but-unwritten chapter can still show
+  # up grayed out). Admins preview drafts through a separate controller
+  # (Admin::ContentEpisodesController#show) that queries ContentEpisode
+  # directly instead of going through ProductContent.
   def episodes
-    ContentEpisode.where(bundle_id: bundles.select(:id)).ordered
+    return ContentEpisode.none unless self.class.tables_ready?
+
+    ContentEpisode.where(bundle_id: bundles.select(:id)).published.ordered
   end
 
   def chapter_hash(episode)
@@ -92,7 +133,7 @@ class ProductContent::DatabaseSource
       slug: id,
       title: episode.customer_title.presence || episode.internal_ref.presence || "제목 없음",
       product_code: product_code,
-      available: episode.published?,
+      available: true,
       kind: :chapter
     }
   end
