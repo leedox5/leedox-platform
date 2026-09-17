@@ -78,9 +78,9 @@
             @content_html,
             tags: %w[
               h1 h2 h3 h4 h5 h6 p br hr ul ol li pre code blockquote strong em a img
-              table thead tbody tr th td
+              table thead tbody tr th td input
             ],
-            attributes: %w[href target rel src alt]
+            attributes: %w[href target rel src alt type disabled checked style]
           ) %>
         </div>
 
@@ -92,8 +92,8 @@
                 <div class="doc-content mt-2 max-w-none text-sm">
                   <%= sanitize(
                     takeaway[:body_html],
-                    tags: %w[h1 h2 h3 h4 h5 h6 p br hr ul ol li pre code blockquote strong em a img table thead tbody tr th td],
-                    attributes: %w[href target rel src alt]
+                    tags: %w[h1 h2 h3 h4 h5 h6 p br hr ul ol li pre code blockquote strong em a img table thead tbody tr th td input],
+                    attributes: %w[href target rel src alt type disabled checked style]
                   ) %>
                 </div>
               </div>

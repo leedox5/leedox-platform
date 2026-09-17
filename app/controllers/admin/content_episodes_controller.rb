@@ -6,7 +6,14 @@
 # since Admin::BaseController already blocks non-admins from the whole
 # namespace.
 class Admin::ContentEpisodesController < Admin::BaseController
-  before_action :set_episode, only: %i[edit update show publish unpublish]
+  include MarkdownChecklistRendering
+
+  # Handoff 0054 R2 P0-1 -- any status may move to any other status except
+  # itself (a self-transition is the one thing consistently meaningless
+  # across every state, so it's the one case rejected).
+  VALID_STATUSES = %w[draft in_review published unpublished].freeze
+
+  before_action :set_episode, only: %i[edit update show transition publish unpublish]
 
   helper_method :render_preview_markdown
 
@@ -32,6 +39,14 @@ class Admin::ContentEpisodesController < Admin::BaseController
 
   def show
     @takeaways = @episode.content_takeaways.ordered
+    # Unlike the customer path (ProductContent::DatabaseSource, published-only),
+    # admin preview navigation walks every status in the bundle -- an editor
+    # reviewing a draft needs to move between draft siblings too (handoff
+    # 0054 R2 P0-2).
+    siblings = @bundle.content_episodes.ordered.to_a
+    current_index = siblings.index(@episode)
+    @prev_episode = siblings[0...current_index]&.last
+    @next_episode = siblings[(current_index + 1)..]&.first
   end
 
   def update
@@ -53,23 +68,45 @@ class Admin::ContentEpisodesController < Admin::BaseController
     render :edit, status: :conflict
   end
 
+  # #publish/#unpublish stay as their own routes for backward compatibility
+  # with existing bookmarks/tests (handoff 0053), but now go through the
+  # same validated path as the generic transition action instead of writing
+  # status unconditionally.
+  def transition
+    apply_transition(params[:status])
+  end
+
   def publish
-    @episode.update!(status: "published", published_at: Time.current)
-    redirect_to edit_admin_content_episode_path(@episode), notice: "게시했습니다."
+    apply_transition("published")
   end
 
   def unpublish
-    @episode.update!(status: "unpublished")
-    redirect_to edit_admin_content_episode_path(@episode), notice: "비공개로 전환했습니다."
+    apply_transition("unpublished")
   end
 
   private
+
+  def apply_transition(target_status)
+    unless VALID_STATUSES.include?(target_status)
+      return redirect_to edit_admin_content_episode_path(@episode), alert: "알 수 없는 상태입니다."
+    end
+
+    if target_status == @episode.status
+      return redirect_to edit_admin_content_episode_path(@episode), alert: "이미 #{target_status} 상태입니다."
+    end
+
+    attrs = { status: target_status }
+    attrs[:published_at] = Time.current if target_status == "published"
+    @episode.update!(attrs)
+    redirect_to edit_admin_content_episode_path(@episode), notice: "#{target_status} 상태로 전환했습니다."
+  end
 
   # Plain rendering (no LinkRewritingRenderer) -- this is an admin-only
   # preview, not the customer-facing route, and DB episode bodies don't carry
   # the relative .md-link convention that renderer resolves.
   def render_preview_markdown(raw_markdown)
-    Redcarpet::Markdown.new(Redcarpet::Render::HTML.new, autolink: true, tables: true, fenced_code_blocks: true).render(raw_markdown.to_s)
+    html = Redcarpet::Markdown.new(Redcarpet::Render::HTML.new, autolink: true, tables: true, fenced_code_blocks: true).render(raw_markdown.to_s)
+    render_checklist_items(html)
   end
 
   def set_episode
@@ -78,6 +115,6 @@ class Admin::ContentEpisodesController < Admin::BaseController
   end
 
   def episode_params
-    params.require(:content_episode).permit(:customer_title, :position, :body, :lock_version)
+    params.require(:content_episode).permit(:customer_title, :position, :body, :lock_version, :internal_ref)
   end
 end

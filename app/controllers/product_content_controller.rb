@@ -11,6 +11,7 @@
 # product.
 class ProductContentController < ApplicationController
   include ChapterImages
+  include MarkdownChecklistRendering
 
   helper_method :product_content_index_path_for, :product_chapter_path_for
 
@@ -213,6 +214,6 @@ class ProductContentController < ApplicationController
       superscript: true
     )
 
-    markdown.render(raw_markdown).html_safe
+    render_checklist_items(markdown.render(raw_markdown)).html_safe
   end
 end

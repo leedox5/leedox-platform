@@ -3,9 +3,9 @@
 <div class="min-h-screen bg-white">
   <%= render "shared/header" %>
   <main class="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
-    <div class="mb-6 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800">
-      관리자 전용 미리보기 — 실제 고객 화면이 아니며, <%= @episode.status %> 상태 그대로 보입니다.
-      <%= link_to "편집으로 돌아가기", edit_admin_content_episode_path(@episode), class: "ml-2 underline" %>
+    <div class="mb-6 flex flex-col gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800 sm:flex-row sm:items-center sm:justify-between">
+      <span>관리자 전용 미리보기 — 실제 고객 화면이 아니며, <%= @episode.status %> 상태 그대로 보입니다.</span>
+      <%= link_to "편집으로 돌아가기", edit_admin_content_episode_path(@episode), class: "underline sm:flex-shrink-0" %>
     </div>
 
     <p class="text-sm font-semibold uppercase tracking-wide text-blue-600">Chapter <%= @episode.position %></p>
@@ -14,8 +14,8 @@
     <div class="doc-content mt-8 max-w-none">
       <%= sanitize(
         render_preview_markdown(@episode.body),
-        tags: %w[h1 h2 h3 h4 h5 h6 p br hr ul ol li pre code blockquote strong em a img table thead tbody tr th td],
-        attributes: %w[href target rel src alt]
+        tags: %w[h1 h2 h3 h4 h5 h6 p br hr ul ol li pre code blockquote strong em a img table thead tbody tr th td input],
+        attributes: %w[href target rel src alt type disabled checked style]
       ) %>
     </div>
 
@@ -27,13 +27,31 @@
             <div class="doc-content mt-2 max-w-none text-sm">
               <%= sanitize(
                 render_preview_markdown(takeaway.body),
-                tags: %w[h1 h2 h3 h4 h5 h6 p br hr ul ol li pre code blockquote strong em a img table thead tbody tr th td],
-                attributes: %w[href target rel src alt]
+                tags: %w[h1 h2 h3 h4 h5 h6 p br hr ul ol li pre code blockquote strong em a img table thead tbody tr th td input],
+                attributes: %w[href target rel src alt type disabled checked style]
               ) %>
             </div>
           </div>
         <% end %>
       </div>
     <% end %>
+
+    <div class="mt-10 flex justify-between border-t border-gray-100 pt-8">
+      <% if @prev_episode %>
+        <%= link_to admin_content_episode_path(@prev_episode), class: "flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600" do %>
+          <span>←</span>
+          <span><%= @prev_episode.customer_title.presence || "(제목 없음)" %> <span class="text-xs text-gray-400">(<%= @prev_episode.status %>)</span></span>
+        <% end %>
+      <% else %>
+        <div></div>
+      <% end %>
+
+      <% if @next_episode %>
+        <%= link_to admin_content_episode_path(@next_episode), class: "flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600" do %>
+          <span><%= @next_episode.customer_title.presence || "(제목 없음)" %> <span class="text-xs text-gray-400">(<%= @next_episode.status %>)</span></span>
+          <span>→</span>
+        <% end %>
+      <% end %>
+    </div>
   </main>
 </div>

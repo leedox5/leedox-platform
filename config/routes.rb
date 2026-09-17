@@ -82,6 +82,7 @@ Rails.application.routes.draw do
     resources :content_bundles, only: %i[index new create edit update] do
       resources :content_episodes, only: %i[new create edit update show], shallow: true do
         member do
+          patch :transition
           patch :publish
           patch :unpublish
         end
