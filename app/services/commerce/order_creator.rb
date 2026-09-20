@@ -33,6 +33,8 @@ module Commerce
       offer = product.product_offers.find_by!(code: @offer_code)
       raise Unavailable, "offer is not available" unless offer.available_at?(@at)
 
+      return create_lifetime_order!(product, offer) if offer.lifetime?
+
       requested_start_on = resolve_requested_start(product, offer)
       period = Commerce::LicenseScheduler.preview(
         user: @user,
@@ -82,6 +84,36 @@ module Commerce
     end
 
     private
+
+    # Handoff 0057 -- one-time Season purchase. No period to compute or stack:
+    # the license starts today and never expires. One paid license per user and
+    # Season; a refunded (canceled) one no longer counts, so it can be bought
+    # again. Seasons that aren't published/listed can't be bought even if a
+    # stale checkout link is still open.
+    def create_lifetime_order!(product, offer)
+      season = product.product_season
+      raise Unavailable, "season is not on sale" unless season&.customer_reachable? && season.product_line.published?
+      # A 0-won Season has no payment to make: it is started, not ordered
+      # (a zero-amount order could never be confirmed by any payment provider).
+      raise Unavailable, "free season cannot be ordered" if offer.total_amount.zero?
+      raise Unavailable, "season is already purchased" if @user.licenses.where(product: product).not_canceled.exists?
+
+      today = @at.in_time_zone(Commerce::PeriodCalculator::KST).to_date
+      ApplicationRecord.transaction do
+        order = Order.create!(
+          user: @user, public_id: SecureRandom.uuid, provider: @provider, status: "pending",
+          requested_start_on: today, supply_amount: offer.supply_amount, vat_amount: offer.vat_amount,
+          total_amount: offer.total_amount, currency: offer.currency, payment_requested_at: @at,
+          retry_of_order: @retry_of_order
+        )
+        order.order_items.create!(snapshot_attributes(product, offer))
+        order.create_payment_transaction!(
+          provider: @provider, provider_payment_id: "pending:#{order.public_id}", order_id: order.public_id,
+          status: "pending", amount: order.total_amount, currency: order.currency, provider_payload: {}
+        )
+        order
+      end
+    end
 
     def max_license_start_on
       @at.in_time_zone(Commerce::PeriodCalculator::KST).to_date + 12.months

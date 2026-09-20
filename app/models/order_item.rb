@@ -11,8 +11,8 @@ class OrderItem < ApplicationRecord
   has_one :license, dependent: :restrict_with_error
 
   validates :product_code, :product_name, :offer_code, :currency, presence: true
-  validates :offer_version, :duration_months,
-    numericality: { only_integer: true, greater_than: 0 }
+  validates :offer_version, numericality: { only_integer: true, greater_than: 0 }
+  validates :duration_months, numericality: { only_integer: true, greater_than: 0 }, unless: :lifetime?
   validates :supply_amount, :vat_amount, :total_amount,
     numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :discount_bps,
@@ -20,6 +20,12 @@ class OrderItem < ApplicationRecord
   validates :product_id, uniqueness: { scope: :order_id }
   validate :amounts_add_up
   validate :snapshot_is_immutable, on: :update
+
+  # One-time (no-duration) purchase of a Season -- the item snapshot's
+  # duration_months is empty exactly when the offer's was (handoff 0057).
+  def lifetime?
+    duration_months.nil?
+  end
 
   private
 

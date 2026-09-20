@@ -14,6 +14,9 @@ class ProductSeason < ApplicationRecord
   VISIBILITIES = %w[public unlisted private].freeze
 
   belongs_to :product_line
+  # Handoff 0057 -- the commerce Product carrying this Season's price, orders
+  # and licenses (1:1, unique index). Empty = the Season is free/public.
+  belongs_to :product, optional: true
   has_many :content_episodes, dependent: :restrict_with_error
 
   before_validation :normalize_fields
@@ -35,6 +38,46 @@ class ProductSeason < ApplicationRecord
 
   def customer_reachable?
     published? && %w[public unlisted].include?(visibility)
+  end
+
+  # A Season with a commerce Product is license-gated content: its episodes and
+  # files require an active license for that Product (see ProductSeasonGates).
+  # The license comes from a purchase, or -- for a 0-won Season -- from an
+  # explicit free start (Commerce::ClaimFreeSeason). No Product = free/public.
+  def gated?
+    product_id.present?
+  end
+
+  def lifetime_offer
+    product&.product_offers&.lifetime&.order(:version)&.last
+  end
+
+  def price
+    lifetime_offer&.total_amount
+  end
+
+  # 0-won Season: shown as free, obtained without an order or payment.
+  def free?
+    price&.zero? || false
+  end
+
+  # A paying customer can order it right now (price > 0, sales on, global
+  # commerce switch on). Free Seasons are never orderable -- see #free_start_open?.
+  def for_sale?
+    gated? && !free? && !!lifetime_offer&.available_at? && Commerce::Sales.enabled_for?(product)
+  end
+
+  # A visitor can start a free Season right now. Needs the same explicit
+  # "sale started" admin action as a paid one, but no payment provider, so the
+  # global commerce switch (a payment safeguard) does not apply.
+  def free_start_open?
+    gated? && free? && !!lifetime_offer&.available_at? && product.active? && product.sale_enabled? &&
+      customer_reachable? && product_line.published?
+  end
+
+  # Can a visitor who doesn't own it get it now (buy or free start)?
+  def acquirable?
+    free? ? free_start_open? : for_sale?
   end
 
   def display_title

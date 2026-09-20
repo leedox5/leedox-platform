@@ -48,7 +48,7 @@
       <% transaction = @order.payment_transaction %>
       <div class="mt-4 grid gap-5 text-sm md:grid-cols-3">
         <div><h3 class="font-bold">Transaction</h3><p class="mt-2">상태 <%= transaction&.status || "없음" %></p><p>Provider 상태 <%= transaction&.provider_status.presence || "미확인" %></p></div>
-        <div><h3 class="font-bold">License</h3><% @order.licenses.each do |license| %><p class="mt-2"><%= license.effective_status %> · <%= license.starts_on %> ~ <%= license.last_usable_on %></p><% end %><%= "없음" if @order.licenses.empty? %></div>
+        <div><h3 class="font-bold">License</h3><% @order.licenses.each do |license| %><p class="mt-2"><%= license.effective_status %> · <%= license.starts_on %> ~ <%= license.indefinite? ? "무기한" : license.last_usable_on %></p><% end %><%= "없음" if @order.licenses.empty? %></div>
         <div><h3 class="font-bold">환불 요청</h3><% @order.refund_requests.each do |request| %><p class="mt-2"><%= link_to refund_status_label(request.status), admin_commerce_refund_request_path(request.public_id), class: "font-bold text-indigo-700 hover:underline" %></p><% end %><%= "없음" if @order.refund_requests.empty? %></div>
       </div>
       <p class="mt-5 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">전체 provider payload, secret, 결제수단 상세는 표시하지 않습니다.</p>

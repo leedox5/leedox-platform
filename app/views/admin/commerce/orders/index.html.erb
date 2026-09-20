@@ -35,7 +35,7 @@
               <tr class="align-top">
                 <td class="px-4 py-4"><%= link_to order.public_id.first(8), admin_commerce_order_path(order.public_id), class: "font-bold text-blue-700 hover:underline" %><p class="mt-1 text-xs text-slate-500"><%= I18n.l(order.created_at.to_date, locale: :ko, format: :long) %></p></td>
                 <td class="px-4 py-4"><%= masked_email(order.user) %></td>
-                <td class="px-4 py-4"><strong><%= item&.product_name %></strong><p class="text-xs text-slate-500"><%= item&.duration_months %>개월 · <%= item&.offer_code %></p></td>
+                <td class="px-4 py-4"><strong><%= item&.product_name %></strong><p class="text-xs text-slate-500"><%= duration_label(item&.duration_months) %> · <%= item&.offer_code %></p></td>
                 <td class="px-4 py-4"><%= order.provider %> · <%= order_status_label(order.status) %><% if order.status == "pending" %><p class="mt-1 font-bold <%= assessment.stale ? 'text-amber-700' : 'text-emerald-700' %>"><%= assessment.classification %></p><% end %></td>
                 <td class="px-4 py-4"><%= number_with_delimiter(order.total_amount) %>원<p class="text-xs text-slate-500"><%= number_with_delimiter(order.supply_amount) %> + VAT <%= number_with_delimiter(order.vat_amount) %></p></td>
                 <td class="px-4 py-4"><%= transaction&.status || "없음" %></td>

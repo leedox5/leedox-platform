@@ -16,6 +16,7 @@ class ProductAssetDownloadsController < ApplicationController
   before_action :load_product_line
   before_action :load_season
   before_action :load_episode
+  before_action :require_season_license
 
   def show
     asset = @current_episode.content_assets.find_by(id: params[:asset_id])

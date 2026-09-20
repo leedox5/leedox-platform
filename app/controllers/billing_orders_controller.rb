@@ -28,10 +28,11 @@ class BillingOrdersController < ApplicationController
     end
 
     @order_item = @order.order_items.first!
+    # One-time (no-duration) Season purchases have no period to show.
     @period = Commerce::PeriodCalculator.call(
       start_on: @order.requested_start_on,
       duration_months: @order_item.duration_months
-    )
+    ) unless @order_item.lifetime?
 
     if @order.provider == Order::MANUAL_PROVIDER
       @bank_transfer_account_info = ENV.fetch("BANK_TRANSFER_ACCOUNT_INFO", "")
@@ -64,7 +65,7 @@ class BillingOrdersController < ApplicationController
       product: @source_item.product,
       duration_months: @current_offer.duration_months,
       requested_start_on: Time.current.in_time_zone(Commerce::PeriodCalculator::KST).to_date
-    )
+    ) unless @current_offer.lifetime?
   end
 
   def retry

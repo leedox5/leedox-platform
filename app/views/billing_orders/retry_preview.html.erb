@@ -11,7 +11,7 @@
       <section class="rounded-2xl border border-slate-200 bg-white p-6" aria-labelledby="previous-order-title">
         <h2 id="previous-order-title" class="font-bold text-slate-900">이전 주문 snapshot</h2>
         <dl class="mt-4 space-y-3 text-sm">
-          <div class="flex justify-between gap-4"><dt>기간</dt><dd><%= @source_item.duration_months %>개월</dd></div>
+          <div class="flex justify-between gap-4"><dt>기간</dt><dd><%= duration_label(@source_item.duration_months) %></dd></div>
           <div class="flex justify-between gap-4"><dt>결제액</dt><dd><%= number_with_delimiter(@source_order.total_amount) %>원</dd></div>
           <div class="flex justify-between gap-4"><dt>상태</dt><dd><%= @source_order.status %></dd></div>
         </dl>
@@ -19,10 +19,14 @@
       <section class="rounded-2xl border border-blue-200 bg-blue-50 p-6" aria-labelledby="current-offer-title">
         <h2 id="current-offer-title" class="font-bold text-slate-900">현재 Offer</h2>
         <dl class="mt-4 space-y-3 text-sm">
-          <div class="flex justify-between gap-4"><dt>기간</dt><dd><%= @current_offer.duration_months %>개월</dd></div>
+          <div class="flex justify-between gap-4"><dt>기간</dt><dd><%= duration_label(@current_offer.duration_months) %></dd></div>
           <div class="flex justify-between gap-4"><dt>공급가 + VAT</dt><dd><%= number_with_delimiter(@current_offer.supply_amount) %>원 + <%= number_with_delimiter(@current_offer.vat_amount) %>원</dd></div>
           <div class="flex justify-between gap-4 font-bold"><dt>결제액</dt><dd><%= number_with_delimiter(@current_offer.total_amount) %>원</dd></div>
-          <div class="flex justify-between gap-4"><dt>새 이용 기간</dt><dd><%= I18n.l(@period.starts_on, locale: :ko, format: :long) %> ~ <%= I18n.l(@period.last_usable_on, locale: :ko, format: :long) %></dd></div>
+          <% if @period %>
+            <div class="flex justify-between gap-4"><dt>새 이용 기간</dt><dd><%= I18n.l(@period.starts_on, locale: :ko, format: :long) %> ~ <%= I18n.l(@period.last_usable_on, locale: :ko, format: :long) %></dd></div>
+          <% else %>
+            <div class="flex justify-between gap-4"><dt>이용 기간</dt><dd>무기한 (한 번 결제)</dd></div>
+          <% end %>
         </dl>
       </section>
     </div>

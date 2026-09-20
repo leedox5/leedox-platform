@@ -16,6 +16,8 @@
 
     <%= render "form", season: @season, url: admin_product_season_path(@season), method: :patch, submit_label: "저장" %>
 
+    <%= render "admin/product_seasons/sale_panel", season: @season %>
+
     <section class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div class="flex items-center justify-between">
         <h2 class="text-lg font-bold text-slate-900">편</h2>

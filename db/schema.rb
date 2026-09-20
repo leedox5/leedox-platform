@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_20_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_21_100100) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -152,9 +152,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_20_110000) do
   end
 
   create_table "licenses", force: :cascade do |t|
-    t.datetime "access_ends_at", null: false
+    t.datetime "access_ends_at"
     t.datetime "created_at", null: false
-    t.date "last_usable_on", null: false
+    t.date "last_usable_on"
     t.integer "order_item_id"
     t.integer "product_id", null: false
     t.string "source", default: "paid", null: false
@@ -167,13 +167,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_20_110000) do
     t.index ["user_id", "product_id", "access_ends_at"], name: "index_licenses_on_user_product_access_end"
     t.index ["user_id", "product_id", "starts_on"], name: "index_licenses_on_user_product_start", unique: true, where: "status != 'canceled'"
     t.index ["user_id"], name: "index_licenses_on_user_id"
+    t.check_constraint "(access_ends_at IS NULL AND last_usable_on IS NULL) OR (access_ends_at IS NOT NULL AND last_usable_on IS NOT NULL)", name: "licenses_period_all_or_none"
   end
 
   create_table "order_items", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "currency", default: "KRW", null: false
     t.integer "discount_bps", default: 0, null: false
-    t.integer "duration_months", null: false
+    t.integer "duration_months"
     t.string "offer_code", null: false
     t.integer "offer_version", null: false
     t.integer "order_id", null: false
@@ -265,7 +266,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_20_110000) do
     t.datetime "created_at", null: false
     t.string "currency", default: "KRW", null: false
     t.integer "discount_bps", default: 0, null: false
-    t.integer "duration_months", null: false
+    t.integer "duration_months"
     t.integer "product_id", null: false
     t.integer "supply_amount", null: false
     t.integer "total_amount", null: false
@@ -282,12 +283,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_20_110000) do
     t.string "customer_title"
     t.string "internal_name", null: false
     t.integer "position", default: 0, null: false
+    t.integer "product_id"
     t.integer "product_line_id", null: false
     t.string "season_code", null: false
     t.string "slug", null: false
     t.string "status", default: "draft", null: false
     t.datetime "updated_at", null: false
     t.string "visibility", default: "public", null: false
+    t.index ["product_id"], name: "index_product_seasons_on_product_id", unique: true
     t.index ["product_line_id", "season_code"], name: "index_product_seasons_on_product_line_id_and_season_code", unique: true
     t.index ["product_line_id", "slug"], name: "index_product_seasons_on_product_line_id_and_slug", unique: true
     t.index ["product_line_id"], name: "index_product_seasons_on_product_line_id"
@@ -400,6 +403,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_20_110000) do
   add_foreign_key "payment_transactions", "orders", column: "purchase_order_id"
   add_foreign_key "product_offers", "products"
   add_foreign_key "product_seasons", "product_lines"
+  add_foreign_key "product_seasons", "products"
   add_foreign_key "refund_requests", "orders"
   add_foreign_key "refund_requests", "users"
   add_foreign_key "refund_requests", "users", column: "processed_by_id"

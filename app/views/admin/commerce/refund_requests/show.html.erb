@@ -13,7 +13,7 @@
           <div class="flex justify-between gap-4"><dt>고객</dt><dd><%= masked_email(@refund_request.user) %></dd></div>
           <div class="flex justify-between gap-4"><dt>상품·결제액</dt><dd><%= @order.order_items.first.product_name %> · <%= number_with_delimiter(@order.total_amount) %>원</dd></div>
           <div class="flex justify-between gap-4"><dt>PG·Transaction</dt><dd><%= @order.provider %> · <%= @order.payment_transaction&.status %></dd></div>
-          <div class="flex justify-between gap-4"><dt>License</dt><dd><%= @order.licenses.map { |license| "#{license.effective_status} #{license.starts_on}~#{license.last_usable_on}" }.join(", ") %></dd></div>
+          <div class="flex justify-between gap-4"><dt>License</dt><dd><%= @order.licenses.map { |license| "#{license.effective_status} #{license_span_compact(license)}" }.join(", ") %></dd></div>
           <div class="flex justify-between gap-4"><dt>요청 상태</dt><dd class="font-bold"><%= refund_status_label(@refund_request.status) %></dd></div>
           <div class="flex justify-between gap-4"><dt>외부 환불</dt><dd><%= @refund_request.provider_refund_status %> / 확인 <%= @refund_request.external_refund_confirmed? ? "예" : "아니오" %></dd></div>
         </dl>

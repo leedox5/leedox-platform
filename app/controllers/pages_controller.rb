@@ -1,6 +1,6 @@
 class PagesController < ApplicationController
   def home
-    products = Product.active.to_a.sort_by(&:display_order)
+    products = Product.standalone.active.to_a.sort_by(&:display_order)
     @flagship_products = products.reject(&:gateway?)
     @gateway_product = products.find(&:gateway?) || Product.find_by(code: "aistart")
   end
@@ -15,7 +15,7 @@ class PagesController < ApplicationController
   def getting_started; end
 
   def pricing
-    @products = Product.order(:code).sort_by { |product| [ pricing_rank(product), product.code ] }
+    @products = Product.standalone.order(:code).sort_by { |product| [ pricing_rank(product), product.code ] }
   end
 
   def community; end

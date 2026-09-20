@@ -16,7 +16,7 @@ class DashboardController < ApplicationController
   private
 
   def dashboard_products
-    Product.active
+    Product.standalone.active
       .where(free_access: false)
       .joins(:product_offers)
       .merge(ProductOffer.active)

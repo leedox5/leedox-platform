@@ -1,6 +1,6 @@
 class Admin::Commerce::ProductsController < Admin::BaseController
   def index
-    @products = Product.includes(:product_offers).order(:code)
+    @products = Product.standalone.includes(:product_offers).order(:code)
   end
 
   def edit

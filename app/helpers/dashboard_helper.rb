@@ -15,7 +15,7 @@ module DashboardHelper
     if product.free_access?
       "#{product.name}은(는) 라이선스 없이 전체 이용 가능합니다"
     elsif (license = user.licenses.for_product(product.code).not_canceled.find { |item| item.active_at? })
-      "#{product.name} 이용 종료일: #{I18n.l(license.last_usable_on, format: :long, locale: :ko)}"
+      license.indefinite? ? "#{product.name} 무기한 이용 중" : "#{product.name} 이용 종료일: #{I18n.l(license.last_usable_on, format: :long, locale: :ko)}"
     else
       "#{product.name} 이용 중인 라이선스가 없습니다"
     end

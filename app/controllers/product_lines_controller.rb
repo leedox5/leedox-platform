@@ -23,6 +23,7 @@ class ProductLinesController < ApplicationController
   before_action :load_product_line
   before_action :load_season, only: %i[season episode]
   before_action :load_episode, only: %i[episode]
+  before_action :require_season_license, only: %i[episode]
 
   def show
     @seasons = @product_line.product_seasons.customer_listed.ordered
@@ -30,8 +31,18 @@ class ProductLinesController < ApplicationController
 
   def season
     @episodes = @season.content_episodes.published.ordered
-    @assets_by_episode = ContentAsset.where(content_episode_id: @episodes.map(&:id))
-      .ordered.with_attached_file.group_by(&:content_episode_id)
+    @owned = season_owned?
+    # Files of a paid Season are listed only for owners (downloads are gated
+    # separately in ProductAssetDownloadsController regardless).
+    @assets_by_episode = if !@season.gated? || @owned
+      ContentAsset.where(content_episode_id: @episodes.map(&:id)).ordered.with_attached_file.group_by(&:content_episode_id)
+    else
+      {}
+    end
+    @offer = @season.lifetime_offer if @season.gated?
+    @for_sale = @season.for_sale?
+    @free = @season.free?
+    @free_open = @season.free_start_open?
   end
 
   def episode
@@ -46,6 +57,11 @@ class ProductLinesController < ApplicationController
   end
 
   private
+
+  def season_owned?
+    @season.gated? && user_signed_in? &&
+      Entitlements::ProductAccess.allowed?(user: current_user, product_code: @season.product.code)
+  end
 
   def strip_leading_heading(raw_markdown)
     raw_markdown.sub(/\A\s*#[^\n]*\n?/, "")

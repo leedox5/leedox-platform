@@ -4,7 +4,7 @@ class BillingController < ApplicationController
   def checkout
     @product_code = params[:product_code].presence || "chatdox"
     @product = Product.find_by(code: @product_code)
-    unless Commerce::Sales.enabled_for?(@product)
+    unless Commerce::Sales.enabled_for?(@product) || free_season_open?(@product)
       @product_landing_path = product_landing_path_for(@product)
       render :checkout
       return
@@ -12,6 +12,8 @@ class BillingController < ApplicationController
 
     authenticate_user!
     return if performed?
+
+    return checkout_lifetime if @product.season_product?
 
     @offers = @product.product_offers.active.ordered.select(&:available_at?)
     # The product page links here with ?offer_code= for the duration the
@@ -42,6 +44,24 @@ class BillingController < ApplicationController
     render :checkout_enabled
   end
 
+  # Handoff 0057 -- one-time Season purchase: a single offer, no start date, no
+  # period. Already-owned Seasons and Seasons that can't be bought right now
+  # (unpublished, private, no offer) don't get a purchasable form.
+  def checkout_lifetime
+    @season = @product.product_season
+    @offer = @season.lifetime_offer
+    @offer = nil unless @offer&.available_at?
+    @already_owned = current_user.licenses.where(product: @product).not_canceled.exists?
+    @free = @season.free?
+    @purchasable = if @free
+      @season.free_start_open?
+    else
+      @offer.present? && @season.customer_reachable? && @season.product_line.published?
+    end
+    @kakaopay_available = Payments::Configuration.current.kakaopay_ready?
+    render :checkout_lifetime
+  end
+
   def success
     order = find_purchase_order
     unless order
@@ -68,6 +88,12 @@ class BillingController < ApplicationController
   end
 
   private
+
+  # A 0-won Season involves no payment, so the global payment switch doesn't
+  # gate its (explicit) free start; the admin's per-Season sale switch does.
+  def free_season_open?(product)
+    product&.product_season&.free_start_open? || false
+  end
 
   # Every product's own landing page renders the same shared/_product_pricing
   # partial with a #pricing anchor -- this button always means "show me

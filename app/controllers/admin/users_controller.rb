@@ -10,7 +10,7 @@ class Admin::UsersController < Admin::BaseController
     # aigravity, pre-sale) are excluded because nobody can hold or lack a
     # subscription to something not yet purchasable -- "미보유" would imply
     # they could buy it, which they can't.
-    @products = Product.active.where(free_access: false)
+    @products = Product.standalone.active.where(free_access: false)
       .joins(:product_offers).merge(ProductOffer.active).distinct.order(:code)
     @grantable_products = @products.select { |product| FREE_GRANTABLE_PRODUCT_CODES.include?(product.code) }
   end
@@ -39,7 +39,7 @@ class Admin::UsersController < Admin::BaseController
 
   def grant_free_license
     user = User.find(params[:id])
-    product = Product.active.find_by(code: params[:product_code])
+    product = Product.standalone.active.find_by(code: params[:product_code])
 
     unless product && FREE_GRANTABLE_PRODUCT_CODES.include?(product.code)
       redirect_to admin_users_path, alert: "무료 부여할 수 없는 상품입니다."

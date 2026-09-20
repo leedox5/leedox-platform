@@ -124,6 +124,11 @@ Rails.application.routes.draw do
     delete "product_lines/:product_line_id/cover", to: "product_line_covers#destroy", as: :product_line_cover
     resources :product_seasons, only: %i[show edit update] do
       resources :content_episodes, only: %i[new create], shallow: true
+      # Handoff 0057 -- one-time price and sale switch for the Season.
+      resource :sale, only: %i[update], controller: "season_sales" do
+        patch :start
+        patch :stop
+      end
     end
     namespace :commerce do
       resources :orders, only: %i[index show], param: :id do
@@ -145,6 +150,7 @@ Rails.application.routes.draw do
   post "/billing/success",  to: "billing#success"
   get  "/billing/cancel",   to: "billing#cancel",    as: :billing_cancel
   post "/billing/orders", to: "billing_orders#create", as: :billing_orders
+  post "/billing/free_seasons/:product_code", to: "free_season_claims#create", as: :claim_free_season
   get "/billing/orders/:id", to: "billing_orders#show", as: :billing_order
   get "/billing/orders/:id/retry", to: "billing_orders#retry_preview", as: :retry_billing_order
   post "/billing/orders/:id/retry", to: "billing_orders#retry", as: :create_retry_billing_order

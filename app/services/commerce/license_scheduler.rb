@@ -53,6 +53,8 @@ module Commerce
 
     def create_for!(order_item, source: "paid")
       @user.lock!
+      return create_indefinite_for!(order_item, source) if order_item&.lifetime?
+
       period = preview
       status = period.starts_on > @at.in_time_zone(Commerce::PeriodCalculator::KST).to_date ? "scheduled" : "active"
 
@@ -69,6 +71,20 @@ module Commerce
     end
 
     private
+
+    # Handoff 0057 -- one-time purchase: an indefinite license (access_ends_at
+    # and last_usable_on empty). Idempotent per order item, so a replayed
+    # payment confirmation can't issue a second one.
+    def create_indefinite_for!(order_item, source)
+      existing = License.find_by(order_item_id: order_item.id)
+      return existing if existing
+
+      License.create!(
+        user: @user, product: @product, order_item: order_item, source: source,
+        status: @requested_start_on > @at.in_time_zone(Commerce::PeriodCalculator::KST).to_date ? "scheduled" : "active",
+        starts_on: @requested_start_on, last_usable_on: nil, access_ends_at: nil
+      )
+    end
 
     def next_start_on
       latest = @user.licenses
