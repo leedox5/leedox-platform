@@ -37,6 +37,7 @@ class ProductLine < ApplicationRecord
     attachable.variant :hero, resize_to_fill: [ 1600, 900, { crop: :attention } ], format: :webp, saver: { quality: 82, strip: true }
     attachable.variant :thumb, resize_to_fill: [ 480, 270, { crop: :attention } ], format: :webp, saver: { quality: 80, strip: true }
   end
+  include UploadsBeforeCommit
 
   before_validation :normalize_slug
 
@@ -46,6 +47,7 @@ class ProductLine < ApplicationRecord
   validates :cover_image_alt, presence: { message: "대표 이미지를 올리면 대체문구가 필요합니다" }, if: -> { cover_image.attached? }
   validates :cover_image_alt, length: { maximum: COVER_ALT_MAX_LENGTH }
   validate :cover_image_acceptable, if: :new_cover_image?
+  validate :storage_accepts_cover_upload, if: :new_cover_image?
 
   scope :published, -> { where(status: "published") }
 
@@ -73,6 +75,10 @@ class ProductLine < ApplicationRecord
   end
 
   private
+
+  def storage_accepts_cover_upload
+    errors.add(:cover_image, StoragePersistence::MESSAGE) if StoragePersistence.upload_blocked?
+  end
 
   def new_cover_image?
     attachment_changes["cover_image"].present?

@@ -72,3 +72,6 @@ gem "pg", "~> 1.6"
 gem "devise", "~> 5.0"
 
 gem "dotenv-rails", "~> 3.2", groups: [ :development, :test ]
+
+# Active Storage S3 service for the production file bucket (handoff 0058).
+gem "aws-sdk-s3", "~> 1.232", require: false

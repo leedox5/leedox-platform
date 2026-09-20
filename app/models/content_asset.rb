@@ -30,12 +30,14 @@ class ContentAsset < ApplicationRecord
 
   belongs_to :content_episode
   has_one_attached :file
+  include UploadsBeforeCommit
 
   validates :title, :kind, presence: true
   validates :position, numericality: { only_integer: true, greater_than_or_equal_to: 0 },
     uniqueness: { scope: :content_episode_id }
   validate :file_present
   validate :file_allowed, if: :new_file_attached?
+  validate :storage_accepts_upload, if: :new_file_attached?
 
   scope :ordered, -> { order(:position) }
 
@@ -51,6 +53,10 @@ class ContentAsset < ApplicationRecord
 
   def new_file_attached?
     attachment_changes["file"].present?
+  end
+
+  def storage_accepts_upload
+    errors.add(:file, StoragePersistence::MESSAGE) if StoragePersistence.upload_blocked?
   end
 
   def file_present

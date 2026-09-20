@@ -3,6 +3,8 @@
 # Admin::BaseController already restricts this whole namespace to
 # authenticated admins.
 class Admin::ProductLinesController < Admin::BaseController
+  include StorageUploadFailure
+
   def index
     @product_lines = ProductLine.order(:id).with_attached_cover_image
   end
@@ -26,6 +28,10 @@ class Admin::ProductLinesController < Admin::BaseController
     else
       render :new, status: :unprocessable_entity
     end
+  rescue StandardError => e
+    raise unless storage_upload_failed?(e)
+
+    render_storage_upload_failure(e, record: @product_line, attribute: :cover_image, view: :new)
   end
 
   def edit
@@ -41,6 +47,11 @@ class Admin::ProductLinesController < Admin::BaseController
       @seasons = @product_line.product_seasons.ordered
       render :edit, status: :unprocessable_entity
     end
+  rescue StandardError => e
+    raise unless storage_upload_failed?(e)
+
+    @seasons = @product_line.product_seasons.ordered
+    render_storage_upload_failure(e, record: @product_line, attribute: :cover_image, view: :edit)
   end
 
   private

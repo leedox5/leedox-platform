@@ -25,3 +25,34 @@ local:
 #   service: Mirror
 #   primary: local
 #   mirrors: [ amazon, google, microsoft ]
+
+# Production file storage (handoff 0058): a private S3-compatible bucket
+# (Railway Storage Bucket). Nothing here is a secret -- every value comes from
+# the web service's environment, where the Product Owner connects the bucket's
+# credentials by variable reference; no credential is ever committed.
+#
+# Each setting reads its own STORAGE_BUCKET_* variable first, then the standard
+# AWS-style name Railway's bucket credentials use, so either mapping works.
+#
+#   STORAGE_BUCKET_NAME               (or AWS_S3_BUCKET_NAME)
+#   STORAGE_BUCKET_ENDPOINT           (or AWS_ENDPOINT_URL)
+#   STORAGE_BUCKET_REGION             (or AWS_DEFAULT_REGION / AWS_REGION; default "auto")
+#   STORAGE_BUCKET_ACCESS_KEY_ID      (or AWS_ACCESS_KEY_ID)
+#   STORAGE_BUCKET_SECRET_ACCESS_KEY  (or AWS_SECRET_ACCESS_KEY)
+#   STORAGE_BUCKET_FORCE_PATH_STYLE   optional, "true" for path-style addressing
+#
+# The bucket is never public: the app serves every file itself (after the
+# publish/license gates) and never hands out a bucket or signed URL.
+railway_bucket:
+  service: S3
+  bucket: <%= ENV["STORAGE_BUCKET_NAME"].presence || ENV["AWS_S3_BUCKET_NAME"] %>
+  endpoint: <%= ENV["STORAGE_BUCKET_ENDPOINT"].presence || ENV["AWS_ENDPOINT_URL"] %>
+  region: <%= ENV["STORAGE_BUCKET_REGION"].presence || ENV["AWS_DEFAULT_REGION"].presence || ENV["AWS_REGION"].presence || "auto" %>
+  access_key_id: <%= ENV["STORAGE_BUCKET_ACCESS_KEY_ID"].presence || ENV["AWS_ACCESS_KEY_ID"] %>
+  secret_access_key: <%= ENV["STORAGE_BUCKET_SECRET_ACCESS_KEY"].presence || ENV["AWS_SECRET_ACCESS_KEY"] %>
+  force_path_style: <%= ENV["STORAGE_BUCKET_FORCE_PATH_STYLE"] == "true" %>
+  public: false
+  # Newer AWS SDKs add CRC checksums by default, which several S3-compatible
+  # stores reject; only send/validate them when the API requires it.
+  request_checksum_calculation: when_required
+  response_checksum_validation: when_required

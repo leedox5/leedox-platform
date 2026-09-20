@@ -29,5 +29,17 @@ module CoverImageResponse
   rescue Vips::Error, ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e
     Rails.logger.error("Cover variant #{variant_name} for ProductLine #{product_line.id} failed: #{e.class}: #{e.message}")
     head :not_found
+  rescue StandardError => e
+    if StorageFailures.missing_error?(e)
+      Rails.logger.error("[storage] cover file missing for ProductLine #{product_line.id}: #{e.class}")
+      return head(:not_found)
+    end
+    raise unless StorageFailures.storage_error?(e)
+
+    # Storage outage (bucket unreachable, credentials, provider error): the
+    # image is temporarily unavailable, not gone -- 503 with a retry hint.
+    Rails.logger.error("[storage] storage unavailable serving cover of ProductLine #{product_line.id}: #{e.class}: #{e.message}")
+    response.headers["Retry-After"] = "30"
+    head :service_unavailable
   end
 end

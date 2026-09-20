@@ -7,6 +7,8 @@
 # #set_episode / #set_asset 404 those instead of relying on the UI merely
 # not linking to them. Downloads are in Admin::ContentAssetDownloadsController.
 class Admin::ContentAssetsController < Admin::BaseController
+  include StorageUploadFailure
+
   before_action :set_asset, only: %i[edit update destroy]
   before_action :set_episode_from_params, only: %i[new create]
 
@@ -21,6 +23,10 @@ class Admin::ContentAssetsController < Admin::BaseController
     else
       render :new, status: :unprocessable_entity
     end
+  rescue StandardError => e
+    raise unless storage_upload_failed?(e)
+
+    render_storage_upload_failure(e, record: @asset, attribute: :file, view: :new)
   end
 
   def edit
@@ -32,6 +38,10 @@ class Admin::ContentAssetsController < Admin::BaseController
     else
       render :edit, status: :unprocessable_entity
     end
+  rescue StandardError => e
+    raise unless storage_upload_failed?(e)
+
+    render_storage_upload_failure(e, record: @asset, attribute: :file, view: :edit)
   end
 
   def destroy
