@@ -114,6 +114,18 @@ class IndefiniteLicenseTest < ActiveSupport::TestCase
     assert_not_includes order_item.errors.attribute_names, :duration_months
   end
 
+  test "Product.standalone keeps working before the product_seasons.product_id migration has run" do
+    original = ProductSeason.method(:column_names)
+    ProductSeason.define_singleton_method(:column_names) { original.call - [ "product_id" ] }
+    chatdox = Product.find_by!(code: "chatdox")
+    assert_nothing_raised do
+      assert_includes Product.standalone.to_a, chatdox
+      assert_not chatdox.season_product?
+    end
+  ensure
+    ProductSeason.define_singleton_method(:column_names, original)
+  end
+
   test "Product.standalone excludes Season products and keeps the four catalog products" do
     assert_not_includes Product.standalone, @product
     assert_includes Product.standalone, Product.find_by!(code: "chatdox")

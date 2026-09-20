@@ -27,7 +27,11 @@ class Product < ApplicationRecord
   validates :name, presence: true
 
   scope :active, -> { where(active: true) }
-  scope :standalone, -> { where.missing(:product_season) }
+  # Until the product_seasons.product_id migration has run (a deploy does not
+  # run migrations), there can be no Season products yet, so every Product is
+  # standalone -- this keeps the home/pricing/dashboard pages working in that
+  # window instead of raising on the missing column.
+  scope :standalone, -> { ProductSeason.column_names.include?("product_id") ? where.missing(:product_season) : all }
 
   def theme
     THEMES.fetch(code) do
@@ -40,7 +44,7 @@ class Product < ApplicationRecord
   end
 
   def season_product?
-    product_season.present?
+    ProductSeason.column_names.include?("product_id") && product_season.present?
   end
 
   def gateway?

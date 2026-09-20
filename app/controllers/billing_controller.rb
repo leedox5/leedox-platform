@@ -92,7 +92,7 @@ class BillingController < ApplicationController
   # A 0-won Season involves no payment, so the global payment switch doesn't
   # gate its (explicit) free start; the admin's per-Season sale switch does.
   def free_season_open?(product)
-    product&.product_season&.free_start_open? || false
+    product&.season_product? && product.product_season.free_start_open? || false
   end
 
   # Every product's own landing page renders the same shared/_product_pricing
