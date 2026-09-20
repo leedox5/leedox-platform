@@ -1,0 +1,17 @@
+<%# ProductLine cover image (handoff 0056 R5). variant: :hero (responsive, 16:9 detail Hero) or
+    :thumb (small 16:9 card/list image -- the boundary a future customer card grid reuses). %>
+<% return unless product_line.cover_image.attached? %>
+<% admin = local_assigns.fetch(:admin, false) %>
+<% thumb = product_line_cover_src(product_line, :thumb, admin: admin) %>
+<% if variant == :hero %>
+  <%= image_tag product_line_cover_src(product_line, :hero, admin: admin),
+    alt: product_line.cover_image_alt, width: 1600, height: 900,
+    srcset: "#{thumb} 480w, #{product_line_cover_src(product_line, :hero, admin: admin)} 1600w",
+    sizes: "(min-width: 824px) 768px, 100vw",
+    class: "block aspect-video w-full max-w-full rounded-2xl bg-slate-100 object-cover",
+    fetchpriority: "high", decoding: "async" %>
+<% else %>
+  <%= image_tag thumb, alt: product_line.cover_image_alt, width: 480, height: 270,
+    class: local_assigns.fetch(:classes, "block aspect-video w-full rounded-lg bg-slate-100 object-cover"),
+    loading: "lazy", decoding: "async" %>
+<% end %>

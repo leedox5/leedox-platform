@@ -1,0 +1,22 @@
+<div class="min-h-screen bg-white">
+  <%= render "shared/header" %>
+  <main class="mx-auto max-w-3xl px-5 py-12 sm:px-7">
+    <%= render "product_lines/info", product_line: @product_line %>
+
+    <section class="mt-10">
+      <h2 class="text-lg font-bold text-gray-900">Season</h2>
+      <div class="mt-4 space-y-3">
+        <% @seasons.each do |season| %>
+          <div class="rounded-xl border border-gray-200 p-5">
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500"><%= season.season_code %></p>
+            <p class="mt-1 font-bold text-gray-900"><%= season.display_title %></p>
+            <%= link_to "보러 가기 →", product_season_path(@product_line.slug, season.slug), class: "mt-2 inline-block text-sm font-bold text-blue-700 hover:underline" %>
+          </div>
+        <% end %>
+        <% if @seasons.empty? %>
+          <p class="text-gray-500">준비 중입니다.</p>
+        <% end %>
+      </div>
+    </section>
+  </main>
+</div>

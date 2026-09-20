@@ -2,10 +2,14 @@
 # the `lock_version` column alone is enough; no extra code is needed beyond
 # forms/controllers round-tripping it (see Admin::ContentEpisodesController#update).
 class ContentEpisode < ApplicationRecord
-  belongs_to :bundle, class_name: "ContentBundle", foreign_key: :bundle_id, inverse_of: :content_episodes
+  # Exactly one of these two parents (handoff 0056 R3) -- enforced by the
+  # validation below and by the content_episodes_exactly_one_parent DB check.
+  belongs_to :bundle, class_name: "ContentBundle", foreign_key: :bundle_id, inverse_of: :content_episodes, optional: true
+  belongs_to :product_season, optional: true
   belongs_to :author, class_name: "User", optional: true
   has_many :content_takeaways, foreign_key: :episode_id, inverse_of: :episode, dependent: :destroy
   has_many :content_revisions, foreign_key: :episode_id, inverse_of: :episode, dependent: :destroy
+  has_many :content_assets, dependent: :destroy
 
   # Set by the controller before #update (see Admin::ContentEpisodesController)
   # so #snapshot_previous_body can record who made the change -- not a DB
@@ -13,6 +17,9 @@ class ContentEpisode < ApplicationRecord
   attr_accessor :editor
 
   validates :status, inclusion: { in: %w[draft in_review published unpublished archived] }
+  validate :exactly_one_parent
+  validates :position, uniqueness: { scope: :bundle_id }, if: :bundle_id?
+  validates :position, uniqueness: { scope: :product_season_id }, if: :product_season_id?
 
   scope :ordered, -> { order(:position) }
   scope :published, -> { where(status: "published") }
@@ -30,7 +37,18 @@ class ContentEpisode < ApplicationRecord
     position.to_s.rjust(2, "0")
   end
 
+  # The container this episode was authored in, whichever kind it is.
+  def parent
+    product_season || bundle
+  end
+
   private
+
+  def exactly_one_parent
+    return if bundle.present? ^ product_season.present?
+
+    errors.add(:base, "편은 콘텐츠 묶음 또는 Season 중 정확히 하나에 속해야 합니다.")
+  end
 
   # Runs inside the same transaction as the update itself (see Rails' save
   # callback semantics), so a failed save never leaves an orphaned revision.

@@ -1,0 +1,107 @@
+<% content_for :title, "#{@product_line.customer_name} 편집" %>
+
+<div class="min-h-screen bg-slate-50">
+  <%= render "shared/header" %>
+  <main class="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+    <header class="flex items-center justify-between">
+      <h1 class="text-2xl font-black text-slate-950"><%= @product_line.customer_name %></h1>
+      <div class="flex flex-col items-end gap-2">
+        <%= link_to "← 목록으로", admin_product_lines_path, class: "text-sm font-bold text-slate-600 hover:text-slate-900" %>
+        <%= link_to "관리자 미리보기 →", admin_product_line_path(@product_line), class: "text-sm font-bold text-blue-700 hover:underline" %>
+        <% if @product_line.published? %>
+          <%= link_to "고객 화면 보기 →", product_line_path(@product_line.slug), class: "text-sm font-bold text-blue-700 hover:underline", target: "_blank", rel: "noopener" %>
+        <% end %>
+      </div>
+    </header>
+
+    <%= form_with model: @product_line, multipart: true, url: admin_product_line_path(@product_line), method: :patch, class: "mt-6 space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" do |f| %>
+      <% if @product_line.errors.any? %>
+        <div class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          <%= @product_line.errors.full_messages.join(", ") %>
+        </div>
+      <% end %>
+
+      <div>
+        <%= f.label :internal_name, "내부 관리명", class: "block text-sm font-bold text-slate-700 mb-1" %>
+        <%= f.text_field :internal_name, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+      </div>
+
+      <div>
+        <%= f.label :customer_name, "고객용 제품명", class: "block text-sm font-bold text-slate-700 mb-1" %>
+        <%= f.text_field :customer_name, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+      </div>
+
+      <div>
+        <%= f.label :slug, "고객 URL slug", class: "block text-sm font-bold text-slate-700 mb-1" %>
+        <%= f.text_field :slug, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono" %>
+        <p class="mt-1 text-xs text-slate-500">고객 URL: <code><%= product_line_path(@product_line.slug) %></code></p>
+      </div>
+
+      <div>
+        <%= f.label :problem, "해결할 문제", class: "block text-sm font-bold text-slate-700 mb-1" %>
+        <%= f.text_area :problem, rows: 3, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+      </div>
+
+      <div>
+        <%= f.label :expected_result, "기대 결과", class: "block text-sm font-bold text-slate-700 mb-1" %>
+        <%= f.text_area :expected_result, rows: 3, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+      </div>
+
+      <div>
+        <%= f.label :target_audience, "대상 고객", class: "block text-sm font-bold text-slate-700 mb-1" %>
+        <%= f.text_field :target_audience, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+      </div>
+
+      <div>
+        <%= f.label :ai_supporter, "AI 서포터 (선택)", class: "block text-sm font-bold text-slate-700 mb-1" %>
+        <%= f.text_field :ai_supporter, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+      </div>
+
+      <div>
+        <%= f.label :status, "공개 상태", class: "block text-sm font-bold text-slate-700 mb-1" %>
+        <%= f.select :status, ProductLine::STATUSES, {}, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+        <p class="mt-1 text-xs text-slate-500">published가 아니면 slug를 알아도 고객 URL에서 보이지 않습니다.</p>
+      </div>
+
+      <%= render "admin/product_lines/cover_fields", f: f %>
+
+      <%= f.submit "저장", class: "rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700 cursor-pointer" %>
+    <% end %>
+
+    <% if @product_line.persisted? && ProductLine.find(@product_line.id).cover_image.attached? %>
+      <% stored_cover = ProductLine.find(@product_line.id).cover_image %>
+      <section class="mt-8 rounded-2xl border-2 border-red-200 bg-red-50 p-6">
+        <h2 class="text-lg font-bold text-red-900">대표 이미지 삭제</h2>
+        <p class="mt-1 text-sm text-red-800">
+          대표 이미지 파일을 삭제하면 저장된 원본과 표시용 이미지가 함께 삭제되고 되돌릴 수 없습니다.
+          삭제 후 고객 화면은 텍스트 Hero로 표시됩니다. 제품 정보와 Season·편은 바뀌지 않습니다.
+        </p>
+        <%= button_to "대표 이미지 삭제", admin_product_line_cover_path(@product_line), method: :delete,
+          data: { turbo_confirm: "\"#{@product_line.customer_name}\"의 대표 이미지 #{stored_cover.filename}을(를) 정말 삭제하시겠습니까? 저장된 파일이 함께 삭제되며 되돌릴 수 없습니다." },
+          class: "mt-4 rounded-lg border-2 border-red-400 bg-red-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-red-700" %>
+      </section>
+    <% end %>
+
+    <section class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-slate-900">Season</h2>
+        <%= link_to "+ 새 Season", new_admin_product_line_product_season_path(@product_line), class: "flex-shrink-0 whitespace-nowrap rounded-lg bg-slate-800 px-3 py-1.5 text-sm font-bold text-white hover:bg-slate-900" %>
+      </div>
+
+      <ul class="mt-4 divide-y divide-slate-100">
+        <% @seasons.each do |season| %>
+          <li class="flex items-center justify-between gap-4 py-3">
+            <div class="min-w-0">
+              <p class="truncate font-semibold text-slate-900"><%= season.season_code %> — <%= season.display_title %></p>
+              <p class="text-xs text-slate-500">
+                <%= season.status %> · <%= season.visibility %> · 편 <%= season.content_episodes.count %>개
+              </p>
+            </div>
+            <%= link_to "편집", edit_admin_product_season_path(season), class: "flex-shrink-0 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50" %>
+          </li>
+        <% end %>
+        <% if @seasons.empty? %><p class="py-6 text-center text-slate-500">아직 Season이 없습니다.</p><% end %>
+      </ul>
+    </section>
+  </main>
+</div>

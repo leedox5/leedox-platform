@@ -1,0 +1,42 @@
+<% content_for :title, "Season 편집 — #{@season.display_title}" %>
+
+<div class="min-h-screen bg-slate-50">
+  <%= render "shared/header" %>
+  <main class="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+    <header class="flex items-center justify-between">
+      <h1 class="text-2xl font-black text-slate-950"><%= @season.season_code %> — <%= @season.display_title %></h1>
+      <div class="flex flex-col items-end gap-2">
+        <%= link_to "← 제품으로", edit_admin_product_line_path(@product_line), class: "text-sm font-bold text-slate-600 hover:text-slate-900" %>
+        <%= link_to "관리자 미리보기 →", admin_product_season_path(@season), class: "text-sm font-bold text-blue-700 hover:underline" %>
+        <% if @product_line.published? && @season.customer_reachable? %>
+          <%= link_to "고객 화면 보기 →", product_season_path(@product_line.slug, @season.slug), class: "text-sm font-bold text-blue-700 hover:underline", target: "_blank", rel: "noopener" %>
+        <% end %>
+      </div>
+    </header>
+
+    <%= render "form", season: @season, url: admin_product_season_path(@season), method: :patch, submit_label: "저장" %>
+
+    <section class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-slate-900">편</h2>
+        <%= link_to "+ 새 편", new_admin_product_season_content_episode_path(@season), class: "flex-shrink-0 whitespace-nowrap rounded-lg bg-slate-800 px-3 py-1.5 text-sm font-bold text-white hover:bg-slate-900" %>
+      </div>
+
+      <ul class="mt-4 divide-y divide-slate-100">
+        <% @episodes.each do |episode| %>
+          <li class="flex items-center justify-between gap-4 py-3">
+            <div class="min-w-0">
+              <p class="truncate font-semibold text-slate-900"><%= episode.display_id %> — <%= episode.customer_title.presence || "(제목 없음)" %></p>
+              <p class="text-xs text-slate-500"><%= episode.status %></p>
+            </div>
+            <div class="flex flex-shrink-0 gap-2">
+              <%= link_to "미리보기", admin_content_episode_path(episode), class: "rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50" %>
+              <%= link_to "편집", edit_admin_content_episode_path(episode), class: "rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50" %>
+            </div>
+          </li>
+        <% end %>
+        <% if @episodes.empty? %><p class="py-6 text-center text-slate-500">아직 편이 없습니다. 0편인 Season도 그대로 둘 수 있습니다.</p><% end %>
+      </ul>
+    </section>
+  </main>
+</div>

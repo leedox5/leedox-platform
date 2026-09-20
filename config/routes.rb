@@ -16,6 +16,19 @@ Rails.application.routes.draw do
   get "/chatdox", to: "pages#chatdox", as: :chatdox
   get "/aigravity", to: "pages#aigravity", as: :aigravity
 
+  # Handoff 0056 R3 -- customer URLs for the new ProductLine -> ProductSeason
+  # -> Episode path, kept separate from /content/:product_code/... (which
+  # stays the file-based products' and legacy ContentBundle's namespace).
+  # Reachable by direct URL only -- not linked from any nav/listing yet.
+  get "/products/:product_slug", to: "product_lines#show", as: :product_line
+  # Handoff 0056 R5 -- ProductLine cover image variants (hero/thumb). A separate
+  # top-level path on purpose: under /products/:slug/... a segment named
+  # "cover" would collide with Season/Episode slugs.
+  get "/product-covers/:product_slug/:variant", to: "product_covers#show", as: :product_cover
+  get "/products/:product_slug/:season_slug", to: "product_lines#season", as: :product_season
+  get "/products/:product_slug/:season_slug/:episode_id", to: "product_lines#episode", as: :product_season_episode
+  get "/products/:product_slug/:season_slug/:episode_id/assets/:asset_id", to: "product_asset_downloads#show", as: :product_season_episode_asset
+
   # Legacy per-product URLs and route helper names, kept exactly as they were
   # (bookmarks/external links/SEO) -- product_code comes in via `defaults:`
   # instead of the path, so both route to the single ProductContentController.
@@ -92,7 +105,25 @@ Rails.application.routes.draw do
           patch :unpublish
         end
         resources :content_takeaways, only: %i[new create edit update], shallow: true
+        # Handoff 0056 R4 -- downloadable files, managed only for Season
+        # episodes (Admin::ContentAssetsController rejects Bundle episodes).
+        resources :content_assets, only: %i[new create edit update destroy], shallow: true do
+          get :download, on: :member, controller: "content_asset_downloads", action: :show
+        end
       end
+    end
+    # Handoff 0056 R3 -- the single entry point for new products:
+    # ProductLine -> ProductSeason -> Episode. Episodes reuse the shallow
+    # content_episodes routes above for edit/update/show/destroy/transition/
+    # takeaways (they don't care which kind of parent an episode has); only
+    # new/create need their own nesting under a Season.
+    resources :product_lines, only: %i[index show new create edit update] do
+      resources :product_seasons, only: %i[new create], shallow: true
+    end
+    get "product_lines/:product_line_id/cover/:variant", to: "product_line_covers#show", as: :product_line_cover_image
+    delete "product_lines/:product_line_id/cover", to: "product_line_covers#destroy", as: :product_line_cover
+    resources :product_seasons, only: %i[show edit update] do
+      resources :content_episodes, only: %i[new create], shallow: true
     end
     namespace :commerce do
       resources :orders, only: %i[index show], param: :id do

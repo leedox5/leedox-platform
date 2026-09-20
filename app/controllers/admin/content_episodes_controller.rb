@@ -15,16 +15,20 @@ class Admin::ContentEpisodesController < Admin::BaseController
 
   before_action :set_episode, only: %i[edit update show transition publish unpublish destroy]
 
-  helper_method :render_preview_markdown
+  helper_method :render_preview_markdown, :parent_edit_path, :parent_label, :parent_title, :episodes_collection_path
 
+  # Handoff 0056 R3 -- an episode is authored either inside a legacy
+  # ContentBundle or directly inside a ProductSeason. The URL you arrive by
+  # decides which (nothing in the forms asks the author to choose), and
+  # every other action derives it from the episode itself.
   def new
-    @bundle = ContentBundle.find(params[:content_bundle_id])
-    @episode = @bundle.content_episodes.new
+    load_parent_from_params
+    @episode = @parent.content_episodes.new
   end
 
   def create
-    @bundle = ContentBundle.find(params[:content_bundle_id])
-    @episode = @bundle.content_episodes.new(episode_params)
+    load_parent_from_params
+    @episode = @parent.content_episodes.new(episode_params)
     @episode.author = current_user
     if @episode.save
       redirect_to edit_admin_content_episode_path(@episode), notice: "편을 만들었습니다."
@@ -39,11 +43,12 @@ class Admin::ContentEpisodesController < Admin::BaseController
 
   def show
     @takeaways = @episode.content_takeaways.ordered
+    @assets = @episode.product_season_id? ? @episode.content_assets.ordered.with_attached_file : []
     # Unlike the customer path (ProductContent::DatabaseSource, published-only),
     # admin preview navigation walks every status in the bundle -- an editor
     # reviewing a draft needs to move between draft siblings too (handoff
     # 0054 R2 P0-2).
-    siblings = @bundle.content_episodes.ordered.to_a
+    siblings = @parent.content_episodes.ordered.to_a
     current_index = siblings.index(@episode)
     @prev_episode = siblings[0...current_index]&.last
     @next_episode = siblings[(current_index + 1)..]&.first
@@ -96,10 +101,10 @@ class Admin::ContentEpisodesController < Admin::BaseController
   # the warning is what's supposed to stop a careless click, not a second
   # server-side gate).
   def destroy
-    bundle = @episode.bundle
+    parent_path = parent_edit_path
     title = @episode.customer_title.presence || "(제목 없음)"
     @episode.destroy!
-    redirect_to edit_admin_content_bundle_path(bundle), notice: "\"#{title}\" 편을 삭제했습니다."
+    redirect_to parent_path, notice: "\"#{title}\" 편을 삭제했습니다."
   end
 
   private
@@ -129,7 +134,35 @@ class Admin::ContentEpisodesController < Admin::BaseController
 
   def set_episode
     @episode = ContentEpisode.find(params[:id])
-    @bundle = @episode.bundle
+    @parent = @episode.parent
+  end
+
+  def load_parent_from_params
+    @parent = if params[:product_season_id]
+      ProductSeason.find(params[:product_season_id])
+    else
+      ContentBundle.find(params[:content_bundle_id])
+    end
+  end
+
+  def parent_edit_path
+    @parent.is_a?(ProductSeason) ? edit_admin_product_season_path(@parent) : edit_admin_content_bundle_path(@parent)
+  end
+
+  def parent_label
+    @parent.is_a?(ProductSeason) ? "Season" : "묶음"
+  end
+
+  def parent_title
+    @parent.is_a?(ProductSeason) ? @parent.display_title : @parent.internal_name
+  end
+
+  def episodes_collection_path
+    if @parent.is_a?(ProductSeason)
+      admin_product_season_content_episodes_path(@parent)
+    else
+      admin_content_bundle_content_episodes_path(@parent)
+    end
   end
 
   def episode_params

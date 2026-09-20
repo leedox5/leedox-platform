@@ -13,7 +13,7 @@
         </p>
       </div>
       <div class="flex flex-col items-end gap-2">
-        <%= link_to "← 묶음으로", edit_admin_content_bundle_path(@bundle), class: "text-sm font-bold text-slate-600 hover:text-slate-900" %>
+        <%= link_to "← #{parent_label}으로", parent_edit_path, class: "text-sm font-bold text-slate-600 hover:text-slate-900" %>
         <%= link_to "관리자 미리보기 →", admin_content_episode_path(@episode), class: "text-sm font-bold text-blue-700 hover:underline" %>
       </div>
     </header>
@@ -86,10 +86,43 @@
       </ul>
     </section>
 
+    <% if @episode.product_season_id? %>
+      <section class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold text-slate-900">첨부 산출물</h2>
+          <%= link_to "+ 업로드", new_admin_content_episode_content_asset_path(@episode), class: "flex-shrink-0 whitespace-nowrap rounded-lg bg-slate-800 px-3 py-1.5 text-sm font-bold text-white hover:bg-slate-900" %>
+        </div>
+        <p class="mt-1 text-xs text-slate-500">고객이 내려받는 파일입니다. 이 편이 게시되면 함께 공개됩니다.</p>
+
+        <ul class="mt-4 divide-y divide-slate-100">
+          <% @episode.content_assets.ordered.with_attached_file.each do |asset| %>
+            <li class="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <div class="min-w-0">
+                <p class="font-semibold text-slate-900">
+                  <span class="mr-2 text-xs font-normal text-slate-400"><%= asset.position %></span>
+                  <span class="mr-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700"><%= asset.kind %></span>
+                  <%= asset.title %>
+                </p>
+                <p class="truncate text-xs text-slate-500"><%= asset.file.filename %> · <%= number_to_human_size(asset.file.byte_size) %></p>
+              </div>
+              <div class="flex flex-shrink-0 items-center gap-2">
+                <%= link_to "다운로드", download_admin_content_asset_path(asset), class: "rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50" %>
+                <%= link_to "편집", edit_admin_content_asset_path(asset), class: "rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50" %>
+                <%= button_to "삭제", admin_content_asset_path(asset), method: :delete,
+                  data: { turbo_confirm: "\"#{asset.title}\" (#{asset.file.filename}) 산출물을 정말 삭제하시겠습니까? 실제 파일도 함께 삭제되며 되돌릴 수 없습니다." },
+                  form_class: "inline", class: "rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-bold text-red-700 hover:bg-red-50" %>
+              </div>
+            </li>
+          <% end %>
+          <% if @episode.content_assets.none? %><p class="py-6 text-center text-slate-500">아직 첨부한 산출물이 없습니다.</p><% end %>
+        </ul>
+      </section>
+    <% end %>
+
     <section class="mt-8 rounded-2xl border-2 border-red-200 bg-red-50 p-6">
       <h2 class="text-lg font-bold text-red-900">위험 영역</h2>
       <p class="mt-1 text-sm text-red-800">
-        이 편을 삭제하면 연결된 takeaway와 revision 이력도 함께 삭제됩니다. archived나 휴지통 같은
+        이 편을 삭제하면 연결된 takeaway와 revision 이력<%= ", 첨부 산출물(파일 포함)".html_safe if @episode.product_season_id? %>도 함께 삭제됩니다. archived나 휴지통 같은
         복구 수단은 없습니다 — 되돌릴 수 없습니다. 다른 편의 원고·상태·순서는 바뀌지 않습니다.
         <% if @episode.published? %>
           <strong>이 편은 현재 게시 중입니다 — 삭제하면 고객 URL이 즉시 사라집니다.</strong>

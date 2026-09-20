@@ -1,0 +1,62 @@
+<%# 대표 이미지 fields (handoff 0056 R5). `stored` is the last *saved* record, so after a failed
+    save the preview still shows what is really stored, not the rejected upload. %>
+<% stored = f.object.persisted? ? ProductLine.find(f.object.id) : nil %>
+<fieldset class="space-y-4 rounded-xl border border-slate-200 p-4">
+  <legend class="px-2 text-sm font-bold text-slate-700">대표 이미지</legend>
+  <p class="text-xs text-slate-500">
+    가로형 16:9, 권장 1600×900px. JPEG·PNG·WebP만, 최대 <%= number_to_human_size(ProductLine.max_cover_bytes) %>,
+    최대 4096×4096px. SVG·GIF·애니메이션은 사용할 수 없습니다. 16:9가 아니면 중요한 부분을 살려 잘라서 표시됩니다.
+  </p>
+
+  <% if stored&.cover_image&.attached? %>
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
+      <div class="w-full max-w-xs flex-shrink-0">
+        <%= render "admin/product_lines/cover_link", product_line: stored, variant: :thumb %>
+        <p class="mt-1 text-xs text-slate-500">클릭하면 이 제품의 미리보기로 이동합니다</p>
+      </div>
+      <dl class="min-w-0 text-xs text-slate-600">
+        <div><dt class="inline font-bold">파일명</dt> <dd class="inline break-all"><%= stored.cover_image.filename %></dd></div>
+        <div><dt class="inline font-bold">크기</dt> <dd class="inline"><%= number_to_human_size(stored.cover_image.byte_size) %></dd></div>
+        <% if (dims = stored.cover_dimensions) %>
+          <div><dt class="inline font-bold">해상도</dt> <dd class="inline"><%= dims[0] %>×<%= dims[1] %>px</dd></div>
+        <% end %>
+      </dl>
+    </div>
+  <% elsif stored %>
+    <div class="w-full max-w-xs">
+      <%= render "admin/product_lines/cover_link", product_line: stored, variant: :thumb, caption: true %>
+    </div>
+  <% end %>
+
+  <div data-controller="file-picker">
+    <% if stored&.cover_image&.attached? %>
+      <p class="mb-2 text-sm font-bold text-slate-700">새 이미지로 교체 (선택)</p>
+    <% end %>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <%# The real file input stays in the tab order (sr-only, not display:none) so keyboard users can focus and
+          open it; the label is the visible button and shows the focus ring via `peer-focus-visible`. %>
+      <%= f.file_field :cover_image, accept: "image/jpeg,image/png,image/webp", class: "peer sr-only",
+        data: { file_picker_target: "input", action: "file-picker#update" } %>
+      <%= f.label :cover_image,
+        class: "inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-800 active:bg-blue-100 peer-focus-visible:border-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500 peer-focus-visible:ring-offset-2" do %>
+        <svg class="h-5 w-5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10 13V3.5M6.5 7 10 3.5 13.5 7M3.5 12.5v2A1.5 1.5 0 0 0 5 16h10a1.5 1.5 0 0 0 1.5-1.5v-2" />
+        </svg>
+        <span>대표 이미지 선택</span>
+      <% end %>
+      <span class="min-w-0 break-all text-sm text-slate-500" data-file-picker-target="name" aria-live="polite">선택된 파일 없음</span>
+    </div>
+
+    <% if stored&.cover_image&.attached? %>
+      <p class="mt-2 text-xs font-semibold text-amber-700">새 파일을 고르고 저장하면 현재 이미지는 교체되어 삭제됩니다. 고르지 않으면 그대로 유지됩니다.</p>
+    <% end %>
+    <p class="mt-1 text-xs text-slate-500">파일 이름은 화면 표시에만 쓰이며 저장 경로·URL에는 쓰이지 않습니다.</p>
+  </div>
+
+  <div>
+    <%= f.label :cover_image_alt, "대체문구 (이미지가 있으면 필수)", class: "block text-sm font-bold text-slate-700 mb-1" %>
+    <%= f.text_field :cover_image_alt, maxlength: ProductLine::COVER_ALT_MAX_LENGTH, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+    <p class="mt-1 text-xs text-slate-500">이미지를 볼 수 없는 방문자에게 읽어주는 설명입니다. 예: "코드가 자동으로 완성되는 개발 화면".</p>
+  </div>
+</fieldset>

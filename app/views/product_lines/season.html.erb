@@ -1,0 +1,45 @@
+<div class="min-h-screen bg-white">
+  <%= render "shared/header" %>
+  <main class="mx-auto max-w-3xl px-5 py-10 sm:px-7">
+    <%= link_to "← #{@product_line.customer_name}", product_line_path(@product_line.slug), class: "mb-3 inline-block text-sm text-gray-500 hover:text-blue-600" %>
+
+    <p class="text-xs font-semibold uppercase tracking-wide text-blue-600"><%= @season.season_code %></p>
+    <h1 class="text-2xl font-bold text-gray-900"><%= @season.display_title %></h1>
+
+    <ol class="mt-8 space-y-3">
+      <% @episodes.each do |episode| %>
+        <li>
+          <%= link_to product_season_episode_path(@product_line.slug, @season.slug, episode.display_id), class: "block rounded-xl border border-gray-200 p-4 hover:border-blue-300" do %>
+            <span class="text-xs font-semibold text-gray-400"><%= episode.display_id %></span>
+            <span class="mt-1 block font-bold text-gray-900"><%= episode.customer_title.presence || "(제목 없음)" %></span>
+          <% end %>
+        </li>
+      <% end %>
+      <% if @episodes.empty? %>
+        <p class="text-gray-500">아직 공개된 편이 없습니다.</p>
+      <% end %>
+    </ol>
+
+    <% if @assets_by_episode.any? %>
+      <section class="mt-12">
+        <h2 class="text-lg font-bold text-gray-900">Season 산출물</h2>
+        <div class="mt-4 space-y-3">
+          <% @episodes.each do |episode| %>
+            <% (@assets_by_episode[episode.id] || []).each do |asset| %>
+              <div class="flex flex-col gap-3 rounded-xl border border-blue-200 bg-blue-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div class="min-w-0">
+                  <p class="text-xs font-bold uppercase tracking-wide text-blue-700"><%= asset.kind %> · <%= episode.display_id %> <%= episode.customer_title.presence || "(제목 없음)" %></p>
+                  <p class="mt-1 font-bold text-gray-900"><%= asset.title %></p>
+                  <% if asset.description.present? %><p class="mt-1 text-sm text-gray-600"><%= asset.description %></p><% end %>
+                  <p class="mt-1 truncate text-xs text-gray-500"><%= asset.file.filename %> · <%= number_to_human_size(asset.file.byte_size) %></p>
+                </div>
+                <%= link_to "다운로드", product_season_episode_asset_path(@product_line.slug, @season.slug, episode.display_id, asset.id),
+                  class: "inline-flex flex-shrink-0 items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700" %>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+  </main>
+</div>

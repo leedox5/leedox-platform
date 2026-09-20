@@ -23,6 +23,13 @@ module ChatdoxPlatform
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.1
 
+    # Handoff 0056 R4 -- uploaded files are only ever served through our own
+    # authorized download actions (ProductLinesController#asset,
+    # Admin::ContentAssetsController#download). Drop Active Storage's built-in
+    # blob/representation/direct-upload routes so no signed blob URL can be
+    # used to bypass those gates.
+    config.active_storage.draw_routes = false
+
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.

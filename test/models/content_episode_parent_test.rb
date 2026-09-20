@@ -1,0 +1,76 @@
+require "test_helper"
+
+# Handoff 0056 R3 -- a ContentEpisode belongs to exactly one of a legacy
+# ContentBundle or a ProductSeason.
+class ContentEpisodeParentTest < ActiveSupport::TestCase
+  setup do
+    @bundle = ContentBundle.create!(internal_name: "legacy")
+    @line = ProductLine.create!(internal_name: "A", customer_name: "A", slug: "line-a", problem: "p", expected_result: "e", target_audience: "t")
+    @season = @line.product_seasons.create!(internal_name: "S01", season_code: "S01", slug: "s01")
+  end
+
+  test "an episode with only a bundle is valid and reports it as parent" do
+    episode = ContentEpisode.create!(bundle: @bundle, position: 1)
+    assert_equal @bundle, episode.parent
+  end
+
+  test "an episode with only a season is valid and reports it as parent" do
+    episode = ContentEpisode.create!(product_season: @season, position: 1)
+    assert_equal @season, episode.parent
+    assert_nil episode.bundle_id
+  end
+
+  test "an episode with neither parent is rejected" do
+    episode = ContentEpisode.new(position: 1)
+    assert_not episode.valid?
+    assert_includes episode.errors.full_messages.join, "정확히 하나"
+  end
+
+  test "an episode with both parents is rejected" do
+    episode = ContentEpisode.new(bundle: @bundle, product_season: @season, position: 1)
+    assert_not episode.valid?
+    assert_includes episode.errors.full_messages.join, "정확히 하나"
+  end
+
+  test "the DB check constraint rejects both-parents and no-parent rows even when validations are skipped" do
+    assert_raises(ActiveRecord::StatementInvalid) do
+      ContentEpisode.new(bundle: @bundle, product_season: @season, position: 1).save!(validate: false)
+    end
+    assert_raises(ActiveRecord::StatementInvalid) do
+      ContentEpisode.new(position: 1).save!(validate: false)
+    end
+  end
+
+  test "position is unique within each parent, but a bundle episode and a season episode may share a position" do
+    ContentEpisode.create!(bundle: @bundle, position: 1)
+    ContentEpisode.create!(product_season: @season, position: 1)
+
+    assert_not ContentEpisode.new(bundle: @bundle, position: 1).valid?
+    assert_not ContentEpisode.new(product_season: @season, position: 1).valid?
+    assert ContentEpisode.new(bundle: @bundle, position: 2).valid?
+
+    other_season = @line.product_seasons.create!(internal_name: "S02", season_code: "S02", slug: "s02")
+    assert ContentEpisode.new(product_season: other_season, position: 1).valid?
+  end
+
+  test "season episodes keep revisions, takeaways and cascade delete like bundle episodes" do
+    episode = ContentEpisode.create!(product_season: @season, position: 1, body: "v1")
+    episode.update!(body: "v2")
+    episode.content_takeaways.create!(kind: "체크리스트", body: "- [ ] a")
+    assert_equal 1, episode.content_revisions.count
+    assert_equal "v1", episode.content_revisions.first.body_snapshot
+
+    assert_difference [ "ContentRevision.count", "ContentTakeaway.count" ], -1 do
+      episode.destroy!
+    end
+  end
+
+  test "bundle episodes are unaffected: still ordered, still cascade with their bundle" do
+    ContentEpisode.create!(bundle: @bundle, position: 2)
+    ContentEpisode.create!(bundle: @bundle, position: 1)
+    assert_equal [ 1, 2 ], @bundle.content_episodes.ordered.map(&:position)
+    assert_difference "ContentEpisode.count", -2 do
+      @bundle.destroy!
+    end
+  end
+end

@@ -6,8 +6,11 @@
     <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <p class="text-sm font-bold uppercase tracking-[0.2em] text-blue-700">Admin Content</p>
-        <h1 class="mt-2 text-3xl font-black text-slate-950">콘텐츠 묶음 관리</h1>
-        <p class="mt-2 text-slate-600">DB에서 직접 저작·게시하는 신규 콘텐츠 묶음(handoff 0053 수직 절단)입니다.</p>
+        <h1 class="mt-2 text-3xl font-black text-slate-950">기존 DB 콘텐츠 관리</h1>
+        <p class="mt-2 text-slate-600">
+          DB에서 직접 저작·게시하는 기존 콘텐츠 묶음(handoff 0053~0055)입니다. 새 제품은
+          <%= link_to "제품 관리", admin_product_lines_path, class: "font-bold text-blue-700 hover:underline" %>에서만 만듭니다.
+        </p>
       </div>
       <%= link_to "+ 새 묶음", new_admin_content_bundle_path, class: "inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700" %>
     </header>

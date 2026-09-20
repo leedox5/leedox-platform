@@ -1,0 +1,31 @@
+<%# Cover image for the admin screens (handoff 0056 R6): the real cover, or the shared placeholder when the
+    product has none, laid out identically. By default it is an ordinary same-tab link to that product's
+    canonical admin preview (/admin/product_lines/:id), so the browser's back button returns to the list as
+    usual -- no lightbox, no new tab. link: false renders the image only (used on the preview page itself,
+    where a link to itself would be pointless).
+    variant: :thumb (list/edit) or :hero. caption: true adds a visible "no image" note. %>
+<% has_cover = product_line.cover_image.attached? %>
+<% link = local_assigns.fetch(:link, true) %>
+<% caption = local_assigns.fetch(:caption, false) %>
+<% image_classes = "block aspect-video w-full rounded-lg bg-slate-100 object-cover transition group-hover:opacity-90" %>
+<% image = capture do %>
+  <% if has_cover %>
+    <%= render "product_lines/cover_image", product_line: product_line, variant: variant, admin: true, classes: image_classes %>
+  <% else %>
+    <%= image_tag "product_cover_placeholder.svg", alt: "대표 이미지 없음 (기본 이미지)", width: 1600, height: 900, class: image_classes %>
+  <% end %>
+<% end %>
+<div class="min-w-0">
+  <% if link %>
+    <%= link_to admin_product_line_path(product_line), title: "제품 미리보기로 이동",
+      aria: { label: "#{product_line.customer_name} 제품 미리보기로 이동#{has_cover ? "" : " (대표 이미지 없음, 기본 이미지)"}" },
+      class: "group block overflow-hidden rounded-lg ring-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" do %>
+      <%= image %>
+    <% end %>
+  <% else %>
+    <div class="group block overflow-hidden rounded-lg"><%= image %></div>
+  <% end %>
+  <% if caption && !has_cover %>
+    <p class="mt-1 text-xs font-semibold text-slate-500">대표 이미지 없음 · 기본 이미지</p>
+  <% end %>
+</div>

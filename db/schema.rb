@@ -10,7 +10,35 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_17_153000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_20_110000) do
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "record_id", null: false
+    t.string "record_type", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.string "content_type"
+    t.datetime "created_at", null: false
+    t.string "filename", null: false
+    t.string "key", null: false
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
   create_table "chapter_progresses", force: :cascade do |t|
     t.string "chapter_id", null: false
     t.datetime "completed_at"
@@ -38,6 +66,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_153000) do
     t.index ["auditable_type", "auditable_id", "occurred_at"], name: "index_commerce_audits_on_target_and_time"
   end
 
+  create_table "content_assets", force: :cascade do |t|
+    t.integer "content_episode_id", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "kind", null: false
+    t.integer "position", default: 0, null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["content_episode_id", "position"], name: "index_content_assets_on_content_episode_id_and_position", unique: true
+    t.index ["content_episode_id"], name: "index_content_assets_on_content_episode_id"
+  end
+
   create_table "content_bundles", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "customer_title"
@@ -57,18 +97,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_153000) do
   create_table "content_episodes", force: :cascade do |t|
     t.integer "author_id"
     t.text "body"
-    t.integer "bundle_id", null: false
+    t.integer "bundle_id"
     t.datetime "created_at", null: false
     t.string "customer_title"
     t.string "internal_ref"
     t.integer "lock_version", default: 0, null: false
     t.integer "position", default: 0, null: false
+    t.integer "product_season_id"
     t.datetime "published_at"
     t.string "status", default: "draft", null: false
     t.datetime "updated_at", null: false
     t.index ["author_id"], name: "index_content_episodes_on_author_id"
     t.index ["bundle_id", "position"], name: "index_content_episodes_on_bundle_id_and_position"
     t.index ["bundle_id"], name: "index_content_episodes_on_bundle_id"
+    t.index ["product_season_id", "position"], name: "index_content_episodes_on_season_and_position", unique: true
+    t.index ["product_season_id"], name: "index_content_episodes_on_product_season_id"
+    t.check_constraint "(bundle_id IS NOT NULL AND product_season_id IS NULL) OR (bundle_id IS NULL AND product_season_id IS NOT NULL)", name: "content_episodes_exactly_one_parent"
   end
 
   create_table "content_revisions", force: :cascade do |t|
@@ -198,6 +242,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_153000) do
     t.index ["email"], name: "index_premium_waitlists_on_email", unique: true
   end
 
+  create_table "product_lines", force: :cascade do |t|
+    t.string "ai_supporter"
+    t.string "cover_image_alt"
+    t.datetime "created_at", null: false
+    t.string "customer_name", null: false
+    t.text "expected_result", null: false
+    t.string "internal_name", null: false
+    t.text "problem", null: false
+    t.string "slug", null: false
+    t.string "status", default: "draft", null: false
+    t.text "target_audience", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_product_lines_on_slug", unique: true
+  end
+
   create_table "product_offers", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.datetime "available_from"
@@ -216,6 +275,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_153000) do
     t.index ["code"], name: "index_product_offers_on_code", unique: true
     t.index ["product_id", "duration_months", "version"], name: "index_product_offers_on_product_duration_version", unique: true
     t.index ["product_id"], name: "index_product_offers_on_product_id"
+  end
+
+  create_table "product_seasons", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "customer_title"
+    t.string "internal_name", null: false
+    t.integer "position", default: 0, null: false
+    t.integer "product_line_id", null: false
+    t.string "season_code", null: false
+    t.string "slug", null: false
+    t.string "status", default: "draft", null: false
+    t.datetime "updated_at", null: false
+    t.string "visibility", default: "public", null: false
+    t.index ["product_line_id", "season_code"], name: "index_product_seasons_on_product_line_id_and_season_code", unique: true
+    t.index ["product_line_id", "slug"], name: "index_product_seasons_on_product_line_id_and_slug", unique: true
+    t.index ["product_line_id"], name: "index_product_seasons_on_product_line_id"
   end
 
   create_table "products", force: :cascade do |t|
@@ -300,11 +375,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_153000) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "chapter_progresses", "users"
   add_foreign_key "commerce_audit_events", "users", column: "actor_id"
+  add_foreign_key "content_assets", "content_episodes"
   add_foreign_key "content_bundles", "products"
   add_foreign_key "content_bundles", "users", column: "owner_id"
   add_foreign_key "content_episodes", "content_bundles", column: "bundle_id"
+  add_foreign_key "content_episodes", "product_seasons"
   add_foreign_key "content_episodes", "users", column: "author_id"
   add_foreign_key "content_revisions", "content_episodes", column: "episode_id"
   add_foreign_key "content_revisions", "users", column: "editor_id"
@@ -320,6 +399,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_153000) do
   add_foreign_key "orders", "users"
   add_foreign_key "payment_transactions", "orders", column: "purchase_order_id"
   add_foreign_key "product_offers", "products"
+  add_foreign_key "product_seasons", "product_lines"
   add_foreign_key "refund_requests", "orders"
   add_foreign_key "refund_requests", "users"
   add_foreign_key "refund_requests", "users", column: "processed_by_id"

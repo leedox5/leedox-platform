@@ -1,0 +1,16 @@
+<% content_for :title, "산출물 편집 — #{@asset.title}" %>
+
+<div class="min-h-screen bg-slate-50">
+  <%= render "shared/header" %>
+  <main class="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
+    <header class="flex items-center justify-between">
+      <h1 class="text-2xl font-black text-slate-950">산출물 편집</h1>
+      <div class="flex flex-col items-end gap-2">
+        <%= link_to "← 편으로", edit_admin_content_episode_path(@episode), class: "text-sm font-bold text-slate-600 hover:text-slate-900" %>
+        <%= link_to "다운로드", download_admin_content_asset_path(@asset), class: "text-sm font-bold text-blue-700 hover:underline" %>
+      </div>
+    </header>
+
+    <%= render "form", asset: @asset, url: admin_content_asset_path(@asset), method: :patch, submit_label: "저장" %>
+  </main>
+</div>

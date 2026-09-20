@@ -1,0 +1,52 @@
+<% content_for :title, "제품 관리" %>
+
+<div class="min-h-screen bg-slate-50">
+  <%= render "shared/header" %>
+  <main class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div class="min-w-0">
+        <p class="text-sm font-bold uppercase tracking-[0.2em] text-blue-700">Admin Product</p>
+        <h1 class="mt-2 text-3xl font-black text-slate-950">제품 관리</h1>
+        <p class="mt-2 text-slate-600">
+          제품과 그 안의 Season·편을 관리합니다. 새 제품은 여기서만 만듭니다.
+          (이전에 만든 콘텐츠 묶음은 <%= link_to "기존 DB 콘텐츠 관리", admin_content_bundles_path, class: "font-bold text-blue-700 hover:underline" %>에 그대로 있습니다.)
+        </p>
+      </div>
+      <%= link_to "+ 새 제품", new_admin_product_line_path, class: "inline-flex flex-shrink-0 items-center justify-center self-start whitespace-nowrap rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700 sm:self-auto" %>
+    </header>
+
+    <section class="mt-8 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <table class="min-w-full divide-y divide-slate-200 text-sm">
+        <thead class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+          <tr>
+            <th class="px-4 py-3">대표 이미지</th>
+            <th class="px-4 py-3">고객용 제품명</th>
+            <th class="px-4 py-3">내부 관리명</th>
+            <th class="px-4 py-3">slug</th>
+            <th class="whitespace-nowrap px-4 py-3">공개 상태</th>
+            <th class="whitespace-nowrap px-4 py-3">Season 수</th>
+            <th class="whitespace-nowrap px-4 py-3 text-right">관리</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% @product_lines.each do |line| %>
+            <tr>
+              <td class="w-40 px-4 py-4">
+                <%= render "admin/product_lines/cover_link", product_line: line, variant: :thumb, caption: true %>
+              </td>
+              <td class="px-4 py-4 font-semibold text-slate-900"><%= line.customer_name %></td>
+              <td class="px-4 py-4 text-slate-600"><%= line.internal_name %></td>
+              <td class="px-4 py-4 text-slate-600"><code><%= line.slug %></code></td>
+              <td class="whitespace-nowrap px-4 py-4"><span class="inline-block rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700"><%= line.status %></span></td>
+              <td class="whitespace-nowrap px-4 py-4 text-slate-600"><%= line.product_seasons.count %></td>
+              <td class="whitespace-nowrap px-4 py-4 text-right">
+                <%= link_to "편집", edit_admin_product_line_path(line), class: "font-semibold text-blue-700 hover:underline" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <% if @product_lines.empty? %><p class="p-8 text-center text-slate-500">등록된 제품이 없습니다.</p><% end %>
+    </section>
+  </main>
+</div>

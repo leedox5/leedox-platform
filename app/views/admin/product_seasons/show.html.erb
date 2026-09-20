@@ -1,0 +1,27 @@
+<% content_for :title, "미리보기 — #{@season.display_title}" %>
+
+<div class="min-h-screen bg-white">
+  <%= render "shared/header" %>
+  <main class="mx-auto max-w-3xl px-5 py-10 sm:px-7">
+    <div class="mb-6 flex flex-col gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-800 sm:flex-row sm:items-center sm:justify-between">
+      <span>관리자 전용 미리보기 — 실제 고객 화면이 아니며, Season은 <%= @season.status %> · <%= @season.visibility %> 상태 그대로 보입니다.</span>
+      <%= link_to "편집으로 돌아가기", edit_admin_product_season_path(@season), class: "underline sm:flex-shrink-0" %>
+    </div>
+
+    <%= link_to "← #{@product_line.customer_name}", admin_product_line_path(@product_line), class: "mb-3 inline-block text-sm text-gray-500 hover:text-blue-600" %>
+    <p class="text-xs font-semibold uppercase tracking-wide text-blue-600"><%= @season.season_code %></p>
+    <h1 class="text-2xl font-bold text-gray-900"><%= @season.display_title %></h1>
+
+    <ol class="mt-8 space-y-3">
+      <% @episodes.each do |episode| %>
+        <li>
+          <%= link_to admin_content_episode_path(episode), class: "block rounded-xl border border-gray-200 p-4 hover:border-blue-300" do %>
+            <span class="text-xs font-semibold text-gray-400"><%= episode.display_id %> · <%= episode.status %></span>
+            <span class="mt-1 block font-bold text-gray-900"><%= episode.customer_title.presence || "(제목 없음)" %></span>
+          <% end %>
+        </li>
+      <% end %>
+      <% if @episodes.empty? %><p class="text-gray-500">아직 편이 없습니다.</p><% end %>
+    </ol>
+  </main>
+</div>
