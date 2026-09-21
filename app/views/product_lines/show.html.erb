@@ -2,6 +2,7 @@
   <%= render "shared/header" %>
   <main class="mx-auto max-w-3xl px-5 py-12 sm:px-7">
     <%= render "product_lines/info", product_line: @product_line %>
+    <%= render "product_lines/price_summary", seasons: @summary_seasons %>
 
     <section class="mt-10">
       <h2 class="text-lg font-bold text-gray-900">Season</h2>

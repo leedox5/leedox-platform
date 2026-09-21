@@ -27,6 +27,8 @@ class ProductLinesController < ApplicationController
 
   def show
     @seasons = @product_line.product_seasons.customer_listed.ordered
+    # Handoff 0059 price summary: only what a visitor could actually get right now.
+    @summary_seasons = @seasons.select(&:acquirable?)
   end
 
   def season
