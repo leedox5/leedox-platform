@@ -9,10 +9,10 @@ class ProductLineAdminUiTest < ActionDispatch::IntegrationTest
   setup do
     @admin = User.create!(name: "관리자", email: "ui-admin-#{SecureRandom.hex(3)}@example.com", password: "password123", role: :admin)
     @user = User.create!(name: "일반유저", email: "ui-user-#{SecureRandom.hex(3)}@example.com", password: "password123")
-    @with_cover = ProductLine.create!(internal_name: "a", customer_name: "이미지 있는 제품", slug: "with-cover", problem: "p", expected_result: "e", target_audience: "t")
+    @with_cover = ProductLine.create!(internal_name: "a", customer_name: "이미지 있는 제품", slug: "with-cover", introduction: "소개")
     @with_cover.cover_image.attach(io: file_fixture("covers/cover.jpg").open, filename: "hero-shot.jpg", content_type: "image/jpeg")
     @with_cover.update!(cover_image_alt: "실제 대체문구")
-    @without = ProductLine.create!(internal_name: "b", customer_name: "이미지 없는 제품", slug: "without-cover", problem: "p", expected_result: "e", target_audience: "t")
+    @without = ProductLine.create!(internal_name: "b", customer_name: "이미지 없는 제품", slug: "without-cover", introduction: "소개")
   end
 
   def sign_in_as(user)

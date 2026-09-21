@@ -1,4 +1,6 @@
-# Long-lived product identity (problem / result / audience) -- handoff 0056 R3.
+# Long-lived product identity -- handoff 0056 R3. Its customer-facing description is
+# one free-form `introduction` (handoff 0060; it replaced the fixed problem / result /
+# audience fields, whose columns are still in the table but no longer used).
 # Owns ProductSeasons; deliberately has no relation to the commerce Product
 # yet (that 1:1 link belongs to the later pricing/License round, hung off
 # ProductSeason rather than here).
@@ -41,7 +43,7 @@ class ProductLine < ApplicationRecord
 
   before_validation :normalize_slug
 
-  validates :internal_name, :customer_name, :problem, :expected_result, :target_audience, presence: true
+  validates :internal_name, :customer_name, :introduction, presence: true
   validates :slug, presence: true, format: { with: SLUG_FORMAT }, uniqueness: true
   validates :status, inclusion: { in: STATUSES }
   validates :cover_image_alt, presence: { message: "대표 이미지를 올리면 대체문구가 필요합니다" }, if: -> { cover_image.attached? }

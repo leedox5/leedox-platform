@@ -8,7 +8,7 @@ class IndefiniteLicenseTest < ActiveSupport::TestCase
   setup do
     Commerce::CatalogBootstrap.call!
     @user = User.create!(name: "구매자", email: "indef-#{SecureRandom.hex(3)}@example.com", password: "password123")
-    line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "line-a", problem: "p", expected_result: "e", target_audience: "t", status: "published")
+    line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "line-a", introduction: "소개", status: "published")
     @season = line.product_seasons.create!(internal_name: "S01", season_code: "S01", slug: "s01", status: "published")
     @product = Product.create!(code: "line_a_s01", name: "제품 S01")
     @season.update!(product: @product)

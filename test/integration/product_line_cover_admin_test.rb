@@ -14,11 +14,11 @@ class ProductLineCoverAdminTest < ActionDispatch::IntegrationTest
   end
 
   def line_params(overrides = {})
-    { product_line: { internal_name: "내부", customer_name: "커버 제품", slug: "cover-line", problem: "문제", expected_result: "결과", target_audience: "대상" }.merge(overrides) }
+    { product_line: { internal_name: "내부", customer_name: "커버 제품", slug: "cover-line", introduction: "소개" }.merge(overrides) }
   end
 
   def make_line(with_cover: true, status: "draft", slug: "cover-line")
-    line = ProductLine.create!(internal_name: "내부", customer_name: "커버 제품", slug: slug, problem: "p", expected_result: "e", target_audience: "t", status: status)
+    line = ProductLine.create!(internal_name: "내부", customer_name: "커버 제품", slug: slug, introduction: "소개", status: status)
     if with_cover
       line.cover_image.attach(io: file_fixture("covers/cover.jpg").open, filename: "hero.jpg", content_type: "image/jpeg")
       line.update!(cover_image_alt: "대체문구 원본")
@@ -269,7 +269,7 @@ class ProductLineCoverAdminTest < ActionDispatch::IntegrationTest
   test "admin list shows the thumbnail; a product without one shows the shared placeholder" do
     sign_in_as(@admin)
     line = make_line
-    ProductLine.create!(internal_name: "n", customer_name: "이미지 없음", slug: "no-cover", problem: "p", expected_result: "e", target_audience: "t")
+    ProductLine.create!(internal_name: "n", customer_name: "이미지 없음", slug: "no-cover", introduction: "소개")
     get admin_product_lines_path
     assert_response :success
     assert_select "img", 2
@@ -284,7 +284,7 @@ class ProductLineCoverAdminTest < ActionDispatch::IntegrationTest
     assert_response :not_found
     get admin_product_line_cover_image_path(line, "../../etc")
     assert_response :not_found
-    get admin_product_line_cover_image_path(make_line_without = ProductLine.create!(internal_name: "x", customer_name: "x", slug: "x-line", problem: "p", expected_result: "e", target_audience: "t"), "hero")
+    get admin_product_line_cover_image_path(make_line_without = ProductLine.create!(internal_name: "x", customer_name: "x", slug: "x-line", introduction: "소개"), "hero")
     assert_response :not_found
     assert make_line_without.persisted?
     get admin_product_line_cover_image_path(0, "hero")

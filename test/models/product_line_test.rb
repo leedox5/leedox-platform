@@ -6,9 +6,7 @@ class ProductLineTest < ActiveSupport::TestCase
       internal_name: "Codex TODO 내부명",
       customer_name: "Codex TODO",
       slug: "codex-todo",
-      problem: "문제 정의",
-      expected_result: "기대 결과",
-      target_audience: "대상 고객"
+      introduction: "제품 소개"
     }.merge(overrides)
   end
 
@@ -17,10 +15,10 @@ class ProductLineTest < ActiveSupport::TestCase
     assert product_line.save
   end
 
-  test "requires internal_name, customer_name, problem, expected_result, target_audience" do
-    product_line = ProductLine.new(valid_attrs(internal_name: "", customer_name: "", problem: "", expected_result: "", target_audience: ""))
+  test "requires internal_name, customer_name and introduction" do
+    product_line = ProductLine.new(valid_attrs(internal_name: "", customer_name: "", introduction: ""))
     assert_not product_line.save
-    %i[internal_name customer_name problem expected_result target_audience].each do |attr|
+    %i[internal_name customer_name introduction].each do |attr|
       assert_includes product_line.errors.attribute_names, attr
     end
   end

@@ -38,18 +38,9 @@
       </div>
 
       <div>
-        <%= f.label :problem, "해결할 문제", class: "block text-sm font-bold text-slate-700 mb-1" %>
-        <%= f.text_area :problem, rows: 3, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
-      </div>
-
-      <div>
-        <%= f.label :expected_result, "기대 결과", class: "block text-sm font-bold text-slate-700 mb-1" %>
-        <%= f.text_area :expected_result, rows: 3, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
-      </div>
-
-      <div>
-        <%= f.label :target_audience, "대상 고객", class: "block text-sm font-bold text-slate-700 mb-1" %>
-        <%= f.text_field :target_audience, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+        <%= f.label :introduction, "소개", class: "block text-sm font-bold text-slate-700 mb-1" %>
+        <%= f.text_area :introduction, rows: 10, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+        <p class="mt-1 text-xs text-slate-500">자유롭게 적으세요. 줄바꿈은 그대로 표시되고 마크다운은 적용되지 않습니다.</p>
       </div>
 
       <div>

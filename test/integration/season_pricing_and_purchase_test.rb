@@ -18,7 +18,7 @@ class SeasonPricingAndPurchaseTest < ActionDispatch::IntegrationTest
     @buyer = User.create!(name: "구매자", email: "sp-buyer-#{SecureRandom.hex(3)}@example.com", password: "password123", created_at: 30.days.ago)
     @other = User.create!(name: "다른사람", email: "sp-other-#{SecureRandom.hex(3)}@example.com", password: "password123", created_at: 30.days.ago)
 
-    @line = ProductLine.create!(internal_name: "A", customer_name: "제품 A", slug: "product-a", problem: "p", expected_result: "e", target_audience: "t", status: "published")
+    @line = ProductLine.create!(internal_name: "A", customer_name: "제품 A", slug: "product-a", introduction: "소개", status: "published")
     @s1 = @line.product_seasons.create!(internal_name: "S01", customer_title: "첫 판", season_code: "S01", slug: "s01", status: "published", visibility: "public")
     @s2 = @line.product_seasons.create!(internal_name: "S02", customer_title: "둘째 판", season_code: "S02", slug: "s02", status: "published", visibility: "public")
     @ep1 = @s1.content_episodes.create!(position: 1, customer_title: "S01 첫 편", body: "# S01\n\nS01 유료 본문", status: "published")

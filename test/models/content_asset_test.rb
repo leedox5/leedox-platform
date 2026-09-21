@@ -4,7 +4,7 @@ class ContentAssetTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
 
   setup do
-    line = ProductLine.create!(internal_name: "A", customer_name: "A", slug: "line-a", problem: "p", expected_result: "e", target_audience: "t")
+    line = ProductLine.create!(internal_name: "A", customer_name: "A", slug: "line-a", introduction: "소개")
     @season = line.product_seasons.create!(internal_name: "S01", season_code: "S01", slug: "s01")
     @episode = @season.content_episodes.create!(position: 1, customer_title: "편")
   end

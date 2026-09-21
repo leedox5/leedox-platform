@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_21_100100) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_21_120000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -248,12 +248,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_21_100100) do
     t.string "cover_image_alt"
     t.datetime "created_at", null: false
     t.string "customer_name", null: false
-    t.text "expected_result", null: false
+    t.text "expected_result"
     t.string "internal_name", null: false
-    t.text "problem", null: false
+    t.text "introduction", default: "", null: false
+    t.text "problem"
     t.string "slug", null: false
     t.string "status", default: "draft", null: false
-    t.text "target_audience", null: false
+    t.text "target_audience"
     t.datetime "updated_at", null: false
     t.index ["slug"], name: "index_product_lines_on_slug", unique: true
   end

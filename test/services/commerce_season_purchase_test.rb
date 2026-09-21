@@ -12,7 +12,7 @@ class CommerceSeasonPurchaseTest < ActiveSupport::TestCase
     @admin = User.create!(name: "관리자", email: "season-admin-#{SecureRandom.hex(3)}@example.com", password: "password123", role: :admin)
     @buyer = User.create!(name: "구매자", email: "season-buyer-#{SecureRandom.hex(3)}@example.com", password: "password123")
     @other = User.create!(name: "다른사람", email: "season-other-#{SecureRandom.hex(3)}@example.com", password: "password123")
-    @line = ProductLine.create!(internal_name: "A", customer_name: "제품 A", slug: "product-a", problem: "p", expected_result: "e", target_audience: "t", status: "published")
+    @line = ProductLine.create!(internal_name: "A", customer_name: "제품 A", slug: "product-a", introduction: "소개", status: "published")
     @s1 = @line.product_seasons.create!(internal_name: "S01", season_code: "S01", slug: "s01", status: "published", visibility: "public")
     @s2 = @line.product_seasons.create!(internal_name: "S02", season_code: "S02", slug: "s02", status: "published", visibility: "public")
   end

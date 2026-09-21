@@ -13,7 +13,7 @@ class AdminProductLineManagementTest < ActionDispatch::IntegrationTest
   end
 
   def make_line(overrides = {})
-    ProductLine.create!({ internal_name: "내부", customer_name: "고객 제품", slug: "test-line", problem: "p", expected_result: "e", target_audience: "t" }.merge(overrides))
+    ProductLine.create!({ internal_name: "내부", customer_name: "고객 제품", slug: "test-line", introduction: "소개" }.merge(overrides))
   end
 
   def make_season(line, overrides = {})
@@ -40,7 +40,7 @@ class AdminProductLineManagementTest < ActionDispatch::IntegrationTest
     end
 
     assert_no_difference [ "ProductLine.count", "ProductSeason.count", "ContentEpisode.count" ] do
-      post admin_product_lines_path, params: { product_line: { internal_name: "x", customer_name: "x", slug: "x", problem: "p", expected_result: "e", target_audience: "t" } }
+      post admin_product_lines_path, params: { product_line: { internal_name: "x", customer_name: "x", slug: "x", introduction: "소개" } }
       post admin_product_line_product_seasons_path(line), params: { product_season: { internal_name: "x", season_code: "S9", slug: "s9" } }
       post admin_product_season_content_episodes_path(season), params: { content_episode: { customer_title: "x", position: 1 } }
     end
@@ -51,7 +51,7 @@ class AdminProductLineManagementTest < ActionDispatch::IntegrationTest
 
     # 1. Product (draft by default)
     post admin_product_lines_path, params: { product_line: {
-      internal_name: "R3 내부명", customer_name: "R3 제품", slug: "r3-line", problem: "문제", expected_result: "결과", target_audience: "대상"
+      internal_name: "R3 내부명", customer_name: "R3 제품", slug: "r3-line", introduction: "소개"
     } }
     line = ProductLine.last
     assert_redirected_to edit_admin_product_line_path(line)
@@ -164,7 +164,7 @@ class AdminProductLineManagementTest < ActionDispatch::IntegrationTest
     make_season(line)
 
     assert_no_difference [ "ProductLine.count", "ProductSeason.count" ] do
-      post admin_product_lines_path, params: { product_line: { internal_name: "", customer_name: "", slug: line.slug, problem: "", expected_result: "", target_audience: "" } }
+      post admin_product_lines_path, params: { product_line: { internal_name: "", customer_name: "", slug: line.slug, introduction: "" } }
       assert_response :unprocessable_entity
       post admin_product_line_product_seasons_path(line), params: { product_season: { internal_name: "dup", season_code: "S01", slug: "s01" } }
       assert_response :unprocessable_entity

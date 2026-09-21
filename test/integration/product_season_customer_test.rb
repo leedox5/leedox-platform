@@ -7,7 +7,7 @@ class ProductSeasonCustomerTest < ActionDispatch::IntegrationTest
   setup do
     @line = ProductLine.create!(
       internal_name: "내부", customer_name: "결과 중심 제품", slug: "result-line",
-      problem: "해결할 문제 문장", expected_result: "기대 결과 문장", target_audience: "대상 고객 문장",
+      introduction: "소개 문장",
       ai_supporter: "Codex", status: "published"
     )
     @season = @line.product_seasons.create!(
@@ -28,7 +28,7 @@ class ProductSeasonCustomerTest < ActionDispatch::IntegrationTest
 
     get product_line_path(@line.slug)
     assert_response :success
-    %w[결과\ 중심\ 제품 해결할\ 문제\ 문장 기대\ 결과\ 문장 대상\ 고객\ 문장 Codex 첫\ 번째\ 판].each { |text| assert_match(text, response.body) }
+    %w[결과\ 중심\ 제품 소개\ 문장 Codex 첫\ 번째\ 판].each { |text| assert_match(text, response.body) }
     assert_no_match(/구매|가격|₩/, css_select("main").text)
     assert_select "a[href=?]", product_season_path(@line.slug, "s01")
     hidden.each_key { |slug| assert_no_match(/#{slug} 제목/, response.body) }
@@ -131,7 +131,7 @@ class ProductSeasonCustomerTest < ActionDispatch::IntegrationTest
     get product_season_episode_path(@line.slug, @season.slug, "99")
     assert_response :not_found
 
-    other_line = ProductLine.create!(internal_name: "o", customer_name: "o", slug: "other-line", problem: "p", expected_result: "e", target_audience: "t", status: "published")
+    other_line = ProductLine.create!(internal_name: "o", customer_name: "o", slug: "other-line", introduction: "소개", status: "published")
     get product_season_path(other_line.slug, @season.slug)
     assert_response :not_found
   end

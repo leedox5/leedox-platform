@@ -7,7 +7,7 @@ class EpisodeLabelTest < ActionDispatch::IntegrationTest
   setup do
     @admin = User.create!(name: "관리자", email: "label-admin-#{SecureRandom.hex(3)}@example.com", password: "password123", role: :admin)
 
-    @line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "label-line", problem: "p", expected_result: "e", target_audience: "t", status: "published")
+    @line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "label-line", introduction: "소개", status: "published")
     @season = @line.product_seasons.create!(internal_name: "S01", customer_title: "첫 판", season_code: "S01", slug: "s01", status: "published", visibility: "public")
     @season_episode = @season.content_episodes.create!(position: 1, customer_title: "시즌 편", body: "본문", status: "published")
 

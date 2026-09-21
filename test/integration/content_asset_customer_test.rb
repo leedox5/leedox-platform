@@ -4,7 +4,7 @@ require "test_helper"
 # download gate that must hold at every level of the hierarchy.
 class ContentAssetCustomerTest < ActionDispatch::IntegrationTest
   setup do
-    @line = ProductLine.create!(internal_name: "A", customer_name: "결과 제품", slug: "result-line", problem: "p", expected_result: "e", target_audience: "t", status: "published")
+    @line = ProductLine.create!(internal_name: "A", customer_name: "결과 제품", slug: "result-line", introduction: "소개", status: "published")
     @season = @line.product_seasons.create!(internal_name: "S01", customer_title: "첫 판", season_code: "S01", slug: "s01", status: "published", visibility: "public")
     @ep1 = @season.content_episodes.create!(position: 1, customer_title: "첫 편", body: "# 첫 편\n\n본문", status: "published")
     @ep2 = @season.content_episodes.create!(position: 2, customer_title: "마지막 편", body: "# 마지막 편\n\n본문", status: "published")
@@ -129,7 +129,7 @@ class ContentAssetCustomerTest < ActionDispatch::IntegrationTest
     get product_season_episode_asset_path(@line.slug, other_season.slug, other_ep.display_id, @a1.id)
     assert_response :not_found
 
-    other_line = ProductLine.create!(internal_name: "B", customer_name: "B", slug: "other-line", problem: "p", expected_result: "e", target_audience: "t", status: "published")
+    other_line = ProductLine.create!(internal_name: "B", customer_name: "B", slug: "other-line", introduction: "소개", status: "published")
     get product_season_episode_asset_path(other_line.slug, @season.slug, "01", @a1.id)
     assert_response :not_found
 

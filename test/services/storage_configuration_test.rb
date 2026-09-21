@@ -149,7 +149,7 @@ class StorageConfigurationTest < ActiveSupport::TestCase
   test "audit: clean storage is clean; a missing file, a corrupted file and an orphan object are each reported, and nothing is deleted" do
     bucket = FakeBucket.new
     bucket.install do
-      line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "audit-line", problem: "p", expected_result: "e", target_audience: "t")
+      line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "audit-line", introduction: "소개")
       season = line.product_seasons.create!(internal_name: "S", season_code: "S01", slug: "s01")
       episode = season.content_episodes.create!(position: 1, customer_title: "편")
       good = episode.content_assets.create!(title: "정상", kind: "k", position: 1, file: { io: file_fixture("assets/sample.zip").open, filename: "a.zip", content_type: "application/zip" })
@@ -216,7 +216,7 @@ class StorageConfigurationTest < ActiveSupport::TestCase
   test "storage:audit exits non-zero only when a stored file is really missing" do
     bucket = FakeBucket.new
     bucket.install do
-      line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "audit-line-2", problem: "p", expected_result: "e", target_audience: "t")
+      line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "audit-line-2", introduction: "소개")
       line.update!(cover_image: { io: file_fixture("covers/cover.jpg").open, filename: "c.jpg", content_type: "image/jpeg" }, cover_image_alt: "x")
 
       out, status = run_task("storage:audit")

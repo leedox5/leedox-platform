@@ -10,7 +10,7 @@ class ProductLineCoverTest < ActiveSupport::TestCase
   end
 
   def build_line(cover: "cover.jpg", type: "image/jpeg", **attrs)
-    attrs = { internal_name: "내부", customer_name: "제품", slug: "cover-line", problem: "p", expected_result: "e", target_audience: "t",
+    attrs = { internal_name: "내부", customer_name: "제품", slug: "cover-line", introduction: "소개",
               cover_image_alt: "대표 이미지 설명" }.merge(attrs)
     line = ProductLine.new(attrs)
     line.cover_image.attach(upload(cover, type)) if cover

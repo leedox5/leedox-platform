@@ -2,8 +2,8 @@ require "test_helper"
 
 class ProductSeasonTest < ActiveSupport::TestCase
   setup do
-    @line = ProductLine.create!(internal_name: "A", customer_name: "A", slug: "line-a", problem: "p", expected_result: "e", target_audience: "t")
-    @other_line = ProductLine.create!(internal_name: "B", customer_name: "B", slug: "line-b", problem: "p", expected_result: "e", target_audience: "t")
+    @line = ProductLine.create!(internal_name: "A", customer_name: "A", slug: "line-a", introduction: "소개")
+    @other_line = ProductLine.create!(internal_name: "B", customer_name: "B", slug: "line-b", introduction: "소개")
   end
 
   def build(overrides = {})

@@ -3,14 +3,13 @@ require "test_helper"
 # Handoff 0056 R5 -- customer Hero, image delivery gate, fallback.
 class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
   setup do
-    @line = ProductLine.create!(internal_name: "A", customer_name: "결과 제품", slug: "result-line", problem: "해결할 문제 문장",
-      expected_result: "기대 결과 문장", target_audience: "대상", status: "published")
+    @line = ProductLine.create!(internal_name: "A", customer_name: "결과 제품", slug: "result-line", introduction: "소개 문장 첫 줄\n소개 문장 둘째 줄", status: "published")
     @line.cover_image.attach(io: file_fixture("covers/cover.jpg").open, filename: "secret-original-name.jpg", content_type: "image/jpeg")
     @line.update!(cover_image_alt: "코드가 완성되는 화면")
   end
 
   def other_line(cover: false, status: "published")
-    line = ProductLine.create!(internal_name: "B", customer_name: "다른 제품", slug: "other-line", problem: "p", expected_result: "e", target_audience: "t", status: status)
+    line = ProductLine.create!(internal_name: "B", customer_name: "다른 제품", slug: "other-line", introduction: "소개", status: status)
     if cover
       line.cover_image.attach(io: file_fixture("covers/cover.png").open, filename: "other.png", content_type: "image/png")
       line.update!(cover_image_alt: "다른 이미지")
@@ -35,7 +34,7 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
       assert_match(%r{\A/product-covers/result-line/hero\?v=\d+\z}, img["src"])
     end
     main = css_select("main").text
-    %w[결과\ 제품 해결할\ 문제\ 문장 기대\ 결과\ 문장].each { |text| assert_includes main, text }
+    %w[결과\ 제품 소개\ 문장\ 첫\ 줄 소개\ 문장\ 둘째\ 줄].each { |text| assert_includes main, text }
   end
 
   # Character offsets of each landmark inside <main>, so the test can assert document order.
@@ -46,7 +45,7 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
   def assert_single_column_order(main_html, with_image:, with_ai: true)
     landmarks = [ [ :name, "<h1" ] ]
     landmarks << [ :image, "<img" ] if with_image
-    landmarks += [ [ :problem, "해결할 문제" ], [ :result, "기대 결과" ], [ :audience, "대상 고객" ] ]
+    landmarks << [ :introduction, ">소개<" ]
     landmarks << [ :ai, "AI 서포터" ] if with_ai
     landmarks << [ :season, "Season" ]
 
@@ -56,7 +55,7 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
     assert_equal positions.sort_by(&:last).map(&:first), positions.map(&:first), "wrong order: #{positions.inspect}"
   end
 
-  test "Hero is one vertical flow: name, image, problem, result, audience, AI supporter, Seasons" do
+  test "Hero is one vertical flow: name, image, introduction, AI supporter, Seasons" do
     @line.product_seasons.create!(internal_name: "S", customer_title: "첫 판", season_code: "S01", slug: "s01", status: "published", visibility: "public")
     @line.update!(ai_supporter: "Codex")
     get product_line_path(@line.slug)
@@ -70,13 +69,13 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
     assert_select "main > h1", 1
   end
 
-  test "the image sits directly between the name and the problem, full body width, 16:9" do
+  test "the image sits directly between the name and the introduction, full body width, 16:9" do
     get product_line_path(@line.slug)
     kids = css_select("main").first.element_children
     assert_equal "h1", kids[0].name
     assert_equal "div", kids[1].name
     assert kids[1].at_css("img[alt='코드가 완성되는 화면']"), "image must follow the name"
-    assert_includes kids[2].text, "해결할 문제"
+    assert_includes kids[2].text, "소개 문장 첫 줄"
     assert_includes css_select("main img").first["class"], "aspect-video"
     assert_includes css_select("main img").first["class"], "w-full"
     assert_equal "(min-width: 824px) 768px, 100vw", css_select("main img").first["sizes"]
@@ -89,7 +88,7 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
     assert_single_column_order(css_select("main").to_html, with_image: false)
     kids = css_select("main").first.element_children
     assert_equal "h1", kids[0].name
-    assert_includes kids[1].text, "해결할 문제"
+    assert_includes kids[1].text, "소개"
     assert_select "main img", 0
   end
 

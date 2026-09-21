@@ -36,7 +36,7 @@ class BucketStorageTest < ActionDispatch::IntegrationTest
   # A published, license-gated Season with one published episode, a cover on
   # the product, and one file -- all stored in the fake bucket.
   def build_catalog
-    @line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "bucket-line", problem: "p", expected_result: "e", target_audience: "t", status: "published")
+    @line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "bucket-line", introduction: "소개", status: "published")
     @line.update!(cover_image: { io: file_fixture("covers/cover.jpg").open, filename: "cover.jpg", content_type: "image/jpeg" }, cover_image_alt: "대체문구")
     @season = @line.product_seasons.create!(internal_name: "S01", season_code: "S01", slug: "s01", status: "published", visibility: "public")
     @episode = @season.content_episodes.create!(position: 1, customer_title: "첫 편", body: "# 첫 편\n\n본문", status: "published")
@@ -57,7 +57,7 @@ class BucketStorageTest < ActionDispatch::IntegrationTest
 
   test "uploads through the admin screens are stored in the bucket, and nothing touches the local disk" do
     with_bucket do
-      @line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "bucket-line", problem: "p", expected_result: "e", target_audience: "t")
+      @line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "bucket-line", introduction: "소개")
       season = @line.product_seasons.create!(internal_name: "S01", season_code: "S01", slug: "s01")
       episode = season.content_episodes.create!(position: 1, customer_title: "편")
       sign_in(@admin)
@@ -289,7 +289,7 @@ class BucketStorageTest < ActionDispatch::IntegrationTest
       assert_equal "대체문구", @line.cover_image_alt
       assert_equal keys_before, @bucket.keys.sort
 
-      post admin_product_lines_path, params: { product_line: { internal_name: "n", customer_name: "신규", slug: "new-line", problem: "p", expected_result: "e", target_audience: "t",
+      post admin_product_lines_path, params: { product_line: { internal_name: "n", customer_name: "신규", slug: "new-line", introduction: "소개",
         cover_image: fixture_file_upload("covers/cover.jpg", "image/jpeg"), cover_image_alt: "설명" } }
       assert_response :service_unavailable
       assert_not ProductLine.exists?(slug: "new-line")
@@ -305,7 +305,7 @@ class BucketStorageTest < ActionDispatch::IntegrationTest
   test "with production rules on and the Disk service, uploads are refused with a clear message and nothing is saved" do
     previous = StoragePersistence.method(:enforced?)
     StoragePersistence.define_singleton_method(:enforced?) { true }
-    line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "guard-line", problem: "p", expected_result: "e", target_audience: "t")
+    line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "guard-line", introduction: "소개")
     season = line.product_seasons.create!(internal_name: "S01", season_code: "S01", slug: "s01")
     episode = season.content_episodes.create!(position: 1, customer_title: "편")
     sign_in(@admin)

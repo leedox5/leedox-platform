@@ -1,5 +1,5 @@
 <%# Product Hero as one vertical flow, same order on every screen size:
-    name -> cover image (if any) -> problem -> result -> audience / AI supporter.
+    name -> cover image (if any) -> free-form introduction (handoff 0060) -> AI supporter.
     Shared by the customer page and the admin preview; admin: true only changes which image URL is used.
     Without a cover the text follows the name directly (no empty media area). %>
 <% admin = local_assigns.fetch(:admin, false) %>
@@ -20,16 +20,8 @@
 
 <div class="mt-6 space-y-6 break-words text-gray-700">
   <div>
-    <p class="text-xs font-bold uppercase tracking-wide text-blue-600">해결할 문제</p>
-    <p class="mt-1 whitespace-pre-line"><%= product_line.problem %></p>
-  </div>
-  <div>
-    <p class="text-xs font-bold uppercase tracking-wide text-blue-600">기대 결과</p>
-    <p class="mt-1 whitespace-pre-line font-semibold text-gray-900"><%= product_line.expected_result %></p>
-  </div>
-  <div>
-    <p class="text-xs font-bold uppercase tracking-wide text-blue-600">대상 고객</p>
-    <p class="mt-1"><%= product_line.target_audience %></p>
+    <p class="text-xs font-bold uppercase tracking-wide text-blue-600">소개</p>
+    <p class="mt-1 whitespace-pre-line"><%= product_line.introduction %></p>
   </div>
   <% if product_line.ai_supporter.present? %>
     <div>
