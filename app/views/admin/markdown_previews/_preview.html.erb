@@ -1,0 +1,6 @@
+<% if result.warnings.any? %>
+  <ul class="mb-3 space-y-1 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs font-semibold text-amber-900">
+    <% result.warnings.each do |warning| %><li><%= warning %></li><% end %>
+  </ul>
+<% end %>
+<div class="doc-content max-w-none"><%= result.html %></div>

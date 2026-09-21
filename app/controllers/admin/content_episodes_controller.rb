@@ -6,8 +6,6 @@
 # since Admin::BaseController already blocks non-admins from the whole
 # namespace.
 class Admin::ContentEpisodesController < Admin::BaseController
-  include MarkdownChecklistRendering
-
   # Handoff 0054 R2 P0-1 -- any status may move to any other status except
   # itself (a self-transition is the one thing consistently meaningless
   # across every state, so it's the one case rejected).
@@ -124,12 +122,10 @@ class Admin::ContentEpisodesController < Admin::BaseController
     redirect_to edit_admin_content_episode_path(@episode), notice: "#{target_status} 상태로 전환했습니다."
   end
 
-  # Plain rendering (no LinkRewritingRenderer) -- this is an admin-only
-  # preview, not the customer-facing route, and DB episode bodies don't carry
-  # the relative .md-link convention that renderer resolves.
+  # The same renderer as the customer page (ContentMarkdown), with the draft's
+  # own images resolved to the admin-only image route.
   def render_preview_markdown(raw_markdown)
-    html = Redcarpet::Markdown.new(Redcarpet::Render::HTML.new, autolink: true, tables: true, fenced_code_blocks: true).render(raw_markdown.to_s)
-    render_checklist_items(html)
+    ContentMarkdown.render(raw_markdown.to_s, parent: @episode, admin: true)
   end
 
   def set_episode

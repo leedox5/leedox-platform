@@ -17,7 +17,6 @@
 # No License/purchase check yet -- published content is public until the
 # later commerce round wires Seasons to a commerce Product.
 class ProductLinesController < ApplicationController
-  include MarkdownChecklistRendering
   include ProductSeasonGates
 
   before_action :load_product_line
@@ -51,9 +50,9 @@ class ProductLinesController < ApplicationController
     index = @episodes.index(@current_episode)
     @prev_episode = index.positive? ? @episodes[index - 1] : nil
     @next_episode = @episodes[index + 1]
-    @content_html = render_markdown(strip_leading_heading(@current_episode.body.to_s))
+    @content_html = ContentMarkdown.render(strip_leading_heading(@current_episode.body.to_s), parent: @current_episode)
     @takeaways = @current_episode.content_takeaways.ordered.map do |takeaway|
-      { kind: takeaway.kind, body_html: render_markdown(takeaway.body.to_s) }
+      { kind: takeaway.kind, body_html: ContentMarkdown.render(takeaway.body.to_s, parent: @current_episode) }
     end
     @assets = @current_episode.content_assets.ordered.with_attached_file
   end
@@ -67,13 +66,5 @@ class ProductLinesController < ApplicationController
 
   def strip_leading_heading(raw_markdown)
     raw_markdown.sub(/\A\s*#[^\n]*\n?/, "")
-  end
-
-  def render_markdown(raw_markdown)
-    html = Redcarpet::Markdown.new(
-      Redcarpet::Render::HTML.new,
-      autolink: true, tables: true, fenced_code_blocks: true, strikethrough: true, superscript: true
-    ).render(raw_markdown)
-    render_checklist_items(html).html_safe
   end
 end

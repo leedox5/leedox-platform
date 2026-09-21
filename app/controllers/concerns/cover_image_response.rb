@@ -18,27 +18,36 @@ module CoverImageResponse
   # (admin previews); :short lets a browser reuse the image for a few minutes.
   def send_cover_variant(product_line, variant_name, cache:)
     return head :not_found unless ProductLine::COVER_VARIANTS.include?(variant_name.to_s)
-    return head :not_found unless product_line.cover_image.attached?
 
-    blob = product_line.cover_image.variant(variant_name.to_sym).processed.image.blob
+    send_image_variant(product_line.cover_image, variant_name, cache: cache, label: "cover of ProductLine #{product_line.id}")
+  end
+
+  # Handoff 0063 -- the same delivery for any attached image (a ContentImage
+  # too): only the named re-encoded variant is ever sent, headers and the
+  # storage-outage handling stay identical. The caller has already checked
+  # that the variant name is one it defines.
+  def send_image_variant(attached, variant_name, cache:, label:)
+    return head :not_found unless attached.attached?
+
+    blob = attached.variant(variant_name.to_sym).processed.image.blob
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Cache-Control"] = cache == :short ? "private, max-age=300" : "private, no-cache"
     return unless stale?(etag: blob.checksum, public: false)
 
     send_data blob.download, type: blob.content_type, disposition: "inline"
   rescue Vips::Error, ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e
-    Rails.logger.error("Cover variant #{variant_name} for ProductLine #{product_line.id} failed: #{e.class}: #{e.message}")
+    Rails.logger.error("Image variant #{variant_name} of #{label} failed: #{e.class}: #{e.message}")
     head :not_found
   rescue StandardError => e
     if StorageFailures.missing_error?(e)
-      Rails.logger.error("[storage] cover file missing for ProductLine #{product_line.id}: #{e.class}")
+      Rails.logger.error("[storage] image file missing for #{label}: #{e.class}")
       return head(:not_found)
     end
     raise unless StorageFailures.storage_error?(e)
 
     # Storage outage (bucket unreachable, credentials, provider error): the
     # image is temporarily unavailable, not gone -- 503 with a retry hint.
-    Rails.logger.error("[storage] storage unavailable serving cover of ProductLine #{product_line.id}: #{e.class}: #{e.message}")
+    Rails.logger.error("[storage] storage unavailable serving #{label}: #{e.class}: #{e.message}")
     response.headers["Retry-After"] = "30"
     head :service_unavailable
   end

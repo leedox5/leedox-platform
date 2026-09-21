@@ -21,7 +21,9 @@
 <div class="mt-6 space-y-6 break-words text-gray-700">
   <div>
     <p class="text-xs font-bold uppercase tracking-wide text-blue-600">소개</p>
-    <p class="mt-1 whitespace-pre-line"><%= product_line.introduction %></p>
+    <%# Restricted Markdown (handoff 0063): hard line breaks keep the plain text of handoff 0060 looking as it did;
+        images resolve only to this product's own images (admin preview points at the admin-only image route). %>
+    <div class="doc-content mt-1 max-w-none [&_p]:mb-4 [&>:last-child]:mb-0"><%= ContentMarkdown.render(product_line.introduction, parent: product_line, profile: :marketing, admin: admin) %></div>
   </div>
   <% if product_line.ai_supporter.present? %>
     <div>

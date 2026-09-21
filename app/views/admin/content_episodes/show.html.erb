@@ -13,11 +13,7 @@
     <h1 class="text-3xl font-bold text-gray-900"><%= @episode.customer_title.presence || "(제목 없음)" %></h1>
 
     <div class="doc-content mt-8 max-w-none">
-      <%= sanitize(
-        render_preview_markdown(@episode.body),
-        tags: %w[h1 h2 h3 h4 h5 h6 p br hr ul ol li pre code blockquote strong em a img table thead tbody tr th td input],
-        attributes: %w[href target rel src alt type disabled checked style]
-      ) %>
+      <%= render_preview_markdown(@episode.body) %>
     </div>
 
     <% if @takeaways.any? %>
@@ -26,11 +22,7 @@
           <div class="rounded-xl border border-amber-200 bg-amber-50 p-5">
             <p class="text-xs font-bold uppercase tracking-wide text-amber-700"><%= takeaway.kind %></p>
             <div class="doc-content mt-2 max-w-none text-sm">
-              <%= sanitize(
-                render_preview_markdown(takeaway.body),
-                tags: %w[h1 h2 h3 h4 h5 h6 p br hr ul ol li pre code blockquote strong em a img table thead tbody tr th td input],
-                attributes: %w[href target rel src alt type disabled checked style]
-              ) %>
+              <%= render_preview_markdown(takeaway.body) %>
             </div>
           </div>
         <% end %>

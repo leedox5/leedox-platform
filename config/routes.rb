@@ -25,6 +25,9 @@ Rails.application.routes.draw do
   # top-level path on purpose: under /products/:slug/... a segment named
   # "cover" would collide with Season/Episode slugs.
   get "/product-covers/:product_slug/:variant", to: "product_covers#show", as: :product_cover
+  # Handoff 0063 -- inline images of an introduction or an episode body, looked
+  # up by their random public id. Top-level for the same reason as the covers.
+  get "/product-images/:public_id", to: "product_images#show", as: :product_image
   get "/products/:product_slug/:season_slug", to: "product_lines#season", as: :product_season
   get "/products/:product_slug/:season_slug/:episode_id", to: "product_lines#episode", as: :product_season_episode
   get "/products/:product_slug/:season_slug/:episode_id/assets/:asset_id", to: "product_asset_downloads#show", as: :product_season_episode_asset
@@ -120,6 +123,13 @@ Rails.application.routes.draw do
     resources :product_lines, only: %i[index show new create edit update] do
       resources :product_seasons, only: %i[new create], shallow: true
     end
+    # Handoff 0063 -- inline images (introduction / episode body) and the Markdown preview.
+    post "product_lines/:product_line_id/content_images", to: "content_images#create", as: :product_line_content_images
+    post "content_episodes/:content_episode_id/content_images", to: "content_images#create", as: :content_episode_content_images
+    get "content_images/:public_id/:variant", to: "content_images#file", as: :content_image_file, constraints: { variant: /body|thumb/ }
+    patch "content_images/:public_id", to: "content_images#update", as: :content_image
+    delete "content_images/:public_id", to: "content_images#destroy"
+    post "markdown_preview", to: "markdown_previews#create", as: :markdown_preview
     get "product_lines/:product_line_id/cover/:variant", to: "product_line_covers#show", as: :product_line_cover_image
     delete "product_lines/:product_line_id/cover", to: "product_line_covers#destroy", as: :product_line_cover
     resources :product_seasons, only: %i[show edit update] do

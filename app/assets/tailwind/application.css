@@ -25,6 +25,12 @@
 	@apply my-4 ml-6 list-disc;
 }
 
+/* Checklist items rendered by ContentMarkdown (handoff 0063): the checkbox replaces the bullet.
+   A class, not an inline style, because `style` is not an allowed attribute. */
+.doc-content li.checklist-item {
+	list-style-type: none;
+}
+
 .doc-content ol {
 	@apply my-4 ml-6 list-decimal;
 }

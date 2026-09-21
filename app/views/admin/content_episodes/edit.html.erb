@@ -32,6 +32,7 @@
       </div>
     <% end %>
 
+    <div data-controller="markdown-editor" data-markdown-editor-url-value="<%= admin_markdown_preview_path %>" data-markdown-editor-parent-type-value="content_episode" data-markdown-editor-parent-id-value="<%= @episode.id %>">
     <%= form_with model: @episode, url: admin_content_episode_path(@episode), method: :patch, class: "mt-6 space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" do |f| %>
       <% if @episode.errors.any? %>
         <div class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
@@ -53,8 +54,14 @@
 
       <div>
         <%= f.label :body, "본문 (Markdown)", class: "block text-sm font-bold text-slate-700 mb-1" %>
-        <%= f.text_area :body, rows: 16, class: "w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm" %>
-        <p class="mt-1 text-xs text-slate-500">본문을 바꾸고 저장하면 이전 내용이 revision으로 자동 기록됩니다.</p>
+        <%= f.text_area :body, rows: 16, data: { markdown_editor_target: "textarea" }, class: "w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm" %>
+        <p class="mt-1 text-xs text-slate-500">본문을 바꾸고 저장하면 이전 내용이 revision으로 자동 기록됩니다. 원본 HTML은 글자 그대로 보이고, 이미지는 아래 '이미지'에서 올린 것만 <code>![설명](image:ID)</code> 로 넣을 수 있습니다(외부 이미지 주소 불가).</p>
+        <div class="mt-2 flex items-center gap-2">
+          <button type="button" data-action="markdown-editor#preview" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50">미리보기</button>
+          <button type="button" data-action="markdown-editor#closePreview" class="text-xs font-bold text-slate-500 hover:text-slate-800">미리보기 닫기</button>
+        </div>
+        <div data-markdown-editor-target="preview" hidden class="mt-3 rounded-xl border border-slate-200 bg-white p-4"></div>
+
       </div>
 
       <div>
@@ -65,6 +72,9 @@
 
       <%= f.submit "저장", class: "rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700 cursor-pointer" %>
     <% end %>
+
+    <%= render "admin/content_images/panel", parent: @episode %>
+    </div>
 
     <section class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div class="flex items-center justify-between">

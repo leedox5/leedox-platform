@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_21_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_21_130000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -113,6 +113,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_21_120000) do
     t.index ["product_season_id", "position"], name: "index_content_episodes_on_season_and_position", unique: true
     t.index ["product_season_id"], name: "index_content_episodes_on_product_season_id"
     t.check_constraint "(bundle_id IS NOT NULL AND product_season_id IS NULL) OR (bundle_id IS NULL AND product_season_id IS NOT NULL)", name: "content_episodes_exactly_one_parent"
+  end
+
+  create_table "content_images", force: :cascade do |t|
+    t.string "alt", null: false
+    t.integer "content_episode_id"
+    t.datetime "created_at", null: false
+    t.integer "position", default: 0, null: false
+    t.integer "product_line_id"
+    t.string "public_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["content_episode_id"], name: "index_content_images_on_content_episode_id"
+    t.index ["product_line_id"], name: "index_content_images_on_product_line_id"
+    t.index ["public_id"], name: "index_content_images_on_public_id", unique: true
+    t.check_constraint "(product_line_id IS NOT NULL AND content_episode_id IS NULL) OR (product_line_id IS NULL AND content_episode_id IS NOT NULL)", name: "content_images_exactly_one_parent"
   end
 
   create_table "content_revisions", force: :cascade do |t|
@@ -389,6 +403,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_21_120000) do
   add_foreign_key "content_episodes", "content_bundles", column: "bundle_id"
   add_foreign_key "content_episodes", "product_seasons"
   add_foreign_key "content_episodes", "users", column: "author_id"
+  add_foreign_key "content_images", "content_episodes"
+  add_foreign_key "content_images", "product_lines"
   add_foreign_key "content_revisions", "content_episodes", column: "episode_id"
   add_foreign_key "content_revisions", "users", column: "editor_id"
   add_foreign_key "content_takeaways", "content_episodes", column: "episode_id"

@@ -65,11 +65,12 @@ class ProductLineCoverAdminTest < ActionDispatch::IntegrationTest
   # submit / validation behavior tested elsewhere in this file is unchanged.
   def assert_cover_picker
     assert_select "div[data-controller='file-picker']", 1
-    assert_select "input[type=file]", 1
+    # The inline-image panel (handoff 0063) has its own upload form; this picker is the cover's.
+    assert_select "input[type=file][name='product_line[cover_image]']", 1
     assert_select "input[type=file][name='product_line[cover_image]'][accept='image/jpeg,image/png,image/webp']"
     assert_select "input[type=file][data-file-picker-target='input'][data-action='file-picker#update']"
 
-    input_id = css_select("input[type=file]").first["id"]
+    input_id = css_select("input[type=file][name='product_line[cover_image]']").first["id"]
     assert input_id.present?
 
     # the visible button is the label bound to the real input, so clicking / Enter / Space still opens the native dialog
@@ -106,6 +107,7 @@ class ProductLineCoverAdminTest < ActionDispatch::IntegrationTest
     without_image = make_line(with_cover: false, slug: "no-image-line")
     get edit_admin_product_line_path(without_image)
     assert_cover_picker
+    assert_select "#content-images input[type=file]", 1
     assert_no_match(/새 이미지로 교체/, response.body)
 
     line = make_line

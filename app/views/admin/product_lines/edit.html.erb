@@ -14,6 +14,7 @@
       </div>
     </header>
 
+    <div data-controller="markdown-editor" data-markdown-editor-url-value="<%= admin_markdown_preview_path %>" data-markdown-editor-parent-type-value="product_line" data-markdown-editor-parent-id-value="<%= @product_line.id %>">
     <%= form_with model: @product_line, multipart: true, url: admin_product_line_path(@product_line), method: :patch, class: "mt-6 space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" do |f| %>
       <% if @product_line.errors.any? %>
         <div class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
@@ -39,8 +40,14 @@
 
       <div>
         <%= f.label :introduction, "소개", class: "block text-sm font-bold text-slate-700 mb-1" %>
-        <%= f.text_area :introduction, rows: 10, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
-        <p class="mt-1 text-xs text-slate-500">자유롭게 적으세요. 줄바꿈은 그대로 표시되고 마크다운은 적용되지 않습니다.</p>
+        <%= f.text_area :introduction, rows: 10, data: { markdown_editor_target: "textarea" }, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+        <p class="mt-1 text-xs text-slate-500">마크다운을 쓸 수 있습니다: <code>**굵게**</code>, <code>- 목록</code>, <code>[글자](https://…)</code>. 줄바꿈은 그대로 표시됩니다. 원본 HTML은 글자 그대로 보이고, 이미지는 아래에서 올린 것만 <code>![설명](image:ID)</code> 로 넣을 수 있습니다.</p>
+        <div class="mt-2 flex items-center gap-2">
+          <button type="button" data-action="markdown-editor#preview" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50">미리보기</button>
+          <button type="button" data-action="markdown-editor#closePreview" class="text-xs font-bold text-slate-500 hover:text-slate-800">미리보기 닫기</button>
+        </div>
+        <div data-markdown-editor-target="preview" hidden class="mt-3 rounded-xl border border-slate-200 bg-white p-4"></div>
+
       </div>
 
       <div>
@@ -58,6 +65,9 @@
 
       <%= f.submit "저장", class: "rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700 cursor-pointer" %>
     <% end %>
+
+    <%= render "admin/content_images/panel", parent: @product_line %>
+    </div>
 
     <% if @product_line.persisted? && ProductLine.find(@product_line.id).cover_image.attached? %>
       <% stored_cover = ProductLine.find(@product_line.id).cover_image %>

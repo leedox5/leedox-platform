@@ -23,23 +23,21 @@ class ProductLine < ApplicationRecord
   COVER_MAX_BYTES = 5.megabytes
   COVER_MAX_PIXELS = 4096 * 4096
   COVER_ALT_MAX_LENGTH = 200
-  COVER_TYPES = {
-    ".jpg" => %w[image/jpeg],
-    ".jpeg" => %w[image/jpeg],
-    ".png" => %w[image/png],
-    ".webp" => %w[image/webp]
-  }.freeze
+  COVER_TYPES = ImageUploadValidation::TYPES
   # Purpose-specific sizes, both 16:9. `crop: :attention` (libvips smartcrop)
   # keeps the most salient region if an upload isn't already 16:9, so
   # important content isn't blindly center-cropped.
   COVER_VARIANTS = %w[hero thumb].freeze
 
   has_many :product_seasons, dependent: :restrict_with_error
+  # Inline images for the introduction (handoff 0063).
+  has_many :content_images, dependent: :destroy
   has_one_attached :cover_image do |attachable|
     attachable.variant :hero, resize_to_fill: [ 1600, 900, { crop: :attention } ], format: :webp, saver: { quality: 82, strip: true }
     attachable.variant :thumb, resize_to_fill: [ 480, 270, { crop: :attention } ], format: :webp, saver: { quality: 80, strip: true }
   end
   include UploadsBeforeCommit
+  include ImageUploadValidation
 
   before_validation :normalize_slug
 
@@ -83,58 +81,11 @@ class ProductLine < ApplicationRecord
   end
 
   def new_cover_image?
-    attachment_changes["cover_image"].present?
+    new_image_attached?(:cover_image)
   end
 
-  # Extension and detected content type must agree, then the bytes are actually
-  # decoded: header size against the pixel cap first (cheap, before any pixel
-  # is decoded), then a full decode to catch truncated/corrupt files, and
-  # animated files are refused (variants are single-frame stills).
   def cover_image_acceptable
-    blob = cover_image.blob
-    return if blob.nil?
-
-    extension = File.extname(blob.filename.to_s).downcase
-    unless COVER_TYPES.key?(extension)
-      return errors.add(:cover_image, "허용되지 않는 형식입니다 (허용: JPEG, PNG, WebP — SVG·GIF 등은 사용할 수 없습니다).")
-    end
-    unless COVER_TYPES[extension].include?(blob.content_type)
-      return errors.add(:cover_image, "파일 내용이 #{extension} 이미지와 맞지 않습니다.")
-    end
-    if blob.byte_size > self.class.max_cover_bytes
-      return errors.add(:cover_image, "파일이 너무 큽니다 (최대 #{ActiveSupport::NumberHelper.number_to_human_size(self.class.max_cover_bytes)}).")
-    end
-
-    check_cover_decodes
-  end
-
-  def check_cover_decodes
-    require "vips"
-    data = pending_cover_bytes
-    return if data.nil?
-
-    image = Vips::Image.new_from_buffer(data, "", fail_on: :truncated)
-    pages = image.get_typeof("n-pages").zero? ? 1 : image.get("n-pages")
-    return errors.add(:cover_image, "애니메이션 이미지는 사용할 수 없습니다.") if pages > 1
-
-    if image.width * image.height > self.class.max_cover_pixels
-      return errors.add(:cover_image, "해상도가 너무 큽니다 (최대 #{(self.class.max_cover_pixels / 1_000_000.0).round(1)}메가픽셀, 예: 4096×4096).")
-    end
-
-    image.avg # forces a full decode; raises on truncated or corrupt data
-  rescue Vips::Error
-    errors.add(:cover_image, "이미지를 읽을 수 없습니다 (손상되었거나 지원하지 않는 파일입니다).")
-  end
-
-  def pending_cover_bytes
-    attachable = attachment_changes["cover_image"].attachable
-    io = attachable.is_a?(Hash) ? attachable[:io] : attachable
-    return nil unless io.respond_to?(:read)
-
-    io.rewind if io.respond_to?(:rewind)
-    data = io.read
-    io.rewind if io.respond_to?(:rewind)
-    data
+    validate_uploaded_image(:cover_image, max_bytes: self.class.max_cover_bytes, max_pixels: self.class.max_cover_pixels)
   end
 
   def normalize_slug

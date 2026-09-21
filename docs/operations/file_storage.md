@@ -1,6 +1,6 @@
 # 파일 저장소 운영 가이드 (handoff 0058)
 
-대표 이미지(ProductLine)와 Season 산출물(ContentAsset)은 Active Storage로 저장합니다. production은
+대표 이미지(ProductLine), 본문·소개 이미지(ContentImage, handoff 0063)와 Season 산출물(ContentAsset)은 Active Storage로 저장합니다. production은
 **Railway Storage Bucket**(비공개 S3 호환 object storage)을 쓰고, 개발·test는 로컬 디스크를 씁니다.
 이 문서는 production 연결·점검·장애 대응 절차입니다. **이 문서와 저장소 어디에도 인증 값은 적지 않습니다.**
 

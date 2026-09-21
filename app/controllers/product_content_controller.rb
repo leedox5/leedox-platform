@@ -97,9 +97,9 @@ class ProductContentController < ApplicationController
     authorize episode_policy_hash(@current_episode), :view?, policy_class: DocPolicy
 
     @episodes = @source.episodes_for_bundle(@bundle)
-    @content_html = render_bundle_markdown(strip_leading_heading(@current_episode.body.to_s))
+    @content_html = ContentMarkdown.render(strip_leading_heading(@current_episode.body.to_s), parent: @current_episode)
     @takeaways = @current_episode.content_takeaways.ordered.map do |takeaway|
-      { kind: takeaway.kind, body_html: render_bundle_markdown(takeaway.body.to_s) }
+      { kind: takeaway.kind, body_html: ContentMarkdown.render(takeaway.body.to_s, parent: @current_episode) }
     end
     @last_updated_at = @current_episode.updated_at
 
@@ -117,14 +117,6 @@ class ProductContentController < ApplicationController
 
   def episode_policy_hash(episode)
     { id: episode.display_id, product_code: @product_code }
-  end
-
-  def render_bundle_markdown(raw_markdown)
-    html = Redcarpet::Markdown.new(
-      Redcarpet::Render::HTML.new,
-      autolink: true, tables: true, fenced_code_blocks: true, strikethrough: true, superscript: true
-    ).render(raw_markdown)
-    render_checklist_items(html).html_safe
   end
 
   # --- File-based flat flow (unchanged since before handoff 0055) ---

@@ -91,6 +91,7 @@ class AdminContentEpisodeLifecycleAndPreviewTest < ActionDispatch::IntegrationTe
     assert_select "input[type=checkbox][checked]", count: 1
   end
 
+  # Handoff 0063: the bullet is removed by a CSS class now, never an inline style (`style` is not an allowed attribute).
   test "only the checklist-converted <li> loses its bullet -- a plain bullet item in the same list keeps its default marker" do
     get admin_content_episode_path(@episode)
     doc = Nokogiri::HTML(response.body)
@@ -100,7 +101,13 @@ class AdminContentEpisodeLifecycleAndPreviewTest < ActionDispatch::IntegrationTe
 
     assert_equal 2, checklist_items.size
     assert_equal 1, plain_items.size
-    checklist_items.each { |li| assert_match(/list-style-type\s*:\s*none/, li["style"].to_s) }
-    plain_items.each { |li| assert_nil li["style"] }
+    checklist_items.each do |li|
+      assert_equal "checklist-item", li["class"]
+      assert_nil li["style"]
+    end
+    plain_items.each do |li|
+      assert_nil li["class"]
+      assert_nil li["style"]
+    end
   end
 end

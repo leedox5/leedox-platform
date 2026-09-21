@@ -1,0 +1,55 @@
+<%# Handoff 0063 -- inline images of a ProductLine introduction or an Episode body. Must sit INSIDE the element that
+    carries data-controller="markdown-editor" (so "본문에 삽입" can reach the text field) but OUTSIDE the main <form>
+    (forms cannot nest). `parent` is a saved ProductLine or ContentEpisode. %>
+<%# Between a deploy and its migration the table does not exist yet: keep the editing screen working (without the panel) instead of failing. %>
+<% if !ContentImage.table_exists? %>
+  <section class="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900" id="content-images-unavailable">
+    이미지 기능은 배포 후 데이터베이스 준비(마이그레이션)가 끝나면 사용할 수 있습니다.
+  </section>
+<% else %>
+<% images = parent.content_images.ordered.with_attached_file %>
+<% upload_path = parent.is_a?(ProductLine) ? admin_product_line_content_images_path(parent) : admin_content_episode_content_images_path(parent) %>
+<section class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" id="content-images">
+  <h2 class="text-lg font-bold text-slate-900">이미지</h2>
+  <p class="mt-1 text-xs text-slate-500">
+    여기에 올린 이미지만 글에 넣을 수 있습니다(외부 이미지 주소는 표시되지 않습니다). JPEG·PNG·WebP, 한 장 최대
+    <%= number_to_human_size(ContentImage.max_file_bytes) %>, 최대 4096×4096px, 최대 <%= ContentImage.max_images_per_parent %>장·합계
+    <%= number_to_human_size(ContentImage.max_total_bytes_per_parent) %>. 화면에는 가로 1600px 이하로 줄여(비율 유지, 자르지 않음) 표시합니다.
+  </p>
+
+  <ul class="mt-4 divide-y divide-slate-100">
+    <% images.each do |image| %>
+      <li class="flex flex-col gap-3 py-4 sm:flex-row sm:items-start">
+        <img src="<%= admin_content_image_file_path(image.public_id, variant: 'thumb') %>" alt="<%= image.alt %>"
+             class="h-24 w-36 flex-shrink-0 rounded-lg border border-slate-200 bg-slate-50 object-contain" loading="lazy">
+        <div class="min-w-0 flex-1 space-y-2">
+          <%= form_with url: admin_content_image_path(image.public_id), method: :patch, scope: :content_image, class: "flex flex-wrap items-center gap-2" do |f| %>
+            <%= f.text_field :alt, value: image.alt, maxlength: ContentImage::ALT_MAX_LENGTH, required: true, "aria-label": "대체문구",
+              class: "min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm" %>
+            <%= f.submit "대체문구 저장", class: "cursor-pointer rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50" %>
+          <% end %>
+          <p class="break-all font-mono text-xs text-slate-500"><%= image.markdown_snippet %></p>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" data-action="markdown-editor#insert" data-markdown-editor-snippet-param="<%= image.markdown_snippet %>"
+                    class="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700">본문에 삽입</button>
+            <%= button_to "삭제", admin_content_image_path(image.public_id), method: :delete,
+              form: { class: "inline" },
+              data: { turbo_confirm: image.referenced? ? "이 이미지는 글에서 사용 중입니다. 삭제하면 글에서 보이지 않게 되고 되돌릴 수 없습니다. 삭제할까요?" : "이 이미지를 삭제할까요? 되돌릴 수 없습니다." },
+              class: "rounded-lg border border-red-300 px-3 py-1.5 text-xs font-bold text-red-700 hover:bg-red-50" %>
+            <% if image.referenced? %><span class="text-xs font-semibold text-emerald-700">글에서 사용 중</span><% end %>
+          </div>
+        </div>
+      </li>
+    <% end %>
+    <% if images.empty? %><li class="py-6 text-center text-sm text-slate-500">아직 올린 이미지가 없습니다.</li><% end %>
+  </ul>
+
+  <%= form_with url: upload_path, method: :post, scope: :content_image, multipart: true, class: "mt-4 space-y-3 rounded-xl bg-slate-50 p-4" do |f| %>
+    <p class="text-sm font-bold text-slate-700">새 이미지 추가</p>
+    <%= f.file_field :file, accept: "image/jpeg,image/png,image/webp", required: true, class: "block w-full text-sm text-slate-700" %>
+    <%= f.text_field :alt, placeholder: "대체문구 (필수) — 이미지를 볼 수 없는 방문자에게 읽어주는 설명", maxlength: ContentImage::ALT_MAX_LENGTH, required: true,
+      class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+    <%= f.submit "이미지 올리기", class: "cursor-pointer rounded-lg bg-slate-800 px-4 py-2 text-sm font-bold text-white hover:bg-slate-900" %>
+  <% end %>
+</section>
+<% end %>

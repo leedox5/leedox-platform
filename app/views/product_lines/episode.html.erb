@@ -11,11 +11,7 @@
     </div>
 
     <div class="doc-content max-w-none">
-      <%= sanitize(
-        @content_html,
-        tags: %w[h1 h2 h3 h4 h5 h6 p br hr ul ol li pre code blockquote strong em a img table thead tbody tr th td input],
-        attributes: %w[href target rel src alt type disabled checked style]
-      ) %>
+      <%= @content_html %>
     </div>
 
     <% if @takeaways.present? || @assets.present? %>
@@ -28,11 +24,7 @@
               <div class="rounded-xl border border-amber-200 bg-amber-50 p-5">
                 <p class="text-xs font-bold uppercase tracking-wide text-amber-700"><%= takeaway[:kind] %></p>
                 <div class="doc-content mt-2 max-w-none text-sm">
-                  <%= sanitize(
-                    takeaway[:body_html],
-                    tags: %w[h1 h2 h3 h4 h5 h6 p br hr ul ol li pre code blockquote strong em a img table thead tbody tr th td input],
-                    attributes: %w[href target rel src alt type disabled checked style]
-                  ) %>
+                  <%= takeaway[:body_html] %>
                 </div>
               </div>
             <% end %>

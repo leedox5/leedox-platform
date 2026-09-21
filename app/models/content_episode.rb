@@ -10,6 +10,8 @@ class ContentEpisode < ApplicationRecord
   has_many :content_takeaways, foreign_key: :episode_id, inverse_of: :episode, dependent: :destroy
   has_many :content_revisions, foreign_key: :episode_id, inverse_of: :episode, dependent: :destroy
   has_many :content_assets, dependent: :destroy
+  # Inline images for the body and takeaways (handoff 0063).
+  has_many :content_images, dependent: :destroy
 
   # Set by the controller before #update (see Admin::ContentEpisodesController)
   # so #snapshot_previous_body can record who made the change -- not a DB

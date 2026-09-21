@@ -16,11 +16,15 @@ class ProductLineIntroductionTest < ActionDispatch::IntegrationTest
 
   # --- customer page --------------------------------------------------------
 
-  test "the customer page shows the introduction as one section, keeping line breaks and adding no formatting" do
+  # Handoff 0063 reversed 0060's "no Markdown": the introduction is rendered as restricted Markdown
+  # (ContentMarkdown, :marketing profile) -- still one section, with the stored text unchanged.
+  test "the customer page shows the introduction as one section, rendering Markdown but never raw HTML" do
     get product_line_path(@line.slug)
     assert_response :success
-    assert_select "main p.whitespace-pre-line", text: /첫 줄입니다\.\s+둘째 문단 \*\*굵게\*\* <b>태그<\/b>/
-    assert_select "main strong, main b", count: 0
+    assert_select "main .doc-content p", text: /첫 줄입니다\./
+    assert_select "main .doc-content strong", text: "굵게"
+    assert_select "main b", count: 0
+    assert_includes css_select("main .doc-content").text, "<b>태그</b>"
     assert_select "main p.text-xs", text: "소개", count: 1
     body = css_select("main").text
     %w[해결할\ 문제 기대\ 결과 대상\ 고객].each { |label| assert_not_includes body, label }
@@ -28,10 +32,10 @@ class ProductLineIntroductionTest < ActionDispatch::IntegrationTest
 
   test "guests and signed-in visitors see the identical introduction and a draft product is still hidden" do
     get product_line_path(@line.slug)
-    guest = css_select("main p.whitespace-pre-line").first.text
+    guest = css_select("main .doc-content").first.text
     sign_in(@admin)
     get product_line_path(@line.slug)
-    assert_equal guest, css_select("main p.whitespace-pre-line").first.text
+    assert_equal guest, css_select("main .doc-content").first.text
 
     @line.update!(status: "draft")
     get product_line_path(@line.slug)
@@ -79,7 +83,7 @@ class ProductLineIntroductionTest < ActionDispatch::IntegrationTest
     sign_in(@admin)
     get admin_product_line_path(@line)
     assert_response :success
-    assert_select "p.whitespace-pre-line", text: /첫 줄입니다/
+    assert_select ".doc-content p", text: /첫 줄입니다/
   end
 
   # --- data migration -------------------------------------------------------
