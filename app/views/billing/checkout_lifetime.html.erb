@@ -5,31 +5,31 @@
 
   <main class="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6">
     <div class="mb-8">
-      <p class="text-sm font-black uppercase tracking-[0.18em] text-blue-700"><%= @season.product_line.customer_name %> · <%= @season.season_code %></p>
-      <h1 class="mt-2 break-keep text-3xl font-black tracking-tight text-slate-950"><%= @season.display_title %> <%= @free ? "무료 이용" : "구매" %></h1>
+      <% if @product_line.series_label.present? %><p class="text-sm font-black uppercase tracking-[0.18em] text-blue-700"><%= @product_line.series_label %></p><% end %>
+      <h1 class="mt-2 break-keep text-3xl font-black tracking-tight text-slate-950"><%= @product_line.customer_name %> <%= @free ? "무료 이용" : "구매" %></h1>
       <% if @free %>
-        <p class="mt-3 break-keep text-sm leading-6 text-slate-600">결제나 주문 없이 이 Season을 무료로 시작합니다. 시작하면 기간 제한 없이 이용할 수 있으며, 다른 Season은 포함되지 않습니다.</p>
+        <p class="mt-3 break-keep text-sm leading-6 text-slate-600">결제나 주문 없이 이 제품을 무료로 시작합니다. 시작하면 기간 제한 없이 이용할 수 있으며, 다른 제품은 포함되지 않습니다.</p>
       <% else %>
-        <p class="mt-3 break-keep text-sm leading-6 text-slate-600">한 번 결제하면 기간 제한 없이 이 Season을 이용합니다. 다른 Season은 포함되지 않으며, 금액은 VAT 포함입니다.</p>
+        <p class="mt-3 break-keep text-sm leading-6 text-slate-600">한 번 결제하면 기간 제한 없이 이 제품을 이용합니다. 다른 제품은 포함되지 않으며, 금액은 VAT 포함입니다.</p>
       <% end %>
     </div>
 
     <% if @already_owned %>
-      <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-6" id="season-already-owned">
-        <h2 class="font-bold text-emerald-900">이미 구매한 Season입니다</h2>
+      <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-6" id="product-already-owned">
+        <h2 class="font-bold text-emerald-900">이미 구매한 제품입니다</h2>
         <p class="mt-2 text-sm text-emerald-800">추가 결제 없이 계속 이용하실 수 있습니다.</p>
-        <%= link_to "Season 보러 가기", product_season_path(@season.product_line.slug, @season.slug), class: "mt-4 inline-flex rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-700" %>
+        <%= link_to "제품 보러 가기", product_line_path(@product_line.slug), class: "mt-4 inline-flex rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-700" %>
       </div>
     <% elsif !@purchasable %>
-      <div class="rounded-2xl border border-amber-200 bg-amber-50 p-6" id="season-not-purchasable">
+      <div class="rounded-2xl border border-amber-200 bg-amber-50 p-6" id="product-not-purchasable">
         <h2 class="font-bold text-amber-900">지금은 <%= @free ? "시작할" : "구매할" %> 수 없습니다</h2>
-        <p class="mt-2 text-sm text-amber-800">이 Season은 준비 중이거나 이용 시작이 중지되었습니다.</p>
+        <p class="mt-2 text-sm text-amber-800">이 제품은 준비 중이거나 이용 시작이 중지되었습니다.</p>
       </div>
     <% elsif @free %>
-      <section class="rounded-2xl border border-emerald-200 bg-emerald-50 p-6" id="season-free-start">
+      <section class="rounded-2xl border border-emerald-200 bg-emerald-50 p-6" id="product-free-start">
         <p class="text-xs font-bold uppercase tracking-wide text-emerald-700">무료 · 무기한 이용</p>
         <strong class="mt-3 block text-3xl text-slate-950">무료</strong>
-        <%= button_to "무료로 이용 시작", claim_free_season_path(@product.code), method: :post,
+        <%= button_to "무료로 이용 시작", claim_free_access_path(@product.code), method: :post,
           class: "mt-5 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-emerald-700" %>
       </section>
     <% else %>

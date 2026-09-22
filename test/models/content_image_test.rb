@@ -4,8 +4,7 @@ require "test_helper"
 class ContentImageTest < ActiveSupport::TestCase
   setup do
     @line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "img-line", introduction: "소개", status: "published")
-    @season = @line.product_seasons.create!(internal_name: "S", season_code: "S01", slug: "s01", status: "published", visibility: "public")
-    @episode = @season.content_episodes.create!(position: 1, customer_title: "편", body: "본문", status: "published")
+    @episode = @line.content_episodes.create!(position: 1, customer_title: "편", body: "본문", status: "published")
   end
 
   def upload(fixture = "covers/cover.jpg", type = "image/jpeg")
@@ -170,7 +169,7 @@ class ContentImageTest < ActiveSupport::TestCase
     assert_equal :short, image.cache_mode
   end
 
-  test "an episode image follows the product, the Season and the episode gates" do
+  test "an episode image follows the product and the episode gates" do
     image = build(@episode).tap(&:save!)
     assert image.visible_to?(nil)
     assert_equal :revalidate, image.cache_mode
@@ -179,27 +178,33 @@ class ContentImageTest < ActiveSupport::TestCase
     assert_not image.reload.visible_to?(nil)
     @episode.update!(status: "published")
 
-    @season.update!(visibility: "private")
+    @line.update!(visibility: "private")
     assert_not image.reload.visible_to?(nil)
-    @season.update!(visibility: "unlisted")
-    assert image.reload.visible_to?(nil), "an unlisted Season is reachable by URL, so is its image"
+    @line.update!(visibility: "unlisted")
+    assert image.reload.visible_to?(nil), "an unlisted product is reachable by URL, so is its image"
 
-    @season.update!(status: "unpublished")
+    @line.update!(status: "unpublished")
     assert_not image.reload.visible_to?(nil)
-    @season.update!(status: "published", visibility: "public")
-
     @line.update!(status: "draft")
     assert_not image.reload.visible_to?(nil)
   end
 
-  test "an episode image of a license-gated Season needs an active license" do
+  test "an introduction image needs a reachable product, not just a published one" do
+    image = build.tap(&:save!)
+    @line.update!(visibility: "private")
+    assert_not image.reload.visible_to?(nil)
+    @line.update!(visibility: "public")
+    assert image.reload.visible_to?(nil)
+  end
+
+  test "an episode image of a license-gated product needs an active license" do
     admin = User.create!(name: "관", email: "gate-admin@example.com", password: "password123", role: :admin)
     holder = User.create!(name: "보유", email: "gate-holder@example.com", password: "password123", created_at: 30.days.ago)
     other = User.create!(name: "타인", email: "gate-other@example.com", password: "password123", created_at: 30.days.ago)
     Commerce::CatalogBootstrap.call!
-    Commerce::SeasonSales.set_price!(season: @season, total_amount: 0, actor: admin)
-    Commerce::SeasonSales.start_sale!(season: @season, actor: admin)
-    Commerce::ClaimFreeSeason.call!(user: holder, season: @season.reload)
+    Commerce::ProductLineSales.set_price!(product_line: @line, total_amount: 0, actor: admin)
+    Commerce::ProductLineSales.start_sale!(product_line: @line, actor: admin)
+    Commerce::ClaimFreeAccess.call!(user: holder, product_line: @line.reload)
     image = build(@episode).tap(&:save!)
 
     assert_not image.visible_to?(nil)

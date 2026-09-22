@@ -89,20 +89,20 @@ class ContentImage < ApplicationRecord
 
   # Whether `user` may see the image on a customer page. It follows exactly the
   # gates of the page that shows it, so a picture is never reachable when its
-  # text is not: an introduction image needs a published product; an episode
-  # image needs the published product, a reachable Season and published
-  # episode, plus -- for a license-gated Season -- an active license. Admins see
-  # everything (draft previews).
+  # text is not: an introduction image needs a reachable (published, not
+  # private) product; an episode image needs that plus a published episode and
+  # -- for a license-gated product -- an active license. Admins see everything
+  # (draft previews).
   def visible_to?(user)
     return true if user&.admin?
-    return product_line.published? if product_line
+    return product_line.customer_reachable? if product_line
 
     episode = content_episode
     return false unless episode.published?
 
     case (container = episode.parent)
-    when ProductSeason
-      return false unless container.customer_reachable? && container.product_line.published?
+    when ProductLine
+      return false unless container.customer_reachable?
       return true unless container.gated?
 
       Entitlements::ProductAccess.allowed?(user: user, product_code: container.product.code)

@@ -12,7 +12,7 @@ class License < ApplicationRecord
   validates :starts_on, presence: true
   validates :access_ends_at, :last_usable_on, presence: true, unless: :indefinite?
   validate :period_is_all_or_none
-  validate :indefinite_only_for_season_products
+  validate :indefinite_only_for_line_products
   validates :order_item_id, uniqueness: true, allow_nil: true
   validate :period_is_ordered
 
@@ -23,7 +23,7 @@ class License < ApplicationRecord
   # license never expires. It is deliberately not a far-future date: every
   # "is this still valid" question goes through active_at?/effective_status
   # below, so there is no date for a report or a stacking calculation to trip
-  # over. Only one-time Season purchases create these; term products never do.
+  # over. Only one-time product purchases (and free starts) create these; term products never do.
   def indefinite?
     access_ends_at.nil?
   end
@@ -53,11 +53,11 @@ class License < ApplicationRecord
   private
 
   # A missing end date on a term product's license is a bug, not "forever" --
-  # only a Season's one-time purchase may create an indefinite license.
-  def indefinite_only_for_season_products
+  # only a product line's one-time purchase may create an indefinite license.
+  def indefinite_only_for_line_products
     return unless indefinite? && product
 
-    errors.add(:access_ends_at, :blank) unless product.season_product?
+    errors.add(:access_ends_at, :blank) unless product.line_product?
   end
 
   def period_is_all_or_none

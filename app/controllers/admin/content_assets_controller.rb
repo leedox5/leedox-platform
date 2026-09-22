@@ -1,8 +1,8 @@
 # Handoff 0056 R4 -- upload/replace/delete/download of files attached to a
-# ProductSeason Episode. Admin::BaseController already restricts this whole
+# ProductLine Episode. Admin::BaseController already restricts this whole
 # namespace to authenticated admins.
 #
-# Assets are only managed for Season episodes; the shallow routes also
+# Assets are only managed for product episodes; the shallow routes also
 # resolve for legacy Bundle episodes (they share ContentEpisode), so
 # #set_episode / #set_asset 404 those instead of relying on the UI merely
 # not linking to them. Downloads are in Admin::ContentAssetDownloadsController.
@@ -56,12 +56,12 @@ class Admin::ContentAssetsController < Admin::BaseController
   def set_asset
     @asset = ContentAsset.find(params[:id])
     @episode = @asset.content_episode
-    head :not_found unless @episode.product_season_id?
+    head :not_found unless @episode.product_line_id?
   end
 
   def set_episode_from_params
     @episode = ContentEpisode.find(params[:content_episode_id])
-    head :not_found unless @episode.product_season_id?
+    head :not_found unless @episode.product_line_id?
   end
 
   def next_position

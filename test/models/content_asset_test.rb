@@ -5,8 +5,7 @@ class ContentAssetTest < ActiveSupport::TestCase
 
   setup do
     line = ProductLine.create!(internal_name: "A", customer_name: "A", slug: "line-a", introduction: "소개")
-    @season = line.product_seasons.create!(internal_name: "S01", season_code: "S01", slug: "s01")
-    @episode = @season.content_episodes.create!(position: 1, customer_title: "편")
+    @episode = line.content_episodes.create!(position: 1, customer_title: "편")
   end
 
   def upload(name, content_type = nil, filename: name)
@@ -44,7 +43,7 @@ class ContentAssetTest < ActiveSupport::TestCase
     assert_not dup.valid?
     assert_includes dup.errors.attribute_names, :position
 
-    other_episode = @season.content_episodes.create!(position: 2, customer_title: "다음 편")
+    other_episode = @episode.product_line.content_episodes.create!(position: 2, customer_title: "다음 편")
     assert other_episode.content_assets.new(title: "x", kind: "k", position: 1, file: upload("sample.zip", "application/zip")).valid?
   end
 

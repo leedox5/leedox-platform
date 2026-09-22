@@ -1,7 +1,7 @@
 # Handoff 0063 -- customer delivery of an inline image (introduction or episode
 # body). Every request re-checks the same gates as the page that shows the image
 # (ContentImage#visible_to?), so an image is never reachable when its text is
-# not: a draft product, an unpublished Season/episode or a paid Season without a
+# not: a draft product, an unpublished episode or a paid product without a
 # license all answer 404, exactly like the page. The route is an application
 # path -- no Active Storage blob URL is ever rendered.
 class ProductImagesController < ApplicationController

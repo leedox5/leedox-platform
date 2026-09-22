@@ -1,49 +1,41 @@
-# Handoff 0056 R3 -- customer pages for ProductLine -> ProductSeason ->
-# Episode, entirely separate from ProductContentController (/content/...).
+# Customer pages for a ProductLine and its Episodes (handoff 0056 R3; since 0065
+# the ProductLine is the sellable unit and the Season layer is gone), entirely
+# separate from ProductContentController (/content/...).
 #
-# Every level applies its own lifecycle gate and 404s (never redirects or
-# hints) when it isn't met, so a draft product/season/episode is invisible
-# even to someone who knows the slug:
-#   ProductLine  -> status published
-#   ProductSeason -> status published AND visibility public/unlisted
-#                    (only public ones are *listed* on the product page)
+# Each level applies its own lifecycle gate and 404s (never redirects or hints)
+# when it isn't met, so a draft product/episode is invisible even to someone who
+# knows the slug:
+#   ProductLine    -> status published AND visibility public/unlisted
 #   ContentEpisode -> status published
+#   (gated product -> an active license, for episode bodies and files)
 # Admins preview drafts through the separate Admin::* preview actions; there
 # is no query param or session flag here that opens a gate.
 #
 # File downloads live in ProductAssetDownloadsController and reuse the same
-# gates (ProductSeasonGates).
-#
-# No License/purchase check yet -- published content is public until the
-# later commerce round wires Seasons to a commerce Product.
+# gates (ProductLineGates).
 class ProductLinesController < ApplicationController
-  include ProductSeasonGates
+  include ProductLineGates
 
   before_action :load_product_line
-  before_action :load_season, only: %i[season episode]
   before_action :load_episode, only: %i[episode]
-  before_action :require_season_license, only: %i[episode]
+  before_action :require_product_license, only: %i[episode]
 
+  # The product page: introduction, what a visitor can do to get it (purchase
+  # box), and the published episodes.
   def show
-    @seasons = @product_line.product_seasons.customer_listed.ordered
-    # Handoff 0059 price summary: only what a visitor could actually get right now.
-    @summary_seasons = @seasons.select(&:acquirable?)
-  end
-
-  def season
-    @episodes = @season.content_episodes.published.ordered
-    @owned = season_owned?
-    # Files of a paid Season are listed only for owners (downloads are gated
+    @episodes = @product_line.content_episodes.published.ordered
+    @owned = product_owned?
+    # Files of a paid product are listed only for owners (downloads are gated
     # separately in ProductAssetDownloadsController regardless).
-    @assets_by_episode = if !@season.gated? || @owned
+    @assets_by_episode = if !@product_line.gated? || @owned
       ContentAsset.where(content_episode_id: @episodes.map(&:id)).ordered.with_attached_file.group_by(&:content_episode_id)
     else
       {}
     end
-    @offer = @season.lifetime_offer if @season.gated?
-    @for_sale = @season.for_sale?
-    @free = @season.free?
-    @free_open = @season.free_start_open?
+    @offer = @product_line.lifetime_offer if @product_line.gated?
+    @for_sale = @product_line.for_sale?
+    @free = @product_line.free?
+    @free_open = @product_line.free_start_open?
   end
 
   def episode
@@ -59,9 +51,9 @@ class ProductLinesController < ApplicationController
 
   private
 
-  def season_owned?
-    @season.gated? && user_signed_in? &&
-      Entitlements::ProductAccess.allowed?(user: current_user, product_code: @season.product.code)
+  def product_owned?
+    @product_line.gated? && user_signed_in? &&
+      Entitlements::ProductAccess.allowed?(user: current_user, product_code: @product_line.product.code)
   end
 
   def strip_leading_heading(raw_markdown)

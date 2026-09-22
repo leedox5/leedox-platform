@@ -1,10 +1,10 @@
-<%# Access state of a license-gated Season (handoff 0057): purchase for a priced Season, an explicit
-    "무료 이용 시작" for a 0-won Season. Seasons without a commerce Product render nothing. %>
-<% if season.gated? %>
-  <section class="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-5" aria-label="이용 안내" id="season-purchase">
+<%# Access state of a license-gated product (handoff 0057; per product line since 0065): purchase for a priced
+    product, an explicit "무료 이용 시작" for a 0-won one. A product without a commerce Product renders nothing. %>
+<% if product_line.gated? %>
+  <section class="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-5" aria-label="이용 안내" id="product-purchase">
     <% if owned %>
-      <p class="font-bold text-blue-900"><%= free ? "무료로 이용 중인 Season입니다 · 무기한 이용" : "구매한 Season입니다 · 무기한 이용" %></p>
-      <p class="mt-1 text-sm text-blue-800">이 Season의 모든 편과 산출물을 계속 이용하실 수 있습니다.</p>
+      <p class="font-bold text-blue-900"><%= free ? "무료로 이용 중인 제품입니다 · 무기한 이용" : "구매한 제품입니다 · 무기한 이용" %></p>
+      <p class="mt-1 text-sm text-blue-800">이 제품의 모든 편과 산출물을 계속 이용하실 수 있습니다.</p>
     <% elsif free && free_open %>
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -12,27 +12,27 @@
           <p class="mt-1 text-2xl font-black text-slate-950">무료</p>
         </div>
         <% if user_signed_in? %>
-          <%= button_to "무료로 이용 시작", claim_free_season_path(season.product.code), method: :post,
+          <%= button_to "무료로 이용 시작", claim_free_access_path(product_line.product.code), method: :post,
             class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-emerald-700" %>
         <% else %>
-          <%= link_to "로그인하고 무료로 시작", billing_checkout_path(season.product.code),
+          <%= link_to "로그인하고 무료로 시작", billing_checkout_path(product_line.product.code),
             class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-emerald-700" %>
         <% end %>
       </div>
-      <p class="mt-3 text-xs text-slate-600">결제나 주문 없이 시작할 수 있습니다. 다른 Season은 포함되지 않습니다.</p>
+      <p class="mt-3 text-xs text-slate-600">결제나 주문 없이 시작할 수 있습니다. 다른 제품은 포함되지 않습니다.</p>
     <% elsif !free && for_sale && offer %>
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p class="text-xs font-bold uppercase tracking-wide text-blue-700">한 번 결제 · 무기한 이용</p>
           <p class="mt-1 text-2xl font-black text-slate-950"><%= number_with_delimiter(offer.total_amount) %>원 <span class="text-sm font-semibold text-slate-500">(VAT 포함)</span></p>
         </div>
-        <%= link_to "구매하기", billing_checkout_path(season.product.code),
+        <%= link_to "구매하기", billing_checkout_path(product_line.product.code),
           class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-blue-700" %>
       </div>
-      <p class="mt-3 text-xs text-slate-600">구매하면 이 Season의 모든 편과 산출물을 이용할 수 있습니다. 다른 Season은 포함되지 않습니다.</p>
+      <p class="mt-3 text-xs text-slate-600">구매하면 이 제품의 모든 편과 산출물을 이용할 수 있습니다. 다른 제품은 포함되지 않습니다.</p>
     <% else %>
       <p class="font-bold text-slate-800">현재 <%= free ? "시작할" : "구매할" %> 수 없습니다</p>
-      <p class="mt-1 text-sm text-slate-600">이 Season은 준비 중이거나 이용 시작이 중지되었습니다. 이미 이용 중인 분은 로그인하면 계속 이용하실 수 있습니다.</p>
+      <p class="mt-1 text-sm text-slate-600">이 제품은 준비 중이거나 이용 시작이 중지되었습니다. 이미 이용 중인 분은 로그인하면 계속 이용하실 수 있습니다.</p>
     <% end %>
   </section>
 <% end %>

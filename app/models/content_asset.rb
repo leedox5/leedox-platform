@@ -1,6 +1,6 @@
 # A downloadable file attached to one ContentEpisode (handoff 0056 R4) --
 # source ZIPs, WARs, spec documents. Belongs to the Episode, never to the
-# Season/Product; the Season page's "산출물" list is derived from these rows.
+# product/Product; the product page's "산출물" list is derived from these rows.
 #
 # The uploaded file's original name is display-only: Active Storage keys the
 # stored object by a random blob key, and downloads go through

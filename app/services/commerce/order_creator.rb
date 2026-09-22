@@ -85,18 +85,18 @@ module Commerce
 
     private
 
-    # Handoff 0057 -- one-time Season purchase. No period to compute or stack:
-    # the license starts today and never expires. One paid license per user and
-    # Season; a refunded (canceled) one no longer counts, so it can be bought
-    # again. Seasons that aren't published/listed can't be bought even if a
-    # stale checkout link is still open.
+    # Handoff 0057/0065 -- one-time purchase of a product line. No period to
+    # compute or stack: the license starts today and never expires. One paid
+    # license per user and product; a refunded (canceled) one no longer counts,
+    # so it can be bought again. A product that isn't published/reachable can't
+    # be bought even if a stale checkout link is still open.
     def create_lifetime_order!(product, offer)
-      season = product.product_season
-      raise Unavailable, "season is not on sale" unless season&.customer_reachable? && season.product_line.published?
-      # A 0-won Season has no payment to make: it is started, not ordered
+      line = product.product_line
+      raise Unavailable, "product is not on sale" unless line&.customer_reachable?
+      # A 0-won product has no payment to make: it is started, not ordered
       # (a zero-amount order could never be confirmed by any payment provider).
-      raise Unavailable, "free season cannot be ordered" if offer.total_amount.zero?
-      raise Unavailable, "season is already purchased" if @user.licenses.where(product: product).not_canceled.exists?
+      raise Unavailable, "free product cannot be ordered" if offer.total_amount.zero?
+      raise Unavailable, "product is already purchased" if @user.licenses.where(product: product).not_canceled.exists?
 
       today = @at.in_time_zone(Commerce::PeriodCalculator::KST).to_date
       ApplicationRecord.transaction do

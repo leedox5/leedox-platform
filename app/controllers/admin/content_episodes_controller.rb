@@ -16,7 +16,7 @@ class Admin::ContentEpisodesController < Admin::BaseController
   helper_method :render_preview_markdown, :parent_edit_path, :parent_label, :parent_title, :episodes_collection_path
 
   # Handoff 0056 R3 -- an episode is authored either inside a legacy
-  # ContentBundle or directly inside a ProductSeason. The URL you arrive by
+  # ContentBundle or directly inside a ProductLine. The URL you arrive by
   # decides which (nothing in the forms asks the author to choose), and
   # every other action derives it from the episode itself.
   def new
@@ -41,7 +41,7 @@ class Admin::ContentEpisodesController < Admin::BaseController
 
   def show
     @takeaways = @episode.content_takeaways.ordered
-    @assets = @episode.product_season_id? ? @episode.content_assets.ordered.with_attached_file : []
+    @assets = @episode.product_line_id? ? @episode.content_assets.ordered.with_attached_file : []
     # Unlike the customer path (ProductContent::DatabaseSource, published-only),
     # admin preview navigation walks every status in the bundle -- an editor
     # reviewing a draft needs to move between draft siblings too (handoff
@@ -134,28 +134,28 @@ class Admin::ContentEpisodesController < Admin::BaseController
   end
 
   def load_parent_from_params
-    @parent = if params[:product_season_id]
-      ProductSeason.find(params[:product_season_id])
+    @parent = if params[:product_line_id]
+      ProductLine.find(params[:product_line_id])
     else
       ContentBundle.find(params[:content_bundle_id])
     end
   end
 
   def parent_edit_path
-    @parent.is_a?(ProductSeason) ? edit_admin_product_season_path(@parent) : edit_admin_content_bundle_path(@parent)
+    @parent.is_a?(ProductLine) ? edit_admin_product_line_path(@parent) : edit_admin_content_bundle_path(@parent)
   end
 
   def parent_label
-    @parent.is_a?(ProductSeason) ? "Season" : "묶음"
+    @parent.is_a?(ProductLine) ? "제품" : "묶음"
   end
 
   def parent_title
-    @parent.is_a?(ProductSeason) ? @parent.display_title : @parent.internal_name
+    @parent.is_a?(ProductLine) ? @parent.customer_name : @parent.internal_name
   end
 
   def episodes_collection_path
-    if @parent.is_a?(ProductSeason)
-      admin_product_season_content_episodes_path(@parent)
+    if @parent.is_a?(ProductLine)
+      admin_product_line_content_episodes_path(@parent)
     else
       admin_content_bundle_content_episodes_path(@parent)
     end

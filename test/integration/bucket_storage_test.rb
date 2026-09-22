@@ -33,20 +33,19 @@ class BucketStorageTest < ActionDispatch::IntegrationTest
     fixture_file_upload("assets/#{name}", "application/zip")
   end
 
-  # A published, license-gated Season with one published episode, a cover on
+  # A published, license-gated product with one published episode, a cover on
   # the product, and one file -- all stored in the fake bucket.
   def build_catalog
     @line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "bucket-line", introduction: "소개", status: "published")
     @line.update!(cover_image: { io: file_fixture("covers/cover.jpg").open, filename: "cover.jpg", content_type: "image/jpeg" }, cover_image_alt: "대체문구")
-    @season = @line.product_seasons.create!(internal_name: "S01", season_code: "S01", slug: "s01", status: "published", visibility: "public")
-    @episode = @season.content_episodes.create!(position: 1, customer_title: "첫 편", body: "# 첫 편\n\n본문", status: "published")
+    @episode = @line.content_episodes.create!(position: 1, customer_title: "첫 편", body: "# 첫 편\n\n본문", status: "published")
     @asset = @episode.content_assets.create!(title: "소스", kind: "소스코드", position: 1,
       file: { io: file_fixture("assets/sample.zip").open, filename: "sample.zip", content_type: "application/zip" })
-    Commerce::SeasonSales.set_price!(season: @season, total_amount: 33_000, actor: @admin)
-    Commerce::SeasonSales.start_sale!(season: @season, actor: @admin)
-    order = Commerce::OrderCreator.call!(user: @buyer, product_code: @season.reload.product.code, offer_code: @season.lifetime_offer.code, requested_start_on: nil, provider: "manual")
+    Commerce::ProductLineSales.set_price!(product_line: @line, total_amount: 33_000, actor: @admin)
+    Commerce::ProductLineSales.start_sale!(product_line: @line, actor: @admin)
+    order = Commerce::OrderCreator.call!(user: @buyer, product_code: @line.reload.product.code, offer_code: @line.lifetime_offer.code, requested_start_on: nil, provider: "manual")
     Commerce::ConfirmManualPayment.call!(order: order, actor: @admin)
-    @download = product_season_episode_asset_path(@line.slug, @season.slug, "01", @asset.id)
+    @download = product_episode_asset_path(@line.slug, "01", @asset.id)
   end
 
   def with_bucket(&block)
@@ -58,8 +57,7 @@ class BucketStorageTest < ActionDispatch::IntegrationTest
   test "uploads through the admin screens are stored in the bucket, and nothing touches the local disk" do
     with_bucket do
       @line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "bucket-line", introduction: "소개")
-      season = @line.product_seasons.create!(internal_name: "S01", season_code: "S01", slug: "s01")
-      episode = season.content_episodes.create!(position: 1, customer_title: "편")
+      episode = @line.content_episodes.create!(position: 1, customer_title: "편")
       sign_in(@admin)
 
       post admin_content_episode_content_assets_path(episode), params: { content_asset: { title: "소스", kind: "소스코드", position: 1, file: zip_upload } }
@@ -97,7 +95,7 @@ class BucketStorageTest < ActionDispatch::IntegrationTest
       assert_redirected_to new_user_session_path
       sign_in(@other)
       get @download
-      assert_redirected_to product_season_path(@line.slug, @season.slug)
+      assert_redirected_to product_line_path(@line.slug)
       sign_out
 
       sign_in(@buyer)
@@ -111,16 +109,16 @@ class BucketStorageTest < ActionDispatch::IntegrationTest
       get @download
       assert_response :not_found
       @episode.update!(status: "published")
-      @season.update!(visibility: "private")
+      @line.update!(visibility: "private")
       get @download
       assert_response :not_found
-      @season.update!(visibility: "public")
+      @line.update!(visibility: "public")
       @line.update!(status: "draft")
       get @download
       assert_response :not_found
       @line.update!(status: "published")
 
-      get product_season_episode_asset_path(@line.slug, @season.slug, "01", 0)
+      get product_episode_asset_path(@line.slug, "01", 0)
       assert_response :not_found
     end
   end
@@ -147,7 +145,7 @@ class BucketStorageTest < ActionDispatch::IntegrationTest
     with_bucket do
       build_catalog
       sign_in(@buyer)
-      pages = [ product_line_path(@line.slug), product_season_path(@line.slug, @season.slug), product_season_episode_path(@line.slug, @season.slug, "01") ]
+      pages = [ product_line_path(@line.slug), product_episode_path(@line.slug, "01") ]
       pages.each do |url|
         get url
         assert_no_match(/bucket\.invalid|fake-private-bucket|X-Amz|amazonaws|storage\.railway|active_storage|\/blobs\//, response.body)
@@ -306,8 +304,7 @@ class BucketStorageTest < ActionDispatch::IntegrationTest
     previous = StoragePersistence.method(:enforced?)
     StoragePersistence.define_singleton_method(:enforced?) { true }
     line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "guard-line", introduction: "소개")
-    season = line.product_seasons.create!(internal_name: "S01", season_code: "S01", slug: "s01")
-    episode = season.content_episodes.create!(position: 1, customer_title: "편")
+    episode = line.content_episodes.create!(position: 1, customer_title: "편")
     sign_in(@admin)
 
     assert_no_difference [ "ContentAsset.count", "ActiveStorage::Blob.count" ] do

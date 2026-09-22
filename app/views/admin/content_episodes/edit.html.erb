@@ -96,7 +96,7 @@
       </ul>
     </section>
 
-    <% if @episode.product_season_id? %>
+    <% if @episode.product_line_id? %>
       <section class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-bold text-slate-900">첨부 산출물</h2>
@@ -132,7 +132,7 @@
     <section class="mt-8 rounded-2xl border-2 border-red-200 bg-red-50 p-6">
       <h2 class="text-lg font-bold text-red-900">위험 영역</h2>
       <p class="mt-1 text-sm text-red-800">
-        이 편을 삭제하면 연결된 takeaway와 revision 이력<%= ", 첨부 산출물(파일 포함)".html_safe if @episode.product_season_id? %>도 함께 삭제됩니다. archived나 휴지통 같은
+        이 편을 삭제하면 연결된 takeaway와 revision 이력<%= ", 첨부 산출물(파일 포함)".html_safe if @episode.product_line_id? %>도 함께 삭제됩니다. archived나 휴지통 같은
         복구 수단은 없습니다 — 되돌릴 수 없습니다. 다른 편의 원고·상태·순서는 바뀌지 않습니다.
         <% if @episode.published? %>
           <strong>이 편은 현재 게시 중입니다 — 삭제하면 고객 URL이 즉시 사라집니다.</strong>

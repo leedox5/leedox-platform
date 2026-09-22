@@ -47,7 +47,7 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
     landmarks << [ :image, "<img" ] if with_image
     landmarks << [ :introduction, ">소개<" ]
     landmarks << [ :ai, "AI 서포터" ] if with_ai
-    landmarks << [ :season, "Season" ]
+    landmarks << [ :episodes, %(<ol class="mt-10 space-y-3">) ]
 
     positions = landmark_order(main_html, landmarks)
     missing = positions.select { |_, pos| pos.nil? }.map(&:first)
@@ -55,8 +55,8 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
     assert_equal positions.sort_by(&:last).map(&:first), positions.map(&:first), "wrong order: #{positions.inspect}"
   end
 
-  test "Hero is one vertical flow: name, image, introduction, AI supporter, Seasons" do
-    @line.product_seasons.create!(internal_name: "S", customer_title: "첫 판", season_code: "S01", slug: "s01", status: "published", visibility: "public")
+  test "Hero is one vertical flow: name, image, introduction, AI supporter, episodes" do
+    @line.content_episodes.create!(position: 1, customer_title: "첫 편", status: "published")
     @line.update!(ai_supporter: "Codex")
     get product_line_path(@line.slug)
     assert_single_column_order(css_select("main").to_html, with_image: true)
@@ -96,7 +96,7 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
     admin = User.create!(name: "관리자", email: "hero-admin-#{SecureRandom.hex(3)}@example.com", password: "password123", role: :admin)
     post user_session_path, params: { user: { email: admin.email, password: "password123" } }
     @line.update!(status: "draft", ai_supporter: "Codex")
-    @line.product_seasons.create!(internal_name: "S", customer_title: "첫 판", season_code: "S01", slug: "s01")
+    @line.content_episodes.create!(position: 1, customer_title: "첫 편")
 
     get admin_product_line_path(@line)
     assert_response :success
@@ -206,31 +206,31 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "the cover route can't shadow or be shadowed by Season/Episode URLs" do
-    season = @line.product_seasons.create!(internal_name: "S", season_code: "S01", slug: "cover", status: "published", visibility: "public")
-    season.content_episodes.create!(position: 1, customer_title: "편", status: "published", body: "본문")
-    get product_season_path(@line.slug, "cover")
+  test "the cover route can't shadow or be shadowed by product/episode URLs" do
+    @line.content_episodes.create!(position: 1, customer_title: "편", status: "published", body: "본문")
+    get product_line_path(@line.slug)
     assert_response :success
-    get product_season_episode_path(@line.slug, "cover", "01")
+    get product_episode_path(@line.slug, "01")
     assert_response :success
+    get "/products/#{@line.slug}/cover"
+    assert_response :not_found, "a non-numeric second segment is an old Season slug, never the cover"
     get product_cover_path(@line.slug, "hero")
     assert_equal "image/webp", response.media_type
   end
 
-  test "R4 downloads, Season/Episode pages and legacy bundle URLs are unaffected" do
-    season = @line.product_seasons.create!(internal_name: "S", customer_title: "첫 판", season_code: "S01", slug: "s01", status: "published", visibility: "public")
-    episode = season.content_episodes.create!(position: 1, customer_title: "첫 편", body: "# 첫 편\n\n본문", status: "published")
+  test "R4 downloads, product/episode pages and legacy bundle URLs are unaffected" do
+    episode = @line.content_episodes.create!(position: 1, customer_title: "첫 편", body: "# 첫 편\n\n본문", status: "published")
     asset = episode.content_assets.create!(title: "소스", kind: "소스코드", position: 1,
       file: { io: file_fixture("assets/sample.zip").open, filename: "sample.zip", content_type: "application/zip" })
 
-    get product_season_episode_path(@line.slug, "s01", "01")
+    get product_episode_path(@line.slug, "01")
     assert_response :success
     assert_select "h2", text: "이 편의 실전 자료"
-    get product_season_episode_asset_path(@line.slug, "s01", "01", asset.id)
+    get product_episode_asset_path(@line.slug, "01", asset.id)
     assert_response :success
     assert_match(/\Aattachment;/, response.headers["Content-Disposition"])
-    get product_season_path(@line.slug, "s01")
-    assert_select "h2", text: "Season 산출물"
+    get product_line_path(@line.slug)
+    assert_select "h2", text: "산출물"
 
     product = Product.create!(code: "content_lab", name: "Content Lab", active: true)
     bundle = ContentBundle.create!(product: product, internal_name: "레거시", slug: "legacy", status: "published")

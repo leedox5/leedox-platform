@@ -28,7 +28,7 @@ class BillingOrdersController < ApplicationController
     end
 
     @order_item = @order.order_items.first!
-    # One-time (no-duration) Season purchases have no period to show.
+    # One-time (no-duration) product purchases have no period to show.
     @period = Commerce::PeriodCalculator.call(
       start_on: @order.requested_start_on,
       duration_months: @order_item.duration_months

@@ -59,9 +59,9 @@ class ProductLineTest < ActiveSupport::TestCase
     assert_includes product_line.errors.attribute_names, :status
   end
 
-  test "restricts destroy while seasons still exist" do
+  test "restricts destroy while episodes still exist" do
     product_line = ProductLine.create!(valid_attrs)
-    product_line.product_seasons.create!(internal_name: "S01", season_code: "S01", slug: "s01")
+    product_line.content_episodes.create!(position: 1, customer_title: "편")
 
     assert_not product_line.destroy
     assert ProductLine.exists?(product_line.id)

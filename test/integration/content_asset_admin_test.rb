@@ -1,7 +1,7 @@
 require "test_helper"
 
 # Handoff 0056 R4 -- admin upload / replace / delete / download of files on
-# ProductSeason episodes.
+# ProductLine episodes.
 class ContentAssetAdminTest < ActionDispatch::IntegrationTest
   include ActiveJob::TestHelper
 
@@ -9,8 +9,7 @@ class ContentAssetAdminTest < ActionDispatch::IntegrationTest
     @admin = User.create!(name: "관리자", email: "asset-admin-#{SecureRandom.hex(3)}@example.com", password: "password123", role: :admin)
     @user = User.create!(name: "일반유저", email: "asset-user-#{SecureRandom.hex(3)}@example.com", password: "password123")
     @line = ProductLine.create!(internal_name: "A", customer_name: "A", slug: "line-a", introduction: "소개")
-    @season = @line.product_seasons.create!(internal_name: "S01", season_code: "S01", slug: "s01")
-    @episode = @season.content_episodes.create!(position: 1, customer_title: "첫 편")
+    @episode = @line.content_episodes.create!(position: 1, customer_title: "첫 편")
     @bundle = ContentBundle.create!(internal_name: "레거시")
     @bundle_episode = @bundle.content_episodes.create!(position: 1, customer_title: "레거시 편")
   end
@@ -44,7 +43,7 @@ class ContentAssetAdminTest < ActionDispatch::IntegrationTest
     assert ContentAsset.exists?(asset.id)
   end
 
-  test "the asset section shows on Season episodes only" do
+  test "the asset section shows on product episodes only" do
     sign_in_as(@admin)
     get edit_admin_content_episode_path(@episode)
     assert_response :success

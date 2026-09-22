@@ -210,9 +210,9 @@ class ProductLineCoverTest < ActiveSupport::TestCase
     keys.each { |key| assert_not ActiveStorage::Blob.service.exist?(key) }
   end
 
-  test "destroy is still refused while seasons exist and the cover is kept" do
+  test "destroy is still refused while episodes exist and the cover is kept" do
     line = build_line.tap(&:save!)
-    line.product_seasons.create!(internal_name: "S01", season_code: "S01", slug: "s01")
+    line.content_episodes.create!(position: 1, customer_title: "편")
     assert_not line.destroy
     assert ProductLine.find(line.id).cover_image.attached?
   end

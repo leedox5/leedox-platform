@@ -8,8 +8,8 @@
       <%= link_to "편집으로 돌아가기", edit_admin_content_episode_path(@episode), class: "underline sm:flex-shrink-0" %>
     </div>
 
-    <%# Season episodes use the new-product term; legacy Bundle episodes keep "Chapter" (handoff 0056 R4 follow-up) %>
-    <p class="text-sm font-semibold uppercase tracking-wide text-blue-600"><%= @episode.product_season_id? ? "Episode" : "Chapter" %> <%= @episode.position %></p>
+    <%# Product episodes use the new-product term; legacy Bundle episodes keep "Chapter" (handoff 0056 R4 follow-up) %>
+    <p class="text-sm font-semibold uppercase tracking-wide text-blue-600"><%= @episode.product_line_id? ? "Episode" : "Chapter" %> <%= @episode.position %></p>
     <h1 class="text-3xl font-bold text-gray-900"><%= @episode.customer_title.presence || "(제목 없음)" %></h1>
 
     <div class="doc-content mt-8 max-w-none">

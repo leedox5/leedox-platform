@@ -43,13 +43,13 @@ class ProductLineAdminUiTest < ActionDispatch::IntegrationTest
     assert_includes css_select("main header > div").first["class"].split, "min-w-0"
   end
 
-  test "list grid: 공개 상태, Season 수 and 관리 stay on one line, and a narrow screen scrolls the table instead of clipping it" do
+  test "list grid: 공개 상태, 편 수 and 관리 stay on one line, and a narrow screen scrolls the table instead of clipping it" do
     sign_in_as(@admin)
     get admin_product_lines_path
     assert_response :success
 
     headers = css_select("main thead th")
-    %w[공개\ 상태 Season\ 수 관리].each do |label|
+    %w[공개\ 상태 편\ 수 관리].each do |label|
       th = headers.find { |h| h.text.strip == label }
       assert_not_nil th, "#{label} header missing"
       assert_includes th["class"].split, "whitespace-nowrap", "#{label} header can wrap"
@@ -58,7 +58,7 @@ class ProductLineAdminUiTest < ActionDispatch::IntegrationTest
 
     css_select("main tbody tr").each do |row|
       cells = row.css("td")
-      # status, season count, manage -- the last three cells
+      # status, episode count, manage -- the last three cells
       cells.to_a.last(3).each { |td| assert_includes td["class"].split, "whitespace-nowrap", "cell can wrap: #{td.text.strip}" }
       assert_includes cells.last["class"].split, "text-right"
       assert_equal "편집", cells.last.at_css("a").text.strip
@@ -70,7 +70,7 @@ class ProductLineAdminUiTest < ActionDispatch::IntegrationTest
     assert_includes css_select("main table").first["class"].split, "min-w-full"
   end
 
-  test "the grid change is scoped to this list: legacy content-bundle list and the season screens keep their own markup" do
+  test "the grid change is scoped to this list: legacy content-bundle list keeps its own markup" do
     sign_in_as(@admin)
     get admin_content_bundles_path
     assert_includes css_select("main section").first["class"].split, "overflow-hidden"
@@ -80,10 +80,8 @@ class ProductLineAdminUiTest < ActionDispatch::IntegrationTest
 
   test "other product-management action buttons don't wrap either" do
     sign_in_as(@admin)
-    season = @with_cover.product_seasons.create!(internal_name: "S", season_code: "S01", slug: "s01")
-    episode = season.content_episodes.create!(position: 1, customer_title: "편")
-    { edit_admin_product_line_path(@with_cover) => "+ 새 Season", edit_admin_product_season_path(season) => "+ 새 편",
-      edit_admin_content_episode_path(episode) => "+ 업로드" }.each do |url, label|
+    episode = @with_cover.content_episodes.create!(position: 1, customer_title: "편")
+    { edit_admin_product_line_path(@with_cover) => "+ 새 편", edit_admin_content_episode_path(episode) => "+ 업로드" }.each do |url, label|
       get url
       button = css_select("main a").find { |a| a.text.strip == label }
       assert_not_nil button, "#{label} missing on #{url}"

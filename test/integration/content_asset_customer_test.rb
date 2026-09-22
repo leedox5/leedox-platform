@@ -1,13 +1,12 @@
 require "test_helper"
 
-# Handoff 0056 R4 -- customer "이 편의 실전 자료", Season 산출물, and the
-# download gate that must hold at every level of the hierarchy.
+# Handoff 0056 R4 (product level since 0065) -- customer "이 편의 실전 자료", the
+# product page's 산출물, and the download gate that must hold at every level.
 class ContentAssetCustomerTest < ActionDispatch::IntegrationTest
   setup do
     @line = ProductLine.create!(internal_name: "A", customer_name: "결과 제품", slug: "result-line", introduction: "소개", status: "published")
-    @season = @line.product_seasons.create!(internal_name: "S01", customer_title: "첫 판", season_code: "S01", slug: "s01", status: "published", visibility: "public")
-    @ep1 = @season.content_episodes.create!(position: 1, customer_title: "첫 편", body: "# 첫 편\n\n본문", status: "published")
-    @ep2 = @season.content_episodes.create!(position: 2, customer_title: "마지막 편", body: "# 마지막 편\n\n본문", status: "published")
+    @ep1 = @line.content_episodes.create!(position: 1, customer_title: "첫 편", body: "# 첫 편\n\n본문", status: "published")
+    @ep2 = @line.content_episodes.create!(position: 2, customer_title: "마지막 편", body: "# 마지막 편\n\n본문", status: "published")
     @a1 = attach(@ep1, "sample.zip", title: "1편 소스", kind: "소스코드", description: "1편 설명", position: 1)
     @a1b = attach(@ep1, "sample.pdf", title: "1편 스펙", kind: "구현 스펙", position: 2, type: "application/pdf")
     @a2 = attach(@ep2, "sample.war", title: "최종 WAR", kind: "실행파일", position: 1)
@@ -19,12 +18,12 @@ class ContentAssetCustomerTest < ActionDispatch::IntegrationTest
       file: { io: file_fixture("assets/#{name}").open, filename: filename, content_type: type })
   end
 
-  def dl(episode, asset, season: @season, line: @line)
-    product_season_episode_asset_path(line.slug, season.slug, episode.display_id, asset.id)
+  def dl(episode, asset, line: @line)
+    product_episode_asset_path(line.slug, episode.display_id, asset.id)
   end
 
   test "episode page groups takeaways and files under '이 편의 실전 자료'" do
-    get product_season_episode_path(@line.slug, @season.slug, "01")
+    get product_episode_path(@line.slug, "01")
     assert_response :success
     assert_select "h2", text: "이 편의 실전 자료", count: 1
     assert_match(/체크리스트/, response.body)
@@ -37,20 +36,20 @@ class ContentAssetCustomerTest < ActionDispatch::IntegrationTest
   test "the section is absent when an episode has neither takeaways nor files" do
     @ep1.content_takeaways.destroy_all
     @ep1.content_assets.destroy_all
-    get product_season_episode_path(@line.slug, @season.slug, "01")
+    get product_episode_path(@line.slug, "01")
     assert_no_match(/이 편의 실전 자료/, response.body)
   end
 
   test "a files-only episode still shows the section" do
     @ep1.content_takeaways.destroy_all
-    get product_season_episode_path(@line.slug, @season.slug, "01")
+    get product_episode_path(@line.slug, "01")
     assert_select "h2", text: "이 편의 실전 자료"
   end
 
-  test "season page collects published episodes' files in episode then asset order, with the original episode title" do
-    get product_season_path(@line.slug, @season.slug)
+  test "product page collects published episodes' files in episode then asset order, with the original episode title" do
+    get product_line_path(@line.slug)
     assert_response :success
-    assert_select "h2", text: "Season 산출물"
+    assert_select "h2", text: "산출물"
     titles = css_select("section p.mt-1.font-bold").map { |n| n.text.strip }
     assert_equal [ "1편 소스", "1편 스펙", "최종 WAR" ], titles
     assert_match(/01 첫 편/, response.body)
@@ -58,20 +57,14 @@ class ContentAssetCustomerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", dl(@ep2, @a2)
   end
 
-  test "season page omits draft episodes' files and shows no empty section without any files" do
+  test "product page omits draft episodes' files and shows no empty section without any files" do
     @ep2.update!(status: "draft")
-    get product_season_path(@line.slug, @season.slug)
+    get product_line_path(@line.slug)
     assert_no_match(/최종 WAR/, response.body)
 
     ContentAsset.destroy_all
-    get product_season_path(@line.slug, @season.slug)
-    assert_no_match(/Season 산출물/, response.body)
-  end
-
-  test "the product page never lists files" do
     get product_line_path(@line.slug)
-    assert_response :success
-    assert_no_match(/산출물|다운로드|1편 소스/, css_select("main").text)
+    assert_no_match(/산출물/, response.body)
   end
 
   test "published hierarchy: download succeeds as an attachment with the exact bytes" do
@@ -88,8 +81,8 @@ class ContentAssetCustomerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "an unlisted season's files are reachable by URL, like its episodes" do
-    @season.update!(visibility: "unlisted")
+  test "an unlisted product's files are reachable by URL, like its episodes" do
+    @line.update!(visibility: "unlisted")
     get dl(@ep1, @a1)
     assert_response :success
   end
@@ -99,45 +92,33 @@ class ContentAssetCustomerTest < ActionDispatch::IntegrationTest
       @ep1.update!(status: status)
       get dl(@ep1, @a1)
       assert_response :not_found, "#{status} episode file downloadable"
-      get product_season_path(@line.slug, @season.slug)
+      get product_line_path(@line.slug)
       assert_no_match(/1편 소스/, response.body)
     end
   end
 
-  test "season gates: draft, in_review, unpublished, archived and private seasons block downloads" do
-    { "draft" => "public", "in_review" => "public", "unpublished" => "public", "archived" => "public", "published" => "private" }.each do |status, visibility|
-      @season.update!(status: status, visibility: visibility)
+  test "product gates: draft, unpublished and private products block downloads" do
+    { "draft" => "public", "unpublished" => "public", "published" => "private" }.each do |status, visibility|
+      @line.update!(status: status, visibility: visibility)
       get dl(@ep1, @a1)
-      assert_response :not_found, "#{status}/#{visibility} season file downloadable"
+      assert_response :not_found, "#{status}/#{visibility} product file downloadable"
     end
   end
 
-  test "product gates: draft and unpublished products block downloads" do
-    %w[draft unpublished].each do |status|
-      @line.update!(status: status)
-      get dl(@ep1, @a1)
-      assert_response :not_found, "#{status} product file downloadable"
-    end
-  end
-
-  test "an asset id can't be combined with another episode, season or product" do
+  test "an asset id can't be combined with another episode or product" do
     get dl(@ep2, @a1)
     assert_response :not_found
 
-    other_season = @line.product_seasons.create!(internal_name: "S02", season_code: "S02", slug: "s02", status: "published", visibility: "public")
-    other_ep = other_season.content_episodes.create!(position: 1, customer_title: "다른 시즌 편", status: "published")
-    get product_season_episode_asset_path(@line.slug, other_season.slug, other_ep.display_id, @a1.id)
-    assert_response :not_found
-
     other_line = ProductLine.create!(internal_name: "B", customer_name: "B", slug: "other-line", introduction: "소개", status: "published")
-    get product_season_episode_asset_path(other_line.slug, @season.slug, "01", @a1.id)
-    assert_response :not_found
+    other_ep = other_line.content_episodes.create!(position: 1, customer_title: "다른 제품 편", status: "published")
+    get product_episode_asset_path(other_line.slug, other_ep.display_id, @a1.id)
+    assert_response :not_found, "an asset of one product must not download under another product's episode"
 
-    get product_season_episode_asset_path(@line.slug, @season.slug, "01", 0)
+    get product_episode_asset_path(@line.slug, "01", 0)
     assert_response :not_found
-    get product_season_episode_asset_path(@line.slug, @season.slug, "01", "abc")
+    get product_episode_asset_path(@line.slug, "01", "abc")
     assert_response :not_found
-    get product_season_episode_asset_path(@line.slug, @season.slug, "99", @a1.id)
+    get product_episode_asset_path(@line.slug, "99", @a1.id)
     assert_response :not_found
   end
 
@@ -145,12 +126,12 @@ class ContentAssetCustomerTest < ActionDispatch::IntegrationTest
     bundle = ContentBundle.create!(internal_name: "레거시")
     legacy_episode = bundle.content_episodes.create!(position: 1, customer_title: "레거시", status: "published")
     stray = attach(legacy_episode, "sample.zip", title: "레거시 파일", kind: "k", position: 1)
-    get product_season_episode_asset_path(@line.slug, @season.slug, "01", stray.id)
+    get product_episode_asset_path(@line.slug, "01", stray.id)
     assert_response :not_found
   end
 
   test "no Active Storage blob URL is rendered, and Active Storage's own routes are gone" do
-    [ product_season_episode_path(@line.slug, @season.slug, "01"), product_season_path(@line.slug, @season.slug) ].each do |url|
+    [ product_episode_path(@line.slug, "01"), product_line_path(@line.slug) ].each do |url|
       get url
       assert_no_match(%r{rails/active_storage|/blobs/}, response.body)
     end
@@ -179,7 +160,7 @@ class ContentAssetCustomerTest < ActionDispatch::IntegrationTest
 
   test "the page escapes a hostile filename and title" do
     evil = attach(@ep2, "sample.zip", title: "<script>alert(1)</script>", kind: "<b>k</b>", position: 2, filename: "<img src=x onerror=alert(1)>.zip")
-    get product_season_episode_path(@line.slug, @season.slug, "02")
+    get product_episode_path(@line.slug, "02")
     assert_no_match(/<script>alert\(1\)/, response.body)
     assert_no_match(/<img src=x onerror/, response.body)
     assert_match(/&lt;script&gt;/, response.body)
@@ -203,15 +184,15 @@ class ContentAssetCustomerTest < ActionDispatch::IntegrationTest
   end
 
   test "ordinary pages keep default security headers" do
-    get product_season_episode_path(@line.slug, @season.slug, "01")
+    get product_episode_path(@line.slug, "01")
     assert_equal "nosniff", response.headers["X-Content-Type-Options"]
     assert_equal "SAMEORIGIN", response.headers["X-Frame-Options"]
   end
 
   test "R3 customer URLs and the legacy bundle URLs are unaffected" do
-    get product_season_episode_path(@line.slug, @season.slug, "02")
+    get product_episode_path(@line.slug, "02")
     assert_response :success
-    assert_select "a[href=?]", product_season_episode_path(@line.slug, @season.slug, "01")
+    assert_select "a[href=?]", product_episode_path(@line.slug, "01")
 
     product = Product.create!(code: "content_lab", name: "Content Lab", active: true)
     bundle = ContentBundle.create!(product: product, internal_name: "레거시", slug: "legacy", status: "published")

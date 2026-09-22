@@ -1,5 +1,5 @@
 # Handoff 0056 R3 -- admin CRUD for ProductLine, the single entry point of
-# the new-product flow (ProductLine -> ProductSeason -> Episode).
+# the new-product flow (ProductLine -> Episode since handoff 0065).
 # Admin::BaseController already restricts this whole namespace to
 # authenticated admins.
 class Admin::ProductLinesController < Admin::BaseController
@@ -10,11 +10,11 @@ class Admin::ProductLinesController < Admin::BaseController
   end
 
   # Admin-only preview: shows the customer-facing product info and every
-  # Season regardless of lifecycle state (the customer route only shows
+  # episode regardless of lifecycle state (the customer route only shows
   # published ones -- see ProductLinesController).
   def show
     @product_line = ProductLine.find(params[:id])
-    @seasons = @product_line.product_seasons.ordered
+    @episodes = @product_line.content_episodes.ordered
   end
 
   def new
@@ -36,7 +36,7 @@ class Admin::ProductLinesController < Admin::BaseController
 
   def edit
     @product_line = ProductLine.find(params[:id])
-    @seasons = @product_line.product_seasons.ordered
+    @episodes = @product_line.content_episodes.ordered
   end
 
   def update
@@ -44,19 +44,19 @@ class Admin::ProductLinesController < Admin::BaseController
     if @product_line.update(product_line_params)
       redirect_to edit_admin_product_line_path(@product_line), notice: "저장했습니다."
     else
-      @seasons = @product_line.product_seasons.ordered
+      @episodes = @product_line.content_episodes.ordered
       render :edit, status: :unprocessable_entity
     end
   rescue StandardError => e
     raise unless storage_upload_failed?(e)
 
-    @seasons = @product_line.product_seasons.ordered
+    @episodes = @product_line.content_episodes.ordered
     render_storage_upload_failure(e, record: @product_line, attribute: :cover_image, view: :edit)
   end
 
   private
 
   def product_line_params
-    params.require(:product_line).permit(:internal_name, :customer_name, :slug, :introduction, :ai_supporter, :status, :cover_image, :cover_image_alt)
+    params.require(:product_line).permit(:internal_name, :customer_name, :slug, :introduction, :ai_supporter, :status, :visibility, :series_key, :series_label, :series_position, :cover_image, :cover_image_alt)
   end
 end

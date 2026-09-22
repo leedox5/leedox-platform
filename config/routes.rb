@@ -16,21 +16,27 @@ Rails.application.routes.draw do
   get "/chatdox", to: "pages#chatdox", as: :chatdox
   get "/aigravity", to: "pages#aigravity", as: :aigravity
 
-  # Handoff 0056 R3 -- customer URLs for the new ProductLine -> ProductSeason
-  # -> Episode path, kept separate from /content/:product_code/... (which
-  # stays the file-based products' and legacy ContentBundle's namespace).
-  # Reachable by direct URL only -- not linked from any nav/listing yet.
+  # Customer URLs for a ProductLine and its Episodes (handoff 0056 R3; the
+  # Season level was removed in 0065). Reachable by direct URL only -- not
+  # linked from any nav/listing yet. Kept separate from /content/:product_code/...
+  # (the file-based products' and legacy ContentBundle's namespace).
   get "/products/:product_slug", to: "product_lines#show", as: :product_line
   # Handoff 0056 R5 -- ProductLine cover image variants (hero/thumb). A separate
   # top-level path on purpose: under /products/:slug/... a segment named
-  # "cover" would collide with Season/Episode slugs.
+  # "cover" would collide with episode ids.
   get "/product-covers/:product_slug/:variant", to: "product_covers#show", as: :product_cover
   # Handoff 0063 -- inline images of an introduction or an episode body, looked
   # up by their random public id. Top-level for the same reason as the covers.
   get "/product-images/:public_id", to: "product_images#show", as: :product_image
-  get "/products/:product_slug/:season_slug", to: "product_lines#season", as: :product_season
-  get "/products/:product_slug/:season_slug/:episode_id", to: "product_lines#episode", as: :product_season_episode
-  get "/products/:product_slug/:season_slug/:episode_id/assets/:asset_id", to: "product_asset_downloads#show", as: :product_season_episode_asset
+  # Episode ids are numbers ("00", "01", ..., see ContentEpisode#display_id); the
+  # constraint is what keeps them apart from the old Season slugs below.
+  get "/products/:product_slug/:episode_id", to: "product_lines#episode", as: :product_episode, constraints: { episode_id: /\d+/ }
+  get "/products/:product_slug/:episode_id/assets/:asset_id", to: "product_asset_downloads#show", as: :product_episode_asset, constraints: { episode_id: /\d+/ }
+  # Handoff 0065 (D5) -- the old Season URLs: /products/:line/:season[/:episode[/assets/:asset]]
+  # redirect permanently to the product that Season became.
+  get "/products/:product_slug/:season_slug", to: "legacy_season_redirects#show", as: :legacy_product_season
+  get "/products/:product_slug/:season_slug/:episode_id", to: "legacy_season_redirects#show", as: :legacy_product_season_episode
+  get "/products/:product_slug/:season_slug/:episode_id/assets/:asset_id", to: "legacy_season_redirects#show", as: :legacy_product_season_episode_asset
 
   # Legacy per-product URLs and route helper names, kept exactly as they were
   # (bookmarks/external links/SEO) -- product_code comes in via `defaults:`
@@ -115,13 +121,18 @@ Rails.application.routes.draw do
         end
       end
     end
-    # Handoff 0056 R3 -- the single entry point for new products:
-    # ProductLine -> ProductSeason -> Episode. Episodes reuse the shallow
+    # The single entry point for new products: ProductLine -> Episode (handoff
+    # 0056 R3; the Season level was removed in 0065). Episodes reuse the shallow
     # content_episodes routes above for edit/update/show/destroy/transition/
     # takeaways (they don't care which kind of parent an episode has); only
-    # new/create need their own nesting under a Season.
+    # new/create need their own nesting under a product.
     resources :product_lines, only: %i[index show new create edit update] do
-      resources :product_seasons, only: %i[new create], shallow: true
+      resources :content_episodes, only: %i[new create], shallow: true
+      # Handoff 0057/0065 -- one-time price and sale switch for the product.
+      resource :sale, only: %i[update], controller: "product_line_sales" do
+        patch :start
+        patch :stop
+      end
     end
     # Handoff 0063 -- inline images (introduction / episode body) and the Markdown preview.
     post "product_lines/:product_line_id/content_images", to: "content_images#create", as: :product_line_content_images
@@ -132,14 +143,6 @@ Rails.application.routes.draw do
     post "markdown_preview", to: "markdown_previews#create", as: :markdown_preview
     get "product_lines/:product_line_id/cover/:variant", to: "product_line_covers#show", as: :product_line_cover_image
     delete "product_lines/:product_line_id/cover", to: "product_line_covers#destroy", as: :product_line_cover
-    resources :product_seasons, only: %i[show edit update] do
-      resources :content_episodes, only: %i[new create], shallow: true
-      # Handoff 0057 -- one-time price and sale switch for the Season.
-      resource :sale, only: %i[update], controller: "season_sales" do
-        patch :start
-        patch :stop
-      end
-    end
     namespace :commerce do
       resources :orders, only: %i[index show], param: :id do
         post :abandon, on: :member
@@ -160,7 +163,7 @@ Rails.application.routes.draw do
   post "/billing/success",  to: "billing#success"
   get  "/billing/cancel",   to: "billing#cancel",    as: :billing_cancel
   post "/billing/orders", to: "billing_orders#create", as: :billing_orders
-  post "/billing/free_seasons/:product_code", to: "free_season_claims#create", as: :claim_free_season
+  post "/billing/free_access/:product_code", to: "free_access_claims#create", as: :claim_free_access
   get "/billing/orders/:id", to: "billing_orders#show", as: :billing_order
   get "/billing/orders/:id/retry", to: "billing_orders#retry_preview", as: :retry_billing_order
   post "/billing/orders/:id/retry", to: "billing_orders#retry", as: :create_retry_billing_order

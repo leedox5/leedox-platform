@@ -1,7 +1,7 @@
 require "test_helper"
 
 # Handoff 0057 -- License with NULL access_ends_at (the policy's "expires_at")
-# never expires; one-time offers exist only for Season products.
+# never expires; one-time offers exist only for products that belong to a ProductLine (0065).
 class IndefiniteLicenseTest < ActiveSupport::TestCase
   KST = Commerce::PeriodCalculator::KST
 
@@ -9,9 +9,8 @@ class IndefiniteLicenseTest < ActiveSupport::TestCase
     Commerce::CatalogBootstrap.call!
     @user = User.create!(name: "구매자", email: "indef-#{SecureRandom.hex(3)}@example.com", password: "password123")
     line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "line-a", introduction: "소개", status: "published")
-    @season = line.product_seasons.create!(internal_name: "S01", season_code: "S01", slug: "s01", status: "published")
-    @product = Product.create!(code: "line_a_s01", name: "제품 S01")
-    @season.update!(product: @product)
+    @product = Product.create!(code: "line_a", name: "제품")
+    line.update!(product: @product)
   end
 
   def indefinite_license(starts_on: Date.new(2026, 1, 1), **attrs)
@@ -79,8 +78,8 @@ class IndefiniteLicenseTest < ActiveSupport::TestCase
     assert indefinite_license.save
   end
 
-  test "a one-time (no duration) offer is allowed only for a Season product" do
-    offer = @product.product_offers.new(code: "line_a_s01-once-v1", version: 1, duration_months: nil, supply_amount: 10_000, vat_amount: 1_000, total_amount: 11_000)
+  test "a one-time (no duration) offer is allowed only for a product line's product" do
+    offer = @product.product_offers.new(code: "line_a-once-v1", version: 1, duration_months: nil, supply_amount: 10_000, vat_amount: 1_000, total_amount: 11_000)
     assert offer.valid?, offer.errors.full_messages.to_sentence
     assert offer.lifetime?
 
@@ -92,7 +91,7 @@ class IndefiniteLicenseTest < ActiveSupport::TestCase
     assert_not zero.valid?, "0 months must not stand in for one-time"
   end
 
-  test "a Season product has at most one one-time offer per version" do
+  test "a line product has at most one one-time offer per version" do
     @product.product_offers.create!(code: "o1", version: 1, duration_months: nil, supply_amount: 10_000, vat_amount: 1_000, total_amount: 11_000)
     dup = @product.product_offers.new(code: "o2", version: 1, duration_months: nil, supply_amount: 20_000, vat_amount: 2_000, total_amount: 22_000)
     assert_not dup.valid?
@@ -114,22 +113,10 @@ class IndefiniteLicenseTest < ActiveSupport::TestCase
     assert_not_includes order_item.errors.attribute_names, :duration_months
   end
 
-  test "Product.standalone keeps working before the product_seasons.product_id migration has run" do
-    original = ProductSeason.method(:column_names)
-    ProductSeason.define_singleton_method(:column_names) { original.call - [ "product_id" ] }
-    chatdox = Product.find_by!(code: "chatdox")
-    assert_nothing_raised do
-      assert_includes Product.standalone.to_a, chatdox
-      assert_not chatdox.season_product?
-    end
-  ensure
-    ProductSeason.define_singleton_method(:column_names, original)
-  end
-
-  test "Product.standalone excludes Season products and keeps the four catalog products" do
+  test "Product.standalone excludes line products and keeps the four catalog products" do
     assert_not_includes Product.standalone, @product
     assert_includes Product.standalone, Product.find_by!(code: "chatdox")
-    assert @product.season_product?
-    assert_not Product.find_by!(code: "chatdox").season_product?
+    assert @product.line_product?
+    assert_not Product.find_by!(code: "chatdox").line_product?
   end
 end

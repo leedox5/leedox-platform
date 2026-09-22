@@ -8,8 +8,7 @@ class ContentImageFlowTest < ActionDispatch::IntegrationTest
     @admin = User.create!(name: "관리자", email: "ci-admin-#{SecureRandom.hex(3)}@example.com", password: "password123", role: :admin)
     @user = User.create!(name: "일반", email: "ci-user-#{SecureRandom.hex(3)}@example.com", password: "password123", created_at: 30.days.ago)
     @line = ProductLine.create!(internal_name: "A", customer_name: "이미지 제품", slug: "image-line", introduction: "소개", status: "published")
-    @season = @line.product_seasons.create!(internal_name: "S", customer_title: "첫 판", season_code: "S01", slug: "s01", status: "published", visibility: "public")
-    @episode = @season.content_episodes.create!(position: 1, customer_title: "첫 편", body: "본문", status: "published")
+    @episode = @line.content_episodes.create!(position: 1, customer_title: "첫 편", body: "본문", status: "published")
   end
 
   def sign_in(user)
@@ -187,8 +186,7 @@ class ContentImageFlowTest < ActionDispatch::IntegrationTest
   test "before the migration has run, customer pages and the admin editing screens still work" do
     with_class_method(ContentImage, :table_exists?, false) do
       @episode.update!(body: "본문 ![x](image:11111111-1111-1111-1111-111111111111)")
-      [ product_line_path(@line.slug), product_season_path(@line.slug, @season.slug),
-        product_season_episode_path(@line.slug, @season.slug, @episode.display_id) ].each do |path|
+      [ product_line_path(@line.slug), product_episode_path(@line.slug, @episode.display_id) ].each do |path|
         get path
         assert_response :success, path
       end
@@ -271,7 +269,7 @@ class ContentImageFlowTest < ActionDispatch::IntegrationTest
     @episode.update!(body: "앞\n\n![캡처](#{image.reference})")
     @episode.content_takeaways.create!(kind: "카드", body: "![카드](#{image.reference})", position: 1)
 
-    get product_season_episode_path(@line.slug, @season.slug, @episode.display_id)
+    get product_episode_path(@line.slug, @episode.display_id)
     assert_response :success
     assert_select ".doc-content img[src=?]", product_image_path(image.public_id), 2
 
@@ -285,11 +283,11 @@ class ContentImageFlowTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  test "an image inside a license-gated Season needs the license, like the episode itself" do
-    Commerce::SeasonSales.set_price!(season: @season, total_amount: 0, actor: @admin)
-    Commerce::SeasonSales.start_sale!(season: @season, actor: @admin)
+  test "an image inside a license-gated product needs the license, like the episode itself" do
+    Commerce::ProductLineSales.set_price!(product_line: @line, total_amount: 0, actor: @admin)
+    Commerce::ProductLineSales.start_sale!(product_line: @line, actor: @admin)
     holder = User.create!(name: "보유", email: "ci-holder-#{SecureRandom.hex(3)}@example.com", password: "password123", created_at: 30.days.ago)
-    Commerce::ClaimFreeSeason.call!(user: holder, season: @season.reload)
+    Commerce::ClaimFreeAccess.call!(user: holder, product_line: @line.reload)
     image = add_image(@episode)
 
     get product_image_path(image.public_id)
@@ -330,7 +328,7 @@ class ContentImageFlowTest < ActionDispatch::IntegrationTest
   test "existing episode content still renders: tables, checklists, code and links" do
     @episode.update!(body: "| a | b |\n|---|---|\n| 1 | 2 |\n\n- [ ] 할 일\n- [x] 끝\n\n```ruby\nputs 1\n```\n\n[링크](https://example.com)")
 
-    get product_season_episode_path(@line.slug, @season.slug, @episode.display_id)
+    get product_episode_path(@line.slug, @episode.display_id)
     assert_response :success
     assert_select ".doc-content table th", 2
     assert_select ".doc-content li.checklist-item input[type=checkbox][disabled]", 2

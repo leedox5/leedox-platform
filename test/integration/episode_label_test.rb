@@ -8,8 +8,7 @@ class EpisodeLabelTest < ActionDispatch::IntegrationTest
     @admin = User.create!(name: "관리자", email: "label-admin-#{SecureRandom.hex(3)}@example.com", password: "password123", role: :admin)
 
     @line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "label-line", introduction: "소개", status: "published")
-    @season = @line.product_seasons.create!(internal_name: "S01", customer_title: "첫 판", season_code: "S01", slug: "s01", status: "published", visibility: "public")
-    @season_episode = @season.content_episodes.create!(position: 1, customer_title: "시즌 편", body: "본문", status: "published")
+    @season_episode = @line.content_episodes.create!(position: 1, customer_title: "제품 편", body: "본문", status: "published")
 
     @product = Product.create!(code: "content_lab", name: "Content Lab", active: true)
     @bundle = ContentBundle.create!(product: @product, internal_name: "레거시", slug: "legacy", status: "published")
@@ -24,7 +23,7 @@ class EpisodeLabelTest < ActionDispatch::IntegrationTest
     css_select("p.uppercase.text-blue-600").first&.text&.strip
   end
 
-  test "admin preview labels a Season episode 'Episode' and a Bundle episode 'Chapter'" do
+  test "admin preview labels a product episode 'Episode' and a Bundle episode 'Chapter'" do
     sign_in_admin
 
     get admin_content_episode_path(@season_episode)
@@ -38,8 +37,8 @@ class EpisodeLabelTest < ActionDispatch::IntegrationTest
     assert_no_match(/Episode/, css_select("main").text)
   end
 
-  test "customer Season episode says 'Episode', the legacy Bundle episode still says 'Chapter'" do
-    get product_season_episode_path(@line.slug, @season.slug, "01")
+  test "customer product episode says 'Episode', the legacy Bundle episode still says 'Chapter'" do
+    get product_episode_path(@line.slug, "01")
     assert_response :success
     assert_equal "Episode 01", episode_label
     assert_no_match(/Chapter/i, css_select("main").text)
@@ -61,15 +60,14 @@ class EpisodeLabelTest < ActionDispatch::IntegrationTest
     @season_episode.content_takeaways.create!(kind: "체크리스트", body: "- [ ] a", position: 1)
 
     [ admin_product_lines_path, admin_product_line_path(@line), edit_admin_product_line_path(@line),
-      admin_product_season_path(@season), edit_admin_product_season_path(@season),
-      new_admin_product_season_content_episode_path(@season), edit_admin_content_episode_path(@season_episode) ].each do |url|
+      new_admin_product_line_content_episode_path(@line), edit_admin_content_episode_path(@season_episode) ].each do |url|
       get url
       assert_response :success
       assert_no_match(/chapter/i, css_select("main").text, "#{url} shows 'Chapter'")
     end
 
     delete destroy_user_session_path
-    [ product_line_path(@line.slug), product_season_path(@line.slug, @season.slug) ].each do |url|
+    [ product_line_path(@line.slug), product_episode_path(@line.slug, "01") ].each do |url|
       get url
       assert_no_match(/chapter/i, css_select("main").text, "#{url} shows 'Chapter'")
     end

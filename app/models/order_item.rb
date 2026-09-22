@@ -21,7 +21,7 @@ class OrderItem < ApplicationRecord
   validate :amounts_add_up
   validate :snapshot_is_immutable, on: :update
 
-  # One-time (no-duration) purchase of a Season -- the item snapshot's
+  # One-time (no-duration) purchase of a product line -- the item snapshot's
   # duration_months is empty exactly when the offer's was (handoff 0057).
   def lifetime?
     duration_months.nil?

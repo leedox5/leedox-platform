@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-white">
   <%= render "shared/header" %>
   <main class="mx-auto max-w-3xl px-5 py-10 sm:px-7">
-    <%= link_to "← #{@season.season_code} #{@season.display_title}", product_season_path(@product_line.slug, @season.slug),
+    <%= link_to "← #{@product_line.customer_name}", product_line_path(@product_line.slug),
       class: "mb-3 inline-block text-sm text-gray-500 hover:text-blue-600" %>
 
     <div class="mb-8 border-b border-gray-100 pb-4">
@@ -41,7 +41,7 @@
                   <% if asset.description.present? %><p class="mt-1 text-sm text-gray-600"><%= asset.description %></p><% end %>
                   <p class="mt-1 truncate text-xs text-gray-500"><%= asset.file.filename %> · <%= number_to_human_size(asset.file.byte_size) %></p>
                 </div>
-                <%= link_to "다운로드", product_season_episode_asset_path(@product_line.slug, @season.slug, @current_episode.display_id, asset.id),
+                <%= link_to "다운로드", product_episode_asset_path(@product_line.slug, @current_episode.display_id, asset.id),
                   class: "inline-flex flex-shrink-0 items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700" %>
               </div>
             <% end %>
@@ -52,7 +52,7 @@
 
     <div class="mt-16 flex justify-between border-t border-gray-100 pt-8">
       <% if @prev_episode %>
-        <%= link_to product_season_episode_path(@product_line.slug, @season.slug, @prev_episode.display_id), class: "flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600" do %>
+        <%= link_to product_episode_path(@product_line.slug, @prev_episode.display_id), class: "flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600" do %>
           <span>←</span>
           <span><%= @prev_episode.customer_title.presence || "(제목 없음)" %></span>
         <% end %>
@@ -61,7 +61,7 @@
       <% end %>
 
       <% if @next_episode %>
-        <%= link_to product_season_episode_path(@product_line.slug, @season.slug, @next_episode.display_id), class: "flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600" do %>
+        <%= link_to product_episode_path(@product_line.slug, @next_episode.display_id), class: "flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600" do %>
           <span><%= @next_episode.customer_title.presence || "(제목 없음)" %></span>
           <span>→</span>
         <% end %>

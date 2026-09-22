@@ -1,5 +1,8 @@
 require "test_helper"
 
+# Handoff 0065 -- ProductSeason is a LEGACY record now (the Season layer is gone
+# from the app; the table stays until the contract step). What is still true
+# of it is only what the redirects and SeasonFlatten rely on.
 class ProductSeasonTest < ActiveSupport::TestCase
   setup do
     @line = ProductLine.create!(internal_name: "A", customer_name: "A", slug: "line-a", introduction: "소개")
@@ -7,7 +10,7 @@ class ProductSeasonTest < ActiveSupport::TestCase
   end
 
   def build(overrides = {})
-    @line.product_seasons.new({ internal_name: "S01 내부", season_code: "S01", slug: "s01" }.merge(overrides))
+    ProductSeason.new({ product_line: @line, internal_name: "S01 내부", season_code: "S01", slug: "s01" }.merge(overrides))
   end
 
   test "requires a product line, internal name, season code and slug" do
@@ -37,7 +40,7 @@ class ProductSeasonTest < ActiveSupport::TestCase
     assert_not dup_slug.valid?
     assert_includes dup_slug.errors.attribute_names, :slug
 
-    assert @other_line.product_seasons.new(internal_name: "x", season_code: "S01", slug: "s01").save
+    assert build(product_line: @other_line).save
   end
 
   test "DB unique indexes back the validations" do
@@ -55,28 +58,5 @@ class ProductSeasonTest < ActiveSupport::TestCase
     season.status = "archived"
     season.visibility = "secret"
     assert_not season.valid?
-  end
-
-  test "customer scopes: listed = published+public, reachable = published+(public|unlisted)" do
-    listed = build(season_code: "S01", slug: "s01", status: "published", visibility: "public").tap(&:save!)
-    unlisted = build(season_code: "S02", slug: "s02", status: "published", visibility: "unlisted").tap(&:save!)
-    private_season = build(season_code: "S03", slug: "s03", status: "published", visibility: "private").tap(&:save!)
-    draft = build(season_code: "S04", slug: "s04", status: "draft", visibility: "public").tap(&:save!)
-
-    assert_equal [ listed ], @line.product_seasons.customer_listed.to_a
-    assert_equal [ listed, unlisted ].sort_by(&:id), @line.product_seasons.customer_reachable.to_a.sort_by(&:id)
-    assert_not_includes @line.product_seasons.customer_reachable, private_season
-    assert_not_includes @line.product_seasons.customer_reachable, draft
-  end
-
-  test "display_title falls back to internal_name" do
-    assert_equal "S01 내부", build.display_title
-    assert_equal "고객 제목", build(customer_title: "고객 제목").display_title
-  end
-
-  test "cannot be destroyed while it still has episodes" do
-    season = build.tap(&:save!)
-    season.content_episodes.create!(position: 1, customer_title: "편")
-    assert_not season.destroy
   end
 end

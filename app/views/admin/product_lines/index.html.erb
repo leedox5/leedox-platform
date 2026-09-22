@@ -8,7 +8,7 @@
         <p class="text-sm font-bold uppercase tracking-[0.2em] text-blue-700">Admin Product</p>
         <h1 class="mt-2 text-3xl font-black text-slate-950">제품 관리</h1>
         <p class="mt-2 text-slate-600">
-          제품과 그 안의 Season·편을 관리합니다. 새 제품은 여기서만 만듭니다.
+          제품과 그 안의 편을 관리합니다. 새 제품은 여기서만 만듭니다.
           (이전에 만든 콘텐츠 묶음은 <%= link_to "기존 DB 콘텐츠 관리", admin_content_bundles_path, class: "font-bold text-blue-700 hover:underline" %>에 그대로 있습니다.)
         </p>
       </div>
@@ -24,7 +24,7 @@
             <th class="px-4 py-3">내부 관리명</th>
             <th class="px-4 py-3">slug</th>
             <th class="whitespace-nowrap px-4 py-3">공개 상태</th>
-            <th class="whitespace-nowrap px-4 py-3">Season 수</th>
+            <th class="whitespace-nowrap px-4 py-3">편 수</th>
             <th class="whitespace-nowrap px-4 py-3 text-right">관리</th>
           </tr>
         </thead>
@@ -38,7 +38,7 @@
               <td class="px-4 py-4 text-slate-600"><%= line.internal_name %></td>
               <td class="px-4 py-4 text-slate-600"><code><%= line.slug %></code></td>
               <td class="whitespace-nowrap px-4 py-4"><span class="inline-block rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700"><%= line.status %></span></td>
-              <td class="whitespace-nowrap px-4 py-4 text-slate-600"><%= line.product_seasons.count %></td>
+              <td class="whitespace-nowrap px-4 py-4 text-slate-600"><%= line.content_episodes.count %></td>
               <td class="whitespace-nowrap px-4 py-4 text-right">
                 <%= link_to "편집", edit_admin_product_line_path(line), class: "font-semibold text-blue-700 hover:underline" %>
               </td>

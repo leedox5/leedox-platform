@@ -150,8 +150,7 @@ class StorageConfigurationTest < ActiveSupport::TestCase
     bucket = FakeBucket.new
     bucket.install do
       line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "audit-line", introduction: "소개")
-      season = line.product_seasons.create!(internal_name: "S", season_code: "S01", slug: "s01")
-      episode = season.content_episodes.create!(position: 1, customer_title: "편")
+      episode = line.content_episodes.create!(position: 1, customer_title: "편")
       good = episode.content_assets.create!(title: "정상", kind: "k", position: 1, file: { io: file_fixture("assets/sample.zip").open, filename: "a.zip", content_type: "application/zip" })
       lost = episode.content_assets.create!(title: "유실", kind: "k", position: 2, file: { io: file_fixture("assets/sample.war").open, filename: "b.war", content_type: "application/zip" })
       bad = episode.content_assets.create!(title: "손상", kind: "k", position: 3, file: { io: file_fixture("assets/sample.pdf").open, filename: "c.pdf", content_type: "application/pdf" })

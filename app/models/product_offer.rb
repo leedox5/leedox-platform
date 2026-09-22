@@ -11,7 +11,7 @@ class ProductOffer < ApplicationRecord
     numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 10_000 }
   validates :currency, presence: true
   validates :duration_months, uniqueness: { scope: %i[product_id version] }, unless: :lifetime?
-  validate :lifetime_only_for_season_products
+  validate :lifetime_only_for_line_products
   validate :one_lifetime_offer_version_per_product
   validate :amounts_add_up
   validate :availability_window_is_ordered
@@ -21,7 +21,7 @@ class ProductOffer < ApplicationRecord
   scope :lifetime, -> { where(duration_months: nil) }
 
   # Handoff 0057 -- a one-time purchase with no duration: the license it
-  # creates never expires. Only a Season's commerce Product may have one.
+  # creates never expires. Only a ProductLine's commerce Product may have one.
   def lifetime?
     duration_months.nil?
   end
@@ -34,18 +34,18 @@ class ProductOffer < ApplicationRecord
 
   private
 
-  def lifetime_only_for_season_products
+  def lifetime_only_for_line_products
     return unless lifetime?
-    return if product&.season_product?
+    return if product&.line_product?
 
-    errors.add(:duration_months, "can only be empty for a Season product (one-time purchase)")
+    errors.add(:duration_months, "can only be empty for a product line's product (one-time purchase)")
   end
 
   def one_lifetime_offer_version_per_product
     return unless lifetime? && product_id
 
     clash = self.class.lifetime.where(product_id: product_id, version: version).where.not(id: id).exists?
-    errors.add(:version, "already has a one-time offer for this Season product") if clash
+    errors.add(:version, "already has a one-time offer for this product") if clash
   end
 
   def amounts_add_up

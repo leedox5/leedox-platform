@@ -98,7 +98,7 @@ module Commerce
         .group_by { |license| [ license.user_id, license.product_id ] }
         .each_value do |licenses|
           licenses.each_cons(2) do |previous, current|
-            # An indefinite (one-time Season) license has no end date to overlap;
+            # An indefinite (one-time product) license has no end date to overlap;
             # a second non-canceled one for the same user+product is instead
             # caught here as an overlap.
             next if !previous.indefinite? && current.starts_on > previous.last_usable_on

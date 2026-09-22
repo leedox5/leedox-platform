@@ -6,8 +6,7 @@ require "test_helper"
 class ContentMarkdownTest < ActiveSupport::TestCase
   setup do
     @line = ProductLine.create!(internal_name: "A", customer_name: "제품", slug: "md-line", introduction: "소개", status: "published")
-    @season = @line.product_seasons.create!(internal_name: "S", season_code: "S01", slug: "s01", status: "published", visibility: "public")
-    @episode = @season.content_episodes.create!(position: 1, customer_title: "편", body: "본문", status: "published")
+    @episode = @line.content_episodes.create!(position: 1, customer_title: "편", body: "본문", status: "published")
   end
 
   def image_for(parent, alt: "설명", fixture: "covers/cover.jpg", type: "image/jpeg")
