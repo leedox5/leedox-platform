@@ -28,6 +28,20 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", product_episode_path(@line.slug, "01")
   end
 
+  # Handoff 0066: "E01" is display text only; the link (and its digits-only URL segment) is unchanged.
+  test "episode cards show an E-prefixed number and a start CTA, while the links keep the plain number" do
+    get product_line_path(@line.slug)
+    assert_select "ol a[href=?]", product_episode_path(@line.slug, "01") do
+      assert_select "span", text: "E01"
+      assert_select "span", text: "학습 시작 →"
+    end
+    assert_select "ol a[href=?] span", product_episode_path(@line.slug, "02"), text: "E02"
+    assert_select "ol a[href=?] span.truncate[title=?]", product_episode_path(@line.slug, "01"), "첫 편", text: "첫 편"
+    assert_select "ol a span", text: "01", count: 0
+    assert_select "ol a", count: 2
+    assert_select "ol a[href*='E0']", count: 0
+  end
+
   test "the series label shows only for a product that belongs to a series" do
     get product_line_path(@line.slug)
     assert_select "main > p.uppercase", 0

@@ -12,12 +12,7 @@
 
     <ol class="mt-10 space-y-3">
       <% @episodes.each do |episode| %>
-        <li>
-          <%= link_to admin_content_episode_path(episode), class: "block rounded-xl border border-gray-200 p-4 hover:border-blue-300" do %>
-            <span class="text-xs font-semibold text-gray-400"><%= episode.display_id %> · <%= episode.status %></span>
-            <span class="mt-1 block font-bold text-gray-900"><%= episode.customer_title.presence || "(제목 없음)" %></span>
-          <% end %>
-        </li>
+        <li><%= render "product_lines/episode_card", episode: episode, path: admin_content_episode_path(episode), admin: true %></li>
       <% end %>
       <% if @episodes.empty? %><p class="text-gray-500">아직 편이 없습니다.</p><% end %>
     </ol>

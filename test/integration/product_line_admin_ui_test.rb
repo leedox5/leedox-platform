@@ -214,6 +214,25 @@ class ProductLineAdminUiTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_path
   end
 
+  # Handoff 0066: the preview shows the customer's episode card (E-number, one-line title, CTA); only the link target
+  # (the admin episode page), the status after the number and the CTA wording (편집하기, handoff 0066 R4) are admin-specific.
+  test "the admin preview lists episodes with the same card as the customer page, plus their status" do
+    published = @with_cover.content_episodes.create!(position: 1, customer_title: "공개된 편", status: "published")
+    draft = @with_cover.content_episodes.create!(position: 2, customer_title: "초안 편", status: "draft")
+    sign_in_as(@admin)
+
+    get admin_product_line_path(@with_cover)
+    assert_select "ol a[href=?]", admin_content_episode_path(published) do
+      assert_select "span", text: "E01 · published"
+      assert_select "span.truncate[title=?]", "공개된 편"
+      assert_select "span", text: "편집하기 →"
+    end
+    assert_select "ol a[href=?] span", admin_content_episode_path(draft), text: "E02 · draft"
+    assert_select "ol a span", text: "학습 시작 →", count: 0
+    assert_select "ol a span", text: /\A0\d/, count: 0
+    assert_select "#product-purchase", 0, "the admin preview has no access banner"
+  end
+
   test "the earlier enlarge-image page no longer exists" do
     sign_in_as(@admin)
     assert_not Rails.application.routes.url_helpers.respond_to?(:admin_product_line_cover_preview_path)

@@ -176,6 +176,26 @@ class ProductLineSalesAndPurchaseTest < ActionDispatch::IntegrationTest
     assert_select "#product-purchase form[action=?] button", claim_free_access_path(code), text: "무료로 이용 시작"
   end
 
+  # Handoff 0066: the access banner sits right under the cover image (under the name when there is none), above the
+  # introduction, for every product.
+  test "the access banner comes right after the cover image and before the introduction" do
+    open_sale!(@line, 0)
+    order = lambda do |body|
+      [ body.index("<h1"), body.index("/product-covers/"), body.index('id="product-purchase"'), body.index(">소개</h2>"), body.index('<ol class="mt-10') ]
+    end
+
+    get product_line_path(@line.slug)
+    h1, cover, banner, intro, list = order.call(response.body)
+    assert_nil cover, "no cover yet"
+    assert h1 < banner && banner < intro && intro < list, "name -> banner -> introduction -> episodes"
+
+    @line.cover_image.attach(io: file_fixture("covers/cover.jpg").open, filename: "c.jpg", content_type: "image/jpeg")
+    @line.update!(cover_image_alt: "표지")
+    get product_line_path(@line.slug)
+    h1, cover, banner, intro, list = order.call(response.body)
+    assert h1 < cover && cover < banner && banner < intro && intro < list, "name -> cover -> banner -> introduction -> episodes"
+  end
+
   test "free start: locked before, POST creates one indefinite license without any order, open after, and a repeat press is harmless" do
     open_sale!(@line, 0)
     code = @line.product.code

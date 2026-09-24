@@ -25,9 +25,24 @@ class ProductLineIntroductionTest < ActionDispatch::IntegrationTest
     assert_select "main .doc-content strong", text: "굵게"
     assert_select "main b", count: 0
     assert_includes css_select("main .doc-content").text, "<b>태그</b>"
-    assert_select "main p.text-xs", text: "소개", count: 1
+    # Handoff 0066: the section title is a real heading, not a small blue label.
+    assert_select "main h2.text-2xl", text: "소개", count: 1
+    assert_select "main p.text-xs", text: "소개", count: 0
+    assert_select "main .doc-content.max-w-\\[740px\\]", count: 1
     body = css_select("main").text
     %w[해결할\ 문제 기대\ 결과 대상\ 고객].each { |label| assert_not_includes body, label }
+  end
+
+  # Handoff 0066: the AI supporter title is the same heading as 소개, not the old small blue label.
+  test "the AI supporter section title is a heading like the introduction, and only shown when set" do
+    get product_line_path(@line.slug)
+    assert_select "main h2", text: "AI 서포터", count: 0
+
+    @line.update!(ai_supporter: "Codex")
+    get product_line_path(@line.slug)
+    assert_select "main h2.text-2xl.font-bold.text-slate-900", text: "AI 서포터", count: 1
+    assert_select "main p.text-xs", text: "AI 서포터", count: 0
+    assert_select "main p", text: "Codex"
   end
 
   test "guests and signed-in visitors see the identical introduction and a draft product is still hidden" do

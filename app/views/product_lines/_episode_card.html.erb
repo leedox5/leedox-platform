@@ -1,0 +1,13 @@
+<%# One episode card of a product page -- the customer page and the admin preview render the same card so the preview
+    shows what a customer sees (handoff 0066). Only the link target differs, and the admin preview adds the episode's
+    status after the number and says "편집하기 →" instead of "학습 시작 →", because its link opens the admin edit page.
+    The "E" is display only: display_id is also the URL segment (digits only), so the model is untouched.
+    The customer CTA is fixed text: there is no per-episode progress to vary it by.
+    The title stays on one line (ellipsis, full text on hover) whatever the window width or zoom. %>
+<% admin = local_assigns.fetch(:admin, false) %>
+<% title = episode.customer_title.presence || "(제목 없음)" %>
+<%= link_to path, class: "block rounded-xl border border-gray-200 p-4 hover:border-blue-300" do %>
+  <span class="text-xs font-semibold text-gray-400">E<%= episode.display_id %><% if admin %> · <%= episode.status %><% end %></span>
+  <span class="mt-1 block truncate font-bold text-gray-900" title="<%= title %>"><%= title %></span>
+  <span class="mt-2 block text-sm font-semibold text-blue-600"><%= admin ? "편집하기 →" : "학습 시작 →" %></span>
+<% end %>

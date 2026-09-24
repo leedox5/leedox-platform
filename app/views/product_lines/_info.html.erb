@@ -1,8 +1,11 @@
 <%# Product Hero as one vertical flow, same order on every screen size:
     name -> cover image (if any) -> free-form introduction (handoff 0060) -> AI supporter.
     Shared by the customer page and the admin preview; admin: true only changes which image URL is used.
-    Without a cover the text follows the name directly (no empty media area). %>
+    Without a cover the text follows the name directly (no empty media area).
+    Handoff 0066: the customer page passes `purchase` (the locals of the access banner) and the banner is rendered
+    right under the cover image (or under the name when there is none); the admin preview passes none. %>
 <% admin = local_assigns.fetch(:admin, false) %>
+<% purchase = local_assigns[:purchase] %>
 
 <h1 class="break-words text-3xl font-bold text-gray-900 md:text-4xl"><%= product_line.customer_name %></h1>
 
@@ -18,17 +21,24 @@
   </div>
 <% end %>
 
+<% if purchase %>
+  <%= render "product_lines/purchase_box", product_line: product_line, **purchase %>
+<% end %>
+
 <div class="mt-6 space-y-6 break-words text-gray-700">
   <div>
-    <p class="text-xs font-bold uppercase tracking-wide text-blue-600">소개</p>
+    <h2 class="text-2xl font-bold text-slate-900">소개</h2>
     <%# Restricted Markdown (handoff 0063): hard line breaks keep the plain text of handoff 0060 looking as it did;
-        images resolve only to this product's own images (admin preview points at the admin-only image route). %>
-    <div class="doc-content mt-1 max-w-none [&_p]:mb-4 [&>:last-child]:mb-0"><%= ContentMarkdown.render(product_line.introduction, parent: product_line, profile: :marketing, admin: admin) %></div>
+        images resolve only to this product's own images (admin preview points at the admin-only image route).
+        Handoff 0066: a real section heading (h2, 24px) instead of a small blue label, and a reading-width column;
+        line height is already 1.75 via `.doc-content p` (leading-7). %>
+    <div class="doc-content mt-3 max-w-[740px] [&_p]:mb-4 [&>:last-child]:mb-0"><%= ContentMarkdown.render(product_line.introduction, parent: product_line, profile: :marketing, admin: admin) %></div>
   </div>
   <% if product_line.ai_supporter.present? %>
     <div>
-      <p class="text-xs font-bold uppercase tracking-wide text-blue-600">AI 서포터</p>
-      <p class="mt-1"><%= product_line.ai_supporter %></p>
+      <%# Same heading as 소개 (handoff 0066). %>
+      <h2 class="text-2xl font-bold text-slate-900">AI 서포터</h2>
+      <p class="mt-3"><%= product_line.ai_supporter %></p>
     </div>
   <% end %>
 </div>
