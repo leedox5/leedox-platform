@@ -15,6 +15,19 @@ Rails.application.config.to_prepare do
   end
 end
 
+# 1b. Blob analysis runs inline for the same reason. Nothing in production runs a
+#    job worker and the Solid Queue tables do not exist there (the SQLite queue
+#    file is empty on every deploy, and the web process is started without
+#    `db:prepare`), so enqueuing ActiveStorage::AnalyzeJob raised "Could not find
+#    table 'solid_queue_jobs'" -- after the upload and the record were already
+#    saved -- and turned every cover save and every first render of a new image
+#    variant into a 500. Analysis is a few milliseconds of libvips on a file that
+#    was just written (and ProductLine already analyzes its cover synchronously),
+#    so running it inline costs nothing and can't be lost.
+Rails.application.config.to_prepare do
+  ActiveStorage::AnalyzeJob.queue_adapter = :inline
+end
+
 # 2. Say so loudly at boot when production is still on the container disk.
 Rails.application.config.after_initialize do
   if Rails.env.production? && Rails.application.config.active_storage.service.to_s == "local"
