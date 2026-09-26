@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_27_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_27_090000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -266,6 +266,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_010000) do
     t.datetime "created_at", null: false
     t.string "customer_name", null: false
     t.text "expected_result"
+    t.boolean "featured", default: false, null: false
     t.string "internal_name", null: false
     t.text "introduction", default: "", null: false
     t.bigint "legacy_season_id"
@@ -278,8 +279,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_010000) do
     t.string "status", default: "draft", null: false
     t.string "summary"
     t.text "target_audience"
+    t.string "track"
     t.datetime "updated_at", null: false
     t.string "visibility", default: "public", null: false
+    t.index ["featured"], name: "index_product_lines_on_featured_only_one", unique: true, where: "featured"
     t.index ["legacy_season_id"], name: "index_product_lines_on_legacy_season_id", unique: true
     t.index ["product_id"], name: "index_product_lines_on_product_id", unique: true
     t.index ["series_key"], name: "index_product_lines_on_series_key"

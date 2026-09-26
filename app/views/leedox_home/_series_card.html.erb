@@ -1,0 +1,22 @@
+<%# Handoff 0071 (c) -- one series card on the home track rows. The whole card links to the series page
+    (never a link inside a link). Meta: "공개 N편" (+ "· 공개 예정 M편" when any) and the price/owned badge from
+    ProductLine#access_state -- the same label the /products card uses (0068). %>
+<% state = @series_access_states[line.id] %>
+<% published = @published_counts.fetch(line.id, 0) %>
+<% upcoming = @upcoming_counts.fetch(line.id, 0) %>
+<%= link_to product_line_path(line.slug), class: "flex flex-col overflow-hidden rounded-xl border border-white/10 bg-[#15181e] transition hover:border-[#f0a53c]/60" do %>
+  <% if line.cover_image.attached? %>
+    <%= render "product_lines/cover_image", product_line: line, variant: :thumb, classes: "block aspect-video w-full object-cover" %>
+  <% else %>
+    <%= render "product_lines/cover_placeholder", product_line: line, dark: true %>
+  <% end %>
+  <div class="flex flex-1 flex-col p-4">
+    <h3 class="break-keep font-bold text-[#f2efe8]"><%= line.customer_name %></h3>
+    <% if line.summary.present? %>
+      <p class="mt-1 break-keep text-sm leading-relaxed text-[#c9c4ba]"><%= line.summary %></p>
+    <% end %>
+    <p class="mt-auto pt-4 text-xs text-[#a8a39a]">
+      공개 <%= published %>편<% if upcoming.positive? %> · 공개 예정 <%= upcoming %>편<% end %><% if state %> · <span class="font-semibold text-[#f0a53c]"><%= product_list_state_label(state, line) %></span><% end %>
+    </p>
+  </div>
+<% end %>

@@ -18,6 +18,8 @@ class ProductLine < ApplicationRecord
   # Handoff 0065 -- public = reachable (and listable), unlisted = reachable by
   # URL only, private = admin-only. Neither says anything about purchase.
   VISIBILITIES = %w[public unlisted private].freeze
+  # Handoff 0071 -- the home row a series appears in; nil keeps it off the home rows.
+  TRACKS = { "basics" => "개발 기초 시즌", "ai" => "AI와 함께 만들기" }.freeze
 
   # Recommended upload is 16:9 at 1600x900. 5MB is far above a well-compressed
   # 1600x900 JPEG/WebP (~0.2-0.8MB) and a flat PNG (~1-3MB) while stopping
@@ -52,6 +54,7 @@ class ProductLine < ApplicationRecord
 
   before_validation :normalize_slug
   before_validation :normalize_series
+  before_validation { self.track = track.presence }
 
   validates :internal_name, :customer_name, :introduction, presence: true
   validates :slug, presence: true, format: { with: SLUG_FORMAT }, uniqueness: true
@@ -61,6 +64,12 @@ class ProductLine < ApplicationRecord
   validates :series_key, format: { with: SLUG_FORMAT, message: "은 소문자·숫자·하이픈만 쓸 수 있습니다" }, allow_nil: true
   validates :series_label, length: { maximum: 40 }
   validates :series_position, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+  validates :track, inclusion: { in: TRACKS.keys }, allow_nil: true
+
+  # Handoff 0071 -- at most one featured (home hero) series. Turning one on quietly turns the
+  # previous one off in the same transaction (Tommy's call: never block the save); the partial
+  # unique index backs this up at the database level.
+  before_save :unfeature_others, if: -> { featured? && will_save_change_to_featured? }
   validates :cover_image_alt, presence: { message: "대표 이미지를 올리면 대체문구가 필요합니다" }, if: -> { cover_image.attached? }
   validates :cover_image_alt, length: { maximum: COVER_ALT_MAX_LENGTH }
   validate :cover_image_acceptable, if: :new_cover_image?
@@ -72,6 +81,7 @@ class ProductLine < ApplicationRecord
   # What belongs on the customer product list (handoff 0068): public only -- unlisted is
   # reachable by URL but deliberately not listed anywhere (see VISIBILITIES above).
   scope :listed, -> { published.where(visibility: "public") }
+  scope :in_track, ->(track) { where(track: track) }
 
   def published?
     status == "published"
@@ -143,6 +153,21 @@ class ProductLine < ApplicationRecord
   end
 
   # The other products of the same series, in order (empty for a stand-alone product).
+  # The episodes a visitor can open, in order (the product page's cards and its gate).
+  def published_episodes
+    content_episodes.published.ordered
+  end
+
+  # Handoff 0070 -- titled draft episodes, shown as non-link "공개 예정" cards. Kept here (not in
+  # a controller) so the product page and the home (handoff 0071) use the exact same judgment.
+  def upcoming_episodes
+    ContentEpisode.upcoming(content_episodes)
+  end
+
+  def track_name
+    TRACKS[track]
+  end
+
   def series_members
     series_key.present? ? ProductLine.where(series_key: series_key).order(:series_position, :id) : ProductLine.none
   end
@@ -167,6 +192,10 @@ class ProductLine < ApplicationRecord
   end
 
   private
+
+  def unfeature_others
+    self.class.where(featured: true).where.not(id: id).update_all(featured: false, updated_at: Time.current)
+  end
 
   def storage_accepts_cover_upload
     errors.add(:cover_image, StoragePersistence::MESSAGE) if StoragePersistence.upload_blocked?

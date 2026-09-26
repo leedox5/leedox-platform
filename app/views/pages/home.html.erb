@@ -4,6 +4,13 @@
   <%= render "shared/header" %>
 
   <main>
+    <%# Handoff 0071 R1 -- the story-series sections (D-009). The older sections below stay until R2 replaces them. %>
+    <% if @featured_line || @track_rows.any? %>
+      <div class="bg-[#0e1014]">
+        <%= render "leedox_home/series_hero" if @featured_line %>
+        <%= render "leedox_home/track_rows" %>
+      </div>
+    <% end %>
     <%= render "leedox_home/hero" %>
     <%= render "leedox_home/problems" %>
     <%= render "leedox_home/products" %>

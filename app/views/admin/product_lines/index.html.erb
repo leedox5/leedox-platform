@@ -34,7 +34,19 @@
               <td class="w-40 px-4 py-4">
                 <%= render "admin/product_lines/cover_link", product_line: line, variant: :thumb, caption: true %>
               </td>
-              <td class="px-4 py-4 font-semibold text-slate-900"><%= line.customer_name %></td>
+              <td class="px-4 py-4 font-semibold text-slate-900">
+                <%= line.customer_name %>
+                <%# Handoff 0071 -- which series is the home hero, and whether it can actually show there. %>
+                <% if line.featured? %>
+                  <span class="ml-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">대표</span>
+                  <% unless ProductLine.listed.exists?(line.id) %>
+                    <span class="ml-1 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">비공개라 홈에 안 나옴</span>
+                  <% end %>
+                <% end %>
+                <% if line.track_name %>
+                  <span class="mt-1 block text-xs font-normal text-slate-500">홈 줄: <%= line.track_name %></span>
+                <% end %>
+              </td>
               <td class="px-4 py-4 text-slate-600"><%= line.internal_name %></td>
               <td class="px-4 py-4 text-slate-600"><code><%= line.slug %></code></td>
               <td class="whitespace-nowrap px-4 py-4"><span class="inline-block rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700"><%= line.status %></span></td>

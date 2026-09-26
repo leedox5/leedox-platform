@@ -34,6 +34,13 @@ class ContentEpisode < ApplicationRecord
   # are not "coming soon" -- they're intentionally held back or retired).
   scope :draft, -> { where(status: "draft") }
 
+  # Handoff 0070 -- the "공개 예정" episodes of `scope`: draft, in order, and only those with a
+  # title (an untitled draft isn't ready to be named to a visitor). Filtered in Ruby with the
+  # same `present?` rule as everywhere else, so a whitespace-only title counts as untitled.
+  def self.upcoming(scope = all)
+    scope.draft.ordered.select { |episode| episode.customer_title.present? }
+  end
+
   before_update :snapshot_previous_body, if: :body_changed?
 
   def published?

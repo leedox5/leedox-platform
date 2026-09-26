@@ -2,7 +2,9 @@
     real cover's aspect ratio (16:9, aspect-video) so every card in the grid is the same height regardless of
     which ones have an uploaded cover. Purely decorative (aria-hidden, no text an assistive-tech user would
     care about) -- never mistaken for a real upload; the admin list/edit screens still say "대표 이미지 없음"
-    exactly as before (unchanged by this handoff). %>
-<div aria-hidden="true" class="flex aspect-video w-full items-center justify-center bg-gradient-to-br from-indigo-50 via-blue-50 to-slate-100">
-  <span class="text-4xl font-black text-indigo-200"><%= product_line.customer_name.first %></span>
+    exactly as before (unchanged by this handoff).
+    Handoff 0071: `dark: true` gives the same placeholder in the home's dark palette. %>
+<% dark = local_assigns.fetch(:dark, false) %>
+<div aria-hidden="true" class="<%= local_assigns.fetch(:classes, "") %> flex aspect-video w-full items-center justify-center <%= dark ? "bg-gradient-to-br from-[#1b1e25] via-[#161920] to-[#0e1014]" : "bg-gradient-to-br from-indigo-50 via-blue-50 to-slate-100" %>">
+  <span class="text-4xl font-black <%= dark ? "text-[#f0a53c]/40" : "text-indigo-200" %>"><%= product_line.customer_name.first %></span>
 </div>

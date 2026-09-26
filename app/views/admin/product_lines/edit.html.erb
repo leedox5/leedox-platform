@@ -74,6 +74,22 @@
       </div>
 
       <fieldset class="space-y-3 rounded-xl border border-slate-200 p-4">
+        <legend class="px-2 text-sm font-bold text-slate-700">홈 노출</legend>
+        <div>
+          <%= f.label :track, "홈 줄", class: "block text-xs font-bold text-slate-600 mb-1" %>
+          <%= f.select :track, ProductLine::TRACKS.map { |key, name| [ name, key ] }, { include_blank: "홈 줄에 안 나옴" }, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+          <p class="mt-1 text-xs text-slate-500">공개(published·public) 제품만 홈에 나옵니다.</p>
+        </div>
+        <div>
+          <label class="inline-flex items-center gap-2 text-sm font-bold text-slate-700">
+            <%= f.check_box :featured, class: "h-4 w-4 rounded border-slate-300" %>
+            대표 시리즈
+          </label>
+          <p class="mt-1 text-xs text-slate-500">켜면 기존 대표 시리즈는 자동으로 해제됩니다. 홈 맨 위에 크게 소개됩니다(공개 제품일 때만).</p>
+        </div>
+      </fieldset>
+
+      <fieldset class="space-y-3 rounded-xl border border-slate-200 p-4">
         <legend class="px-2 text-sm font-bold text-slate-700">시리즈 (선택)</legend>
         <p class="text-xs text-slate-500">같은 시리즈로 묶을 제품끼리 같은 키를 적습니다. 비워 두면 독립 제품입니다. 시리즈 화면은 아직 없고, 키·이름·순서만 저장됩니다.</p>
         <div class="grid gap-3 sm:grid-cols-3">
