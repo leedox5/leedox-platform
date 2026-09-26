@@ -57,6 +57,6 @@ class Admin::ProductLinesController < Admin::BaseController
   private
 
   def product_line_params
-    params.require(:product_line).permit(:internal_name, :customer_name, :slug, :introduction, :ai_supporter, :status, :visibility, :series_key, :series_label, :series_position, :cover_image, :cover_image_alt)
+    params.require(:product_line).permit(:internal_name, :customer_name, :summary, :slug, :introduction, :ai_supporter, :status, :visibility, :series_key, :series_label, :series_position, :cover_image, :cover_image_alt)
   end
 end

@@ -26,6 +26,9 @@ class ProductLine < ApplicationRecord
   COVER_MAX_BYTES = 5.megabytes
   COVER_MAX_PIXELS = 4096 * 4096
   COVER_ALT_MAX_LENGTH = 200
+  # A recommendation shown as help text on the admin form, not a validation (handoff
+  # 0068) -- a slightly longer summary is never rejected.
+  SUMMARY_RECOMMENDED_MAX = 60
   COVER_TYPES = ImageUploadValidation::TYPES
   # Purpose-specific sizes, both 16:9. `crop: :attention` (libvips smartcrop)
   # keeps the most salient region if an upload isn't already 16:9, so
@@ -66,6 +69,9 @@ class ProductLine < ApplicationRecord
   scope :published, -> { where(status: "published") }
   # What a visitor may open: published, and not private (unlisted is reachable by URL).
   scope :customer_reachable, -> { published.where(visibility: %w[public unlisted]) }
+  # What belongs on the customer product list (handoff 0068): public only -- unlisted is
+  # reachable by URL but deliberately not listed anywhere (see VISIBILITIES above).
+  scope :listed, -> { published.where(visibility: "public") }
 
   def published?
     status == "published"
@@ -114,6 +120,26 @@ class ProductLine < ApplicationRecord
   # Can a visitor who doesn't own it get it now (buy or free start)?
   def acquirable?
     free? ? free_start_open? : for_sale?
+  end
+
+  # Whether `user` already has this product -- the same check the purchase box uses to
+  # decide "owned" (handoff 0057/0065), pulled out to a model method so the product list
+  # (handoff 0068) asks the identical question instead of a second copy of the logic.
+  def owned_by?(user)
+    gated? && user.present? && Entitlements::ProductAccess.allowed?(user: user, product_code: product.code)
+  end
+
+  # The purchase box's state, in the one priority order it already renders in (handoff
+  # 0057; owned beats a free product being open, which beats it being for sale) -- shared
+  # with the product list (handoff 0068) so the two can never disagree about a product's
+  # state. nil for a product with no commerce Product at all (nothing to show).
+  def access_state(owned:)
+    return nil unless gated?
+    return :owned if owned
+    return :free_open if free? && free_start_open?
+    return :for_sale if !free? && for_sale?
+
+    :unavailable
   end
 
   # The other products of the same series, in order (empty for a stand-alone product).

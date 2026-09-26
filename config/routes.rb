@@ -17,9 +17,12 @@ Rails.application.routes.draw do
   get "/aigravity", to: "pages#aigravity", as: :aigravity
 
   # Customer URLs for a ProductLine and its Episodes (handoff 0056 R3; the
-  # Season level was removed in 0065). Reachable by direct URL only -- not
-  # linked from any nav/listing yet. Kept separate from /content/:product_code/...
+  # Season level was removed in 0065). Kept separate from /content/:product_code/...
   # (the file-based products' and legacy ContentBundle's namespace).
+  # Handoff 0068 -- the list, linked from the header. Doesn't collide with the
+  # :product_slug route below: that one always needs a second path segment, this
+  # one never has one.
+  get "/products", to: "product_lines#index", as: :products
   get "/products/:product_slug", to: "product_lines#show", as: :product_line
   # Handoff 0056 R5 -- ProductLine cover image variants (hero/thumb). A separate
   # top-level path on purpose: under /products/:slug/... a segment named

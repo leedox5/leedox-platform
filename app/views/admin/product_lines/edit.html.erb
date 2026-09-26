@@ -33,6 +33,12 @@
       </div>
 
       <div>
+        <%= f.label :summary, "한줄요약 (선택)", class: "block text-sm font-bold text-slate-700 mb-1" %>
+        <%= f.text_field :summary, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+        <p class="mt-1 text-xs text-slate-500">제품 목록(<code><%= products_path %></code>) 카드에 표시됩니다. 비워 두면 목록에서 그 줄이 빠집니다. 권장 길이 60자 안팎(강제하지 않습니다).</p>
+      </div>
+
+      <div>
         <%= f.label :slug, "고객 URL slug", class: "block text-sm font-bold text-slate-700 mb-1" %>
         <%= f.text_field :slug, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono" %>
         <p class="mt-1 text-xs text-slate-500">고객 URL: <code><%= product_line_path(@product_line.slug) %></code></p>

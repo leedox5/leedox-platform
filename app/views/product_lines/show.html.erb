@@ -1,6 +1,11 @@
 <div class="min-h-screen bg-white">
   <%= render "shared/header" %>
-  <main class="mx-auto max-w-3xl px-5 py-12 sm:px-7">
+  <%# Handoff 0068 -- back to the list this product is (or was) reachable from. Outside <main>, above the Hero, so
+      the Hero's own name -> image -> introduction order (handoff 0056 R5) stays exactly as it was. %>
+  <div class="mx-auto max-w-3xl px-5 pt-6 sm:px-7">
+    <%= link_to "← 제품 목록", products_path, class: "text-sm font-semibold text-slate-500 hover:text-slate-900" %>
+  </div>
+  <main class="mx-auto max-w-3xl px-5 pb-12 pt-3 sm:px-7">
     <% if @product_line.series_key.present? && @product_line.series_label.present? %>
       <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-blue-600"><%= @product_line.series_label %></p>
     <% end %>

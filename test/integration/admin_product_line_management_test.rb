@@ -147,9 +147,28 @@ class AdminProductLineManagementTest < ActionDispatch::IntegrationTest
     assert_select "input[name='product_line[series_key]']"
     assert_select "input[name='product_line[series_label]']"
     assert_select "input[name='product_line[series_position]']"
+    assert_select "input[name='product_line[summary]']"
     assert_select "#sale-settings form[action=?]", admin_product_line_sale_path(line)
     assert_select "#episodes a[href=?]", new_admin_product_line_content_episode_path(line), text: "+ 새 편"
     assert_no_match(/Season/, css_select("main").text)
+  end
+
+  # Handoff 0068 -- the customer product list's one-line summary. No length validation
+  # (a recommendation only), never auto-filled from the introduction.
+  test "the one-line summary saves, is never required, and existing lines start blank" do
+    sign_in_as(@admin)
+    line = make_line
+    assert_nil line.summary, "existing data is never auto-filled from the introduction"
+
+    patch admin_product_line_path(line), params: { product_line: { summary: "요약 문장입니다" } }
+    assert_equal "요약 문장입니다", line.reload.summary
+
+    patch admin_product_line_path(line), params: { product_line: { summary: "" } }
+    assert_response :redirect, "a blank summary is not a validation error"
+    assert_not line.reload.summary.present?
+
+    post admin_product_lines_path, params: { product_line: { internal_name: "새 제품", customer_name: "새 제품", slug: "new-no-summary", introduction: "소개" } }
+    assert ProductLine.find_by(slug: "new-no-summary").present?
   end
 
   test "invalid create/update never partially saves" do

@@ -1,0 +1,8 @@
+<%# Handoff 0068 R2 -- a code-drawn placeholder for a product-list card with no cover image, matching the
+    real cover's aspect ratio (16:9, aspect-video) so every card in the grid is the same height regardless of
+    which ones have an uploaded cover. Purely decorative (aria-hidden, no text an assistive-tech user would
+    care about) -- never mistaken for a real upload; the admin list/edit screens still say "대표 이미지 없음"
+    exactly as before (unchanged by this handoff). %>
+<div aria-hidden="true" class="flex aspect-video w-full items-center justify-center bg-gradient-to-br from-indigo-50 via-blue-50 to-slate-100">
+  <span class="text-4xl font-black text-indigo-200"><%= product_line.customer_name.first %></span>
+</div>

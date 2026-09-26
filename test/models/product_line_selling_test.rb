@@ -160,4 +160,45 @@ class ProductLineSellingTest < ActiveSupport::TestCase
     buyer = User.create!(name: "일반", email: "sell-user-#{SecureRandom.hex(3)}@example.com", password: "password123")
     assert_raises(Pundit::NotAuthorizedError) { Commerce::ProductLineSales.set_price!(product_line: @line, total_amount: 1000, actor: buyer) }
   end
+
+  # --- customer list (handoff 0068) ------------------------------------------
+
+  test "listed is published and public only -- draft, unlisted and private are excluded" do
+    assert_includes ProductLine.listed, @line
+    @line.update!(visibility: "unlisted")
+    assert_not_includes ProductLine.listed, @line
+    @line.update!(visibility: "public", status: "draft")
+    assert_not_includes ProductLine.listed, @line
+    @line.update!(status: "published", visibility: "private")
+    assert_not_includes ProductLine.listed, @line
+  end
+
+  test "owned_by? is the exact license check the purchase box uses, and false for a guest or a non-gated line" do
+    holder = User.create!(name: "보유", email: "sell-holder-#{SecureRandom.hex(3)}@example.com", password: "password123", created_at: 30.days.ago)
+    other = User.create!(name: "타인", email: "sell-other-#{SecureRandom.hex(3)}@example.com", password: "password123", created_at: 30.days.ago)
+    assert_not @line.owned_by?(nil), "no commerce Product yet -- never owned"
+
+    open_sale!(0)
+    Commerce::ClaimFreeAccess.call!(user: holder, product_line: @line.reload)
+    assert @line.owned_by?(holder)
+    assert_not @line.owned_by?(other)
+    assert_not @line.owned_by?(nil)
+  end
+
+  test "access_state is the purchase box's own priority order (owned > free-open > for-sale > unavailable), nil without a commerce Product" do
+    assert_nil @line.access_state(owned: false), "no commerce Product -- the purchase box renders nothing"
+
+    open_sale!(0)
+    assert_equal :free_open, @line.access_state(owned: false)
+    assert_equal :owned, @line.access_state(owned: true), "owned wins over free-open"
+
+    paid = ProductLine.create!(internal_name: "B", customer_name: "제품 B", slug: "sell-b", introduction: "소개", status: "published")
+    open_sale!(29_000, line: paid)
+    assert_equal :for_sale, paid.access_state(owned: false)
+    assert_equal :owned, paid.access_state(owned: true)
+
+    stopped = ProductLine.create!(internal_name: "C", customer_name: "제품 C", slug: "sell-c", introduction: "소개", status: "published")
+    price!(5_000, line: stopped) # priced but sale never started
+    assert_equal :unavailable, stopped.access_state(owned: false)
+  end
 end
