@@ -1,8 +1,8 @@
 <%# Handoff 0071 (b) -- the featured series. Rendered only when a featured series is listed (the page skips
     this partial entirely otherwise -- never an empty hero). Everything shown comes from existing judgments:
     price/owned from ProductLine#access_state (0068), published vs 공개 예정 from the product page's own split
-    (0070). "S01" is a fixed string: there is no season record on a ProductLine (series_label is a free-text
-    display name, not a season code). %>
+    (0070). The season slot shows series_label when the admin has set one (the only season-like field on a
+    ProductLine -- free text, e.g. "S01"), otherwise the fixed "S01". %>
 <% line = @featured_line %>
 <% state = @series_access_states[line.id] %>
 <% total = @featured_published.size + @featured_upcoming.size %>
@@ -10,7 +10,7 @@
   <div class="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-7 lg:grid-cols-2 lg:items-center lg:py-20">
     <div class="min-w-0">
       <p class="text-xs font-semibold tracking-wide text-[#f0a53c]">
-        지금 시작하는 시리즈 · S01 · <%= total %>편<% if state %> · <%= product_list_state_label(state, line) %><% end %>
+        지금 시작하는 시리즈 · <%= line.series_label.presence || "S01" %> · <%= total %>편<% if state %> · <%= product_list_state_label(state, line) %><% end %>
       </p>
       <h1 id="featured-series-title" class="mt-4 break-keep text-4xl font-bold leading-tight text-[#f2efe8] sm:text-5xl"><%= line.customer_name %></h1>
       <% if line.summary.present? %>

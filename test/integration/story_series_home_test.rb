@@ -68,6 +68,13 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
     assert hero.at_css("div[aria-hidden='true'].aspect-video"), "no cover -- the placeholder takes its place"
   end
 
+  test "the season slot uses the series' own label when set, S01 otherwise" do
+    line = series("season-line", featured: true, series_label: "S02")
+    episodes(line, published: [ 1 ])
+    get root_path
+    assert_includes hero.text, "지금 시작하는 시리즈 · S02 · 1편"
+  end
+
   test "with nothing coming up the release line is just the published count; with nothing published only 시리즈 소개 remains" do
     done = series("done-line", featured: true)
     episodes(done, published: [ 1, 2 ])
