@@ -49,6 +49,9 @@ class ProductLinesController < ApplicationController
   # box), and the published episodes.
   def show
     @episodes = @product_line.content_episodes.published.ordered
+    # Handoff 0070 -- draft episodes with a title show as "공개 예정" cards after the
+    # published ones; a draft with no title yet isn't ready to be named to a visitor.
+    @upcoming_episodes = @product_line.content_episodes.draft.ordered.select { |episode| episode.customer_title.present? }
     @owned = @product_line.owned_by?(current_user)
     # Files of a paid product are listed only for owners (downloads are gated
     # separately in ProductAssetDownloadsController regardless).

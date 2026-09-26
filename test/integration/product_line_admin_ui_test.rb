@@ -232,6 +232,20 @@ class ProductLineAdminUiTest < ActionDispatch::IntegrationTest
     assert_select "ol a span", text: /\A0\d/, count: 0
   end
 
+  # Handoff 0070 -- the "공개 예정" treatment (no link, muted, a fixed label) is customer-only; the admin preview
+  # keeps every draft as an ordinary, editable card exactly as before.
+  test "the admin preview never turns a draft into a 공개 예정 card, and shows the same teaser line as the customer page" do
+    draft = @with_cover.content_episodes.create!(position: 1, customer_title: "초안 편", status: "draft", summary: "이번 편 예고")
+    sign_in_as(@admin)
+
+    get admin_product_line_path(@with_cover)
+    assert_no_match(/공개 예정/, response.body)
+    assert_select "ol a[href=?]", admin_content_episode_path(draft) do
+      assert_select "span", text: "편집하기 →"
+      assert_select "p.truncate", text: "이번 편 예고"
+    end
+  end
+
   # Handoff 0069 R3 -- the admin preview gets the same "에피소드" heading (draft episodes count as cards here,
   # unlike the customer page).
   test "the admin preview shows the 에피소드 heading whenever it has at least one card, including a draft-only one" do

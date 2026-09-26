@@ -29,6 +29,10 @@ class ContentEpisode < ApplicationRecord
 
   scope :ordered, -> { order(:position) }
   scope :published, -> { where(status: "published") }
+  # Handoff 0070 -- the customer product page's "공개 예정" cards: episodes literally
+  # marked draft, not any other not-yet-published status (in_review/unpublished/archived
+  # are not "coming soon" -- they're intentionally held back or retired).
+  scope :draft, -> { where(status: "draft") }
 
   before_update :snapshot_previous_body, if: :body_changed?
 

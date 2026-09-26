@@ -21,6 +21,12 @@
       </div>
 
       <div>
+        <%= f.label :summary, "한줄 예고 (선택)", class: "block text-sm font-bold text-slate-700 mb-1" %>
+        <%= f.text_field :summary, placeholder: "예: JDK 설치와 첫 실행까지 직접 따라 해봅니다", class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+        <p class="mt-1 text-xs text-slate-500">고객 화면 카드의 제목 아래 한 줄로 표시됩니다. 비워 두면 그 줄이 빠집니다. 권장 길이 60자 안팎(강제하지 않습니다).</p>
+      </div>
+
+      <div>
         <%= f.label :position, "정렬 순서", class: "block text-sm font-bold text-slate-700 mb-1" %>
         <%= f.number_field :position, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
         <p class="mt-1 text-xs text-slate-500">고객 화면의 편 순서·번호(01, 02, ...)로 그대로 쓰입니다.</p>

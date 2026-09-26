@@ -15,7 +15,7 @@
     <%= render "product_lines/info", product_line: @product_line,
       purchase: { owned: @owned, for_sale: @for_sale, offer: @offer, free: @free, free_open: @free_open } %>
 
-    <%= render "product_lines/episode_list", episodes: @episodes, product_line: @product_line %>
+    <%= render "product_lines/episode_list", episodes: @episodes, product_line: @product_line, upcoming_episodes: @upcoming_episodes %>
 
     <% if @assets_by_episode.any? %>
       <section class="mt-12">

@@ -3,14 +3,22 @@
     caller's job via `episodes` and `admin:`). A "에피소드" heading sits above the cards, styled exactly like a
     subheading inside the intro guide (`.doc-content h2`: text-2xl font-semibold text-slate-900, mt-8/mb-3) so it
     reads as one more subheading in the same flow -- and only when there's at least one card to show; a product
-    with no visible episodes gets no heading at all, just the empty-state line it already had. %>
+    with no visible episodes gets no heading at all, just the empty-state line it already had.
+    Handoff 0070 -- on the customer page (never the admin preview -- draft episodes are already ordinary,
+    editable cards there), titled draft episodes follow the published ones as non-interactive "공개 예정" cards
+    (`_upcoming_episode_card`, no link, no CTA). The admin preview never passes `upcoming_episodes`, so it keeps
+    its old behaviour exactly. %>
 <% admin = local_assigns.fetch(:admin, false) %>
-<% if episodes.any? %>
+<% upcoming_episodes = local_assigns.fetch(:upcoming_episodes, []) %>
+<% if episodes.any? || upcoming_episodes.any? %>
   <h2 class="mt-8 mb-3 text-2xl font-semibold text-slate-900">에피소드</h2>
   <ol class="space-y-3">
     <% episodes.each do |episode| %>
       <li><%= render "product_lines/episode_card", episode: episode, admin: admin,
         path: admin ? admin_content_episode_path(episode) : product_episode_path(product_line.slug, episode.display_id) %></li>
+    <% end %>
+    <% upcoming_episodes.each do |episode| %>
+      <li><%= render "product_lines/upcoming_episode_card", episode: episode %></li>
     <% end %>
   </ol>
 <% else %>

@@ -162,6 +162,6 @@ class Admin::ContentEpisodesController < Admin::BaseController
   end
 
   def episode_params
-    params.require(:content_episode).permit(:customer_title, :position, :body, :lock_version, :internal_ref)
+    params.require(:content_episode).permit(:customer_title, :summary, :position, :body, :lock_version, :internal_ref)
   end
 end

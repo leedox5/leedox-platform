@@ -1,0 +1,16 @@
+<%# Handoff 0070 -- a "공개 예정" card: a titled draft episode of the same product, listed after the published
+    cards so the season reads whole (D-008). Deliberately a <div>, never a link -- no href, no CTA, not focusable
+    or clickable -- because the episode's body/URL is still gated exactly as before (404 on direct access; this
+    card never claims otherwise). Same one-row layout as the published card (0067: number + title on the left,
+    a fixed label on the right that's forced to its own line below `sm`) so the season reads as one continuous
+    list, just muted (gray, lower opacity) to read as "not yet". %>
+<div class="rounded-xl border border-gray-200 p-4 opacity-60">
+  <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+    <span class="shrink-0 text-xs font-semibold text-gray-400">E<%= episode.display_id %></span>
+    <span class="min-w-0 flex-1 truncate font-semibold text-gray-500" title="<%= episode.customer_title %>"><%= episode.customer_title %></span>
+    <span class="order-last w-full shrink-0 whitespace-nowrap text-sm font-semibold text-gray-400 sm:order-none sm:ml-auto sm:w-auto">공개 예정</span>
+  </div>
+  <% if episode.summary.present? %>
+    <p class="mt-1 truncate text-sm text-gray-400" title="<%= episode.summary %>"><%= episode.summary %></p>
+  <% end %>
+</div>

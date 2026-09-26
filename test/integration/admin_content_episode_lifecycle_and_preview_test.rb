@@ -66,6 +66,20 @@ class AdminContentEpisodeLifecycleAndPreviewTest < ActionDispatch::IntegrationTe
     assert_no_match(/관리자 전용 메모/, response.body)
   end
 
+  # Handoff 0070 -- the one-line teaser field is settable via the edit form, in both bundle- and ProductLine-authored
+  # episodes' admin form (this test uses the legacy bundle path already set up above; a ProductLine episode uses
+  # the exact same controller/permit list).
+  test "summary (the one-line teaser) is settable via the edit form and shows back on it" do
+    patch admin_content_episode_path(@episode), params: {
+      content_episode: { summary: "한 줄 예고 문구", lock_version: @episode.lock_version }
+    }
+    @episode.reload
+    assert_equal "한 줄 예고 문구", @episode.summary
+
+    get edit_admin_content_episode_path(@episode)
+    assert_select "input[name='content_episode[summary]'][value=?]", "한 줄 예고 문구"
+  end
+
   test "admin preview navigates prev/next across draft siblings, unlike the customer path which excludes drafts entirely" do
     second = @bundle.content_episodes.create!(customer_title: "편 B", position: 2, body: "본문 B", status: "draft")
 

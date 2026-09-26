@@ -8,7 +8,11 @@
     via truncate + a title tooltip, same as before). Below `sm` there usually isn't room for a fourth width (number +
     a readable title + CTA), so the CTA alone drops to its own line there (`w-full` forces the wrap; `sm:w-auto` plus
     `sm:ml-auto` puts it back at the right end of the row) -- number and title always stay together on the first
-    line. No per-episode state (e.g. a lock icon) exists on this card today. %>
+    line. No per-episode state (e.g. a lock icon) exists on this card today.
+
+    Handoff 0070 -- an optional one-line teaser (episode.summary) as a second line, plain text, truncated to one
+    line with a title tooltip for the full text when it's cut off (same convention as the title above); skipped
+    entirely when blank. %>
 <% admin = local_assigns.fetch(:admin, false) %>
 <% title = episode.customer_title.presence || "(제목 없음)" %>
 <%= link_to path, class: "block rounded-xl border border-gray-200 p-4 hover:border-blue-300" do %>
@@ -17,4 +21,7 @@
     <span class="min-w-0 flex-1 truncate font-bold text-gray-900" title="<%= title %>"><%= title %></span>
     <span class="order-last w-full shrink-0 whitespace-nowrap text-sm font-semibold text-blue-600 sm:order-none sm:ml-auto sm:w-auto"><%= admin ? "편집하기 →" : "학습 시작 →" %></span>
   </div>
+  <% if episode.summary.present? %>
+    <p class="mt-1 truncate text-sm text-gray-500" title="<%= episode.summary %>"><%= episode.summary %></p>
+  <% end %>
 <% end %>

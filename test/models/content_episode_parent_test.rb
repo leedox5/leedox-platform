@@ -88,4 +88,20 @@ class ContentEpisodeParentTest < ActiveSupport::TestCase
       @bundle.destroy!
     end
   end
+
+  # Handoff 0070 -- the customer product page's "공개 예정" cards read this scope, and only this scope: an
+  # episode that's literally draft, not any other not-yet-published status.
+  test "the draft scope is exactly status draft, and summary is a free-text, unvalidated field" do
+    published = ContentEpisode.create!(product_line: @line, position: 1, status: "published")
+    draft = ContentEpisode.create!(product_line: @line, position: 2, status: "draft")
+    ContentEpisode.create!(product_line: @line, position: 3, status: "in_review")
+    ContentEpisode.create!(product_line: @line, position: 4, status: "unpublished")
+    ContentEpisode.create!(product_line: @line, position: 5, status: "archived")
+
+    assert_equal [ draft ], @line.content_episodes.draft.to_a
+    assert_not_equal [ draft ], [ published ]
+
+    draft.update!(summary: "일부러 아주 길게 적어본 한 줄 예고 문구입니다 " * 3)
+    assert draft.valid?, "no length validation -- a long summary is never rejected"
+  end
 end

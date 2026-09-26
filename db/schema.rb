@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_26_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_27_010000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -107,6 +107,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_26_020000) do
     t.integer "product_season_id"
     t.datetime "published_at"
     t.string "status", default: "draft", null: false
+    t.string "summary"
     t.datetime "updated_at", null: false
     t.index ["author_id"], name: "index_content_episodes_on_author_id"
     t.index ["bundle_id", "position"], name: "index_content_episodes_on_bundle_id_and_position"

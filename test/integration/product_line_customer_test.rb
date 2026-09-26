@@ -17,12 +17,13 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
   end
 
   test "product page shows the product info and the published episodes, with no purchase box for a free product" do
-    @line.content_episodes.create!(position: 3, customer_title: "초안 편", status: "draft")
+    # An untitled draft never shows anywhere (handoff 0070) -- a titled one becomes a "공개 예정" card, covered by
+    # its own tests below, not this one.
+    @line.content_episodes.create!(position: 3, status: "draft")
 
     get product_line_path(@line.slug)
     assert_response :success
     %w[결과\ 중심\ 제품 소개\ 문장 Codex 첫\ 편 둘째\ 편].each { |text| assert_match(text, response.body) }
-    assert_no_match(/초안 편/, response.body)
     assert_select "#product-purchase", 0
     assert_no_match(/구매|가격|₩/, css_select("main").text)
     assert_select "a[href=?]", product_episode_path(@line.slug, "01")
@@ -128,7 +129,9 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
   end
 
   test "lifecycle: non-published episodes are absent from the list and 404 on direct URL, and don't break prev/next" do
-    %w[draft in_review unpublished archived].each do |status|
+    # A titled draft is the one exception (handoff 0070): it legitimately shows as a non-link "공개 예정" card, so
+    # it's checked on its own below, not folded into "listed nowhere at all" like the other non-published statuses.
+    %w[in_review unpublished archived].each do |status|
       @ep2.update!(status: status)
       get product_line_path(@line.slug)
       assert_no_match(/둘째 편/, response.body, "#{status} episode listed")
@@ -137,10 +140,18 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
       get product_episode_path(@line.slug, "01")
       assert_select "a[href=?]", product_episode_path(@line.slug, "02"), false
     end
+
+    @ep2.update!(status: "draft")
+    get product_line_path(@line.slug)
+    assert_select "a[href=?]", product_episode_path(@line.slug, "02"), false, "the 공개 예정 card is never a link"
+    get product_episode_path(@line.slug, "02")
+    assert_response :not_found, "a draft episode's own page stays gated even though its title now shows"
+    get product_episode_path(@line.slug, "01")
+    assert_select "a[href=?]", product_episode_path(@line.slug, "02"), false
   end
 
-  test "a product with zero published episodes renders an empty state, not an error" do
-    @line.content_episodes.update_all(status: "draft")
+  test "a product with zero episodes at all renders an empty state, not an error" do
+    @line.content_episodes.destroy_all
     get product_line_path(@line.slug)
     assert_response :success
     assert_match(/준비 중입니다/, response.body)
@@ -160,9 +171,60 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
   end
 
   test "no 에피소드 heading when there are no cards to show" do
-    @line.content_episodes.update_all(status: "draft")
+    @line.content_episodes.destroy_all
     get product_line_path(@line.slug)
     assert_select "main h2", text: "에피소드", count: 0
+  end
+
+  # --- Handoff 0070: "공개 예정" cards and the per-episode teaser -----------
+
+  test "titled draft episodes follow the published cards as non-interactive 공개 예정 cards, in position order" do
+    late = @line.content_episodes.create!(position: 4, customer_title: "넷째 편", status: "draft")
+    @ep2.update!(status: "draft") # position 2, so it must sort between ep1 and `late`
+    get product_line_path(@line.slug)
+    assert_response :success
+
+    cards = css_select("main ol > li")
+    assert_equal 3, cards.size
+    assert_equal [ "첫 편", "둘째 편", "넷째 편" ], cards.map { |li| li.at_css("span.min-w-0")&.text }
+
+    upcoming = cards[1]
+    assert_nil upcoming.at_css("a"), "a 공개 예정 card is a div, never a link"
+    assert_equal "공개 예정", upcoming.at_css("span.text-gray-400.sm\\:ml-auto")&.text
+    assert_no_match(/학습 시작|편집하기/, upcoming.text)
+    assert_includes upcoming["class"] || upcoming.at_css("div")["class"], "opacity-60"
+
+    get product_episode_path(@line.slug, "02")
+    assert_response :not_found, "공개 예정 doesn't open the episode -- the gate is unchanged"
+  end
+
+  test "an untitled draft is excluded from the list entirely, not shown as an untitled 공개 예정 card" do
+    @ep2.update!(status: "draft", customer_title: "")
+    get product_line_path(@line.slug)
+    assert_select "main ol > li", 1
+    assert_no_match(/공개 예정/, response.body)
+  end
+
+  test "a product with only titled drafts (no published episodes) shows 공개 예정 cards instead of 준비 중입니다" do
+    @ep1.update!(status: "draft")
+    @ep2.update!(status: "draft")
+    get product_line_path(@line.slug)
+    assert_no_match(/준비 중입니다/, response.body)
+    assert_select "main ol > li", 2
+    assert_select "main span", text: "공개 예정", count: 2
+  end
+
+  test "the one-line teaser shows under the title on both a published and a 공개 예정 card, escaped, and only when present" do
+    @ep1.update!(summary: "이번 편에서 <b>실습</b>합니다")
+    @ep2.update!(status: "draft") # no summary -- must render no teaser line at all
+
+    get product_line_path(@line.slug)
+    assert_select "main a[href=?] p.truncate.text-gray-500", product_episode_path(@line.slug, "01"), text: "이번 편에서 <b>실습</b>합니다"
+    assert_includes response.body, "이번 편에서 &lt;b&gt;실습&lt;/b&gt;합니다", "escaped in the raw HTML"
+    assert_no_match(%r{<b>실습</b>}, response.body, "never rendered as a real <b> tag")
+
+    upcoming = css_select("main ol > li")[1]
+    assert_nil upcoming.at_css("p"), "no summary set on this one -- no second line at all"
   end
 
   test "unknown slugs and unknown episodes 404 cleanly" do
