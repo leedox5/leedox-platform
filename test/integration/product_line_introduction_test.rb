@@ -25,8 +25,10 @@ class ProductLineIntroductionTest < ActionDispatch::IntegrationTest
     assert_select "main .doc-content strong", text: "굵게"
     assert_select "main b", count: 0
     assert_includes css_select("main .doc-content").text, "<b>태그</b>"
-    # Handoff 0066: the section title is a real heading, not a small blue label.
-    assert_select "main h2.text-2xl", text: "소개", count: 1
+    # Handoff 0069 R2: the "소개" heading now duplicates the summary above it with no new information, so it's
+    # sr-only -- kept (not deleted) for the heading structure, but never visible.
+    assert_select "main h2.sr-only", text: "소개", count: 1
+    assert_select "main h2.text-2xl", text: "소개", count: 0
     assert_select "main p.text-xs", text: "소개", count: 0
     assert_select "main .doc-content.max-w-\\[740px\\]", count: 1
     body = css_select("main").text

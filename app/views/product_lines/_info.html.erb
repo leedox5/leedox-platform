@@ -1,13 +1,23 @@
 <%# Product Hero as one vertical flow, same order on every screen size:
-    name -> cover image (if any) -> free-form introduction (handoff 0060) -> AI supporter.
+    name -> (one-line summary) -> cover image (if any) -> free-form introduction (handoff 0060) -> AI supporter.
     Shared by the customer page and the admin preview; admin: true only changes which image URL is used.
-    Without a cover the text follows the name directly (no empty media area).
+    Without a cover the text follows the name (or the summary) directly (no empty media area).
     Handoff 0066: the customer page passes `purchase` (the locals of the access banner) and the banner is rendered
-    right under the cover image (or under the name when there is none); the admin preview passes none. %>
+    right under the cover image (or under the name/summary when there is none); the admin preview passes none.
+    Handoff 0069: `summary` (handoff 0068) is a subtitle right under the name -- plain text (no Markdown), and
+    the element is skipped entirely when blank so a product without one keeps the exact old order/layout.
+    Handoff 0069 R2: the "소개" heading duplicated the new summary with no added information, so it's sr-only now
+    (kept, not deleted, so the heading structure -- h1 name -> h2 소개 -> the copy's own h3s... -- still holds for
+    a screen reader); the body's own top margin is bumped to keep roughly the same visual gap the heading used to
+    create between it and whatever sits above (the purchase box, or the image/summary when there's no box). %>
 <% admin = local_assigns.fetch(:admin, false) %>
 <% purchase = local_assigns[:purchase] %>
 
 <h1 class="break-words text-3xl font-bold text-gray-900 md:text-4xl"><%= product_line.customer_name %></h1>
+
+<% if product_line.summary.present? %>
+  <p class="mt-2 text-lg text-slate-600"><%= product_line.summary %></p>
+<% end %>
 
 <% if admin %>
   <%# Admin preview only: the image itself (this page is the destination of the list/edit links); a product without a cover shows the shared placeholder so the
@@ -27,12 +37,12 @@
 
 <div class="mt-6 space-y-6 break-words text-gray-700">
   <div>
-    <h2 class="text-2xl font-bold text-slate-900">소개</h2>
+    <h2 class="sr-only">소개</h2>
     <%# Restricted Markdown (handoff 0063): hard line breaks keep the plain text of handoff 0060 looking as it did;
         images resolve only to this product's own images (admin preview points at the admin-only image route).
         Handoff 0066: a real section heading (h2, 24px) instead of a small blue label, and a reading-width column;
         line height is already 1.75 via `.doc-content p` (leading-7). %>
-    <div class="doc-content mt-3 max-w-[740px] [&_p]:mb-4 [&>:last-child]:mb-0"><%= ContentMarkdown.render(product_line.introduction, parent: product_line, profile: :marketing, admin: admin) %></div>
+    <div class="doc-content mt-11 max-w-[740px] [&_p]:mb-4 [&>:last-child]:mb-0"><%= ContentMarkdown.render(product_line.introduction, parent: product_line, profile: :marketing, admin: admin) %></div>
   </div>
   <% if product_line.ai_supporter.present? %>
     <div>

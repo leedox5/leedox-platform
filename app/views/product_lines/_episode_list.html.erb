@@ -1,0 +1,18 @@
+<%# Handoff 0069 R3 -- the episode card list, shared by the customer page and the admin preview so the two can
+    never drift (only the link target and whether draft episodes are included differ, and those are already the
+    caller's job via `episodes` and `admin:`). A "에피소드" heading sits above the cards, styled exactly like a
+    subheading inside the intro guide (`.doc-content h2`: text-2xl font-semibold text-slate-900, mt-8/mb-3) so it
+    reads as one more subheading in the same flow -- and only when there's at least one card to show; a product
+    with no visible episodes gets no heading at all, just the empty-state line it already had. %>
+<% admin = local_assigns.fetch(:admin, false) %>
+<% if episodes.any? %>
+  <h2 class="mt-8 mb-3 text-2xl font-semibold text-slate-900">에피소드</h2>
+  <ol class="space-y-3">
+    <% episodes.each do |episode| %>
+      <li><%= render "product_lines/episode_card", episode: episode, admin: admin,
+        path: admin ? admin_content_episode_path(episode) : product_episode_path(product_line.slug, episode.display_id) %></li>
+    <% end %>
+  </ol>
+<% else %>
+  <p class="mt-10 text-gray-500"><%= admin ? "아직 편이 없습니다." : "준비 중입니다." %></p>
+<% end %>

@@ -42,12 +42,14 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
     landmarks.map { |name, needle| [ name, html_main.index(needle) ] }
   end
 
-  def assert_single_column_order(main_html, with_image:, with_ai: true)
+  def assert_single_column_order(main_html, with_image:, with_ai: true, with_summary: false, with_episodes: false)
     landmarks = [ [ :name, "<h1" ] ]
+    landmarks << [ :summary, "text-lg text-slate-600" ] if with_summary
     landmarks << [ :image, "<img" ] if with_image
     landmarks << [ :introduction, ">소개<" ]
     landmarks << [ :ai, "AI 서포터" ] if with_ai
-    landmarks << [ :episodes, %(<ol class="mt-10 space-y-3">) ]
+    # Handoff 0069 R3 -- the "에피소드" heading (and the <ol> under it) exists only when there's at least one card.
+    landmarks << [ :episodes, ">에피소드<" ] if with_episodes
 
     positions = landmark_order(main_html, landmarks)
     missing = positions.select { |_, pos| pos.nil? }.map(&:first)
@@ -59,7 +61,7 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
     @line.content_episodes.create!(position: 1, customer_title: "첫 편", status: "published")
     @line.update!(ai_supporter: "Codex")
     get product_line_path(@line.slug)
-    assert_single_column_order(css_select("main").to_html, with_image: true)
+    assert_single_column_order(css_select("main").to_html, with_image: true, with_episodes: true)
   end
 
   test "the Hero never goes back to two columns, at any breakpoint" do
@@ -81,6 +83,29 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
     assert_equal "(min-width: 824px) 768px, 100vw", css_select("main img").first["sizes"]
   end
 
+  # Handoff 0069 -- summary (0068) is a plain-text subtitle right under the name, above the cover image.
+  test "a one-line summary shows as a subtitle right under the name, above the image, as plain text (no Markdown)" do
+    @line.update!(summary: "제목 아래 부제로 보이는 <b>요약</b> & 특수문자")
+    get product_line_path(@line.slug)
+    assert_single_column_order(css_select("main").to_html, with_image: true, with_summary: true, with_ai: false)
+
+    kids = css_select("main").first.element_children
+    assert_equal "h1", kids[0].name
+    assert_equal "p", kids[1].name
+    assert_equal "제목 아래 부제로 보이는 <b>요약</b> & 특수문자", kids[1].text, "no Markdown, no HTML -- shown as plain text"
+    assert_equal "div", kids[2].name, "the image still follows right after"
+    assert_no_match(/<b>요약<\/b>/, css_select("main").to_html, "must be escaped, never raw HTML")
+  end
+
+  test "a blank or whitespace-only summary renders no element at all, and the old order is unchanged" do
+    [ nil, "", "   " ].each do |value|
+      @line.update!(summary: value)
+      get product_line_path(@line.slug)
+      assert_select "main p.text-lg.text-slate-600", 0
+      assert_single_column_order(css_select("main").to_html, with_image: true, with_summary: false, with_ai: false)
+    end
+  end
+
   test "without an image the text follows the name directly, in the same order, with no empty media block" do
     plain = other_line
     plain.update!(ai_supporter: "Claude")
@@ -92,6 +117,18 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
     assert_select "main img", 0
   end
 
+  # Handoff 0069b -- the admin preview shares _info with the customer page, so the summary shows there too.
+  test "the admin preview shows the same summary subtitle, in the same place, as the customer page" do
+    admin = User.create!(name: "관리자", email: "hero-admin-summary-#{SecureRandom.hex(3)}@example.com", password: "password123", role: :admin)
+    post user_session_path, params: { user: { email: admin.email, password: "password123" } }
+    @line.update!(summary: "관리자 미리보기에도 보이는 요약")
+
+    get admin_product_line_path(@line)
+    assert_response :success
+    assert_single_column_order(css_select("main").to_html, with_image: true, with_summary: true, with_ai: false)
+    assert_select "main p.text-lg.text-slate-600", text: "관리자 미리보기에도 보이는 요약"
+  end
+
   test "the admin preview uses the same order for a draft product, with and without an image" do
     admin = User.create!(name: "관리자", email: "hero-admin-#{SecureRandom.hex(3)}@example.com", password: "password123", role: :admin)
     post user_session_path, params: { user: { email: admin.email, password: "password123" } }
@@ -100,7 +137,7 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
 
     get admin_product_line_path(@line)
     assert_response :success
-    assert_single_column_order(css_select("main").to_html, with_image: true)
+    assert_single_column_order(css_select("main").to_html, with_image: true, with_episodes: true)
     assert_select "main section.grid", 0
     assert_select "main img[alt='코드가 완성되는 화면']", 1
 

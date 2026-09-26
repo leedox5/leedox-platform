@@ -181,7 +181,7 @@ class ProductLineSalesAndPurchaseTest < ActionDispatch::IntegrationTest
   test "the access banner comes right after the cover image and before the introduction" do
     open_sale!(@line, 0)
     order = lambda do |body|
-      [ body.index("<h1"), body.index("/product-covers/"), body.index('id="product-purchase"'), body.index(">소개</h2>"), body.index('<ol class="mt-10') ]
+      [ body.index("<h1"), body.index("/product-covers/"), body.index('id="product-purchase"'), body.index(">소개</h2>"), body.index(">에피소드<") ]
     end
 
     get product_line_path(@line.slug)

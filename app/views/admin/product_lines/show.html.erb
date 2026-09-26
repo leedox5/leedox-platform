@@ -10,11 +10,6 @@
 
     <%= render "product_lines/info", product_line: @product_line, admin: true %>
 
-    <ol class="mt-10 space-y-3">
-      <% @episodes.each do |episode| %>
-        <li><%= render "product_lines/episode_card", episode: episode, path: admin_content_episode_path(episode), admin: true %></li>
-      <% end %>
-      <% if @episodes.empty? %><p class="text-gray-500">아직 편이 없습니다.</p><% end %>
-    </ol>
+    <%= render "product_lines/episode_list", episodes: @episodes, product_line: @product_line, admin: true %>
   </main>
 </div>

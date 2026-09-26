@@ -230,6 +230,19 @@ class ProductLineAdminUiTest < ActionDispatch::IntegrationTest
     assert_select "ol a[href=?] span", admin_content_episode_path(draft), text: "E02 · draft"
     assert_select "ol a span", text: "학습 시작 →", count: 0
     assert_select "ol a span", text: /\A0\d/, count: 0
+  end
+
+  # Handoff 0069 R3 -- the admin preview gets the same "에피소드" heading (draft episodes count as cards here,
+  # unlike the customer page).
+  test "the admin preview shows the 에피소드 heading whenever it has at least one card, including a draft-only one" do
+    sign_in_as(@admin)
+    get admin_product_line_path(@without)
+    assert_select "main h2", text: "에피소드", count: 0
+    assert_select "main p", text: "아직 편이 없습니다."
+
+    @without.content_episodes.create!(position: 1, customer_title: "초안 편", status: "draft")
+    get admin_product_line_path(@without)
+    assert_select "main h2.text-2xl.font-semibold.text-slate-900", text: "에피소드", count: 1
     assert_select "#product-purchase", 0, "the admin preview has no access banner"
   end
 

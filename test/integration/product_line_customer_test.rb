@@ -146,6 +146,25 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
     assert_match(/준비 중입니다/, response.body)
   end
 
+  # Handoff 0069 R3 -- a "에피소드" heading sits above the cards, styled like a subheading inside the intro guide
+  # (.doc-content h2: text-2xl font-semibold text-slate-900), and only shows up when there's at least one card.
+  test "an 에피소드 heading sits above the cards, styled like the intro guide's own subheadings" do
+    get product_line_path(@line.slug)
+    assert_select "main h2.text-2xl.font-semibold.text-slate-900", text: "에피소드", count: 1
+    heading = css_select("main h2").find { |h| h.text == "에피소드" }
+    assert_equal %w[mb-3 mt-8 text-2xl font-semibold text-slate-900].sort, heading["class"].split.sort
+
+    body = response.body
+    assert_operator body.index(">소개</h2>"), :<, body.index(">에피소드<"), "에피소드 heading comes after the intro"
+    assert_operator body.index(">에피소드<"), :<, body.index(product_episode_path(@line.slug, "01")), "and right above the first card"
+  end
+
+  test "no 에피소드 heading when there are no cards to show" do
+    @line.content_episodes.update_all(status: "draft")
+    get product_line_path(@line.slug)
+    assert_select "main h2", text: "에피소드", count: 0
+  end
+
   test "unknown slugs and unknown episodes 404 cleanly" do
     get product_line_path("nope")
     assert_response :not_found
