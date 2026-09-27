@@ -529,8 +529,12 @@ class ProductLineSalesAndPurchaseTest < ActionDispatch::IntegrationTest
     get pricing_path
     assert_response :success
     assert_no_match(/#{Regexp.escape(name)}/, response.body)
+    # The home shows ProductLine series and episodes on purpose since handoff 0071; what must hold is that a line
+    # product never joins the standalone term-product cards there.
     get root_path
-    assert_no_match(/#{Regexp.escape(name)}/, response.body)
+    assert_select "[data-product-code]", minimum: 1
+    assert_select "[data-product-code=?]", @line.product.code, 0
+    assert_no_match(/#{Regexp.escape(name)}/, css_select("[data-product-code]").map(&:text).join)
 
     sign_in(@buyer)
     get dashboard_path

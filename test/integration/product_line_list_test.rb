@@ -125,8 +125,9 @@ class ProductLineListTest < ActionDispatch::IntegrationTest
   test "the header's product link and the detail page's back-to-list link both point at /products" do
     line = ProductLine.create!(internal_name: "n", customer_name: "제품", slug: "list-nav", introduction: "소개", status: "published")
     get product_line_path(line.slug)
-    assert_select "header nav[aria-label='주요 내비게이션'] a[href=?]", products_path, text: "제품"
-    assert_select "nav[aria-label='모바일 내비게이션'] a[href=?]", products_path, text: "제품"
+    # Labelled 시리즈 since handoff 0071 (the link itself is unchanged).
+    assert_select "header nav[aria-label='주요 내비게이션'] a[href=?]", products_path, text: "시리즈"
+    assert_select "nav[aria-label='모바일 내비게이션'] a[href=?]", products_path, text: "시리즈"
     assert_select "a[href=?]", products_path, text: "← 제품 목록"
   end
 

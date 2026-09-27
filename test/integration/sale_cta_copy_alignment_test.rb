@@ -88,11 +88,12 @@ class SaleCtaCopyAlignmentTest < ActionDispatch::IntegrationTest
   test "7. Non-regression of home page, pricing summary page, and Aistart free product CTAs" do
     enable_sales!
 
-    # Home page
+    # Home page -- since handoff 0071 the products are whole-card links in the "AI와 함께 만들기" row, showing
+    # /pricing's own sale state instead of a "자세히 보기" button.
     get root_path
     assert_response :success
-    assert_select "a[href=?]", chatdox_path, text: /자세히 보기/
-    assert_select "a[href=?]", claudox_path, text: /자세히 보기/
+    assert_select "a[href=?]", chatdox_path, text: /판매 중/
+    assert_select "a[href=?]", claudox_path, text: /판매 중/
 
     # Pricing summary page
     get pricing_path

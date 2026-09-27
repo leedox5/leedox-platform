@@ -5,17 +5,22 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     Commerce::CatalogBootstrap.call!
   end
 
-  test "integrated home presents LEEDOX and flagship products" do
+  # Handoff 0071 -- the home became the story-series home (D-009). The earlier sections (masterclass catalog,
+  # terminal mockup, FAQ, proof, the old hero and its product cards) and the header's Chatdox / Claudox /
+  # Antigravity shortcuts were removed on purpose; these tests cover what replaced them. The featured hero,
+  # track rows and new/coming row have their own tests in story_series_home_test.rb.
+  test "integrated home presents LEEDOX: brand line as the page heading, the products still reachable, legal links" do
     get root_path
 
     assert_response :success
     assert_select "title", text: /LEEDOX/
+    assert_select "meta[name='description'][content*='시즌과 에피소드']"
     assert_select "header a[href=?]", root_path, text: /LEEDOX/
-    assert_select "h1", text: /AI와 함께 일하는 방법을/
-    assert_select "a[href=?]", chatdox_path, minimum: 1
-    assert_select "a[href=?]", claudox_path, minimum: 1
-    assert_select "a[href=?]", aigravity_path, minimum: 1
-    assert_select "a[href='#products']", minimum: 2
+    assert_select "h1", count: 1
+    assert_select "h1", text: "실제로 만들고, 막히고, 고친 과정을 시즌과 에피소드로 따라갑니다."
+    assert_select "main a[href=?]", chatdox_path, minimum: 1
+    assert_select "main a[href=?]", claudox_path, minimum: 1
+    assert_select "main a[href=?]", aigravity_path, minimum: 1
     assert_select "footer a[href=?]", terms_path
     assert_select "footer a[href=?]", privacy_path
   end
@@ -28,100 +33,41 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_select "footer a[href=?][target='_blank'][rel='noopener']", expected_href, text: "사업자정보확인"
   end
 
-  test "renders dynamic flagship 3-card catalog and free gateway bar on homepage (handoff 0014)" do
+  test "the AI row carries the four standalone products with /pricing's own badge and price (handoff 0071 e)" do
     get root_path
     assert_response :success
 
-    # Dynamic subtitle & CTA
-    assert_select "p", text: /LEEDOX의 실전 마스터클래스 라인업을 만나보세요/
-    assert_select "a[href='#products']", text: /마스터클래스 살펴보기/
-
-    # 3-Card Flagship Grid (Chatdox, Claudox, Antigravity)
-    assert_select "#products" do
-      assert_select "p", text: /MASTERCLASS LINEUP/
-      assert_select "h2", text: /만드는 과정과, AI 무중력 협업 실전/
-      assert_select "article", count: 3
-      assert_select "a[href=?]", chatdox_path, text: /Chatdox 자세히 보기/
-      assert_select "a[href=?]", claudox_path, text: /Claudox 자세히 보기/
-      assert_select "a[href=?]", aigravity_path, text: /Antigravity 자세히 보기/
+    row = css_select("section[aria-labelledby='track-ai']").first
+    assert row, "the AI row is there even with no AI series yet -- the standalone products fill it"
+    { chatdox_path => "Chatdox", claudox_path => "Claudox", product_content_index_path("aistart") => "AI, 오늘부터 시작", aigravity_path => "Antigravity" }.each do |href, name|
+      card = row.at_css("a[href='#{href}']")
+      assert card, "a card linking to #{href}"
+      assert_includes card.text, name
     end
-
-    # Free gateway bar (aistart)
-    assert_select "a[href=?]", product_content_index_path("aistart"), text: /무료로 읽어보기/
-    assert_select "strong", text: /AI, 오늘부터 시작 — 로그인 없이 바로 시작하는 무료 가이드/
+    assert_includes row.at_css("a[href='#{product_content_index_path('aistart')}']").text, "무료 이용 가능 · 무료"
   end
 
-  test "renders 3-column terminal mockup section and GNB/Footer 3-product links (handoff 0015)" do
+  test "the header drops the Chatdox / Claudox / Antigravity shortcuts and calls /products 시리즈; the footer keeps its product links" do
     get root_path
     assert_response :success
 
-    # Terminal mockup section 3 columns
-    assert_select "p", text: "AIGRAVITY / MASTERY LOG"
-    assert_select "a[href=?]", aigravity_path, text: /무중력 기록 보기/
-
-    # GNB Header 3-product shortcuts
     assert_select "header" do
-      assert_select "a[href=?]", chatdox_path, text: "Chatdox"
-      assert_select "a[href=?]", claudox_path, text: "Claudox"
-      assert_select "a[href=?]", aigravity_path, text: "Antigravity"
+      assert_select "a[href=?]", chatdox_path, count: 0
+      assert_select "a[href=?]", claudox_path, count: 0
+      assert_select "a[href=?]", aigravity_path, count: 0
+      assert_select "a[href=?]", products_path, text: "시리즈", minimum: 2 # desktop + mobile menu
     end
-
-    # Footer 3-product links
     assert_select "footer" do
       assert_select "a[href=?]", chatdox_path, text: "Chatdox"
       assert_select "a[href=?]", claudox_path, text: "Claudox"
       assert_select "a[href=?]", aigravity_path, text: "Antigravity"
     end
+
+    get pricing_path
+    assert_select "header a[href=?]", chatdox_path, count: 0
   end
 
-  test "hero CHATDOX/CLAUDOX cards are themselves clickable links, not static article blocks (handoff 0023)" do
-    get root_path
-    assert_response :success
-
-    doc = Nokogiri::HTML(response.body)
-    hero_products = doc.at_css("[aria-label*='LEEDOX']")
-    assert hero_products, "expected the hero's product block"
-
-    chatdox_card = hero_products.at_css("a[href='#{chatdox_path}']")
-    assert chatdox_card, "expected the CHATDOX hero card to be an <a> to chatdox_path"
-    assert_match(/CHATDOX/, chatdox_card.text)
-    assert_equal "a", chatdox_card.name, "the card itself must be the link, not a link nested inside a static block"
-
-    claudox_card = hero_products.at_css("a[href='#{claudox_path}']")
-    assert claudox_card, "expected the CLAUDOX hero card to be an <a> to claudox_path"
-    assert_match(/CLAUDOX/, claudox_card.text)
-    assert_equal "a", claudox_card.name
-  end
-
-  test "homepage FAQ presents V1 confirmed scope for Chatdox and Claudox in present tense" do
-    get root_path
-    assert_response :success
-
-    assert_select "#faq"
-    assert_select "p", text: /Chatdox는 웹 챕터와 코드 예제를, Claudox는 웹 챕터와 라이선스 전용 특별판을 제공하며/
-    assert_no_match(/확정될 예정입니다/, response.body)
-  end
-
-  test "homepage has a lightweight aistart banner alongside, not instead of, the Chatdox/Claudox two-card section" do
-    get root_path
-    assert_response :success
-
-    doc = Nokogiri::HTML(response.body)
-    # The flagship two-card section is untouched -- still exactly Chatdox + Claudox.
-    assert_select "article", minimum: 2 do
-      assert_select "a[href=?]", chatdox_path
-      assert_select "a[href=?]", claudox_path
-    end
-
-    # The aistart banner exists as a distinct, lighter-weight element -- not
-    # a 3rd <article> card sitting alongside the two flagships.
-    banner_link = doc.css("a[href='#{product_content_index_path('aistart')}']").first
-    assert banner_link, "expected a banner/CTA linking to the aistart content"
-    assert_match(/무료/, banner_link.ancestors("div").first.text)
-    assert_not_equal "article", banner_link.ancestors("article").first&.name
-  end
-
-  test "guest can click the homepage aistart banner straight through to readable content, no sign-in detour (leedox_restore_free_content_guest_access_r1)" do
+  test "guest can click the homepage aistart card straight through to readable content, no sign-in detour (leedox_restore_free_content_guest_access_r1)" do
     get root_path
     assert_response :success
 
@@ -132,22 +78,6 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     get banner_link["href"]
     assert_response :success
     assert_select "h1", text: /AI, 오늘부터 시작/
-  end
-
-  test "homepage proof section shows live chapter titles for both products, not frozen copies" do
-    get root_path
-    assert_response :success
-
-    chatdox_titles = ProductContent.for("chatdox").chapters.first(4).map { |c| c[:title] }
-    claudox_titles = %w[01 03 05 10].map { |id| ProductContent.for("claudox").find(id)[:title].sub(/\A\d+\.\s*/, "") }
-
-    (chatdox_titles + claudox_titles).each do |title|
-      assert_match(/#{Regexp.escape(title)}/, response.body)
-    end
-    # Numbering prefix from the raw Claudox heading must not leak into this
-    # section (Chatdox's curated titles never had one, and doubling the
-    # chapter number that's already shown as its own badge would look broken).
-    assert_no_match(/\d+\. 클로독스와의 첫만남/, response.body)
   end
 
   test "guest header keeps authentication actions on desktop and mobile" do

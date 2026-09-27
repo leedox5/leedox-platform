@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Handoff 0071 -- the home's display serif (series names, brand line). A new token, so no other page's
+   fonts change; the font file itself is only requested by the home (its <head>). */
+@theme {
+	--font-display: "Gowun Batang", ui-serif, Georgia, serif;
+}
+
 .doc-content h1 {
 	@apply mt-10 mb-4 text-3xl font-bold text-slate-900;
 }

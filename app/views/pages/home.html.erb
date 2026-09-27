@@ -1,23 +1,25 @@
-<% content_for :title, "LEEDOX | AI 협업을 결과물로" %>
+<%# Handoff 0071 -- the story-series home (D-009). Dark on the home only; every other page keeps its theme.
+    Sections, top to bottom: featured series (only when one is featured and listed), brand line, new / coming
+    episodes, one row per track (the AI row also carries the standalone products), what series / season /
+    episode mean, footer. "만든 사람" waits for Tommy's copy (out of scope). %>
+<% content_for :title, "LEEDOX | 실제로 만들고 겪은 개발자의 시리즈" %>
+<% content_for :head do %>
+  <meta name="description" content="실제로 만들고, 막히고, 고친 과정을 시즌과 에피소드로 따라갑니다. Git·Java·WSL 같은 개발 기초부터 AI와 함께 만드는 이야기까지.">
+  <%# The display serif, for this page only (see --font-display in application.css). %>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap">
+<% end %>
 
-<div class="min-h-screen">
-  <%= render "shared/header" %>
+<div class="min-h-screen bg-[#0e1014] text-[#f2efe8]">
+  <%= render "shared/header", dark: true %>
 
   <main>
-    <%# Handoff 0071 R1 -- the story-series sections (D-009). The older sections below stay until R2 replaces them. %>
-    <% if @featured_line || @track_rows.any? %>
-      <div class="bg-[#0e1014]">
-        <%= render "leedox_home/series_hero" if @featured_line %>
-        <%= render "leedox_home/track_rows" %>
-      </div>
-    <% end %>
-    <%= render "leedox_home/hero" %>
-    <%= render "leedox_home/problems" %>
-    <%= render "leedox_home/products" %>
-    <%= render "leedox_home/proof" %>
-    <%= render "leedox_home/about" %>
-    <%= render "leedox_home/faq" %>
-    <%= render "leedox_home/cta" %>
+    <%= render "leedox_home/series_hero" if @featured_line %>
+    <%= render "leedox_home/brand_line", heading: @featured_line.nil? %>
+    <%= render "leedox_home/episode_updates" %>
+    <%= render "leedox_home/track_rows" %>
+    <%= render "leedox_home/series_explainer" %>
   </main>
 
   <%= render "shared/footer" %>
