@@ -47,7 +47,7 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_includes row.at_css("a[href='#{product_content_index_path('aistart')}']").text, "무료 이용 가능 · 무료"
   end
 
-  test "the header drops the Chatdox / Claudox / Antigravity shortcuts and calls /products 시리즈; the footer keeps its product links" do
+  test "the header drops the Chatdox / Claudox / Antigravity shortcuts and calls /products 시리즈" do
     get root_path
     assert_response :success
 
@@ -57,14 +57,38 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
       assert_select "a[href=?]", aigravity_path, count: 0
       assert_select "a[href=?]", products_path, text: "시리즈", minimum: 2 # desktop + mobile menu
     end
-    assert_select "footer" do
-      assert_select "a[href=?]", chatdox_path, text: "Chatdox"
-      assert_select "a[href=?]", claudox_path, text: "Claudox"
-      assert_select "a[href=?]", aigravity_path, text: "Antigravity"
-    end
 
     get pricing_path
     assert_select "header a[href=?]", chatdox_path, count: 0
+  end
+
+  # Handoff 0072 -- the footer's Chatdox / Claudox / Antigravity links went too (those products are introduced on
+  # the home's AI row and /pricing). The legal part of the footer must never change: business details, terms,
+  # privacy, the FTC lookup and the copyright line -- on every page and for every viewer.
+  test "the footer has no product links but keeps every legal item, on every page and for guests, users and admins" do
+    user = User.create!(name: "푸터 유저", email: "footer-user-#{SecureRandom.hex(3)}@example.com", password: "password123")
+    admin = User.create!(name: "푸터 관리자", email: "footer-admin-#{SecureRandom.hex(3)}@example.com", password: "password123", role: :admin)
+    ftc_href = "https://www.ftc.go.kr/bizCommPop.do?wrkr_no=#{CompanyInfo::REGISTRATION_NUMBER.delete('-')}"
+
+    [ nil, user, admin ].each do |viewer|
+      delete destroy_user_session_path
+      post user_session_path, params: { user: { email: viewer.email, password: "password123" } } if viewer
+      [ root_path, pricing_path, products_path, chatdox_path, claudox_path, aigravity_path ].each do |path|
+        get path
+        assert_response :success, "#{path} as #{viewer&.email || 'guest'}"
+        assert_select "footer" do
+          [ chatdox_path, claudox_path, aigravity_path ].each { |href| assert_select "a[href=?]", href, count: 0 }
+          assert_select "a[href=?]", terms_path, text: "이용 약관"
+          assert_select "a[href=?]", privacy_path, text: "개인정보 처리 방침"
+          assert_select "a[href=?][target='_blank']", ftc_href, text: "사업자정보확인"
+        end
+        footer = css_select("footer").text
+        [ CompanyInfo::NAME, CompanyInfo::REPRESENTATIVE, CompanyInfo::REGISTRATION_NUMBER, CompanyInfo::MAIL_ORDER_LICENSE,
+          CompanyInfo::ADDRESS, CompanyInfo::EMAIL, CompanyInfo::PHONE, "© 2026 LEEDOX. All rights reserved." ].each do |item|
+          assert_includes footer, item, "#{path}: #{item}"
+        end
+      end
+    end
   end
 
   test "guest can click the homepage aistart card straight through to readable content, no sign-in detour (leedox_restore_free_content_guest_access_r1)" do
