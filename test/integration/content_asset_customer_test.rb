@@ -52,8 +52,10 @@ class ContentAssetCustomerTest < ActionDispatch::IntegrationTest
     assert_select "h2", text: "산출물"
     titles = css_select("section p.mt-1.font-bold").map { |n| n.text.strip }
     assert_equal [ "1편 소스", "1편 스펙", "최종 WAR" ], titles
-    assert_match(/01 첫 편/, response.body)
-    assert_match(/02 마지막 편/, response.body)
+    labels = css_select("section p.text-blue-700").map { |n| n.text.strip }
+    assert labels.any? { |l| l.end_with?(" · 첫 편") }, labels.inspect
+    assert labels.any? { |l| l.end_with?(" · 마지막 편") }, labels.inspect
+    assert labels.none? { |l| l.match?(/\d{2}/) }, "no episode number in the file labels: #{labels.inspect}"
     assert_select "a[href=?]", dl(@ep2, @a2)
   end
 

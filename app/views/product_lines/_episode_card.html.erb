@@ -1,14 +1,15 @@
 <%# One episode card of a product page -- the customer page and the admin preview render the same card so the preview
     shows what a customer sees (handoff 0066). Only the link target differs, and the admin preview adds the episode's
-    status after the number and says "편집하기 →" instead of "학습 시작 →", because its link opens the admin edit page.
-    The "E" is display only: display_id is also the URL segment (digits only), so the model is untouched.
-    The customer CTA is fixed text: there is no per-episode progress to vary it by.
+    number and status before the title and says "편집하기 →" instead of "학습 시작 →", because its link opens the admin
+    edit page. The customer card shows no episode number at all -- position is an ordering key (it can be 0), not
+    something a visitor needs to read; the URL still uses display_id. The customer CTA is fixed text: there is no
+    per-episode progress to vary it by.
 
-    Handoff 0067 -- number, title and CTA sit on one row (number and CTA never shrink or wrap; only the title does,
-    via truncate + a title tooltip, same as before). Below `sm` there usually isn't room for a fourth width (number +
-    a readable title + CTA), so the CTA alone drops to its own line there (`w-full` forces the wrap; `sm:w-auto` plus
-    `sm:ml-auto` puts it back at the right end of the row) -- number and title always stay together on the first
-    line. No per-episode state (e.g. a lock icon) exists on this card today.
+    Handoff 0067 -- (admin: number + status,) title and CTA sit on one row (the number and CTA never shrink or wrap;
+    only the title does, via truncate + a title tooltip, same as before). Below `sm` the CTA alone drops to its own
+    line (`w-full` forces the wrap; `sm:w-auto` plus `sm:ml-auto` puts it back at the right end of the row). The
+    number span is omitted entirely on the customer card rather than left empty, so the row's gap doesn't push the
+    title right. No per-episode state (e.g. a lock icon) exists on this card today.
 
     Handoff 0070 -- an optional one-line teaser (episode.summary) as a second line, plain text, truncated to one
     line with a title tooltip for the full text when it's cut off (same convention as the title above); skipped
@@ -17,7 +18,7 @@
 <% title = episode.customer_title.presence || "(제목 없음)" %>
 <%= link_to path, class: "block rounded-xl border border-gray-200 p-4 hover:border-blue-300" do %>
   <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-    <span class="shrink-0 text-xs font-semibold text-gray-400">E<%= episode.display_id %><% if admin %> · <%= episode.status %><% end %></span>
+    <% if admin %><span class="shrink-0 text-xs font-semibold text-gray-400"><%= episode.display_id %> · <%= episode.status %></span><% end %>
     <span class="min-w-0 flex-1 truncate font-bold text-gray-900" title="<%= title %>"><%= title %></span>
     <span class="order-last w-full shrink-0 whitespace-nowrap text-sm font-semibold text-blue-600 sm:order-none sm:ml-auto sm:w-auto"><%= admin ? "편집하기 →" : "학습 시작 →" %></span>
   </div>

@@ -29,28 +29,27 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", product_episode_path(@line.slug, "01")
   end
 
-  # Handoff 0066: "E01" is display text only; the link (and its digits-only URL segment) is unchanged.
-  test "episode cards show an E-prefixed number and a start CTA, while the links keep the plain number" do
+  # The customer card shows no episode number (position is an ordering key and can be 0); the link still uses the
+  # digits-only display_id as its URL segment.
+  test "episode cards show the title and a start CTA but no episode number, while the links keep the plain number" do
     get product_line_path(@line.slug)
     assert_select "ol a[href=?]", product_episode_path(@line.slug, "01") do
-      assert_select "span", text: "E01"
       assert_select "span", text: "학습 시작 →"
     end
-    assert_select "ol a[href=?] span", product_episode_path(@line.slug, "02"), text: "E02"
     assert_select "ol a[href=?] span.truncate[title=?]", product_episode_path(@line.slug, "01"), "첫 편", text: "첫 편"
-    assert_select "ol a span", text: "01", count: 0
+    assert_select "ol a span", text: /\AE?\d+\z/, count: 0
     assert_select "ol a", count: 2
     assert_select "ol a[href*='E0']", count: 0
   end
 
-  # Handoff 0067: number, title and CTA on one row -- the number and the CTA never shrink, only the title does
-  # (flex-1 + min-w-0, same truncate as 0066); below `sm` the CTA alone wraps to its own line (w-full forces the
-  # wrap) while the number and title stay together on the first line.
-  test "the episode card lays number, title and CTA out as one flexible row, with the CTA forced onto its own line below sm" do
+  # Handoff 0067: title and CTA on one row -- the CTA never shrinks, only the title does (flex-1 + min-w-0, same
+  # truncate as 0066); below `sm` the CTA alone wraps to its own line (w-full forces the wrap). No number span at
+  # all on the customer card, so the row's gap doesn't push the title right.
+  test "the episode card lays title and CTA out as one flexible row, with the CTA forced onto its own line below sm" do
     get product_line_path(@line.slug)
     assert_select "ol a[href=?]", product_episode_path(@line.slug, "01") do
       assert_select "div.flex.flex-wrap.items-center" do
-        assert_select "span.shrink-0", text: "E01"
+        assert_select "span", count: 2
         assert_select "span.min-w-0.flex-1.truncate", text: "첫 편"
         assert_select "span.w-full.shrink-0.whitespace-nowrap.sm\\:w-auto.sm\\:ml-auto", text: "학습 시작 →"
       end
@@ -192,6 +191,7 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
     assert_nil upcoming.at_css("a"), "a 공개 예정 card is a div, never a link"
     assert_equal "공개 예정", upcoming.at_css("span.text-gray-400.sm\\:ml-auto")&.text
     assert_no_match(/학습 시작|편집하기/, upcoming.text)
+    assert_no_match(/E0\d/, upcoming.text, "no episode number on a 공개 예정 card either")
     assert_includes upcoming["class"] || upcoming.at_css("div")["class"], "opacity-60"
 
     get product_episode_path(@line.slug, "02")

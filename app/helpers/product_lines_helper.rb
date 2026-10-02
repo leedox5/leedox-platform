@@ -33,22 +33,16 @@ module ProductLinesHelper
     end
   end
 
-  # Handoff 0071 -- "E01·E02", or "E03~E05" when three or more numbers run consecutively.
-  def episode_numbers_label(episodes)
-    runs = episodes.slice_when { |a, b| b.position != a.position + 1 }
-    runs.map do |run|
-      run.size >= 3 ? "E#{run.first.display_id}~E#{run.last.display_id}" : run.map { |episode| "E#{episode.display_id}" }.join("·")
-    end.join("·")
-  end
-
-  # The hero's release line: "E01·E02 공개 · E03~E05 공개 예정", or just "공개 N편" when nothing
-  # is coming up. Published = what the product page lists; 공개 예정 = ProductLine#upcoming_episodes.
+  # Handoff 0071 -- the hero's release line: "공개 2편 · 공개 예정 3편", or just "공개 N편" when nothing
+  # is coming up. Counts, not episode numbers -- visitors never see a number (position is only an
+  # ordering key and can be 0). Published = what the product page lists; 공개 예정 =
+  # ProductLine#upcoming_episodes.
   def series_release_label(published, upcoming)
     return "공개 #{published.size}편" if upcoming.empty?
 
     parts = []
-    parts << "#{episode_numbers_label(published)} 공개" if published.any?
-    parts << "#{episode_numbers_label(upcoming)} 공개 예정"
+    parts << "공개 #{published.size}편" if published.any?
+    parts << "공개 예정 #{upcoming.size}편"
     parts.join(" · ")
   end
 

@@ -25,7 +25,7 @@
             <% (@assets_by_episode[episode.id] || []).each do |asset| %>
               <div class="flex flex-col gap-3 rounded-xl border border-blue-200 bg-blue-50 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div class="min-w-0">
-                  <p class="text-xs font-bold uppercase tracking-wide text-blue-700"><%= asset.kind %> · <%= episode.display_id %> <%= episode.customer_title.presence || "(제목 없음)" %></p>
+                  <p class="text-xs font-bold uppercase tracking-wide text-blue-700"><%= asset.kind %> · <%= episode.customer_title.presence || "(제목 없음)" %></p>
                   <p class="mt-1 font-bold text-gray-900"><%= asset.title %></p>
                   <% if asset.description.present? %><p class="mt-1 text-sm text-gray-600"><%= asset.description %></p><% end %>
                   <p class="mt-1 truncate text-xs text-gray-500"><%= asset.file.filename %> · <%= number_to_human_size(asset.file.byte_size) %></p>

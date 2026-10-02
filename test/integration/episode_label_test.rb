@@ -2,7 +2,9 @@ require "test_helper"
 
 # Handoff 0056 R4 follow-up -- the new-product structure says "Episode";
 # legacy Bundle content and the file-based products keep "Chapter". The
-# label depends on the episode's parent, so pin both directions.
+# label depends on the episode's parent, so pin both directions. The customer
+# product episode page shows no number label at all (visitors never see an
+# episode number -- position is an ordering key and can be 0).
 class EpisodeLabelTest < ActionDispatch::IntegrationTest
   setup do
     @admin = User.create!(name: "관리자", email: "label-admin-#{SecureRandom.hex(3)}@example.com", password: "password123", role: :admin)
@@ -37,10 +39,11 @@ class EpisodeLabelTest < ActionDispatch::IntegrationTest
     assert_no_match(/Episode/, css_select("main").text)
   end
 
-  test "customer product episode says 'Episode', the legacy Bundle episode still says 'Chapter'" do
+  test "customer product episode shows no number label, the legacy Bundle episode still says 'Chapter'" do
     get product_episode_path(@line.slug, "01")
     assert_response :success
-    assert_equal "Episode 01", episode_label
+    assert_nil episode_label
+    assert_no_match(/Episode|E0\d/, css_select("main").text)
     assert_no_match(/Chapter/i, css_select("main").text)
 
     get "/content/content_lab/legacy/01"

@@ -62,8 +62,9 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
     assert_includes text, "지금 시작하는 시리즈 · S01 · 5편 · 무료"
     assert_equal "시리즈 git-core", hero.at_css("h1").text.strip
     assert_includes text, "변경 이력을 남기는 법부터"
-    assert_includes text, "E01·E02 공개 · E03~E05 공개 예정"
-    assert hero.at_css("a[href='#{product_episode_path(git.slug, '01')}']")&.text&.include?("E01부터 보기")
+    assert_includes text, "공개 2편 · 공개 예정 3편"
+    assert hero.at_css("a[href='#{product_episode_path(git.slug, '01')}']")&.text&.include?("첫 편부터 보기")
+    assert_no_match(/E0\d/, text, "no episode numbers in the hero")
     assert hero.at_css("a[href='#{product_line_path(git.slug)}']")&.text&.include?("시리즈 소개")
     assert hero.at_css("div[aria-hidden='true'].aspect-video"), "no cover -- the placeholder takes its place"
   end
@@ -85,7 +86,7 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
     episodes(fresh, published: [], drafts: [ 1 ])
     fresh.update!(featured: true)
     get root_path
-    assert_includes hero.text, "E01 공개 예정"
+    assert_includes hero.text, "공개 예정 1편"
     assert_nil hero.at_css("a[href^='#{product_line_path(fresh.slug)}/']"), "no episode to start from"
     assert hero.at_css("a[href='#{product_line_path(fresh.slug)}']")
   end
@@ -197,7 +198,8 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
     get root_path
     cards = updates
     assert_equal [ "B 최신 편", "A 오래된 편", "B 예정 편" ], cards.map { |li| li.at_css("p.font-bold").text }
-    assert_includes cards[0].text, "시리즈 upd-b · E01"
+    assert_includes cards[0].text, "시리즈 upd-b"
+    assert_no_match(/E0\d/, cards.map(&:text).join, "no episode numbers on the update cards")
     assert_includes cards[0].text, "공개"
     assert_equal product_episode_path(b.slug, "01"), cards[0].at_css("a")["href"]
     assert_includes cards[1].text, "A의 한 줄 예고"

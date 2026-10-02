@@ -214,8 +214,8 @@ class ProductLineAdminUiTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_path
   end
 
-  # Handoff 0066: the preview shows the customer's episode card (E-number, one-line title, CTA); only the link target
-  # (the admin episode page), the status after the number and the CTA wording (편집하기, handoff 0066 R4) are admin-specific.
+  # Handoff 0066: the preview shows the customer's episode card (one-line title, CTA); only the link target (the admin
+  # episode page), the number + status before the title and the CTA wording (편집하기, handoff 0066 R4) are admin-specific.
   test "the admin preview lists episodes with the same card as the customer page, plus their status" do
     published = @with_cover.content_episodes.create!(position: 1, customer_title: "공개된 편", status: "published")
     draft = @with_cover.content_episodes.create!(position: 2, customer_title: "초안 편", status: "draft")
@@ -223,13 +223,13 @@ class ProductLineAdminUiTest < ActionDispatch::IntegrationTest
 
     get admin_product_line_path(@with_cover)
     assert_select "ol a[href=?]", admin_content_episode_path(published) do
-      assert_select "span", text: "E01 · published"
+      assert_select "span", text: "01 · published"
       assert_select "span.truncate[title=?]", "공개된 편"
       assert_select "span", text: "편집하기 →"
     end
-    assert_select "ol a[href=?] span", admin_content_episode_path(draft), text: "E02 · draft"
+    assert_select "ol a[href=?] span", admin_content_episode_path(draft), text: "02 · draft"
     assert_select "ol a span", text: "학습 시작 →", count: 0
-    assert_select "ol a span", text: /\A0\d/, count: 0
+    assert_select "ol a span", text: /\AE\d/, count: 0
   end
 
   # Handoff 0070 -- the "공개 예정" treatment (no link, muted, a fixed label) is customer-only; the admin preview
