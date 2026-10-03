@@ -14,6 +14,8 @@ class ContentEpisode < ApplicationRecord
   has_many :content_takeaways, foreign_key: :episode_id, inverse_of: :episode, dependent: :destroy
   has_many :content_revisions, foreign_key: :episode_id, inverse_of: :episode, dependent: :destroy
   has_many :content_assets, dependent: :destroy
+  # Handoff 0073 -- view counts go with the episode (the FK also cascades in the DB).
+  has_many :episode_views, dependent: :delete_all
   # Inline images for the body and takeaways (handoff 0063).
   has_many :content_images, dependent: :destroy
 

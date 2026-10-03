@@ -51,7 +51,7 @@
 
     <div class="mt-16 flex justify-between border-t border-gray-100 pt-8">
       <% if @prev_episode %>
-        <%= link_to product_episode_path(@product_line.slug, @prev_episode.display_id), class: "flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600" do %>
+        <%= link_to product_episode_path(@product_line.slug, @prev_episode.display_id), data: { turbo_prefetch: false }, class: "flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600" do %>
           <span>←</span>
           <span><%= @prev_episode.customer_title.presence || "(제목 없음)" %></span>
         <% end %>
@@ -60,7 +60,7 @@
       <% end %>
 
       <% if @next_episode %>
-        <%= link_to product_episode_path(@product_line.slug, @next_episode.display_id), class: "flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600" do %>
+        <%= link_to product_episode_path(@product_line.slug, @next_episode.display_id), data: { turbo_prefetch: false }, class: "flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600" do %>
           <span><%= @next_episode.customer_title.presence || "(제목 없음)" %></span>
           <span>→</span>
         <% end %>

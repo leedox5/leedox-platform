@@ -15,6 +15,7 @@
 # gates (ProductLineGates).
 class ProductLinesController < ApplicationController
   include ProductLineGates
+  include EpisodeViewTracking
 
   # "무료"/"유료" also include a product already owned in that same money sense (0068 R2),
   # so a purchased product doesn't vanish from every filter that isn't "내 제품". "mine" is
@@ -25,6 +26,8 @@ class ProductLinesController < ApplicationController
   before_action :load_product_line, except: %i[index]
   before_action :load_episode, only: %i[episode]
   before_action :require_product_license, only: %i[episode]
+  # Handoff 0073 -- after rendering, so only a request that passed every gate above is counted.
+  after_action :record_episode_view, only: %i[episode]
 
   # Handoff 0068 -- the customer product list: every listed (public, published)
   # ProductLine, oldest first (same order as the admin list; there is no separate

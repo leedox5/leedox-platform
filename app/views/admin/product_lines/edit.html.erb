@@ -138,12 +138,23 @@
         <%= link_to "+ 새 편", new_admin_product_line_content_episode_path(@product_line), class: "flex-shrink-0 whitespace-nowrap rounded-lg bg-slate-800 px-3 py-1.5 text-sm font-bold text-white hover:bg-slate-900" %>
       </div>
 
+      <%# Handoff 0073 -- each episode's views and people (all time / last 7 days) next to its row, in position order, so
+          where the numbers drop from one episode to the next is visible at a glance. A draft isn't counted: "—". %>
+      <% view_stats = episode_view_stats %>
       <ul class="mt-4 divide-y divide-slate-100">
         <% @episodes.each do |episode| %>
           <li class="flex items-center justify-between gap-4 py-3">
             <div class="min-w-0">
               <p class="truncate font-semibold text-slate-900"><%= episode.display_id %> — <%= episode.customer_title.presence || "(제목 없음)" %></p>
               <p class="text-xs text-slate-500"><%= episode.status %></p>
+            </div>
+            <div class="ml-auto flex-shrink-0 text-right text-xs tabular-nums text-slate-500" data-episode-views>
+              <% if episode.status == "draft" %>
+                조회 —
+              <% else %>
+                <span class="block">조회 <span class="font-bold text-slate-900"><%= view_stats_label(view_stats[:total][episode.id]) %></span></span>
+                <span class="block">최근 <%= EpisodeView::RECENT_DAYS %>일 <span class="font-bold text-slate-900"><%= view_stats_label(view_stats[:recent][episode.id]) %></span></span>
+              <% end %>
             </div>
             <div class="flex flex-shrink-0 gap-2">
               <%= link_to "미리보기", admin_content_episode_path(episode), class: "rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50" %>
@@ -153,6 +164,7 @@
         <% end %>
         <% if @episodes.empty? %><p class="py-6 text-center text-slate-500">아직 편이 없습니다.</p><% end %>
       </ul>
+      <% if @episodes.any? %><div class="mt-3"><%= render "admin/product_lines/view_count_note" %></div><% end %>
     </section>
   </main>
 </div>

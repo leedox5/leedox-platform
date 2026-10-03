@@ -19,7 +19,7 @@
       <p class="mt-5 text-sm text-[#a8a39a]"><%= series_release_label(@featured_published, @featured_upcoming) %></p>
       <div class="mt-8 flex flex-wrap gap-3">
         <% if (first = @featured_published.first) %>
-          <%= link_to "첫 편부터 보기", product_episode_path(line.slug, first.display_id),
+          <%= link_to "첫 편부터 보기", product_episode_path(line.slug, first.display_id), data: { turbo_prefetch: false },
             class: "inline-flex items-center rounded-lg bg-[#f0a53c] px-5 py-3 text-sm font-bold text-[#0e1014] hover:bg-[#f5b85e]" %>
         <% end %>
         <%= link_to "시리즈 소개", product_line_path(line.slug),

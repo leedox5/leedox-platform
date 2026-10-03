@@ -24,7 +24,7 @@
         <% end %>
         <li class="min-w-0">
           <% if kind == :published %>
-            <%= link_to inner, product_episode_path(line.slug, episode.display_id),
+            <%= link_to inner, product_episode_path(line.slug, episode.display_id), data: { turbo_prefetch: false },
               class: "block h-full rounded-xl border border-white/10 bg-[#15181e] p-4 transition hover:border-[#f0a53c]/60" %>
           <% else %>
             <div class="h-full rounded-xl border border-dashed border-white/15 p-4"><%= inner %></div>

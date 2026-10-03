@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_27_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_04_010000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -152,6 +152,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_090000) do
     t.datetime "updated_at", null: false
     t.index ["episode_id", "position"], name: "index_content_takeaways_on_episode_id_and_position"
     t.index ["episode_id"], name: "index_content_takeaways_on_episode_id"
+  end
+
+  create_table "episode_views", force: :cascade do |t|
+    t.integer "content_episode_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "view_count", default: 1, null: false
+    t.date "viewed_on", null: false
+    t.string "viewer_key", null: false
+    t.index ["content_episode_id", "viewed_on", "viewer_key"], name: "index_episode_views_uniqueness", unique: true
+    t.index ["viewed_on"], name: "index_episode_views_on_viewed_on"
   end
 
   create_table "external_account_links", force: :cascade do |t|
@@ -425,6 +435,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_090000) do
   add_foreign_key "content_revisions", "content_episodes", column: "episode_id"
   add_foreign_key "content_revisions", "users", column: "editor_id"
   add_foreign_key "content_takeaways", "content_episodes", column: "episode_id"
+  add_foreign_key "episode_views", "content_episodes", on_delete: :cascade
   add_foreign_key "external_account_links", "users"
   add_foreign_key "licenses", "order_items"
   add_foreign_key "licenses", "products"

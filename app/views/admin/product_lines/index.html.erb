@@ -25,6 +25,8 @@
             <th class="px-4 py-3">slug</th>
             <th class="whitespace-nowrap px-4 py-3">공개 상태</th>
             <th class="whitespace-nowrap px-4 py-3">편 수</th>
+            <th class="whitespace-nowrap px-4 py-3 text-right">조회 누적</th>
+            <th class="whitespace-nowrap px-4 py-3 text-right">최근 <%= EpisodeView::RECENT_DAYS %>일</th>
             <th class="whitespace-nowrap px-4 py-3 text-right">관리</th>
           </tr>
         </thead>
@@ -51,6 +53,8 @@
               <td class="px-4 py-4 text-slate-600"><code><%= line.slug %></code></td>
               <td class="whitespace-nowrap px-4 py-4"><span class="inline-block rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700"><%= line.status %></span></td>
               <td class="whitespace-nowrap px-4 py-4 text-slate-600"><%= line.content_episodes.count %></td>
+              <td class="whitespace-nowrap px-4 py-4 text-right tabular-nums text-slate-900" data-view-total><%= view_stats_label(@view_stats[:total][line.id]) %></td>
+              <td class="whitespace-nowrap px-4 py-4 text-right tabular-nums text-slate-600" data-view-recent><%= view_stats_label(@view_stats[:recent][line.id]) %></td>
               <td class="whitespace-nowrap px-4 py-4 text-right">
                 <%= link_to "편집", edit_admin_product_line_path(line), class: "font-semibold text-blue-700 hover:underline" %>
               </td>
@@ -60,5 +64,6 @@
       </table>
       <% if @product_lines.empty? %><p class="p-8 text-center text-slate-500">등록된 제품이 없습니다.</p><% end %>
     </section>
+    <div class="mt-3"><%= render "admin/product_lines/view_count_note" %></div>
   </main>
 </div>

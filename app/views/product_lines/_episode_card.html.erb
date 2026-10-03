@@ -13,10 +13,14 @@
 
     Handoff 0070 -- an optional one-line teaser (episode.summary) as a second line, plain text, truncated to one
     line with a title tooltip for the full text when it's cut off (same convention as the title above); skipped
-    entirely when blank. %>
+    entirely when blank.
+
+    Handoff 0073 -- data-turbo-prefetch="false": Turbo would otherwise fetch the episode on hover and reuse that
+    response on click, so the click itself never reaches the server and the view can't be counted (prefetches are
+    deliberately not counted). Every link to a customer episode page carries this. %>
 <% admin = local_assigns.fetch(:admin, false) %>
 <% title = episode.customer_title.presence || "(제목 없음)" %>
-<%= link_to path, class: "block rounded-xl border border-gray-200 p-4 hover:border-blue-300" do %>
+<%= link_to path, data: { turbo_prefetch: false }, class: "block rounded-xl border border-gray-200 p-4 hover:border-blue-300" do %>
   <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
     <% if admin %><span class="shrink-0 text-xs font-semibold text-gray-400"><%= episode.display_id %> · <%= episode.status %></span><% end %>
     <span class="min-w-0 flex-1 truncate font-bold text-gray-900" title="<%= title %>"><%= title %></span>

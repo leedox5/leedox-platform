@@ -1,0 +1,7 @@
+<%# Handoff 0073 -- how the view numbers are counted, and since when (nothing before the first counted day exists). %>
+<% since = EpisodeView.counting_since %>
+<p class="text-xs text-slate-500">
+  조회수: 횟수는 열 때마다 1회 · 사람 수는 같은 사람을 한 번만 셈(비로그인은 브라우저 기준) · 로봇 제외 ·
+  <%= since ? "#{l(since, format: :long, locale: :ko)}부터" : "아직 집계된 조회가 없습니다" %>
+  (최근 <%= EpisodeView::RECENT_DAYS %>일은 오늘 포함)
+</p>
