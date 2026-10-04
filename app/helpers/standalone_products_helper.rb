@@ -15,6 +15,13 @@ module StandaloneProductsHelper
     { free: "무료 이용 가능", on_sale: "판매 중", preparing: "준비 중" }.fetch(standalone_product_state(product))
   end
 
+  # The main button on a standalone product card (it goes to the product's own page): a free product
+  # invites a start, anything else asks for a closer look. /pricing and the member dashboard (0079)
+  # share this.
+  def standalone_product_cta_label(product)
+    product.free_access? ? "무료로 시작하기" : "자세히 보기"
+  end
+
   def standalone_product_price(product)
     return "무료" if product.free_access?
 

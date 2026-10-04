@@ -23,7 +23,7 @@ class UserDashboardVisibilityFilterTest < ActionDispatch::IntegrationTest
     assert_no_match(/aigravity/i, doc.css("main").text)
 
     # Bottom catalog grid displays purchasable paid products (Chatdox, Claudox) for unowned user
-    assert_select "section[aria-label='전체 카탈로그 둘러보기']" do
+    assert_select "section[aria-label='아직 보지 않은 콘텐츠']" do
       assert_select "h3", text: "Chatdox"
       assert_select "h3", text: "Claudox"
     end
@@ -56,7 +56,7 @@ class UserDashboardVisibilityFilterTest < ActionDispatch::IntegrationTest
     assert_includes main_section.text, "Claudox"
 
     # Chatdox (unowned) appears in bottom catalog grid section
-    catalog_section = doc.at_css("section[aria-label='전체 카탈로그 둘러보기']")
+    catalog_section = doc.at_css("section[aria-label='아직 보지 않은 콘텐츠']")
     assert catalog_section, "Chatdox must appear in bottom catalog section"
     assert_includes catalog_section.text, "Chatdox"
   end

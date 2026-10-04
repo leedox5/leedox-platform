@@ -24,11 +24,11 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
     get dashboard_path
     assert_response :success
 
-    assert_match(/학습 진도/, response.body)
-    assert_match(/최근 완료한 챕터/, response.body)
-    assert_match(/Next Step/, response.body)
+    assert_match(/진행률/, response.body)
+    assert_match(/최근에 읽은 챕터/, response.body)
+    assert_match(/다음 챕터/, response.body)
     assert_no_match(/GitHub Lab/, response.body)
-    assert_match(/접근 가능 문서/, response.body)
+    assert_match(/볼 수 있는 챕터/, response.body)
 
     assert_no_match(/상품별 라이선스/, response.body)
     assert_select "[aria-label='상품별 라이선스']", count: 0
@@ -97,11 +97,11 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
 
     doc = Nokogiri::HTML(response.body)
     claudox_section = doc.at_css("section[aria-label='Claudox 현황']").text
-    catalog_section = doc.at_css("section[aria-label='전체 카탈로그 둘러보기']").text
+    catalog_section = doc.at_css("section[aria-label='아직 보지 않은 콘텐츠']").text
 
-    assert_match(/Claudox 이용 중/, claudox_section)
+    assert_match(/이용 중/, claudox_section)
     assert_match(%r{20/20}, claudox_section)
-    assert_match(/Chatdox 미보유/, catalog_section)
+    assert_match(/미보유/, catalog_section)
     assert_match(%r{5/20}, catalog_section)
   end
 

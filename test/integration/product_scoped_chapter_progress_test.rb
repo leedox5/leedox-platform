@@ -77,6 +77,6 @@ class ProductScopedChapterProgressTest < ActionDispatch::IntegrationTest
 
     get dashboard_path
     assert_response :success
-    assert_match(/전체 20개 중 1개 완료/, response.body)
+    assert_match(/20개 중 1개 읽음/, response.body)
   end
 end
