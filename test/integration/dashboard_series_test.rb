@@ -3,6 +3,8 @@ require "test_helper"
 # Handoff 0080 -- the member dashboard's "이용 중인 시리즈" section, the corrected empty-state condition, the
 # lower section renamed 더 둘러보기, and 만료 for a standalone product whose license ran out. Every judgment is
 # an existing one (License#active_at? / #effective_status, ProductLine.customer_reachable, ContentEpisode.upcoming).
+# Handoff 0085 R1 -- 더 둘러보기 lists series (not earlier products), so the tests that need it create a series
+# that isn't in use; an earlier product without a usable license no longer shows at all (no 만료 / 미보유 card).
 class DashboardSeriesTest < ActionDispatch::IntegrationTest
   setup do
     Commerce::CatalogBootstrap.call!
@@ -37,6 +39,7 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
   test "a series in use shows above everything, with cover slot, name, summary, counts, period, badge and buttons" do
     line = series!("git-core", name: "Git의 기본", summary: "변경 이력을 남기는 법부터", published: [ 1, 2 ], upcoming: [ 3 ])
     license!(line.product)
+    series!("not-yet") # 0085: 더 둘러보기 shows a series not in use
     sign_in
     get dashboard_path
     assert_response :success
@@ -165,6 +168,7 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
   # --- the series link appears once ------------------------------------------------------------
 
   test "시리즈 둘러보기 → sits on the series heading when that section shows, otherwise on 더 둘러보기 -- once" do
+    series!("browse-line")
     sign_in
     get dashboard_path
     assert_equal 1, series_link_count
@@ -178,6 +182,7 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
   end
 
   test "the lower section is 더 둘러보기, its line unchanged" do
+    series!("browse-line")
     sign_in
     get dashboard_path
     section = css_select("section[aria-label='더 둘러보기']").first
@@ -185,37 +190,23 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
     assert_includes section.text, "다른 이야기도 둘러보세요."
   end
 
-  # --- 만료 -------------------------------------------------------------------------------------
+  # --- earlier products without a usable license ------------------------------------------------
 
-  def standalone_card(name)
-    css_select("section[aria-label='더 둘러보기'] h3").find { |h| h.text.strip == name }.ancestors("div.flex-col").first
-  end
-
-  test "an expired standalone license reads 만료 with its last day; buttons and chapter line unchanged" do
+  # 0080 gave an expired earlier product a 만료 card (and others 미보유) under 더 둘러보기; 0085 takes earlier products
+  # out of 더 둘러보기, so they show only while in use (and my page lists only active/scheduled ones since 0082).
+  test "an expired, canceled-only or scheduled-only earlier product shows nowhere on the dashboard" do
     claudox = Product.find_by!(code: "claudox")
-    license!(claudox, starts_on: Date.new(2026, 7, 22), last_usable_on: Date.new(2026, 8, 21))
-    license!(claudox, starts_on: Date.new(2026, 6, 1), last_usable_on: Date.new(2026, 6, 30))
-    sign_in
-    get dashboard_path
-    card = standalone_card("Claudox")
-    assert_equal "만료", card.at_css("span.rounded-full").text.strip
-    assert_equal "이용 기간이 끝났습니다 (2026년 8월 21일까지)", card.css("div.rounded-md p").last.text.strip
-    assert_match %r{볼 수 있는 챕터: \d+/20}, card.text
-    assert_equal [ "자세히 보기", "가격 보기 →" ], card.css("a").map { |a| a.text.strip }
-  end
-
-  test "never licensed, canceled-only or scheduled-only stays 미보유" do
     chatdox = Product.find_by!(code: "chatdox")
-    claudox = Product.find_by!(code: "claudox")
+    license!(claudox, starts_on: Date.current - 40, last_usable_on: Date.current - 10)
     license!(chatdox, starts_on: Date.current - 40, last_usable_on: Date.current - 10, status: "canceled")
-    license!(claudox, starts_on: Date.current + 3, last_usable_on: Date.current + 30)
+    license!(chatdox, starts_on: Date.current + 3, last_usable_on: Date.current + 30)
+    series!("browse-line")
     sign_in
     get dashboard_path
-    %w[Chatdox Claudox].each do |name|
-      card = standalone_card(name)
-      assert_equal "미보유", card.at_css("span.rounded-full").text.strip, name
-      assert_equal "이용 중인 라이선스가 없습니다", card.css("div.rounded-md p").last.text.strip, name
-    end
+    text = css_select("main").text
+    [ "Claudox", "Chatdox", "만료", "미보유", "이전 상품" ].each { |word| assert_not_includes text, word }
+    assert_select "section[aria-label='이용 중인 콘텐츠 없음']", 1
+    assert_select "section[aria-label='더 둘러보기'] [href=?]", product_line_path("browse-line")
   end
 
   test "a product with a usable license is never 만료 even with an older expired one" do
@@ -227,14 +218,14 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
     assert_select "section[aria-label='Chatdox 현황'] span.rounded-full", text: "이용 중"
   end
 
-  # 0080 matched this to /mypage's 만료 card; since 0082 my page leaves expired earlier products out (the order
-  # history keeps them), so the dashboard is where an expired earlier product reads 만료.
-  test "an expired earlier product reads 만료 on the dashboard; my page leaves it out (0082)" do
+  # Since 0082 my page leaves expired earlier products out (the order history keeps them); since 0085 so does the
+  # dashboard -- the two agree again.
+  test "an expired earlier product: neither the dashboard nor my page shows it" do
     claudox = Product.find_by!(code: "claudox")
     license!(claudox, starts_on: Date.current - 40, last_usable_on: Date.current - 10)
     sign_in
     get dashboard_path
-    assert_equal "만료", standalone_card("Claudox").at_css("span.rounded-full").text.strip
+    assert_not_includes css_select("main").text, "Claudox"
     get mypage_path
     assert_select "[data-license-card='claudox']", 0
   end

@@ -22,11 +22,8 @@ class UserDashboardVisibilityFilterTest < ActionDispatch::IntegrationTest
     assert_select "main section[aria-label*='Antigravity']", count: 0
     assert_no_match(/aigravity/i, doc.css("main").text)
 
-    # Bottom catalog grid displays purchasable paid products (Chatdox, Claudox) for unowned user
-    assert_select "section[aria-label='더 둘러보기']" do
-      assert_select "h3", text: "Chatdox"
-      assert_select "h3", text: "Claudox"
-    end
+    # Handoff 0085 -- unowned paid earlier products (Chatdox, Claudox) no longer show either: 더 둘러보기 lists series.
+    assert_no_match(/Chatdox|Claudox/, doc.css("main").text)
   end
 
   test "2. Licensed/active paid product is placed in main section, unowned product is in bottom catalog section" do
@@ -55,22 +52,24 @@ class UserDashboardVisibilityFilterTest < ActionDispatch::IntegrationTest
     assert main_section, "Claudox must appear in main section"
     assert_includes main_section.text, "Claudox"
 
-    # Chatdox (unowned) appears in bottom catalog grid section
-    catalog_section = doc.at_css("section[aria-label='더 둘러보기']")
-    assert catalog_section, "Chatdox must appear in bottom catalog section"
-    assert_includes catalog_section.text, "Chatdox"
+    # Chatdox (unowned) doesn't show (0085: 더 둘러보기 lists series, not earlier products)
+    assert_no_match(/Chatdox/, doc.css("main").text)
   end
 
-  test "3. Empty state UI is rendered when 0 dashboard products are available" do
-    # Temporarily deactivate offers to simulate 0 active paid products
+  # Handoff 0085 -- the separate "nothing to show" box (no earlier product on sale) is gone: with nothing in use the
+  # member gets the one empty box, and with no series to browse either, it carries the 시리즈 둘러보기 link.
+  test "3. Empty state UI is rendered when nothing is in use and there is no series to browse" do
     ProductOffer.update_all(active: false)
 
     get dashboard_path
     assert_response :success
 
-    assert_select "section[aria-label='대시보드 안내']" do
-      assert_select "p", text: "현재 대시보드에 표시할 상품이 없습니다."
+    assert_select "section[aria-label='대시보드 안내']", 0
+    assert_select "section[aria-label='이용 중인 콘텐츠 없음']" do
+      assert_select "p", text: "아직 이용 중인 콘텐츠가 없습니다."
+      assert_select "a[href=?]", products_path, text: "시리즈 둘러보기 →"
     end
+    assert_select "section[aria-label='더 둘러보기']", 0
   end
 
   test "4. Scope is restricted to user dashboard cards -- pricing page and admin page remain untouched" do

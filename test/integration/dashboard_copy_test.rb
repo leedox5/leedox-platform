@@ -24,6 +24,14 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
 
   def section(label) = css_select("section[aria-label='#{label}']").first
 
+  # Handoff 0085 -- 더 둘러보기 lists series not in use, so the tests that look at it need one.
+  def series!(slug, name: "시리즈 #{slug}", summary: nil)
+    line = ProductLine.create!(internal_name: slug, customer_name: name, slug: slug, introduction: "소개", summary: summary,
+      status: "published", visibility: "public")
+    line.content_episodes.create!(position: 1, customer_title: "첫 편", body: "본문", status: "published")
+    line
+  end
+
   # The dashboard's own copy, without product data (a product's tagline is data the admin edits -- 0078 -- and
   # Chatdox's still says "커리큘럼"; that is out of this handoff's scope).
   def own_copy(node)
@@ -80,8 +88,11 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
     assert_includes text, "진행률 100%"
   end
 
-  test "not-yet-seen cards: short badge, chapters you can see, product-page button with /pricing's wording, prices aside" do
+  # Handoff 0085 R1 -- 더 둘러보기 shows series (the /products card), no earlier product (no 미보유 card, no
+  # 가격 보기 →); the section's heading and line are unchanged.
+  test "not-yet-seen cards are series: the series list's card, no earlier product, no prices link" do
     grant("chatdox")
+    series!("copy-line", name: "이야기 시리즈", summary: "한 줄 요약")
     sign_in(@user)
     get dashboard_path
     seen = section("더 둘러보기")
@@ -90,17 +101,19 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
     assert_includes seen.text, "다른 이야기도 둘러보세요."
     assert_select "section[aria-label='더 둘러보기'] a[href=?]", products_path, text: "시리즈 둘러보기 →"
 
-    claudox = seen.css("h3").find { |h| h.text.strip == "Claudox" }.ancestors("div.flex-col").first
-    text = claudox.text.squish
-    assert_equal "미보유", claudox.at_css("span.rounded-full").text.strip
-    assert_match %r{볼 수 있는 챕터: \d+/20}, text
-    assert_equal "이용 중인 라이선스가 없습니다", claudox.css("div.rounded-md p").last.text.strip
-    links = claudox.css("a").map { |a| [ a.text.strip, a["href"] ] }
-    assert_equal [ [ "자세히 보기", "/claudox" ], [ "가격 보기 →", pricing_path ] ], links
+    card = seen.at_css("a[href='#{product_line_path("copy-line")}']")
+    text = card.text.squish
+    assert_equal "이야기 시리즈", card.at_css("h3").text.strip
+    assert_includes text, "한 줄 요약"
+    assert_includes text, "공개 1편"
+    assert_includes text, "자세히 보기 →"
+    assert_not_includes seen.text, "Claudox"
+    assert_not_includes seen.text, "가격 보기"
     assert_no_match OLD_TONE, own_copy(seen)
   end
 
   test "a member with nothing owned sees the new empty line and the not-yet-seen section" do
+    series!("copy-line")
     sign_in(@user)
     get dashboard_path
     empty = section("이용 중인 콘텐츠 없음")
@@ -111,7 +124,9 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
     assert_no_match OLD_TONE, own_copy(css_select("main").first)
   end
 
-  test "during the trial the not-yet-seen card notes the trial range, without the product name repeated" do
+  # Handoff 0085 -- the trial's chapter range lived on the earlier-product cards of 더 둘러보기, which are gone; the
+  # banner itself is unchanged (still shown while an earlier product on sale isn't licensed).
+  test "during the trial the banner shows, and 더 둘러보기 has no earlier-product trial line" do
     trial = User.create!(name: "체험", email: "dc-trial-#{SecureRandom.hex(3)}@example.com", password: "password123")
     sign_in(trial)
     get dashboard_path
@@ -119,9 +134,7 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
     banner = css_select("main p").find { |p| p.text.include?("무료 체험 D-") }
     assert banner, "the trial banner (unchanged copy)"
     assert_includes banner.text, "무료 체험 D-"
-    seen = section("더 둘러보기")
-    assert_match(%r{볼 수 있는 챕터: \d+/20 \(체험 중\)}, seen.text.squish)
-    assert seen.css("span.rounded-full").all? { |badge| badge.text.strip == "미보유" }, "badges without the product name"
+    assert_not_includes css_select("main").text, "(체험 중)"
     assert_no_match OLD_TONE, own_copy(css_select("main").first)
   end
 

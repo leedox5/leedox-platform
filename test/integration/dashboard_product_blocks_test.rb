@@ -24,11 +24,9 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
     assert_match(/다음 챕터/, chatdox_section.text)
     assert chatdox_section.at_css("a[href*='/content/chatdox/']"), "expected learning CTA for owned Chatdox"
 
-    # Claudox (unowned) appears in bottom catalog grid with compact card
-    catalog_section = doc.at_css("section[aria-label='더 둘러보기']")
-    assert catalog_section, "expected a 더 둘러보기 section"
-    assert_includes catalog_section.text, "Claudox"
-    assert catalog_section.at_css("a[href='#{pricing_path}']"), "expected pricing CTA for unowned Claudox"
+    # Claudox (unowned) no longer shows -- 0085: 더 둘러보기 lists series, not earlier products
+    assert_no_match(/Claudox/, doc.at_css("main").text)
+    assert_nil doc.at_css("main a[href='#{pricing_path}']")
   end
 
   test "GitHub Lab entry point is not present in dashboard sections in V1" do
@@ -40,7 +38,7 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
       "GitHub Lab should no longer be present in V1 dashboard"
   end
 
-  test "an unowned user sees onboarding card in main area and all unowned products in bottom catalog" do
+  test "an unowned user sees onboarding card in main area and no earlier product (0085)" do
     get dashboard_path
     assert_response :success
 
@@ -49,11 +47,8 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
     # Onboarding notice in main section when 0 products are owned
     assert doc.at_css("section[aria-label='이용 중인 콘텐츠 없음']")
 
-    # Bottom catalog grid contains compact cards for Chatdox & Claudox
-    catalog_section = doc.at_css("section[aria-label='더 둘러보기']")
-    assert catalog_section, "expected catalog grid section"
-    assert_includes catalog_section.text, "Chatdox"
-    assert_includes catalog_section.text, "Claudox"
+    # 0085: earlier products show only while in use; 더 둘러보기 lists series (none in this test)
+    assert_no_match(/Chatdox|Claudox/, doc.at_css("main").text)
   end
 
   test "a user who completed Chatdox chapters sees accurate Chatdox progress and Next Step" do

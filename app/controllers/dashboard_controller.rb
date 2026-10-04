@@ -1,21 +1,24 @@
 class DashboardController < ApplicationController
+  BROWSE_LIMIT = 4
+
   before_action :authenticate_user!
 
   def show
     authorize :dashboard, :access?
 
-    # Handoff 0080 -- every license of the member, read once: the series in use and the expired
-    # state of standalone products both come from it (no per-series or per-product license query).
+    # Handoff 0080 -- every license of the member, read once: the series in use and (0085) the earlier
+    # products in use both come from it (no per-series or per-product license query).
     @user_licenses = current_user.licenses.includes(:product).to_a
     load_series_in_use
 
-    all_dashboards = dashboard_products.map { |product| build_product_dashboard(product) }
+    # Handoff 0085 R1 -- the dashboard answers "what can I watch": earlier products only while a paid license is
+    # usable now, and the series not in use (not earlier products) under 더 둘러보기.
+    @owned_dashboards = legacy_products_in_use.map { |product| build_product_dashboard(product) }
+    load_series_to_browse
 
-    @owned_dashboards = all_dashboards.select { |pd| current_user.licensed_for?(pd[:product].code) }
-    @unowned_dashboards = all_dashboards.reject { |pd| current_user.licensed_for?(pd[:product].code) }
-
-    @product_dashboards = all_dashboards
-    @has_unowned_product = @unowned_dashboards.any?
+    # The trial banners keep their 0046 rule (unchanged in 0085, reported in result.md e): only while some earlier
+    # product on sale is still not licensed -- the trial opens more chapters of those, not of series.
+    @has_unowned_product = dashboard_products.any? { |product| !current_user.licensed_for?(product.code) }
   end
 
   private
@@ -44,16 +47,30 @@ class DashboardController < ApplicationController
       .group_by(&:product_line_id).transform_values(&:size)
   end
 
-  # Handoff 0080 -- a standalone product the member has no usable license for, but whose latest
-  # license simply ran out: what /mypage labels 만료 (License#effective_status "expired"). Canceled-only
-  # or scheduled-only (not started yet) histories aren't "expired" there, so they stay 미보유 here.
-  def expired_license_for(product)
-    licenses = @user_licenses.select { |license| license.product_id == product.id }
-    return nil if licenses.any?(&:active_at?)
-
-    License.latest_expired(licenses)
+  # Handoff 0085 R1 -- an earlier (standalone, paid) product the member holds a license usable right now
+  # (License#active_at?, the check Entitlements::ProductAccess and the chapter gate make; scheduled-only or ended
+  # licenses don't count). It no longer depends on the product being on sale: with sale_enabled off or every offer
+  # off the license still opens the chapters (DocPolicy#view_as_license?). It does need the product active --
+  # ProductContentController#enforce_active_product 404s an inactive product's chapters even for a license holder,
+  # so a card there would lead nowhere.
+  def legacy_products_in_use
+    product_ids = @user_licenses.select(&:active_at?).map(&:product_id).uniq
+    Product.standalone.active.where(free_access: false, id: product_ids).order(:code).to_a
   end
 
+  # Handoff 0085 R1 -- 더 둘러보기: the series on /products (ProductLine.listed, the same order) the member isn't
+  # using (not in @series_in_use), at most BROWSE_LIMIT. Not in use means no usable license, so the list badge's
+  # state is computed with owned: false -- the same ProductLine#access_state /products uses.
+  def load_series_to_browse
+    lines = ProductLine.listed.where.not(id: @series_in_use.map(&:id)).order(:id).limit(BROWSE_LIMIT)
+      .includes(:product, cover_image_attachment: :blob).to_a
+    @browse_series = lines
+    @browse_states = lines.to_h { |line| [ line.id, line.access_state(owned: false) ] }
+    @browse_published_counts = ContentEpisode.where(product_line_id: lines.map(&:id), status: "published")
+      .group(:product_line_id).count
+  end
+
+  # Handoff 0079-0084: the earlier products on sale. Since 0085 only the trial banners use it.
   def dashboard_products
     Product.standalone.active
       .where(free_access: false)
@@ -61,7 +78,6 @@ class DashboardController < ApplicationController
       .merge(ProductOffer.active)
       .distinct
       .to_a
-      .sort_by { |product| [ current_user.licensed_for?(product.code) ? 0 : 1, product.code ] }
   end
 
   def build_product_dashboard(product)
@@ -83,17 +99,10 @@ class DashboardController < ApplicationController
       product: product,
       total: total,
       accessible: accessible_chapter_count(source, total),
-      # What this same product drops back to once trial ends (handoff 0046) --
-      # always computed, regardless of the viewer's current state, so the view
-      # can decide when it's actually worth showing (trial-active, unlicensed,
-      # and only when it differs from `accessible`). Per-product because
-      # guest/trial limits are set per product, not globally.
-      accessible_after_trial: [ total, source.guest_chapter_limit ].min,
       completed_count: completed_count,
       progress_percent: progress_percent(completed_count, total),
       recent_chapters: completed_ids.first(3).filter_map { |id| source.find(id) },
-      next_chapter: chapters.find { |chapter| completed_ids.exclude?(chapter[:id]) },
-      expired_license: expired_license_for(product)
+      next_chapter: chapters.find { |chapter| completed_ids.exclude?(chapter[:id]) }
     }
   end
 

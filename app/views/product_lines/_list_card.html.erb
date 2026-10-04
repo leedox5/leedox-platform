@@ -1,0 +1,23 @@
+<%# One series card of the series list (/products, handoff 0068/0083) -- also the dashboard's 더 둘러보기 (0085), so
+    both show the same cover, name, summary, 공개 N편, state badge and 자세히 보기 →. `heading:` is the title's tag
+    (h2 on the list, h3 under the dashboard's section heading). %>
+<%= link_to product_line_path(line.slug), class: "flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#15181e] transition hover:border-[#f0a53c]/60" do %>
+  <% if line.cover_image.attached? %>
+    <%= render "product_lines/cover_image", product_line: line, variant: :thumb, classes: "block aspect-video w-full object-cover" %>
+  <% else %>
+    <%= render "product_lines/cover_placeholder", product_line: line, dark: true %>
+  <% end %>
+  <div class="flex flex-1 flex-col p-5">
+    <%= content_tag local_assigns.fetch(:heading, :h2), line.customer_name, class: "break-words text-lg font-bold text-[#f2efe8]" %>
+    <% if line.summary.present? %>
+      <p class="mt-1 break-words text-sm text-[#c9c4ba]"><%= line.summary %></p>
+    <% end %>
+    <p class="mt-3 text-xs font-semibold text-[#a8a39a]">공개 <%= published_count %>편</p>
+    <div class="mt-4 flex flex-1 items-end justify-between gap-3">
+      <% if state %>
+        <span class="<%= product_list_state_classes(state) %>"><%= product_list_state_label(state, line) %></span>
+      <% end %>
+      <span class="flex-shrink-0 whitespace-nowrap text-sm font-semibold text-[#f0a53c]">자세히 보기 →</span>
+    </div>
+  </div>
+<% end %>

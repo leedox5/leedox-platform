@@ -6,7 +6,9 @@ class MypageController < ApplicationController
   # Handoff 0081 -- one card per product (a series' commerce product = that series).
   # Handoff 0082 -- split in two: series (all of them, as in 0081) and earlier products (standalone,
   # paid, and only while in use or scheduled -- no expired, no free, no past records).
-  LicenseCard = Struct.new(:product, :title, :status, :license, :past, :link, :sort_key, keyword_init: true)
+  # Handoff 0085 R2 -- each card is now a one-line record (the page is the account/payment record; the dashboard is
+  # where content is opened), so it carries no 콘텐츠 보기 link.
+  LicenseCard = Struct.new(:product, :title, :status, :license, :past, :sort_key, keyword_init: true)
   STATUS_ORDER = { "active" => 0, "scheduled" => 1, "expired" => 2 }.freeze
 
   def show
@@ -23,13 +25,10 @@ class MypageController < ApplicationController
   private
 
   # Every judgment is an existing one: License#effective_status (the badge this page always showed),
-  # License.longest_running / .latest_expired (the dashboard's period line, 0080), ProductLine.
-  # customer_reachable (the episode gate's scope) for whether a series link is shown, and
+  # License.longest_running / .latest_expired (the dashboard's period line, 0080), and
   # Product#free_access? (what made a 무료 이용 card in 0081) for "paid".
   def license_cards
-    reachable_line_ids = ProductLine.customer_reachable
-      .where(product_id: @licenses.map(&:product_id).uniq).pluck(:id).to_set
-    cards = @licenses.group_by(&:product).filter_map { |product, licenses| license_card(product, licenses, reachable_line_ids) }
+    cards = @licenses.group_by(&:product).filter_map { |product, licenses| license_card(product, licenses) }
     series, standalone = cards.partition { |card| card.product.product_line }
 
     legacy = standalone
@@ -39,7 +38,7 @@ class MypageController < ApplicationController
   end
 
   # A product with only canceled licenses gets no card (the order history keeps them).
-  def license_card(product, licenses, reachable_line_ids)
+  def license_card(product, licenses)
     by_status = licenses.group_by(&:effective_status)
     status = %w[active scheduled expired].find { |s| by_status[s].present? }
     return nil unless status
@@ -64,15 +63,7 @@ class MypageController < ApplicationController
       status: status,
       license: representative,
       past: (licenses - [ representative ]).sort_by { |license| [ -license.starts_on.jd, -license.id ] },
-      link: status == "active" ? card_link(product, line, reachable_line_ids) : nil,
       sort_key: sort_key
     )
-  end
-
-  # 콘텐츠 보기: a series' page if a customer can open it; a standalone product's own page.
-  def card_link(product, line, reachable_line_ids)
-    return (reachable_line_ids.include?(line.id) ? product_line_path(line.slug) : nil) if line
-
-    product.landing_page_path.presence
   end
 end

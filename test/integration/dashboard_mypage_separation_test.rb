@@ -35,12 +35,17 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", mypage_path, text: /마이페이지/
   end
 
-  test "dashboard shows multi-product status and doc access (R2: Chatdox + Claudox, not Chatdox-only)" do
+  # Handoff 0085 -- earlier products show only while in use (they used to be listed unowned under 더 둘러보기).
+  test "dashboard shows each earlier product in use (Chatdox + Claudox, not Chatdox-only)" do
+    %w[chatdox claudox].each do |code|
+      License.create!(user: @user, product: Product.find_by!(code: code), source: "paid", status: "active",
+        starts_on: Date.current, last_usable_on: Date.current + 30, access_ends_at: (Date.current + 31).in_time_zone)
+    end
     get dashboard_path
     assert_response :success
 
-    assert_match(/Chatdox/, response.body)
-    assert_match(/Claudox/, response.body)
+    assert_select "section[aria-label='Chatdox 현황']", 1
+    assert_select "section[aria-label='Claudox 현황']", 1
 
     assert_no_match(/전체 문서 보기/, response.body)
     assert_no_match(/계정 역할/, response.body)
@@ -78,7 +83,8 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
     assert_no_match(/Trial 남은 기간/, response.body)
   end
 
-  test "a Claudox-licensed user sees Claudox marked as licensed and full Claudox chapter access, while Chatdox stays trial-only" do
+  # Handoff 0085 -- Chatdox (not licensed) no longer shows on the dashboard at all (it was a 미보유 5/20 card).
+  test "a Claudox-licensed user sees Claudox marked as licensed and full Claudox chapter access; Chatdox isn't listed" do
     product = Product.find_by!(code: "claudox")
     today = Time.current.in_time_zone(Commerce::PeriodCalculator::KST).to_date
     end_date = today + 1.month
@@ -97,12 +103,10 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
 
     doc = Nokogiri::HTML(response.body)
     claudox_section = doc.at_css("section[aria-label='Claudox 현황']").text
-    catalog_section = doc.at_css("section[aria-label='더 둘러보기']").text
 
     assert_match(/이용 중/, claudox_section)
     assert_match(%r{20/20}, claudox_section)
-    assert_match(/미보유/, catalog_section)
-    assert_match(%r{5/20}, catalog_section)
+    assert_no_match(/Chatdox|미보유/, doc.at_css("main").text)
   end
 
   test "mobile navigation includes 대시보드 for a regular signed-in user, matching desktop" do

@@ -7,6 +7,7 @@ require "test_helper"
 # Handoff 0082 -- two parts: 시리즈 (everything above, always shown, an empty line + link when none) and 이전 상품
 # (paid standalone products in use or scheduled only; no expired, no free, no past records; hidden when empty).
 # The order history stays exactly as it was.
+# Handoff 0085 R2 -- the same records as one-line rows in a divided list (not a card grid), without 콘텐츠 보기.
 class MypageLicenseCardsTest < ActionDispatch::IntegrationTest
   setup do
     Commerce::CatalogBootstrap.call!
@@ -35,7 +36,7 @@ class MypageLicenseCardsTest < ActionDispatch::IntegrationTest
   def codes(label) = (part(label)&.css("[data-license-card]") || []).map { |c| c["data-license-card"] }
   def card(code) = css_select("[data-license-card='#{code}']").first
   def badge(node) = node.at_css("span.rounded-full").text.strip
-  def period(node) = node.css("p.mt-3").first.text.strip
+  def period(node) = node.at_css("div > p").text.strip
 
   # --- the two parts (0082) -------------------------------------------------------------------------
 
@@ -82,7 +83,7 @@ class MypageLicenseCardsTest < ActionDispatch::IntegrationTest
     assert_nil part("이전 상품"), "no cards -> no 이전 상품 part at all"
   end
 
-  test "이전 상품 in use: one card, period line, 콘텐츠 보기, never 지난 기록" do
+  test "이전 상품 in use: one card, period line, no link (0085), never 지난 기록" do
     license!(@chatdox, starts_on: Date.new(2026, 6, 24), last_usable_on: Date.new(2026, 7, 23))
     license!(@chatdox, starts_on: Date.new(2026, 8, 24), last_usable_on: Date.new(2026, 9, 23))
     license!(@chatdox, starts_on: Date.current - 10, last_usable_on: Date.current + 19, status: "canceled")
@@ -93,7 +94,7 @@ class MypageLicenseCardsTest < ActionDispatch::IntegrationTest
     chatdox = card("chatdox")
     assert_equal "이용 중", badge(chatdox)
     assert_equal "이용 종료일: #{I18n.l(current.last_usable_on, format: :long, locale: :ko)}", period(chatdox)
-    assert_select "[data-license-card='chatdox'] a[href=?]", "/chatdox", text: "콘텐츠 보기"
+    assert_nil chatdox.at_css("a"), "0085: no 콘텐츠 보기"
     assert_nil chatdox.at_css("details"), "past records stay in the order history"
   end
 
@@ -129,7 +130,7 @@ class MypageLicenseCardsTest < ActionDispatch::IntegrationTest
     assert_not_includes git.text, "옛 이름"
     assert_equal "이용 중", badge(git)
     assert_equal "무기한 이용 중", period(git)
-    assert_select "[data-license-card='git_core'] a[href=?]", product_line_path("git-core"), text: "콘텐츠 보기"
+    assert_nil git.at_css("a"), "0085: no 콘텐츠 보기"
     assert_equal "지난 기록 2건", git.at_css("summary").text.strip
     lines = git.css("details li").map { |li| li.text.squish }
     assert lines.first.end_with?("· 취소") && lines.last.end_with?("· 만료"), "most recent first: #{lines.inspect}"
@@ -183,6 +184,32 @@ class MypageLicenseCardsTest < ActionDispatch::IntegrationTest
     get mypage_path
     assert_equal "닫힌 시리즈", card("hidden_line").at_css("h4").text.strip
     assert_nil card("hidden_line").at_css("a")
+  end
+
+  # --- 0085 R2: records, not cards ---------------------------------------------------------------------
+
+  test "each part is a divided list of one-line records (name, badge, period); no 콘텐츠 보기 anywhere" do
+    line = series!("git-core", name: "Git의 기본")
+    license!(line.product, starts_on: Date.new(2026, 6, 1), last_usable_on: Date.new(2026, 6, 30))
+    license!(line.product, starts_on: Date.current - 1)
+    license!(@chatdox, starts_on: Date.current - 5, last_usable_on: Date.current + 25)
+    sign_in
+    get mypage_path
+    [ "시리즈", "이전 상품" ].each do |label|
+      assert_select "section[aria-label='#{label}'] ul.divide-y > li[data-license-card]", 1, label
+      assert_select "section[aria-label='#{label}'] .grid", 0, label
+    end
+    row = card("git_core").at_css("div")
+    assert_equal [ "h4", "span", "p" ], row.element_children.map(&:name)
+    assert_equal [ "Git의 기본", "이용 중", "무기한 이용 중" ], row.element_children.map { |e| e.text.strip }
+    assert_equal "지난 기록 1건", card("git_core").at_css("details > summary").text.strip
+    assert_not_includes css_select("section[aria-label='상품별 라이선스']").first.text, "콘텐츠 보기"
+  end
+
+  test "the 시리즈 empty line keeps its 시리즈 둘러보기 → link" do
+    sign_in
+    get mypage_path
+    assert_select "section[aria-label='시리즈'] a[href=?]", products_path, text: "시리즈 둘러보기 →"
   end
 
   # --- page-level (0081) -------------------------------------------------------------------------------

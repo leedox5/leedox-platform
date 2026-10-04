@@ -108,8 +108,9 @@ class DarkFrameTest < ActionDispatch::IntegrationTest
     assert_select "[data-series-card='frame-in-use'] span.text-\\[\\#7dd3a8\\]", text: "이용 중"
     assert_select "section[aria-label='Chatdox 현황'].bg-\\[\\#15181e\\] span.text-\\[\\#7dd3a8\\]", text: "이용 중"
     assert_select "section[aria-label='Chatdox 현황'] [role=progressbar] div.bg-\\[\\#f0a53c\\]"
-    claudox = css_select("section[aria-label='더 둘러보기'] h3").find { |h| h.text.strip == "Claudox" }.ancestors("div.flex-col").first
-    assert_equal "만료", claudox.at_css("span.text-\\[\\#f0a53c\\]").text.strip
+    # 0085: 더 둘러보기 holds series (the dark /products card; frame-line isn't in use), no 만료 earlier product.
+    assert_select "section[aria-label='더 둘러보기'] a.bg-\\[\\#15181e\\][href=?]", product_line_path("frame-line")
+    assert_not_includes css_select("main").text, "Claudox"
   end
 
   test "light-bodied pages keep their light body and don't load the display font" do

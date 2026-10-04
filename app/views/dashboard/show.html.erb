@@ -5,7 +5,9 @@
     Handoff 0080 -- the series in use come first (D-009); the empty box only when there's neither a series nor a
     standalone product in use; a standalone product whose license ran out reads 만료.
     Handoff 0084 (D-010) -- dark body like the home and the series pages (colors only; content unchanged), with the
-    display serif for the page and section headings. %>
+    display serif for the page and section headings.
+    Handoff 0085 R1 -- "what can I watch": the earlier products only while in use, under an 이전 상품 heading, and
+    더 둘러보기 shows the series not in use (the /products card, at most four) instead of earlier products. %>
 <% content_for :head do %>
   <%= render "shared/display_font" %>
 <% end %>
@@ -53,6 +55,7 @@
     <% end %>
 
     <% if @owned_dashboards.any? %>
+      <h2 class="mb-4 font-display text-xl font-bold text-[#f2efe8]">이전 상품</h2>
       <div class="space-y-6">
         <% @owned_dashboards.each do |pd| %>
           <% product = pd[:product] %>
@@ -131,62 +134,35 @@
           </section>
         <% end %>
       </div>
-    <% elsif @series_in_use.any? %>
-      <%# A series in use already fills the top -- no "nothing in use" box. %>
-    <% elsif @unowned_dashboards.any? %>
+    <% elsif @series_in_use.none? %>
       <section aria-label="이용 중인 콘텐츠 없음" class="rounded-2xl border border-white/10 bg-[#15181e] p-8 text-center">
         <p class="text-base font-semibold text-[#f2efe8]">아직 이용 중인 콘텐츠가 없습니다.</p>
-        <p class="mt-1 text-sm text-[#c9c4ba]">아래에서 관심 있는 콘텐츠를 둘러보세요.</p>
-      </section>
-    <% else %>
-      <section aria-label="대시보드 안내" class="rounded-2xl border border-white/10 bg-[#15181e] p-8 text-center">
-        <p class="text-sm font-semibold text-[#c9c4ba]">현재 대시보드에 표시할 상품이 없습니다.</p>
-        <p class="mt-2 text-xs text-[#a8a39a]">판매 중인 유료 상품이 공개되면 이곳에서 진행률을 확인할 수 있습니다.</p>
+        <% if @browse_series.any? %>
+          <p class="mt-1 text-sm text-[#c9c4ba]">아래에서 관심 있는 콘텐츠를 둘러보세요.</p>
+        <% else %>
+          <%= link_to "시리즈 둘러보기 →", products_path, class: "mt-2 inline-block text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
+        <% end %>
       </section>
     <% end %>
 
-    <% if @unowned_dashboards.any? %>
+    <% if @browse_series.any? %>
       <section aria-label="더 둘러보기" class="mt-12">
         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 class="font-display text-xl font-bold text-[#f2efe8]">더 둘러보기</h2>
             <p class="mt-1 text-sm text-[#c9c4ba]">다른 이야기도 둘러보세요.</p>
           </div>
-          <%# The series link sits on the series section's heading when that section shows -- never twice. %>
+          <%# The series link sits on the series section's heading when that section shows -- never twice. It also
+              leads to the rest when there are more series than the four shown here. %>
           <% unless @series_in_use.any? %>
             <%= link_to "시리즈 둘러보기 →", products_path, class: "text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
           <% end %>
         </div>
 
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <% @unowned_dashboards.each do |pd| %>
-            <% product = pd[:product] %>
-            <div class="flex flex-col justify-between rounded-2xl border border-white/10 bg-[#15181e] p-6">
-              <div>
-                <div class="flex items-center justify-between gap-2">
-                  <h3 class="text-lg font-bold text-[#f2efe8]"><%= product.name %></h3>
-                  <%= product_status_badge(current_user, product, expired_license: pd[:expired_license]) %>
-                </div>
-                <p class="mt-2 text-sm leading-relaxed text-[#c9c4ba]"><%= product.tagline %></p>
-                <% trial_boost = current_user.trial_active? && pd[:accessible] != pd[:accessible_after_trial] %>
-                <div class="mt-4 rounded-md bg-white/5 p-3 text-xs text-[#a8a39a]">
-                  <p class="font-medium text-[#c9c4ba]">볼 수 있는 챕터: <%= pd[:accessible] %>/<%= pd[:total] %><%= " (체험 중)" if trial_boost %></p>
-                  <% if trial_boost %>
-                    <p class="mt-0.5 text-[#a8a39a]"><%= I18n.l(current_user.trial_ends_on, locale: :ko, format: :long) %> 이후 <%= pd[:accessible_after_trial] %>/<%= pd[:total] %></p>
-                  <% end %>
-                  <p class="mt-0.5"><%= product_period_text(current_user, product, expired_license: pd[:expired_license]) %></p>
-                </div>
-              </div>
-              <%# The product's own page, with /pricing's own button wording (StandaloneProductsHelper); prices one step aside. %>
-              <div class="mt-6">
-                <% if product.landing_page_path.present? %>
-                  <%= link_to standalone_product_cta_label(product),
-                    product.landing_page_path,
-                    class: "block w-full rounded-lg bg-[#f0a53c] px-4 py-2.5 text-center text-sm font-semibold text-[#0e1014] transition hover:bg-[#f5b85e]" %>
-                <% end %>
-                <%= link_to "가격 보기 →", pricing_path, class: "mt-2 block text-center text-xs font-semibold text-[#a8a39a] hover:text-[#f2efe8]" %>
-              </div>
-            </div>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <% @browse_series.each do |line| %>
+            <%= render "product_lines/list_card", line: line, state: @browse_states[line.id],
+              published_count: @browse_published_counts.fetch(line.id, 0), heading: :h3 %>
           <% end %>
         </div>
       </section>
