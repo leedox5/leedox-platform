@@ -5,10 +5,8 @@
 <% content_for :title, "LEEDOX | 실제로 만들고 겪은 개발자의 시리즈" %>
 <% content_for :head do %>
   <meta name="description" content="실제로 만들고, 막히고, 고친 과정을 시즌과 에피소드로 따라갑니다. Git·Java·WSL 같은 개발 기초부터 AI와 함께 만드는 이야기까지.">
-  <%# The display serif, for this page only (see --font-display in application.css). %>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap">
+  <%# The display serif (see --font-display in application.css) -- shared with the series list since 0083. %>
+  <%= render "shared/display_font" %>
 <% end %>
 
 <div class="min-h-screen bg-[#0e1014] text-[#f2efe8]">

@@ -1,8 +1,14 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Handoff 0083 -- Tailwind's scanner misses classes inside an ERB Ruby string once that string holds an arbitrary
+   hex class (e.g. `dark ? "text-[#c9c4ba] hover:bg-white/5" : ...` in shared/_header): everything from the hex class
+   on is dropped. Hex classes used there happen to exist elsewhere; these two hover backgrounds didn't (the dark
+   header's menu button hover never worked since 0071), so they are generated explicitly. */
+@source inline("hover:bg-white/5 hover:bg-white/10");
+
 /* Handoff 0071 -- the home's display serif (series names, brand line). A new token, so no other page's
-   fonts change; the font file itself is only requested by the home (its <head>). */
+   fonts change; the font file itself is only requested by the dark "browse" pages (home, series list -- 0083). */
 @theme {
 	--font-display: "Gowun Batang", ui-serif, Georgia, serif;
 }
@@ -89,4 +95,47 @@
 .doc-content th,
 .doc-content td {
 	@apply border border-slate-200 px-3 py-2 text-left text-sm;
+}
+
+/* Handoff 0083 R2 -- the series detail page's introduction on the dark "browse" palette. Only that page adds
+   `doc-content-dark` (SeriesThemeHelper); episode bodies, notices and the admin preview keep `.doc-content` as is. */
+.doc-content-dark h1,
+.doc-content-dark h2,
+.doc-content-dark h3 {
+	@apply text-[#f2efe8];
+}
+
+.doc-content-dark p,
+.doc-content-dark li {
+	@apply text-[#c9c4ba];
+}
+
+.doc-content-dark code {
+	@apply bg-white/10 text-[#f2efe8];
+}
+
+.doc-content-dark pre {
+	@apply border border-white/10 bg-[#15181e] text-[#f2efe8];
+}
+
+.doc-content-dark pre code {
+	@apply bg-transparent text-[#f2efe8];
+}
+
+.doc-content-dark a {
+	@apply text-[#f0a53c] decoration-[#f0a53c]/40 hover:text-[#f5b85e] hover:decoration-[#f5b85e];
+}
+
+.doc-content-dark img {
+	@apply border-white/10;
+}
+
+.doc-content-dark blockquote {
+	@apply border-[#f0a53c]/50 bg-[#15181e] text-[#c9c4ba];
+}
+
+.doc-content-dark table,
+.doc-content-dark th,
+.doc-content-dark td {
+	@apply border-white/10;
 }

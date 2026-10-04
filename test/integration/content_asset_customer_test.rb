@@ -52,7 +52,8 @@ class ContentAssetCustomerTest < ActionDispatch::IntegrationTest
     assert_select "h2", text: "산출물"
     titles = css_select("section p.mt-1.font-bold").map { |n| n.text.strip }
     assert_equal [ "1편 소스", "1편 스펙", "최종 WAR" ], titles
-    labels = css_select("section p.text-blue-700").map { |n| n.text.strip }
+    # 0083 R2: the label's color class is the dark accent now (was text-blue-700).
+    labels = css_select("section p.text-\\[\\#f0a53c\\]").map { |n| n.text.strip }
     assert labels.any? { |l| l.end_with?(" · 첫 편") }, labels.inspect
     assert labels.any? { |l| l.end_with?(" · 마지막 편") }, labels.inspect
     assert labels.none? { |l| l.match?(/\d{2}/) }, "no episode number in the file labels: #{labels.inspect}"

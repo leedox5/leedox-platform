@@ -9,18 +9,20 @@
     (`_upcoming_episode_card`, no link, no CTA). The admin preview never passes `upcoming_episodes`, so it keeps
     its old behaviour exactly. %>
 <% admin = local_assigns.fetch(:admin, false) %>
+<%# Handoff 0083 R2 -- `dark: true` on the customer page only (SeriesThemeHelper); the admin preview is unchanged. %>
+<% dark = local_assigns.fetch(:dark, false) %>
 <% upcoming_episodes = local_assigns.fetch(:upcoming_episodes, []) %>
 <% if episodes.any? || upcoming_episodes.any? %>
-  <h2 class="mt-8 mb-3 text-2xl font-semibold text-slate-900">에피소드</h2>
+  <h2 class="<%= series_theme(:list_heading, dark) %>">에피소드</h2>
   <ol class="space-y-3">
     <% episodes.each do |episode| %>
-      <li><%= render "product_lines/episode_card", episode: episode, admin: admin,
+      <li><%= render "product_lines/episode_card", episode: episode, admin: admin, dark: dark,
         path: admin ? admin_content_episode_path(episode) : product_episode_path(product_line.slug, episode.display_id) %></li>
     <% end %>
     <% upcoming_episodes.each do |episode| %>
-      <li><%= render "product_lines/upcoming_episode_card", episode: episode %></li>
+      <li><%= render "product_lines/upcoming_episode_card", episode: episode, dark: dark %></li>
     <% end %>
   </ol>
 <% else %>
-  <p class="mt-10 text-gray-500"><%= admin ? "아직 편이 없습니다." : "준비 중입니다." %></p>
+  <p class="<%= series_theme(:list_empty, dark) %>"><%= admin ? "아직 편이 없습니다." : "준비 중입니다." %></p>
 <% end %>

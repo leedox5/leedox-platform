@@ -42,7 +42,7 @@ class ProductLineIntroductionTest < ActionDispatch::IntegrationTest
 
     @line.update!(ai_supporter: "Codex")
     get product_line_path(@line.slug)
-    assert_select "main h2.text-2xl.font-bold.text-slate-900", text: "AI 서포터", count: 1
+    assert_select "main h2.text-2xl.font-bold", text: "AI 서포터", count: 1 # color is the dark page's since 0083 R2
     assert_select "main p.text-xs", text: "AI 서포터", count: 0
     assert_select "main p", text: "Codex"
   end

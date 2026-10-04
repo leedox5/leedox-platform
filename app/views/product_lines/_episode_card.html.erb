@@ -20,13 +20,14 @@
     deliberately not counted). Every link to a customer episode page carries this. %>
 <% admin = local_assigns.fetch(:admin, false) %>
 <% title = episode.customer_title.presence || "(제목 없음)" %>
-<%= link_to path, data: { turbo_prefetch: false }, class: "block rounded-xl border border-gray-200 p-4 hover:border-blue-300" do %>
+<% dark = local_assigns.fetch(:dark, false) %>
+<%= link_to path, data: { turbo_prefetch: false }, class: series_theme(:card, dark) do %>
   <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
     <% if admin %><span class="shrink-0 text-xs font-semibold text-gray-400"><%= episode.display_id %> · <%= episode.status %></span><% end %>
-    <span class="min-w-0 flex-1 truncate font-bold text-gray-900" title="<%= title %>"><%= title %></span>
-    <span class="order-last w-full shrink-0 whitespace-nowrap text-sm font-semibold text-blue-600 sm:order-none sm:ml-auto sm:w-auto"><%= admin ? "편집하기 →" : "학습 시작 →" %></span>
+    <span class="<%= series_theme(:card_title, dark) %>" title="<%= title %>"><%= title %></span>
+    <span class="<%= series_theme(:card_cta, dark) %>"><%= admin ? "편집하기 →" : "학습 시작 →" %></span>
   </div>
   <% if episode.summary.present? %>
-    <p class="mt-1 truncate text-sm text-gray-500" title="<%= episode.summary %>"><%= episode.summary %></p>
+    <p class="<%= series_theme(:card_summary, dark) %>" title="<%= episode.summary %>"><%= episode.summary %></p>
   <% end %>
 <% end %>

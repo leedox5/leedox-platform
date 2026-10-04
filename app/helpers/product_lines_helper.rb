@@ -8,20 +8,21 @@ module ProductLinesHelper
   PRODUCT_LIST_FILTERS = [ [ "all", "전체" ], [ "free", "무료" ], [ "paid", "유료" ] ].freeze
 
   def product_list_filter_options
-    user_signed_in? ? PRODUCT_LIST_FILTERS + [ [ "mine", "내 제품" ] ] : PRODUCT_LIST_FILTERS
+    user_signed_in? ? PRODUCT_LIST_FILTERS + [ [ "mine", "내 시리즈" ] ] : PRODUCT_LIST_FILTERS
   end
 
+  # Handoff 0083 -- the series list is dark (the home's palette); these two helpers are used only there.
   def product_list_filter_tab_classes(selected)
     base = "flex-shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-bold transition"
-    selected ? "#{base} bg-indigo-600 text-white" : "#{base} bg-white text-slate-600 hover:bg-slate-100"
+    selected ? "#{base} bg-[#f0a53c] text-[#0e1014]" : "#{base} border border-white/15 bg-[#15181e] text-[#c9c4ba] hover:border-white/30 hover:text-[#f2efe8]"
   end
 
   def product_list_empty_message(filter)
     case filter
-    when "free" then "무료 제품이 아직 없습니다."
-    when "paid" then "유료 제품이 아직 없습니다."
-    when "mine" then "아직 이용 중인 제품이 없습니다."
-    else "곧 새 제품이 공개됩니다."
+    when "free" then "무료 시리즈가 아직 없습니다."
+    when "paid" then "유료 시리즈가 아직 없습니다."
+    when "mine" then "아직 이용 중인 시리즈가 없습니다."
+    else "곧 새 시리즈가 공개됩니다."
     end
   end
   def product_list_state_label(state, product_line)
@@ -53,12 +54,12 @@ module ProductLinesHelper
   end
 
   def product_list_state_classes(state)
-    base = "flex-shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-bold"
+    base = "flex-shrink-0 whitespace-nowrap rounded-full border px-3 py-1 text-xs font-bold"
     case state
-    when :owned then "#{base} bg-blue-50 text-blue-700"
-    when :free_open then "#{base} bg-emerald-50 text-emerald-700"
-    when :for_sale then "#{base} bg-slate-100 text-slate-800"
-    else "#{base} bg-amber-50 text-amber-700"
+    when :owned then "#{base} border-[#f0a53c]/40 bg-[#f0a53c]/10 text-[#f0a53c]"
+    when :free_open then "#{base} border-[#7dd3a8]/40 bg-[#7dd3a8]/10 text-[#7dd3a8]"
+    when :for_sale then "#{base} border-white/20 bg-white/5 text-[#f2efe8]"
+    else "#{base} border-white/10 bg-transparent text-[#a8a39a]"
     end
   end
 end

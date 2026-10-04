@@ -10,13 +10,16 @@
     (kept, not deleted, so the heading structure -- h1 name -> h2 소개 -> the copy's own h3s... -- still holds for
     a screen reader); the body's own top margin is bumped to keep roughly the same visual gap the heading used to
     create between it and whatever sits above (the purchase box, or the image/summary when there's no box). %>
+<%# Handoff 0083 R2 -- `dark: true` (the customer page) uses the dark palette from SeriesThemeHelper; the admin preview
+    passes nothing and keeps its exact classes. %>
 <% admin = local_assigns.fetch(:admin, false) %>
 <% purchase = local_assigns[:purchase] %>
+<% dark = local_assigns.fetch(:dark, false) %>
 
-<h1 class="break-words text-3xl font-bold text-gray-900 md:text-4xl"><%= product_line.customer_name %></h1>
+<h1 class="break-words text-3xl font-bold <%= series_theme(:name, dark) %> md:text-4xl"><%= product_line.customer_name %></h1>
 
 <% if product_line.summary.present? %>
-  <p class="mt-2 text-lg text-slate-600"><%= product_line.summary %></p>
+  <p class="mt-2 text-lg <%= series_theme(:summary, dark) %>"><%= product_line.summary %></p>
 <% end %>
 
 <% if admin %>
@@ -32,22 +35,22 @@
 <% end %>
 
 <% if purchase %>
-  <%= render "product_lines/purchase_box", product_line: product_line, **purchase %>
+  <%= render "product_lines/purchase_box", product_line: product_line, dark: dark, **purchase %>
 <% end %>
 
-<div class="mt-6 space-y-6 break-words text-gray-700">
+<div class="mt-6 space-y-6 break-words <%= series_theme(:body, dark) %>">
   <div>
     <h2 class="sr-only">소개</h2>
     <%# Restricted Markdown (handoff 0063): hard line breaks keep the plain text of handoff 0060 looking as it did;
         images resolve only to this product's own images (admin preview points at the admin-only image route).
         Handoff 0066: a real section heading (h2, 24px) instead of a small blue label, and a reading-width column;
         line height is already 1.75 via `.doc-content p` (leading-7). %>
-    <div class="doc-content mt-11 max-w-[740px] [&_p]:mb-4 [&>:last-child]:mb-0"><%= ContentMarkdown.render(product_line.introduction, parent: product_line, profile: :marketing, admin: admin) %></div>
+    <div class="<%= series_theme(:intro, dark) %> mt-11 max-w-[740px] [&_p]:mb-4 [&>:last-child]:mb-0"><%= ContentMarkdown.render(product_line.introduction, parent: product_line, profile: :marketing, admin: admin) %></div>
   </div>
   <% if product_line.ai_supporter.present? %>
     <div>
       <%# Same heading as 소개 (handoff 0066). %>
-      <h2 class="text-2xl font-bold text-slate-900">AI 서포터</h2>
+      <h2 class="text-2xl font-bold <%= series_theme(:heading, dark) %>">AI 서포터</h2>
       <p class="mt-3"><%= product_line.ai_supporter %></p>
     </div>
   <% end %>

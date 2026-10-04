@@ -2,40 +2,42 @@
     product, an explicit "무료 이용 시작" for a 0-won one. A product without a commerce Product renders nothing.
     Handoff 0068 -- which of these four states applies now comes from ProductLine#access_state, the same call the
     product list uses, so the two can't disagree about a product's state; only which HTML to show for it stays here. %>
+<%# Handoff 0083 R2 -- colors from SeriesThemeHelper (`dark:` on the customer page); content and conditions unchanged. %>
+<% dark = local_assigns.fetch(:dark, false) %>
 <% state = product_line.access_state(owned: owned) %>
 <% if state %>
-  <section class="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-5" aria-label="이용 안내" id="product-purchase">
+  <section class="mt-6 rounded-2xl border <%= series_theme(:box, dark) %> p-5" aria-label="이용 안내" id="product-purchase">
     <% if state == :owned %>
-      <p class="font-bold text-blue-900"><%= free ? "무료로 이용 중인 제품입니다 · 무기한 이용" : "구매한 제품입니다 · 무기한 이용" %></p>
-      <p class="mt-1 text-sm text-blue-800">이 제품의 모든 편과 산출물을 계속 이용하실 수 있습니다.</p>
+      <p class="font-bold <%= series_theme(:box_title, dark) %>"><%= free ? "무료로 이용 중인 제품입니다 · 무기한 이용" : "구매한 제품입니다 · 무기한 이용" %></p>
+      <p class="mt-1 text-sm <%= series_theme(:box_text, dark) %>">이 제품의 모든 편과 산출물을 계속 이용하실 수 있습니다.</p>
     <% elsif state == :free_open %>
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p class="text-xs font-bold uppercase tracking-wide text-blue-700">무료 · 무기한 이용</p>
-          <p class="mt-1 text-2xl font-black text-slate-950">무료</p>
+          <p class="text-xs font-bold uppercase tracking-wide <%= series_theme(:box_free_label, dark) %>">무료 · 무기한 이용</p>
+          <p class="mt-1 text-2xl font-black <%= series_theme(:box_price, dark) %>">무료</p>
         </div>
         <% if user_signed_in? %>
           <%= button_to "무료로 이용 시작", claim_free_access_path(product_line.product.code), method: :post,
-            class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-emerald-700" %>
+            class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-6 py-3 text-sm font-bold #{series_theme(:free_button, dark)}" %>
         <% else %>
           <%= link_to "로그인하고 무료로 시작", billing_checkout_path(product_line.product.code),
-            class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-emerald-700" %>
+            class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-6 py-3 text-sm font-bold #{series_theme(:free_button, dark)}" %>
         <% end %>
       </div>
-      <p class="mt-3 text-xs text-slate-600">결제나 주문 없이 시작할 수 있습니다. 다른 제품은 포함되지 않습니다.</p>
+      <p class="mt-3 text-xs <%= series_theme(:box_note, dark) %>">결제나 주문 없이 시작할 수 있습니다. 다른 제품은 포함되지 않습니다.</p>
     <% elsif state == :for_sale %>
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p class="text-xs font-bold uppercase tracking-wide text-blue-700">한 번 결제 · 무기한 이용</p>
-          <p class="mt-1 text-2xl font-black text-slate-950"><%= number_with_delimiter(offer.total_amount) %>원 <span class="text-sm font-semibold text-slate-500">(VAT 포함)</span></p>
+          <p class="text-xs font-bold uppercase tracking-wide <%= series_theme(:box_label, dark) %>">한 번 결제 · 무기한 이용</p>
+          <p class="mt-1 text-2xl font-black <%= series_theme(:box_price, dark) %>"><%= number_with_delimiter(offer.total_amount) %>원 <span class="text-sm font-semibold <%= series_theme(:box_muted, dark) %>">(VAT 포함)</span></p>
         </div>
         <%= link_to "구매하기", billing_checkout_path(product_line.product.code),
-          class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-blue-700" %>
+          class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-6 py-3 text-sm font-bold #{series_theme(:buy_button, dark)}" %>
       </div>
-      <p class="mt-3 text-xs text-slate-600">구매하면 이 제품의 모든 편과 산출물을 이용할 수 있습니다. 다른 제품은 포함되지 않습니다.</p>
+      <p class="mt-3 text-xs <%= series_theme(:box_note, dark) %>">구매하면 이 제품의 모든 편과 산출물을 이용할 수 있습니다. 다른 제품은 포함되지 않습니다.</p>
     <% else %>
-      <p class="font-bold text-slate-800">현재 <%= free ? "시작할" : "구매할" %> 수 없습니다</p>
-      <p class="mt-1 text-sm text-slate-600">이 제품은 준비 중이거나 이용 시작이 중지되었습니다. 이미 이용 중인 분은 로그인하면 계속 이용하실 수 있습니다.</p>
+      <p class="font-bold <%= series_theme(:box_closed, dark) %>">현재 <%= free ? "시작할" : "구매할" %> 수 없습니다</p>
+      <p class="mt-1 text-sm <%= series_theme(:box_note, dark) %>">이 제품은 준비 중이거나 이용 시작이 중지되었습니다. 이미 이용 중인 분은 로그인하면 계속 이용하실 수 있습니다.</p>
     <% end %>
   </section>
 <% end %>

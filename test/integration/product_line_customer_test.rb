@@ -160,9 +160,10 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
   # (.doc-content h2: text-2xl font-semibold text-slate-900), and only shows up when there's at least one card.
   test "an 에피소드 heading sits above the cards, styled like the intro guide's own subheadings" do
     get product_line_path(@line.slug)
-    assert_select "main h2.text-2xl.font-semibold.text-slate-900", text: "에피소드", count: 1
+    # 0083 R2: same size/weight/spacing; the color is the dark page's (#f2efe8) on the customer page.
+    assert_select "main h2.text-2xl.font-semibold", text: "에피소드", count: 1
     heading = css_select("main h2").find { |h| h.text == "에피소드" }
-    assert_equal %w[mb-3 mt-8 text-2xl font-semibold text-slate-900].sort, heading["class"].split.sort
+    assert_equal %w[mb-3 mt-8 text-2xl font-semibold text-[#f2efe8]].sort, heading["class"].split.sort
 
     body = response.body
     assert_operator body.index(">소개</h2>"), :<, body.index(">에피소드<"), "에피소드 heading comes after the intro"
@@ -189,10 +190,11 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
 
     upcoming = cards[1]
     assert_nil upcoming.at_css("a"), "a 공개 예정 card is a div, never a link"
-    assert_equal "공개 예정", upcoming.at_css("span.text-gray-400.sm\\:ml-auto")&.text
+    assert_equal "공개 예정", upcoming.at_css("span.sm\\:ml-auto")&.text
     assert_no_match(/학습 시작|편집하기/, upcoming.text)
     assert_no_match(/E0\d/, upcoming.text, "no episode number on a 공개 예정 card either")
-    assert_includes upcoming["class"] || upcoming.at_css("div")["class"], "opacity-60"
+    # 0083 R2: still muted by opacity -- 70% on the dark page (60% in the light admin preview) so it reads at >= 4.5:1.
+    assert_includes upcoming["class"] || upcoming.at_css("div")["class"], "opacity-70"
 
     get product_episode_path(@line.slug, "02")
     assert_response :not_found, "공개 예정 doesn't open the episode -- the gate is unchanged"
@@ -219,7 +221,7 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
     @ep2.update!(status: "draft") # no summary -- must render no teaser line at all
 
     get product_line_path(@line.slug)
-    assert_select "main a[href=?] p.truncate.text-gray-500", product_episode_path(@line.slug, "01"), text: "이번 편에서 <b>실습</b>합니다"
+    assert_select "main a[href=?] p.truncate", product_episode_path(@line.slug, "01"), text: "이번 편에서 <b>실습</b>합니다"
     assert_includes response.body, "이번 편에서 &lt;b&gt;실습&lt;/b&gt;합니다", "escaped in the raw HTML"
     assert_no_match(%r{<b>실습</b>}, response.body, "never rendered as a real <b> tag")
 

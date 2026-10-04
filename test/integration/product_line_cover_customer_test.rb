@@ -44,7 +44,8 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
 
   def assert_single_column_order(main_html, with_image:, with_ai: true, with_summary: false, with_episodes: false)
     landmarks = [ [ :name, "<h1" ] ]
-    landmarks << [ :summary, "text-lg text-slate-600" ] if with_summary
+    # Found by its structure, not its color: the customer page is dark since 0083 R2, the admin preview light.
+    landmarks << [ :summary, '<p class="mt-2 text-lg ' ] if with_summary
     landmarks << [ :image, "<img" ] if with_image
     landmarks << [ :introduction, ">소개<" ]
     landmarks << [ :ai, "AI 서포터" ] if with_ai
@@ -101,7 +102,7 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
     [ nil, "", "   " ].each do |value|
       @line.update!(summary: value)
       get product_line_path(@line.slug)
-      assert_select "main p.text-lg.text-slate-600", 0
+      assert_select "main p.mt-2.text-lg", 0
       assert_single_column_order(css_select("main").to_html, with_image: true, with_summary: false, with_ai: false)
     end
   end
