@@ -4,6 +4,11 @@ class DashboardController < ApplicationController
   def show
     authorize :dashboard, :access?
 
+    # Handoff 0080 -- every license of the member, read once: the series in use and the expired
+    # state of standalone products both come from it (no per-series or per-product license query).
+    @user_licenses = current_user.licenses.includes(:product).to_a
+    load_series_in_use
+
     all_dashboards = dashboard_products.map { |product| build_product_dashboard(product) }
 
     @owned_dashboards = all_dashboards.select { |pd| current_user.licensed_for?(pd[:product].code) }
@@ -14,6 +19,40 @@ class DashboardController < ApplicationController
   end
 
   private
+
+  # Handoff 0080 -- the series the member can use right now, newest license first. "In use" is
+  # License#active_at? -- the check Entitlements::ProductAccess (the episode gate, ProductLine#
+  # owned_by?) makes, and the same licenses /mypage labels 이용 중 (effective_status "active"); a
+  # free start is such a license too. Only series a customer can open (ProductLine.customer_reachable,
+  # the gate's own scope). A fixed number of queries whatever the number of series.
+  def load_series_in_use
+    active = @user_licenses.select(&:active_at?).group_by(&:product_id)
+    lines = ProductLine.customer_reachable.where(product_id: active.keys)
+      .includes(:product, cover_image_attachment: :blob).to_a
+    @series_in_use = lines.sort_by { |line| [ -active[line.product_id].map(&:starts_on).max.jd, line.id ] }
+    # The license whose period the card shows: an indefinite one if there is one, else the latest end.
+    @series_licenses = lines.to_h do |line|
+      [ line.id, active[line.product_id].max_by { |license| [ license.indefinite? ? 1 : 0, license.last_usable_on || Date.new(1) ] } ]
+    end
+
+    ids = lines.map(&:id)
+    published = ContentEpisode.published.where(product_line_id: ids).ordered.to_a
+    @series_published_counts = published.group_by(&:product_line_id).transform_values(&:size)
+    @series_first_episodes = published.group_by(&:product_line_id).transform_values(&:first)
+    # 공개 예정 = the 0070 judgment (ContentEpisode.upcoming), as on the home.
+    @series_upcoming_counts = ContentEpisode.upcoming(ContentEpisode.where(product_line_id: ids))
+      .group_by(&:product_line_id).transform_values(&:size)
+  end
+
+  # Handoff 0080 -- a standalone product the member has no usable license for, but whose latest
+  # license simply ran out: what /mypage labels 만료 (License#effective_status "expired"). Canceled-only
+  # or scheduled-only (not started yet) histories aren't "expired" there, so they stay 미보유 here.
+  def expired_license_for(product)
+    licenses = @user_licenses.select { |license| license.product_id == product.id }
+    return nil if licenses.any?(&:active_at?)
+
+    licenses.select { |license| license.effective_status == "expired" }.max_by(&:last_usable_on)
+  end
 
   def dashboard_products
     Product.standalone.active
@@ -53,7 +92,8 @@ class DashboardController < ApplicationController
       completed_count: completed_count,
       progress_percent: progress_percent(completed_count, total),
       recent_chapters: completed_ids.first(3).filter_map { |id| source.find(id) },
-      next_chapter: chapters.find { |chapter| completed_ids.exclude?(chapter[:id]) }
+      next_chapter: chapters.find { |chapter| completed_ids.exclude?(chapter[:id]) },
+      expired_license: expired_license_for(product)
     }
   end
 

@@ -25,8 +25,8 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
     assert chatdox_section.at_css("a[href*='/content/chatdox/']"), "expected learning CTA for owned Chatdox"
 
     # Claudox (unowned) appears in bottom catalog grid with compact card
-    catalog_section = doc.at_css("section[aria-label='아직 보지 않은 콘텐츠']")
-    assert catalog_section, "expected an 아직 보지 않은 콘텐츠 section"
+    catalog_section = doc.at_css("section[aria-label='더 둘러보기']")
+    assert catalog_section, "expected a 더 둘러보기 section"
     assert_includes catalog_section.text, "Claudox"
     assert catalog_section.at_css("a[href='#{pricing_path}']"), "expected pricing CTA for unowned Claudox"
   end
@@ -47,10 +47,10 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
     doc = Nokogiri::HTML(response.body)
 
     # Onboarding notice in main section when 0 products are owned
-    assert doc.at_css("section[aria-label='이용 중인 상품 없음']")
+    assert doc.at_css("section[aria-label='이용 중인 콘텐츠 없음']")
 
     # Bottom catalog grid contains compact cards for Chatdox & Claudox
-    catalog_section = doc.at_css("section[aria-label='아직 보지 않은 콘텐츠']")
+    catalog_section = doc.at_css("section[aria-label='더 둘러보기']")
     assert catalog_section, "expected catalog grid section"
     assert_includes catalog_section.text, "Chatdox"
     assert_includes catalog_section.text, "Claudox"

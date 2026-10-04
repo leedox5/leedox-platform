@@ -33,6 +33,12 @@ module ProductLinesHelper
     end
   end
 
+  # Handoff 0071 -- the label of the button that opens a series at its first published episode (the
+  # home hero's main button; the member dashboard's series card shares it since 0080).
+  SERIES_START_LABEL = "첫 편부터 보기".freeze
+
+  def series_start_label = SERIES_START_LABEL
+
   # Handoff 0071 -- the hero's release line: "공개 2편 · 공개 예정 3편", or just "공개 N편" when nothing
   # is coming up. Counts, not episode numbers -- visitors never see a number (position is only an
   # ordering key and can be 0). Published = what the product page lists; 공개 예정 =

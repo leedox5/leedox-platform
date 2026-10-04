@@ -536,10 +536,15 @@ class ProductLineSalesAndPurchaseTest < ActionDispatch::IntegrationTest
     assert_select "[data-product-code=?]", @line.product.code, 0
     assert_no_match(/#{Regexp.escape(name)}/, css_select("[data-product-code]").map(&:text).join)
 
+    # Since handoff 0080 the dashboard lists the series a member uses on purpose ("이용 중인 시리즈"); what must
+    # hold is that a line product never shows up as a standalone (term) product block or card.
     sign_in(@buyer)
     get dashboard_path
     assert_response :success
-    assert_no_match(/#{Regexp.escape(name)}/, css_select("main").text.sub(/무기한.*/m, ""))
+    assert_select "section[aria-label='이용 중인 시리즈'] [data-series-card=?]", @line.slug, 1
+    standalone = css_select("main").first.dup
+    standalone.css("section[aria-label='이용 중인 시리즈']").each(&:remove)
+    assert_no_match(/#{Regexp.escape(name)}/, standalone.text)
     sign_out
 
     sign_in(@admin)

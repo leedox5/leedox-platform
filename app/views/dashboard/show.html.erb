@@ -1,7 +1,9 @@
 <% content_for :title, "대시보드 | LEEDOX" %>
 <%# Handoff 0079 -- copy in the tone of the story-series site (no "학습/커리큘럼/스킬"), no internal notes, no product
     name repeated under a card title that already shows it, a product-page button on the not-yet-seen cards, and the
-    common footer. Which products appear, and the owned/trial/expired judgments, are unchanged. %>
+    common footer. Which products appear, and the owned/trial/expired judgments, are unchanged.
+    Handoff 0080 -- the series in use come first (D-009); the empty box only when there's neither a series nor a
+    standalone product in use; a standalone product whose license ran out reads 만료. %>
 <div class="min-h-screen bg-gray-50">
   <%= render "shared/header" %>
 
@@ -29,6 +31,20 @@
         무료 체험 기간이 끝났습니다. 지금은 비로그인 방문자와 같은 범위까지 열려 있습니다. 이어서 읽으려면 라이선스를 확인해보세요.
         <%= link_to "가격 보기 →", pricing_path, class: "underline decoration-amber-400 underline-offset-2 hover:text-amber-900" %>
       </p>
+    <% end %>
+
+    <% if @series_in_use.any? %>
+      <section aria-label="이용 중인 시리즈" class="mb-10">
+        <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <h2 class="text-xl font-bold text-gray-900">이용 중인 시리즈</h2>
+          <%= link_to "시리즈 둘러보기 →", products_path, class: "text-sm font-semibold text-blue-600 hover:text-blue-700" %>
+        </div>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <% @series_in_use.each do |line| %>
+            <%= render "dashboard/series_card", line: line, license: @series_licenses[line.id] %>
+          <% end %>
+        </div>
+      </section>
     <% end %>
 
     <% if @owned_dashboards.any? %>
@@ -110,9 +126,11 @@
           </section>
         <% end %>
       </div>
+    <% elsif @series_in_use.any? %>
+      <%# A series in use already fills the top -- no "nothing in use" box. %>
     <% elsif @unowned_dashboards.any? %>
-      <section aria-label="이용 중인 상품 없음" class="rounded-lg border border-gray-200 bg-white p-8 text-center shadow-sm">
-        <p class="text-base font-semibold text-gray-900">아직 이용 중인 상품이 없습니다.</p>
+      <section aria-label="이용 중인 콘텐츠 없음" class="rounded-lg border border-gray-200 bg-white p-8 text-center shadow-sm">
+        <p class="text-base font-semibold text-gray-900">아직 이용 중인 콘텐츠가 없습니다.</p>
         <p class="mt-1 text-sm text-gray-500">아래에서 관심 있는 콘텐츠를 둘러보세요.</p>
       </section>
     <% else %>
@@ -123,14 +141,16 @@
     <% end %>
 
     <% if @unowned_dashboards.any? %>
-      <section aria-label="아직 보지 않은 콘텐츠" class="mt-12">
+      <section aria-label="더 둘러보기" class="mt-12">
         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 class="text-xl font-bold text-gray-900">아직 보지 않은 콘텐츠</h2>
+            <h2 class="text-xl font-bold text-gray-900">더 둘러보기</h2>
             <p class="mt-1 text-sm text-gray-600">다른 이야기도 둘러보세요.</p>
           </div>
-          <%# Until series join the dashboard (backlog 0061), the least that connects them. %>
-          <%= link_to "시리즈 둘러보기 →", products_path, class: "text-sm font-semibold text-blue-600 hover:text-blue-700" %>
+          <%# The series link sits on the series section's heading when that section shows -- never twice. %>
+          <% unless @series_in_use.any? %>
+            <%= link_to "시리즈 둘러보기 →", products_path, class: "text-sm font-semibold text-blue-600 hover:text-blue-700" %>
+          <% end %>
         </div>
 
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -140,7 +160,7 @@
               <div>
                 <div class="flex items-center justify-between gap-2">
                   <h3 class="text-lg font-bold text-gray-900"><%= product.name %></h3>
-                  <%= product_status_badge(current_user, product) %>
+                  <%= product_status_badge(current_user, product, expired_license: pd[:expired_license]) %>
                 </div>
                 <p class="mt-2 text-sm text-gray-600 leading-relaxed"><%= product.tagline %></p>
                 <% trial_boost = current_user.trial_active? && pd[:accessible] != pd[:accessible_after_trial] %>
@@ -149,7 +169,7 @@
                   <% if trial_boost %>
                     <p class="mt-0.5 text-gray-500"><%= I18n.l(current_user.trial_ends_on, locale: :ko, format: :long) %> 이후 <%= pd[:accessible_after_trial] %>/<%= pd[:total] %></p>
                   <% end %>
-                  <p class="mt-0.5"><%= product_period_text(current_user, product) %></p>
+                  <p class="mt-0.5"><%= product_period_text(current_user, product, expired_license: pd[:expired_license]) %></p>
                 </div>
               </div>
               <%# The product's own page, with /pricing's own button wording (StandaloneProductsHelper); prices one step aside. %>

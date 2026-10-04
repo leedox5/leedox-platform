@@ -84,11 +84,11 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
     grant("chatdox")
     sign_in(@user)
     get dashboard_path
-    seen = section("아직 보지 않은 콘텐츠")
+    seen = section("더 둘러보기")
     assert seen
-    assert_includes seen.text, "아직 보지 않은 콘텐츠"
+    assert_includes seen.text, "더 둘러보기"
     assert_includes seen.text, "다른 이야기도 둘러보세요."
-    assert_select "section[aria-label='아직 보지 않은 콘텐츠'] a[href=?]", products_path, text: "시리즈 둘러보기 →"
+    assert_select "section[aria-label='더 둘러보기'] a[href=?]", products_path, text: "시리즈 둘러보기 →"
 
     claudox = seen.css("h3").find { |h| h.text.strip == "Claudox" }.ancestors("div.flex-col").first
     text = claudox.text.squish
@@ -103,11 +103,11 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
   test "a member with nothing owned sees the new empty line and the not-yet-seen section" do
     sign_in(@user)
     get dashboard_path
-    empty = section("이용 중인 상품 없음")
+    empty = section("이용 중인 콘텐츠 없음")
     assert empty
-    assert_includes empty.text, "아직 이용 중인 상품이 없습니다."
+    assert_includes empty.text, "아직 이용 중인 콘텐츠가 없습니다."
     assert_includes empty.text, "아래에서 관심 있는 콘텐츠를 둘러보세요."
-    assert section("아직 보지 않은 콘텐츠")
+    assert section("더 둘러보기")
     assert_no_match OLD_TONE, own_copy(css_select("main").first)
   end
 
@@ -118,7 +118,7 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
     banner = css_select("main p.border-violet-100").first
     assert banner, "the trial banner (unchanged copy)"
     assert_includes banner.text, "무료 체험 D-"
-    seen = section("아직 보지 않은 콘텐츠")
+    seen = section("더 둘러보기")
     assert_match(%r{볼 수 있는 챕터: \d+/20 \(체험 중\)}, seen.text.squish)
     assert seen.css("span.rounded-full").all? { |badge| badge.text.strip == "미보유" }, "badges without the product name"
     assert_no_match OLD_TONE, own_copy(css_select("main").first)

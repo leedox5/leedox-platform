@@ -97,7 +97,7 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
 
     doc = Nokogiri::HTML(response.body)
     claudox_section = doc.at_css("section[aria-label='Claudox 현황']").text
-    catalog_section = doc.at_css("section[aria-label='아직 보지 않은 콘텐츠']").text
+    catalog_section = doc.at_css("section[aria-label='더 둘러보기']").text
 
     assert_match(/이용 중/, claudox_section)
     assert_match(%r{20/20}, claudox_section)
