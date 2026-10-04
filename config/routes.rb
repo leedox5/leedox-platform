@@ -23,6 +23,17 @@ Rails.application.routes.draw do
   # :product_slug route below: that one always needs a second path segment, this
   # one never has one.
   get "/products", to: "product_lines#index", as: :products
+  # A series whose address (slug) was changed in production: the old address and everything under it (episodes,
+  # files) move permanently to the new one. Only while the target is open to customers -- otherwise the request
+  # falls through to the routes below and gets the same 404 as any unknown slug (as with the 0065 Season
+  # redirects). There's no slug history: add a pair here when a published series' slug changes.
+  { "wsl" => "wsl-core" }.each do |old_slug, new_slug|
+    constraints(->(_request) { ProductLine.customer_reachable.exists?(slug: new_slug) }) do
+      get "/products/#{old_slug}", to: redirect("/products/#{new_slug}", status: 301)
+      get "/products/#{old_slug}/*rest", to: redirect(status: 301) { |params, _request| "/products/#{new_slug}/#{params[:rest]}" },
+        format: false
+    end
+  end
   get "/products/:product_slug", to: "product_lines#show", as: :product_line
   # Handoff 0056 R5 -- ProductLine cover image variants (hero/thumb). A separate
   # top-level path on purpose: under /products/:slug/... a segment named

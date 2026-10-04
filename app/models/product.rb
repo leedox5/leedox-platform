@@ -53,6 +53,14 @@ class Product < ApplicationRecord
     DISPLAY_ORDERS.fetch(code, 99)
   end
 
+  # Where a product's own page is (the not-on-sale checkout's "가격 및 이용 기간 보기", the home card, a locked
+  # chapter). A series' commerce product follows the series' current address: the stored value is the slug at the
+  # time its sale first opened (Commerce::ProductLineSales) and went stale when the slug changed (wsl -> wsl-core).
+  # A standalone product (Chatdox, ...) keeps its stored path.
+  def landing_page_path
+    product_line ? "/products/#{product_line.slug}" : super
+  end
+
   # The commerce side of a ProductLine (one-time price, indefinite license).
   def line_product?
     product_line.present?
