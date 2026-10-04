@@ -1,0 +1,30 @@
+<% content_for :title, "공지 | LEEDOX" %>
+<%# Handoff 0077 -- the public notice list: the pinned one first, then newest first. Same for every viewer. %>
+<div class="min-h-screen bg-gray-50">
+  <%= render "shared/header" %>
+  <main class="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
+    <div class="mb-10">
+      <div class="mb-2 text-sm font-semibold uppercase tracking-wide text-blue-600">Notice</div>
+      <h1 class="text-3xl font-bold text-gray-900">공지</h1>
+    </div>
+
+    <% if @announcements.empty? %>
+      <p class="rounded-xl border border-gray-200 bg-white p-8 text-center text-sm text-gray-500 shadow-sm">등록된 공지가 없습니다.</p>
+    <% else %>
+      <ul class="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-sm">
+        <% @announcements.each do |announcement| %>
+          <li>
+            <%= link_to announcement_path(announcement), class: "flex items-center gap-3 px-5 py-4 hover:bg-gray-50 sm:px-6" do %>
+              <% if announcement.pinned? %>
+                <span class="shrink-0 rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">고정</span>
+              <% end %>
+              <span class="min-w-0 flex-1 truncate font-semibold text-gray-900" title="<%= announcement.title %>"><%= announcement.title %></span>
+              <span class="shrink-0 text-sm tabular-nums text-gray-500"><%= announcement.published_at.strftime("%Y.%m.%d") %></span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </main>
+  <%= render "shared/footer" %>
+</div>

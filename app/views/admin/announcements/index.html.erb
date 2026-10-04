@@ -1,0 +1,60 @@
+<% content_for :title, "공지 관리" %>
+<%# Handoff 0077 -- every notice, the pinned one first, then newest written first. %>
+<div class="min-h-screen bg-slate-50">
+  <%= render "shared/header" %>
+  <main class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div class="min-w-0">
+        <p class="text-sm font-bold uppercase tracking-[0.2em] text-blue-700">Admin Notice</p>
+        <h1 class="mt-2 text-3xl font-black text-slate-950">공지 관리</h1>
+        <p class="mt-2 text-slate-600">게시한 공지는 누구나(비로그인 포함) <%= link_to "/notices", announcements_path, class: "font-bold text-blue-700 hover:underline" %>에서 봅니다. 상단 고정은 하나만 둘 수 있습니다.</p>
+      </div>
+      <%= link_to "+ 새 공지", new_admin_announcement_path, class: "inline-flex flex-shrink-0 items-center justify-center self-start whitespace-nowrap rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700 sm:self-auto" %>
+    </header>
+
+    <section class="mt-8 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <table class="w-full min-w-[40rem] table-fixed divide-y divide-slate-200 text-sm">
+        <colgroup>
+          <col>
+          <col class="w-24">
+          <col class="w-20">
+          <col class="w-28">
+          <col class="w-28">
+          <col class="w-28">
+        </colgroup>
+        <thead class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+          <tr>
+            <th class="px-4 py-3">제목</th>
+            <th class="px-4 py-3">상태</th>
+            <th class="px-4 py-3">고정</th>
+            <th class="px-4 py-3">게시일</th>
+            <th class="px-4 py-3">수정일</th>
+            <th class="px-4 py-3 text-right">관리</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% @announcements.each do |announcement| %>
+            <tr id="announcement-<%= announcement.id %>">
+              <td class="px-4 py-3"><p class="truncate font-semibold text-slate-900" title="<%= announcement.title %>"><%= announcement.title %></p></td>
+              <td class="px-4 py-3" data-status>
+                <% if announcement.published? %>
+                  <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700">게시</span>
+                <% else %>
+                  <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600">미게시</span>
+                <% end %>
+              </td>
+              <td class="px-4 py-3" data-pinned><%= announcement.pinned? ? "고정" : "—" %></td>
+              <td class="px-4 py-3 tabular-nums text-slate-600"><%= announcement.published_at&.strftime("%Y.%m.%d") || "—" %></td>
+              <td class="px-4 py-3 tabular-nums text-slate-600"><%= announcement.updated_at.strftime("%Y.%m.%d") %></td>
+              <td class="whitespace-nowrap px-4 py-3 text-right">
+                <%= link_to "미리보기", preview_admin_announcement_path(announcement), class: "font-semibold text-slate-600 hover:underline" %>
+                <%= link_to "편집", edit_admin_announcement_path(announcement), class: "ml-2 font-semibold text-blue-700 hover:underline" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <% if @announcements.empty? %><p class="p-8 text-center text-slate-500">아직 공지가 없습니다.</p><% end %>
+    </section>
+  </main>
+</div>

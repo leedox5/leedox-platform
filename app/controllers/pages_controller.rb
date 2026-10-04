@@ -8,6 +8,7 @@ class PagesController < ApplicationController
     @standalone_products = Product.standalone.order(:code).sort_by { |product| [ pricing_rank(product), product.code ] }
     load_story_series
     load_episode_updates
+    load_home_notice
   end
 
   def chatdox
@@ -32,6 +33,17 @@ class PagesController < ApplicationController
   def privacy; end
 
   private
+
+  # Handoff 0077 R2 -- the published + pinned notice the home announces in one line, or nil (no
+  # line at all). One query, no Rails.cache (broken in production, backlog 0058). Best-effort like
+  # the view counter (0073) and comments (0074): if it can't be loaded -- e.g. the table doesn't
+  # exist yet between deploy and migrate -- the home renders without the line.
+  def load_home_notice
+    @home_notice = Announcement.home_pick
+  rescue StandardError => e
+    Rails.logger.warn("[home_notice] not loaded: #{e.class}: #{e.message}")
+    @home_notice = nil
+  end
 
   # /pricing's card order (handoff 0019): on sale first, then free, then
   # everything still prepping -- ahead of the plain code-alphabetical order,

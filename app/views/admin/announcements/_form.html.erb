@@ -1,0 +1,33 @@
+<%# Handoff 0077 -- the notice form (new and edit). %>
+<%= form_with model: [ :admin, announcement ], class: "mt-8 space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" do |f| %>
+  <% if announcement.errors.any? %>
+    <div class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+      <%= announcement.errors.map(&:message).join(" ") %>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :title, "제목", class: "mb-1 block text-sm font-bold text-slate-700" %>
+    <%= f.text_field :title, maxlength: Announcement::TITLE_MAX, required: true, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+    <p class="mt-1 text-xs text-slate-500"><%= Announcement::TITLE_MAX %>자까지.</p>
+  </div>
+
+  <div>
+    <%= f.label :body, "본문", class: "mb-1 block text-sm font-bold text-slate-700" %>
+    <%= f.text_area :body, rows: 12, required: true, class: "w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm" %>
+    <p class="mt-1 text-xs text-slate-500">마크다운을 쓸 수 있습니다(링크 <code>[문구](https://…)</code>, 목록 <code>- </code>, 굵게 <code>**…**</code>). 줄바꿈은 그대로 표시됩니다. HTML 태그와 이미지는 표시되지 않습니다.</p>
+  </div>
+
+  <div class="space-y-3">
+    <label class="flex items-center gap-2 text-sm font-bold text-slate-700">
+      <%= f.check_box :published, class: "h-4 w-4 rounded border-slate-300" %> 게시
+    </label>
+    <p class="-mt-2 pl-6 text-xs text-slate-500">체크하면 누구나 공지 목록에서 볼 수 있습니다. 게시를 내리려면 체크를 해제하세요.</p>
+    <label class="flex items-center gap-2 text-sm font-bold text-slate-700">
+      <%= f.check_box :pinned, class: "h-4 w-4 rounded border-slate-300" %> 상단 고정
+    </label>
+    <p class="-mt-2 pl-6 text-xs text-slate-500">게시된 공지 중 고정한 것 하나가 홈 맨 위에 한 줄로 나옵니다. 다른 공지를 고정하면 이전 고정은 자동으로 풀립니다.</p>
+  </div>
+
+  <%= f.submit announcement.persisted? ? "저장" : "만들기", class: "cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700" %>
+<% end %>

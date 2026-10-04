@@ -1,0 +1,26 @@
+<%# Handoff 0077 -- one notice. Also rendered by Admin::AnnouncementsController#preview (preview: true) so an admin
+    sees exactly the customer layout, with a banner when it isn't published. The body goes through ContentMarkdown
+    (escaped raw HTML, safe links only, sanitized, no images). %>
+<% preview = local_assigns.fetch(:preview, false) %>
+<% content_for :title, "#{@announcement.title} | LEEDOX" %>
+<div class="min-h-screen bg-gray-50">
+  <%= render "shared/header" %>
+  <main class="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
+    <% if preview %>
+      <div class="mb-6 flex flex-col gap-2 rounded-lg border px-4 py-3 text-sm font-bold sm:flex-row sm:items-center sm:justify-between <%= @announcement.published? ? "border-blue-200 bg-blue-50 text-blue-800" : "border-amber-200 bg-amber-50 text-amber-800" %>">
+        <span><%= @announcement.published? ? "관리자 미리보기 — 게시 중인 공지입니다." : "미게시 — 고객에게 보이지 않습니다." %></span>
+        <%= link_to "편집으로 돌아가기", edit_admin_announcement_path(@announcement), class: "underline sm:shrink-0" %>
+      </div>
+    <% end %>
+
+    <%= link_to "← 공지 목록", announcements_path, class: "text-sm font-semibold text-gray-500 hover:text-gray-900" %>
+    <article class="mt-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+      <h1 class="break-keep text-2xl font-bold text-gray-900 sm:text-3xl"><%= @announcement.title %></h1>
+      <p class="mt-2 text-sm tabular-nums text-gray-500"><%= @announcement.published_at ? @announcement.published_at.strftime("%Y.%m.%d") : "게시 전" %></p>
+      <div class="doc-content mt-6 max-w-none text-gray-700">
+        <%= @announcement.rendered_body %>
+      </div>
+    </article>
+  </main>
+  <%= render "shared/footer" %>
+</div>

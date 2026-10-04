@@ -1,5 +1,5 @@
 <%# Handoff 0071 -- the story-series home (D-009). Dark on the home only; every other page keeps its theme.
-    Sections, top to bottom: featured series (only when one is featured and listed), brand line, new / coming
+    Sections, top to bottom: the pinned notice line (0077, only when one is published and pinned), featured series (only when one is featured and listed), brand line, new / coming
     episodes, one row per track (the AI row also carries the standalone products), what series / season /
     episode mean, footer. "만든 사람" waits for Tommy's copy (out of scope). %>
 <% content_for :title, "LEEDOX | 실제로 만들고 겪은 개발자의 시리즈" %>
@@ -13,6 +13,7 @@
 
 <div class="min-h-screen bg-[#0e1014] text-[#f2efe8]">
   <%= render "shared/header", dark: true %>
+  <%= render "leedox_home/notice_line", notice_item: @home_notice if @home_notice %>
 
   <main>
     <%= render "leedox_home/series_hero" if @featured_line %>

@@ -90,6 +90,9 @@ Rails.application.routes.draw do
   get "/pricing", to: "pages#pricing"
   get "/community", to: "pages#community"
   get "/login", to: "pages#login"
+  # Handoff 0077 -- notices (공지), readable by everyone. Model/controller are named Announcement
+  # because `notice` is already the flash helper in every controller and view.
+  resources :announcements, only: %i[index show], path: "notices"
   get "/terms", to: "pages#terms"
   get "/privacy", to: "pages#privacy"
 
@@ -132,6 +135,10 @@ Rails.application.routes.draw do
     # content_episodes routes above for edit/update/show/destroy/transition/
     # takeaways (they don't care which kind of parent an episode has); only
     # new/create need their own nesting under a product.
+    # Handoff 0077 -- notices: list, write/edit, preview (unpublished ones too), delete.
+    resources :announcements, only: %i[index new create edit update destroy] do
+      get :preview, on: :member
+    end
     # Handoff 0074 R2 -- episode comments: the newest-first list, and hide/unhide (never delete).
     resources :episode_comments, only: %i[index], path: "comments" do
       member do

@@ -17,6 +17,16 @@
       </div>
     </div>
 
+    <%# Handoff 0077 R2 -- the other operator desks, reachable from here. Links only: this controller's access and
+        queries are untouched (admin-only as before). %>
+    <nav aria-label="운영 바로가기" class="mb-8 flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+      <p class="text-sm text-gray-500">회원에게 알리는 글은 공지 관리, 편에 달린 댓글은 댓글 관리에서 봅니다.</p>
+      <div class="flex shrink-0 gap-2">
+        <%= link_to "공지 관리", admin_announcements_path, class: "inline-flex items-center rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-sm font-semibold text-gray-700 transition hover:border-gray-400 hover:bg-gray-50" %>
+        <%= link_to "댓글 관리", admin_episode_comments_path, class: "inline-flex items-center rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-sm font-semibold text-gray-700 transition hover:border-gray-400 hover:bg-gray-50" %>
+      </div>
+    </nav>
+
     <section class="mb-8 grid gap-4 sm:grid-cols-2">
       <article class="rounded-lg border border-gray-200 bg-white p-5">
         <div class="mb-3 flex items-center justify-between">

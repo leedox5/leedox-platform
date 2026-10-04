@@ -22,8 +22,10 @@ class LegalPagesCommentsClauseTest < ActionDispatch::IntegrationTest
     get terms_path
     date, note = css_select("h1 ~ p").first(2).map { |n| n.text.squish }
     assert_equal "시행일: 2026년 10월 4일", date
-    assert_equal "개정 안내: 2026년 10월 4일 — 편 댓글 기능 도입에 따라 제4조의2(이용자 게시물)를 추가했습니다.", note
+    # 0077 R2 -- the confirmed sentence is unchanged; a "공지 보기" link to /notices follows it.
+    assert_equal "개정 안내: 2026년 10월 4일 — 편 댓글 기능 도입에 따라 제4조의2(이용자 게시물)를 추가했습니다. 공지 보기", note
     assert_select "h1 ~ p a[href='#article-4-2']", text: "제4조의2"
+    assert_select "h1 ~ p a[href=?]", announcements_path, text: "공지 보기"
     assert_select "#article-4-2 h3", text: "제4조의2 이용자 게시물"
   end
 
@@ -31,7 +33,8 @@ class LegalPagesCommentsClauseTest < ActionDispatch::IntegrationTest
     get privacy_path
     date, note = css_select("h1 ~ p").first(2).map { |n| n.text.squish }
     assert_equal "시행일: 2026년 10월 4일", date
-    assert_equal "개정 안내: 2026년 10월 4일 — 편 댓글 기능 도입에 따라 수집 항목에 게시물 정보를, 이용 목적에 작성자 표시(이름 일부를 가린 형태)를 추가했습니다.", note
+    assert_equal "개정 안내: 2026년 10월 4일 — 편 댓글 기능 도입에 따라 수집 항목에 게시물 정보를, 이용 목적에 작성자 표시(이름 일부를 가린 형태)를 추가했습니다. 공지 보기", note
+    assert_select "h1 ~ p a[href=?]", announcements_path, text: "공지 보기"
   end
 
   test "signed-in users and admins see the same notes as guests" do
