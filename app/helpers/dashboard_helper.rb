@@ -4,17 +4,19 @@
 # series card's period line uses the same wording as a product's (dashboard_license_period_text).
 module DashboardHelper
   def product_status_badge(user, product, expired_license: nil)
+    # Handoff 0084 (D-010) -- the dashboard is dark; the badges keep their meaning colors (in use/free green,
+    # expired amber, not owned grey) in the dark palette.
     label, classes = if product.free_access?
-      [ "무료로 이용 가능", "bg-emerald-100 text-emerald-700" ]
+      [ "무료로 이용 가능", "border-[#7dd3a8]/40 bg-[#7dd3a8]/10 text-[#7dd3a8]" ]
     elsif user.licensed_for?(product.code)
-      [ "이용 중", "bg-emerald-100 text-emerald-700" ]
+      [ "이용 중", "border-[#7dd3a8]/40 bg-[#7dd3a8]/10 text-[#7dd3a8]" ]
     elsif expired_license
-      [ "만료", "bg-amber-50 text-amber-700" ]
+      [ "만료", "border-[#f0a53c]/40 bg-[#f0a53c]/10 text-[#f0a53c]" ]
     else
-      [ "미보유", "bg-gray-100 text-gray-700" ]
+      [ "미보유", "border-white/15 bg-white/5 text-[#a8a39a]" ]
     end
 
-    tag.span(label, class: "inline-flex rounded-full px-3 py-1 text-xs font-semibold #{classes}")
+    tag.span(label, class: "inline-flex shrink-0 whitespace-nowrap rounded-full border px-3 py-1 text-xs font-semibold #{classes}")
   end
 
   def product_period_text(user, product, expired_license: nil)

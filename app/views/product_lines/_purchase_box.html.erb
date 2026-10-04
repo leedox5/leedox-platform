@@ -8,8 +8,8 @@
 <% if state %>
   <section class="mt-6 rounded-2xl border <%= series_theme(:box, dark) %> p-5" aria-label="이용 안내" id="product-purchase">
     <% if state == :owned %>
-      <p class="font-bold <%= series_theme(:box_title, dark) %>"><%= free ? "무료로 이용 중인 제품입니다 · 무기한 이용" : "구매한 제품입니다 · 무기한 이용" %></p>
-      <p class="mt-1 text-sm <%= series_theme(:box_text, dark) %>">이 제품의 모든 편과 산출물을 계속 이용하실 수 있습니다.</p>
+      <p class="font-bold <%= series_theme(:box_title, dark) %>"><%= free ? "무료로 이용 중인 시리즈입니다 · 무기한 이용" : "구매한 시리즈입니다 · 무기한 이용" %></p>
+      <p class="mt-1 text-sm <%= series_theme(:box_text, dark) %>">이 시리즈의 모든 편과 산출물을 계속 이용하실 수 있습니다.</p>
     <% elsif state == :free_open %>
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -24,7 +24,7 @@
             class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-6 py-3 text-sm font-bold #{series_theme(:free_button, dark)}" %>
         <% end %>
       </div>
-      <p class="mt-3 text-xs <%= series_theme(:box_note, dark) %>">결제나 주문 없이 시작할 수 있습니다. 다른 제품은 포함되지 않습니다.</p>
+      <p class="mt-3 text-xs <%= series_theme(:box_note, dark) %>">결제나 주문 없이 시작할 수 있습니다. 다른 시리즈는 포함되지 않습니다.</p>
     <% elsif state == :for_sale %>
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -34,10 +34,10 @@
         <%= link_to "구매하기", billing_checkout_path(product_line.product.code),
           class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-6 py-3 text-sm font-bold #{series_theme(:buy_button, dark)}" %>
       </div>
-      <p class="mt-3 text-xs <%= series_theme(:box_note, dark) %>">구매하면 이 제품의 모든 편과 산출물을 이용할 수 있습니다. 다른 제품은 포함되지 않습니다.</p>
+      <p class="mt-3 text-xs <%= series_theme(:box_note, dark) %>">구매하면 이 시리즈의 모든 편과 산출물을 이용할 수 있습니다. 다른 시리즈는 포함되지 않습니다.</p>
     <% else %>
       <p class="font-bold <%= series_theme(:box_closed, dark) %>">현재 <%= free ? "시작할" : "구매할" %> 수 없습니다</p>
-      <p class="mt-1 text-sm <%= series_theme(:box_note, dark) %>">이 제품은 준비 중이거나 이용 시작이 중지되었습니다. 이미 이용 중인 분은 로그인하면 계속 이용하실 수 있습니다.</p>
+      <p class="mt-1 text-sm <%= series_theme(:box_note, dark) %>">이 시리즈는 준비 중이거나 이용 시작이 중지되었습니다. 이미 이용 중인 분은 로그인하면 계속 이용하실 수 있습니다.</p>
     <% end %>
   </section>
 <% end %>

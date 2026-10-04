@@ -1,8 +1,10 @@
-<footer class="border-t border-slate-200 bg-white py-10">
-  <div class="mx-auto w-full max-w-6xl px-4 text-sm text-slate-500 sm:px-6">
+<%# Handoff 0084 (D-010) -- the frame is dark on every customer page (the footer isn't used in /admin). Content and
+    links are unchanged; the top border marks the edge on light-bodied pages (my page, notices, checkout...). %>
+<footer class="border-t border-white/10 bg-[#0e1014] py-10">
+  <div class="mx-auto w-full max-w-6xl px-4 text-sm text-[#a8a39a] sm:px-6">
     <div class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
       <div class="space-y-2">
-        <p class="mb-4 text-base font-black tracking-tight text-slate-900">LEEDOX</p>
+        <p class="mb-4 text-base font-black tracking-tight text-[#f2efe8]">LEEDOX</p>
         <p><%= CompanyInfo::NAME %> | 대표 <%= CompanyInfo::REPRESENTATIVE %></p>
         <p>사업자등록번호 <%= CompanyInfo::REGISTRATION_NUMBER %></p>
         <p>통신판매업신고 <%= CompanyInfo::MAIL_ORDER_LICENSE %></p>
@@ -16,12 +18,12 @@
             products are introduced on the home's AI row and /pricing. Only the legal links stay here. %>
         <div class="flex flex-wrap gap-4 md:justify-end">
           <%# Handoff 0077 -- notices sit before the legal links. %>
-          <%= link_to "공지", announcements_path, class: "transition hover:text-slate-900" %>
-          <%= link_to "이용 약관", terms_path, class: "transition hover:text-slate-900" %>
-          <%= link_to "개인정보 처리 방침", privacy_path, class: "transition hover:text-slate-900" %>
+          <%= link_to "공지", announcements_path, class: FrameThemeHelper::FOOTER_LINK_CLASS %>
+          <%= link_to "이용 약관", terms_path, class: FrameThemeHelper::FOOTER_LINK_CLASS %>
+          <%= link_to "개인정보 처리 방침", privacy_path, class: FrameThemeHelper::FOOTER_LINK_CLASS %>
           <%= link_to "사업자정보확인",
             "https://www.ftc.go.kr/bizCommPop.do?wrkr_no=#{CompanyInfo::REGISTRATION_NUMBER.delete('-')}",
-            target: "_blank", rel: "noopener", class: "transition hover:text-slate-900" %>
+            target: "_blank", rel: "noopener", class: FrameThemeHelper::FOOTER_LINK_CLASS %>
         </div>
         <p>© 2026 LEEDOX. All rights reserved.</p>
       </div>

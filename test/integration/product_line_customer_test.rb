@@ -34,7 +34,7 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
   test "episode cards show the title and a start CTA but no episode number, while the links keep the plain number" do
     get product_line_path(@line.slug)
     assert_select "ol a[href=?]", product_episode_path(@line.slug, "01") do
-      assert_select "span", text: "학습 시작 →"
+      assert_select "span", text: "보기 →"
     end
     assert_select "ol a[href=?] span.truncate[title=?]", product_episode_path(@line.slug, "01"), "첫 편", text: "첫 편"
     assert_select "ol a span", text: /\AE?\d+\z/, count: 0
@@ -51,7 +51,7 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
       assert_select "div.flex.flex-wrap.items-center" do
         assert_select "span", count: 2
         assert_select "span.min-w-0.flex-1.truncate", text: "첫 편"
-        assert_select "span.w-full.shrink-0.whitespace-nowrap.sm\\:w-auto.sm\\:ml-auto", text: "학습 시작 →"
+        assert_select "span.w-full.shrink-0.whitespace-nowrap.sm\\:w-auto.sm\\:ml-auto", text: "보기 →"
       end
     end
   end

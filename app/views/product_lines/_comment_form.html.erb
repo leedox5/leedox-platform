@@ -4,14 +4,14 @@
 <%= form_with model: comment, url: product_episode_comments_path(@product_line.slug, @current_episode.display_id), class: "mt-2" do |form| %>
   <% if parent %><%= form.hidden_field :parent_id, value: parent.id %><% end %>
   <% if comment.errors.any? %>
-    <p class="mb-2 text-sm font-semibold text-red-600" role="alert"><%= comment.errors[:body].first || comment.errors[:base].first %></p>
+    <p class="mb-2 text-sm font-semibold text-[#ff8a80]" role="alert"><%= comment.errors[:body].first || comment.errors[:base].first %></p>
   <% end %>
   <%= form.text_area :body, rows: parent ? 2 : 3, maxlength: EpisodeComment::MAX_LENGTH, required: true,
     placeholder: parent ? "답글을 남겨 주세요" : "이 편에 대한 생각이나 막힌 곳을 남겨 주세요",
     "aria-label": parent ? "답글" : "댓글",
-    class: "block w-full rounded-lg border border-gray-300 px-3 py-2 text-[15px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" %>
+    class: "block w-full rounded-lg border border-white/15 bg-[#15181e] px-3 py-2 text-[15px] text-[#f2efe8] placeholder:text-[#a8a39a] focus:border-[#f0a53c] focus:outline-none focus:ring-1 focus:ring-[#f0a53c]" %>
   <div class="mt-2 flex items-center justify-between gap-3">
-    <span class="text-xs text-gray-400"><%= EpisodeComment::MAX_LENGTH %>자까지</span>
-    <%= form.submit parent ? "답글 등록" : "댓글 등록", class: "cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700" %>
+    <span class="text-xs text-[#a8a39a]"><%= EpisodeComment::MAX_LENGTH %>자까지</span>
+    <%= form.submit parent ? "답글 등록" : "댓글 등록", class: "cursor-pointer rounded-lg bg-[#f0a53c] px-4 py-2 text-sm font-bold text-[#0e1014] hover:bg-[#f5b85e]" %>
   </div>
 <% end %>

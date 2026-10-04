@@ -1,9 +1,10 @@
 require "test_helper"
 
 # Handoff 0083 -- "browse" pages are dark, "read/handle" pages light: the home, the series list (/products, R1) and
-# the series detail (/products/:slug, R2) use the dark header, the dark page and the display serif; an episode,
-# /pricing, the dashboard, my page and the admin preview keep the light look and never load the font. Only colors and fonts changed on the
-# list -- its cards, badges and links are covered, unchanged, by product_line_list_test.rb.
+# the series detail (/products/:slug, R2) use the dark header, the dark page and the display serif; /pricing, my page
+# and the admin preview keep the light look and never load the font (the dashboard and the episode turned dark in
+# 0084 -- see dark_frame_test.rb and dark_episode_test.rb). Only colors and fonts changed on the list -- its cards,
+# badges and links are covered, unchanged, by product_line_list_test.rb.
 class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
   DARK_HEADER = "header.bg-\\[\\#0e1014\\]\\/90"
   LIGHT_HEADER = "header.bg-white\\/90"
@@ -25,9 +26,12 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     assert_select "div.bg-\\[\\#0e1014\\] > #{DARK_HEADER}"
   end
 
-  def assert_light
-    assert_select LIGHT_HEADER, 1
-    assert_select DARK_HEADER, 0
+  # D-010 (0084): a light-bodied customer page still has the dark frame (header, footer); only its body is light and
+  # it doesn't load the display font. The admin area keeps the light header.
+  def assert_light_body
+    assert_select DARK_HEADER, 1
+    assert_select LIGHT_HEADER, 0
+    assert_select "div.bg-\\[\\#0e1014\\] > #{DARK_HEADER}", 0
     assert_select "link[href*='fonts.googleapis.com']", 0
   end
 
@@ -46,28 +50,21 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     assert_dark
   end
 
-  test "light pages keep the light header and don't load the font" do
+  test "light-bodied pages keep their light body under the dark frame, without the font" do
     get pricing_path
-    assert_light
-    get product_episode_path("dark-line", "01")
-    assert_light
+    assert_light_body
 
     sign_in
-    get dashboard_path
-    assert_light
     get mypage_path
-    assert_light
+    assert_light_body
   end
 
-  test "the mobile menu panel is dark on dark pages and unchanged on light ones" do
-    [ products_path, root_path ].each do |path|
+  test "the mobile menu panel is dark on every customer page" do
+    [ products_path, root_path, pricing_path, announcements_path ].each do |path|
       get path
       assert_select "details[data-controller='mobile-menu'] div.bg-\\[\\#15181e\\]", 1
       assert_select "details[data-controller='mobile-menu'] div.bg-white", 0
     end
-    get pricing_path
-    assert_select "details[data-controller='mobile-menu'] div.bg-white", 1
-    assert_select "details[data-controller='mobile-menu'] div.bg-\\[\\#15181e\\]", 0
   end
 
   test "signed in, the dark header and panel carry the member menu" do
@@ -125,7 +122,7 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     order = Commerce::OrderCreator.call!(user: @user, product_code: @line.product.code, offer_code: @line.lifetime_offer.code, requested_start_on: nil, provider: "manual")
     Commerce::ConfirmManualPayment.call!(order: order, actor: User.find_by!(role: :admin))
     get product_line_path("dark-line")                     # owned
-    assert_includes box.text, "구매한 제품입니다 · 무기한 이용"
+    assert_includes box.text, "구매한 시리즈입니다 · 무기한 이용"
     assert_select "#product-purchase p.text-\\[\\#f2efe8\\]", minimum: 1
 
     free = ProductLine.create!(internal_name: "무료", customer_name: "무료 시리즈", slug: "dark-free", introduction: "소개", status: "published")
@@ -147,7 +144,9 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     sign_in(admin)
     get admin_product_line_path(@line)
     assert_response :success
-    assert_light
+    assert_select LIGHT_HEADER, 1 # the admin area keeps the light frame (D-010)
+    assert_select DARK_HEADER, 0
+    assert_select "link[href*='fonts.googleapis.com']", 0
     html = css_select("main").first.to_html
     assert_not_includes html, "doc-content-dark"
     assert_not_includes html, "#15181e"
@@ -156,10 +155,10 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     assert_select "main ol a.border-gray-200"
   end
 
-  test "an episode body keeps the light .doc-content" do
+  test "an episode body is dark with .doc-content-dark (0084 R2, D-010: series viewing)" do
     get product_episode_path("dark-line", "01")
-    assert_select ".doc-content-dark", 0
-    assert_select ".doc-content", minimum: 1
+    assert_dark
+    assert_select "main .doc-content.doc-content-dark", minimum: 1
   end
 
   test "the series list's wording (0083 R2 d)" do

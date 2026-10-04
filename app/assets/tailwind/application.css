@@ -98,7 +98,8 @@
 }
 
 /* Handoff 0083 R2 -- the series detail page's introduction on the dark "browse" palette. Only that page adds
-   `doc-content-dark` (SeriesThemeHelper); episode bodies, notices and the admin preview keep `.doc-content` as is. */
+   `doc-content-dark` (SeriesThemeHelper); 0084 R2 -- so does the customer episode page (body and takeaways).
+   Notices, the admin preview and the legacy chapters keep `.doc-content` as is. */
 .doc-content-dark h1,
 .doc-content-dark h2,
 .doc-content-dark h3 {

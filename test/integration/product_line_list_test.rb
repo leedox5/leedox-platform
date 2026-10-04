@@ -119,7 +119,7 @@ class ProductLineListTest < ActionDispatch::IntegrationTest
     get products_path
     assert_select "a[href=?] span", product_line_path(free_open.slug), text: "이용 중"
     get product_line_path(free_open.slug)
-    assert_match(/무료로 이용 중인 제품입니다/, css_select("#product-purchase").text)
+    assert_match(/무료로 이용 중인 시리즈입니다/, css_select("#product-purchase").text)
   end
 
   test "the header's product link and the detail page's back-to-list link both point at /products" do

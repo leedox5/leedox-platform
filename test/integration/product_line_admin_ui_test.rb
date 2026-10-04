@@ -228,7 +228,7 @@ class ProductLineAdminUiTest < ActionDispatch::IntegrationTest
       assert_select "span", text: "편집하기 →"
     end
     assert_select "ol a[href=?] span", admin_content_episode_path(draft), text: "02 · draft"
-    assert_select "ol a span", text: "학습 시작 →", count: 0
+    assert_select "ol a span", text: "보기 →", count: 0
     assert_select "ol a span", text: /\AE\d/, count: 0
   end
 

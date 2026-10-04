@@ -115,7 +115,8 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
     trial = User.create!(name: "체험", email: "dc-trial-#{SecureRandom.hex(3)}@example.com", password: "password123")
     sign_in(trial)
     get dashboard_path
-    banner = css_select("main p.border-violet-100").first
+    # 0084: found by its text -- its color changed with the dark dashboard (it was border-violet-100).
+    banner = css_select("main p").find { |p| p.text.include?("무료 체험 D-") }
     assert banner, "the trial banner (unchanged copy)"
     assert_includes banner.text, "무료 체험 D-"
     seen = section("더 둘러보기")
@@ -127,7 +128,7 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
   test "after the trial ended the banner keeps its 가격 보기 link" do
     sign_in(@user.tap { |u| u.update!(created_at: 10.days.ago) })
     get dashboard_path
-    banner = css_select("main p.border-amber-100").first
+    banner = css_select("main p").find { |p| p.text.include?("무료 체험 기간이 끝났습니다.") } # 0084: by text, not color
     assert banner
     assert_includes banner.text, "무료 체험 기간이 끝났습니다."
     assert banner.at_css("a[href='#{pricing_path}']")

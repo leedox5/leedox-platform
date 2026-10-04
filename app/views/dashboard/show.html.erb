@@ -3,41 +3,46 @@
     name repeated under a card title that already shows it, a product-page button on the not-yet-seen cards, and the
     common footer. Which products appear, and the owned/trial/expired judgments, are unchanged.
     Handoff 0080 -- the series in use come first (D-009); the empty box only when there's neither a series nor a
-    standalone product in use; a standalone product whose license ran out reads 만료. %>
-<div class="min-h-screen bg-gray-50">
+    standalone product in use; a standalone product whose license ran out reads 만료.
+    Handoff 0084 (D-010) -- dark body like the home and the series pages (colors only; content unchanged), with the
+    display serif for the page and section headings. %>
+<% content_for :head do %>
+  <%= render "shared/display_font" %>
+<% end %>
+<div class="min-h-screen bg-[#0e1014] text-[#f2efe8]">
   <%= render "shared/header" %>
 
   <main class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
     <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p class="text-sm font-semibold uppercase tracking-wide text-blue-600">My Dashboard</p>
-        <h1 class="mt-1 text-3xl font-bold text-gray-900">
+        <p class="text-sm font-semibold uppercase tracking-wide text-[#f0a53c]">My Dashboard</p>
+        <h1 class="mt-1 font-display text-3xl font-bold text-[#f2efe8]">
           안녕하세요, <%= current_user.name %>님
         </h1>
-        <p class="mt-2 text-gray-600">보던 곳에서 이어서 보세요.</p>
+        <p class="mt-2 text-[#c9c4ba]">보던 곳에서 이어서 보세요.</p>
       </div>
 
       <%= link_to "결제·라이선스 내역은 마이페이지에서 →",
         mypage_path,
-        class: "text-sm font-semibold text-blue-600 hover:text-blue-700" %>
+        class: "text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
     </header>
 
     <% if current_user.trial_active? && @has_unowned_product %>
-      <p class="mb-6 rounded-lg border border-violet-100 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-700">
+      <p class="mb-6 rounded-lg border border-white/10 bg-[#15181e] px-4 py-3 text-sm font-semibold text-[#f2efe8]">
         무료 체험 D-<%= current_user.trial_days_remaining %> · <%= I18n.l(current_user.trial_ends_on, locale: :ko, format: :long) %>까지 — 체험 기간에는 상품별로 더 많은 챕터가 열립니다. 기간이 끝나면 비로그인 방문자와 같은 범위로 돌아갑니다.
       </p>
     <% elsif current_user.trial_recently_expired? && @has_unowned_product %>
-      <p class="mb-6 rounded-lg border border-amber-100 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+      <p class="mb-6 rounded-lg border border-[#f0a53c]/40 bg-[#f0a53c]/10 px-4 py-3 text-sm font-semibold text-[#f0a53c]">
         무료 체험 기간이 끝났습니다. 지금은 비로그인 방문자와 같은 범위까지 열려 있습니다. 이어서 읽으려면 라이선스를 확인해보세요.
-        <%= link_to "가격 보기 →", pricing_path, class: "underline decoration-amber-400 underline-offset-2 hover:text-amber-900" %>
+        <%= link_to "가격 보기 →", pricing_path, class: "underline decoration-[#f0a53c]/60 underline-offset-2 hover:text-[#f5b85e]" %>
       </p>
     <% end %>
 
     <% if @series_in_use.any? %>
       <section aria-label="이용 중인 시리즈" class="mb-10">
         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-          <h2 class="text-xl font-bold text-gray-900">이용 중인 시리즈</h2>
-          <%= link_to "시리즈 둘러보기 →", products_path, class: "text-sm font-semibold text-blue-600 hover:text-blue-700" %>
+          <h2 class="font-display text-xl font-bold text-[#f2efe8]">이용 중인 시리즈</h2>
+          <%= link_to "시리즈 둘러보기 →", products_path, class: "text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
         </div>
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <% @series_in_use.each do |line| %>
@@ -51,75 +56,75 @@
       <div class="space-y-6">
         <% @owned_dashboards.each do |pd| %>
           <% product = pd[:product] %>
-          <section aria-label="<%= product.name %> 현황" class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <section aria-label="<%= product.name %> 현황" class="rounded-2xl border border-white/10 bg-[#15181e] p-6">
             <div class="flex items-center justify-between gap-3">
-              <h2 class="text-lg font-bold text-gray-900"><%= product.name %></h2>
+              <h2 class="text-lg font-bold text-[#f2efe8]"><%= product.name %></h2>
               <%= product_status_badge(current_user, product) %>
             </div>
-            <p class="mt-1 text-sm text-gray-600"><%= product_period_text(current_user, product) %></p>
+            <p class="mt-1 text-sm text-[#c9c4ba]"><%= product_period_text(current_user, product) %></p>
 
             <div class="mt-5 grid gap-4 sm:grid-cols-2">
-              <div class="rounded-lg bg-gray-50 p-4">
-                <p class="text-sm font-semibold text-gray-500">볼 수 있는 챕터</p>
-                <p class="mt-1 text-2xl font-bold text-gray-900"><%= pd[:accessible] %>/<%= pd[:total] %></p>
+              <div class="rounded-lg bg-white/5 p-4">
+                <p class="text-sm font-semibold text-[#a8a39a]">볼 수 있는 챕터</p>
+                <p class="mt-1 text-2xl font-bold text-[#f2efe8]"><%= pd[:accessible] %>/<%= pd[:total] %></p>
               </div>
 
-              <div class="rounded-lg bg-gray-50 p-4">
+              <div class="rounded-lg bg-white/5 p-4">
                 <div class="flex items-center justify-between">
-                  <p class="text-sm font-semibold text-gray-500">진행률</p>
-                  <strong class="text-lg text-blue-600"><%= pd[:progress_percent] %>%</strong>
+                  <p class="text-sm font-semibold text-[#a8a39a]">진행률</p>
+                  <strong class="text-lg text-[#f0a53c]"><%= pd[:progress_percent] %>%</strong>
                 </div>
-                <p class="mt-1 text-xs text-gray-500"><%= pd[:total] %>개 중 <%= pd[:completed_count] %>개 읽음</p>
-                <div class="mt-3 h-2 overflow-hidden rounded-full bg-gray-200"
+                <p class="mt-1 text-xs text-[#a8a39a]"><%= pd[:total] %>개 중 <%= pd[:completed_count] %>개 읽음</p>
+                <div class="mt-3 h-2 overflow-hidden rounded-full bg-white/15"
                      role="progressbar"
                      aria-label="<%= product.name %> 진행률"
                      aria-valuenow="<%= pd[:progress_percent] %>"
                      aria-valuemin="0"
                      aria-valuemax="100">
-                  <div class="h-full rounded-full bg-blue-600 transition-all" style="width: <%= pd[:progress_percent] %>%"></div>
+                  <div class="h-full rounded-full bg-[#f0a53c] transition-all" style="width: <%= pd[:progress_percent] %>%"></div>
                 </div>
               </div>
             </div>
 
             <div class="mt-6 grid gap-4 lg:grid-cols-3">
-              <div class="rounded-lg border border-gray-100 p-5 lg:col-span-2">
+              <div class="rounded-lg border border-white/10 p-5 lg:col-span-2">
                 <div class="flex items-center justify-between gap-4">
-                  <h3 class="font-semibold text-gray-900">최근에 읽은 챕터</h3>
-                  <%= link_to "전체 보기", product_content_index_path(product.code), class: "text-sm font-semibold text-blue-600 hover:text-blue-700" %>
+                  <h3 class="font-semibold text-[#f2efe8]">최근에 읽은 챕터</h3>
+                  <%= link_to "전체 보기", product_content_index_path(product.code), class: "text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
                 </div>
 
                 <% if pd[:recent_chapters].any? %>
-                  <ul class="mt-3 divide-y divide-gray-100">
+                  <ul class="mt-3 divide-y divide-white/10">
                     <% pd[:recent_chapters].each do |chapter| %>
                       <li class="flex items-center justify-between gap-4 py-3">
                         <div class="min-w-0">
-                          <p class="text-xs text-gray-500">Chapter <%= chapter[:id] %></p>
-                          <p class="truncate text-sm font-medium text-gray-900"><%= chapter[:title] %></p>
+                          <p class="text-xs text-[#a8a39a]">Chapter <%= chapter[:id] %></p>
+                          <p class="truncate text-sm font-medium text-[#f2efe8]"><%= chapter[:title] %></p>
                         </div>
                         <%= link_to "다시 보기",
                           product_chapter_path(product.code, chapter[:id]),
-                          class: "shrink-0 text-sm font-semibold text-blue-600 hover:text-blue-700" %>
+                          class: "shrink-0 text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
                       </li>
                     <% end %>
                   </ul>
                 <% else %>
-                  <div class="mt-3 rounded-lg bg-gray-50 p-5 text-center">
-                    <p class="text-sm text-gray-600">아직 읽은 챕터가 없습니다.</p>
+                  <div class="mt-3 rounded-lg bg-white/5 p-5 text-center">
+                    <p class="text-sm text-[#c9c4ba]">아직 읽은 챕터가 없습니다.</p>
                   </div>
                 <% end %>
               </div>
 
-              <aside class="rounded-lg bg-gray-900 p-5 text-white">
-                <p class="text-xs font-semibold uppercase tracking-wide text-blue-300">다음 챕터</p>
+              <aside class="rounded-lg border border-[#f0a53c]/30 bg-[#f0a53c]/10 p-5 text-[#f2efe8]">
+                <p class="text-xs font-semibold uppercase tracking-wide text-[#f0a53c]">다음 챕터</p>
                 <% if pd[:next_chapter] %>
                   <h3 class="mt-2 text-lg font-bold"><%= pd[:next_chapter][:title] %></h3>
-                  <p class="mt-1 text-xs text-gray-300">Chapter <%= pd[:next_chapter][:id] %></p>
+                  <p class="mt-1 text-xs text-[#c9c4ba]">Chapter <%= pd[:next_chapter][:id] %></p>
                   <%= link_to (pd[:completed_count].zero? ? "첫 챕터 시작" : "이어서 보기"),
                     product_chapter_path(product.code, pd[:next_chapter][:id]),
-                    class: "mt-4 block rounded-lg bg-white px-4 py-2 text-center text-sm font-semibold text-gray-900 transition hover:bg-gray-100" %>
+                    class: "mt-4 block rounded-lg bg-[#f0a53c] px-4 py-2 text-center text-sm font-semibold text-[#0e1014] transition hover:bg-[#f5b85e]" %>
                 <% else %>
                   <h3 class="mt-2 text-lg font-bold">모든 챕터를 읽었습니다.</h3>
-                  <p class="mt-1 text-xs text-gray-300">필요한 챕터를 다시 읽어 보세요.</p>
+                  <p class="mt-1 text-xs text-[#c9c4ba]">필요한 챕터를 다시 읽어 보세요.</p>
                 <% end %>
               </aside>
             </div>
@@ -129,14 +134,14 @@
     <% elsif @series_in_use.any? %>
       <%# A series in use already fills the top -- no "nothing in use" box. %>
     <% elsif @unowned_dashboards.any? %>
-      <section aria-label="이용 중인 콘텐츠 없음" class="rounded-lg border border-gray-200 bg-white p-8 text-center shadow-sm">
-        <p class="text-base font-semibold text-gray-900">아직 이용 중인 콘텐츠가 없습니다.</p>
-        <p class="mt-1 text-sm text-gray-500">아래에서 관심 있는 콘텐츠를 둘러보세요.</p>
+      <section aria-label="이용 중인 콘텐츠 없음" class="rounded-2xl border border-white/10 bg-[#15181e] p-8 text-center">
+        <p class="text-base font-semibold text-[#f2efe8]">아직 이용 중인 콘텐츠가 없습니다.</p>
+        <p class="mt-1 text-sm text-[#c9c4ba]">아래에서 관심 있는 콘텐츠를 둘러보세요.</p>
       </section>
     <% else %>
-      <section aria-label="대시보드 안내" class="rounded-lg border border-gray-200 bg-white p-8 text-center shadow-sm">
-        <p class="text-sm font-semibold text-gray-500">현재 대시보드에 표시할 상품이 없습니다.</p>
-        <p class="mt-2 text-xs text-gray-400">판매 중인 유료 상품이 공개되면 이곳에서 진행률을 확인할 수 있습니다.</p>
+      <section aria-label="대시보드 안내" class="rounded-2xl border border-white/10 bg-[#15181e] p-8 text-center">
+        <p class="text-sm font-semibold text-[#c9c4ba]">현재 대시보드에 표시할 상품이 없습니다.</p>
+        <p class="mt-2 text-xs text-[#a8a39a]">판매 중인 유료 상품이 공개되면 이곳에서 진행률을 확인할 수 있습니다.</p>
       </section>
     <% end %>
 
@@ -144,30 +149,30 @@
       <section aria-label="더 둘러보기" class="mt-12">
         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 class="text-xl font-bold text-gray-900">더 둘러보기</h2>
-            <p class="mt-1 text-sm text-gray-600">다른 이야기도 둘러보세요.</p>
+            <h2 class="font-display text-xl font-bold text-[#f2efe8]">더 둘러보기</h2>
+            <p class="mt-1 text-sm text-[#c9c4ba]">다른 이야기도 둘러보세요.</p>
           </div>
           <%# The series link sits on the series section's heading when that section shows -- never twice. %>
           <% unless @series_in_use.any? %>
-            <%= link_to "시리즈 둘러보기 →", products_path, class: "text-sm font-semibold text-blue-600 hover:text-blue-700" %>
+            <%= link_to "시리즈 둘러보기 →", products_path, class: "text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
           <% end %>
         </div>
 
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <% @unowned_dashboards.each do |pd| %>
             <% product = pd[:product] %>
-            <div class="flex flex-col justify-between rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div class="flex flex-col justify-between rounded-2xl border border-white/10 bg-[#15181e] p-6">
               <div>
                 <div class="flex items-center justify-between gap-2">
-                  <h3 class="text-lg font-bold text-gray-900"><%= product.name %></h3>
+                  <h3 class="text-lg font-bold text-[#f2efe8]"><%= product.name %></h3>
                   <%= product_status_badge(current_user, product, expired_license: pd[:expired_license]) %>
                 </div>
-                <p class="mt-2 text-sm text-gray-600 leading-relaxed"><%= product.tagline %></p>
+                <p class="mt-2 text-sm leading-relaxed text-[#c9c4ba]"><%= product.tagline %></p>
                 <% trial_boost = current_user.trial_active? && pd[:accessible] != pd[:accessible_after_trial] %>
-                <div class="mt-4 rounded-md bg-gray-50 p-3 text-xs text-gray-500">
-                  <p class="font-medium text-gray-700">볼 수 있는 챕터: <%= pd[:accessible] %>/<%= pd[:total] %><%= " (체험 중)" if trial_boost %></p>
+                <div class="mt-4 rounded-md bg-white/5 p-3 text-xs text-[#a8a39a]">
+                  <p class="font-medium text-[#c9c4ba]">볼 수 있는 챕터: <%= pd[:accessible] %>/<%= pd[:total] %><%= " (체험 중)" if trial_boost %></p>
                   <% if trial_boost %>
-                    <p class="mt-0.5 text-gray-500"><%= I18n.l(current_user.trial_ends_on, locale: :ko, format: :long) %> 이후 <%= pd[:accessible_after_trial] %>/<%= pd[:total] %></p>
+                    <p class="mt-0.5 text-[#a8a39a]"><%= I18n.l(current_user.trial_ends_on, locale: :ko, format: :long) %> 이후 <%= pd[:accessible_after_trial] %>/<%= pd[:total] %></p>
                   <% end %>
                   <p class="mt-0.5"><%= product_period_text(current_user, product, expired_license: pd[:expired_license]) %></p>
                 </div>
@@ -177,9 +182,9 @@
                 <% if product.landing_page_path.present? %>
                   <%= link_to standalone_product_cta_label(product),
                     product.landing_page_path,
-                    class: "block w-full rounded-lg bg-gray-900 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-gray-800" %>
+                    class: "block w-full rounded-lg bg-[#f0a53c] px-4 py-2.5 text-center text-sm font-semibold text-[#0e1014] transition hover:bg-[#f5b85e]" %>
                 <% end %>
-                <%= link_to "가격 보기 →", pricing_path, class: "mt-2 block text-center text-xs font-semibold text-gray-500 hover:text-gray-700" %>
+                <%= link_to "가격 보기 →", pricing_path, class: "mt-2 block text-center text-xs font-semibold text-[#a8a39a] hover:text-[#f2efe8]" %>
               </div>
             </div>
           <% end %>

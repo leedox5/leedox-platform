@@ -5,12 +5,12 @@ module EpisodeCommentsHelper
   def comment_author_label(comment)
     user = comment.user
     if user.nil?
-      tag.span("탈퇴한 사용자", class: "font-semibold text-gray-400")
+      tag.span("탈퇴한 사용자", class: "font-semibold text-[#a8a39a]")
     elsif user.admin?
-      safe_join([ tag.span("LEEDOX", class: "font-bold text-gray-900"),
-        tag.span("운영자", class: "ml-1.5 rounded-full bg-blue-600 px-2 py-0.5 text-[11px] font-bold text-white") ])
+      safe_join([ tag.span("LEEDOX", class: "font-bold text-[#f2efe8]"),
+        tag.span("운영자", class: "ml-1.5 rounded-full bg-[#f0a53c] px-2 py-0.5 text-[11px] font-bold text-[#0e1014]") ])
     else
-      tag.span(masked_name(user.name), class: "font-semibold text-gray-900")
+      tag.span(masked_name(user.name), class: "font-semibold text-[#f2efe8]")
     end
   end
 

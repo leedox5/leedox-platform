@@ -227,7 +227,7 @@ class ProductLineSalesAndPurchaseTest < ActionDispatch::IntegrationTest
     get download
     assert_response :success
     get product_line_path(@line.slug)
-    assert_includes css_select("#product-purchase").text, "무료로 이용 중인 제품입니다 · 무기한 이용"
+    assert_includes css_select("#product-purchase").text, "무료로 이용 중인 시리즈입니다 · 무기한 이용"
     assert_select "#product-purchase form", 0
 
     assert_no_difference "License.count" do
@@ -344,7 +344,7 @@ class ProductLineSalesAndPurchaseTest < ActionDispatch::IntegrationTest
     buy!(@buyer, @line)
     sign_in(@buyer)
     get product_line_path(@line.slug)
-    assert_includes css_select("#product-purchase").text, "구매한 제품입니다 · 무기한 이용"
+    assert_includes css_select("#product-purchase").text, "구매한 시리즈입니다 · 무기한 이용"
     assert_select "#product-purchase a", 0
   end
 

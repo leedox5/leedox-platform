@@ -74,7 +74,7 @@ class EpisodeCommentModerationTest < ActionDispatch::IntegrationTest
     assert comment.reload.hidden?
 
     follow_redirect!(headers: BROWSER.dup)
-    assert_select "#comment-#{comment.id}.opacity-50"
+    assert_select "#comment-#{comment.id}.opacity-75" # 0084 R2: dark page, 75% so it reads at >= 4.5:1 (was 50%)
     assert_includes css_select("#comment-#{comment.id}").text, "숨길 댓글"
     assert_select "#comment-#{comment.id} span", text: "숨김"
     assert_select "#comment-#{comment.id} form[action=?]", unhide_admin_episode_comment_path(comment, from: "episode")
