@@ -119,9 +119,8 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
     license!(gone.product, starts_on: Date.current - 40, last_usable_on: Date.current - 10)
     sign_in
     get mypage_path
-    mypage_in_use = css_select("h3").filter_map do |h|
-      badge = h.parent.css("span").map { |s| s.text.strip }
-      h.text.strip if badge.include?("이용 중")
+    mypage_in_use = css_select("[data-license-card]").filter_map do |card|
+      card.at_css("h4").text.strip if card.at_css("span.rounded-full").text.strip == "이용 중"
     end
     get dashboard_path
     names = cards.map { |c| c.at_css("h3").text.strip }
@@ -228,15 +227,16 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
     assert_select "section[aria-label='Chatdox 현황'] span.rounded-full", text: "이용 중"
   end
 
-  test "만료 on the dashboard matches /mypage's 만료" do
+  # 0080 matched this to /mypage's 만료 card; since 0082 my page leaves expired earlier products out (the order
+  # history keeps them), so the dashboard is where an expired earlier product reads 만료.
+  test "an expired earlier product reads 만료 on the dashboard; my page leaves it out (0082)" do
     claudox = Product.find_by!(code: "claudox")
     license!(claudox, starts_on: Date.current - 40, last_usable_on: Date.current - 10)
     sign_in
-    get mypage_path
-    mypage = css_select("h3").find { |h| h.text.strip == "Claudox" }.parent.text
-    assert_includes mypage, "만료"
     get dashboard_path
     assert_equal "만료", standalone_card("Claudox").at_css("span.rounded-full").text.strip
+    get mypage_path
+    assert_select "[data-license-card='claudox']", 0
   end
 
   # --- performance -------------------------------------------------------------------------------

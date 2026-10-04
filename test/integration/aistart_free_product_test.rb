@@ -96,10 +96,10 @@ class AistartFreeProductTest < ActionDispatch::IntegrationTest
     get mypage_path
     assert_response :success
     assert_select "title", text: /마이페이지 \| LEEDOX/
-    assert_match(/AI, 오늘부터 시작/, response.body)
-    assert_match(/무료 이용/, response.body)
-    assert_match(/전체 이용 가능 · 기간 제한 없음/, response.body)
-    assert_match(/아직 유료 상품 라이선스가 없습니다/, response.body)
-    assert_select "a[href=?]", product_content_index_path("aistart"), text: /콘텐츠 보기/
+    # Handoff 0082 -- my page no longer lists free earlier products (no 무료 이용 card); with no license the 시리즈
+    # part shows its empty line. What this test guards -- the page renders for such a user -- is unchanged.
+    assert_no_match(/무료 이용/, response.body)
+    assert_select "[data-license-card='aistart']", 0
+    assert_match(/아직 이용 중인 시리즈가 없습니다/, response.body)
   end
 end

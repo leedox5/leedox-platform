@@ -3,44 +3,34 @@
       /pricing and each product page, whose price blocks lead to the same checkout. %>
   <h2 class="text-lg font-bold text-gray-900">상품별 라이선스</h2>
 
-  <%# Handoff 0081 -- one card per product (a series' commerce product shows as that series, under its current
-      name), built by MypageController#license_cards: 이용 중 -> 이용 예정 -> 무료 이용 -> 만료. Other license records
-      of the same product fold into "지난 기록 N건". The purchase links above and the orders below are unchanged. %>
-  <% status_labels = { "active" => "이용 중", "scheduled" => "이용 예정", "expired" => "만료", "canceled" => "취소" } %>
-  <% if license_cards.any? %>
-    <div class="mt-5 grid gap-4 md:grid-cols-2">
-      <% license_cards.each do |card| %>
-        <% free = card.status == "free" %>
-        <article class="rounded-xl border p-5 <%= free ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-slate-50" %>" data-license-card="<%= card.product.code %>">
-          <div class="flex items-center justify-between gap-3">
-            <h3 class="font-bold text-slate-900"><%= card.title %></h3>
-            <span class="rounded-full bg-white px-3 py-1 text-xs font-bold <%= free ? "text-emerald-700" : "text-slate-700" %>"><%= free ? "무료 이용" : status_labels.fetch(card.status) %></span>
-          </div>
-          <% period = if free then "전체 이용 가능 · 기간 제한 없음"
-             elsif card.status == "active" then dashboard_license_period_text(card.license)
-             elsif card.status == "scheduled" then license_scheduled_period_text(card.license)
-             else license_expired_period_text(card.license)
-             end %>
-          <p class="mt-3 text-sm text-slate-600"><%= period %></p>
-          <% if card.link %>
-            <%= link_to "콘텐츠 보기", card.link, class: "mt-3 inline-block text-sm font-semibold #{free ? "text-emerald-700" : "text-blue-700"} hover:underline" %>
-          <% end %>
-          <% if card.past.any? %>
-            <details class="mt-3 text-sm">
-              <summary class="cursor-pointer select-none font-semibold text-slate-500 hover:text-slate-700">지난 기록 <%= card.past.size %>건</summary>
-              <ul class="mt-2 space-y-1 text-xs text-slate-500">
-                <% card.past.each do |license| %>
-                  <li><%= license_span_text(license) %> · <%= status_labels.fetch(license.effective_status) %></li>
-                <% end %>
-              </ul>
-            </details>
-          <% end %>
-        </article>
-      <% end %>
-    </div>
-  <% end %>
-  <% unless license_cards.any? { |card| card.status != "free" } %>
-    <p class="mt-4 rounded-lg bg-slate-50 p-5 text-sm text-slate-600">아직 유료 상품 라이선스가 없습니다.</p>
+  <%# Handoff 0082 -- two parts, series first (D-009). 시리즈 always shows (an empty line and a link when there's
+      none); 이전 상품 only lists paid standalone products in use or scheduled, and disappears entirely when there's
+      nothing to list. Cards are built by MypageController#license_cards. The orders below are unchanged. %>
+  <section aria-label="시리즈" class="mt-5">
+    <h3 class="text-sm font-bold uppercase tracking-wide text-slate-500">시리즈</h3>
+    <% if series_cards.any? %>
+      <div class="mt-3 grid gap-4 md:grid-cols-2">
+        <% series_cards.each do |card| %>
+          <%= render "mypage/license_card", card: card %>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-slate-50 p-5 text-sm text-slate-600">
+        <span>아직 이용 중인 시리즈가 없습니다.</span>
+        <%= link_to "시리즈 둘러보기 →", products_path, class: "font-semibold text-blue-600 hover:text-blue-700" %>
+      </p>
+    <% end %>
+  </section>
+
+  <% if legacy_cards.any? %>
+    <section aria-label="이전 상품" class="mt-7">
+      <h3 class="text-sm font-bold uppercase tracking-wide text-slate-500">이전 상품</h3>
+      <div class="mt-3 grid gap-4 md:grid-cols-2">
+        <% legacy_cards.each do |card| %>
+          <%= render "mypage/license_card", card: card %>
+        <% end %>
+      </div>
+    </section>
   <% end %>
 
   <% if orders.any? %>

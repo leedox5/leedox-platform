@@ -3,10 +3,11 @@ class MypageController < ApplicationController
 
   ORDERS_PER_PAGE = 10
 
-  # Handoff 0081 -- one card per product (a series' commerce product = that series), in the order
-  # 이용 중 -> 이용 예정 -> 무료 이용 -> 만료.
+  # Handoff 0081 -- one card per product (a series' commerce product = that series).
+  # Handoff 0082 -- split in two: series (all of them, as in 0081) and earlier products (standalone,
+  # paid, and only while in use or scheduled -- no expired, no free, no past records).
   LicenseCard = Struct.new(:product, :title, :status, :license, :past, :link, :sort_key, keyword_init: true)
-  STATUS_ORDER = { "active" => 0, "scheduled" => 1, "free" => 2, "expired" => 3 }.freeze
+  STATUS_ORDER = { "active" => 0, "scheduled" => 1, "expired" => 2 }.freeze
 
   def show
     @licenses = current_user.licenses.includes(product: :product_line).order(starts_on: :asc)
@@ -16,27 +17,25 @@ class MypageController < ApplicationController
       .order(created_at: :desc)
     @orders = orders_scope.offset((@orders_page - 1) * ORDERS_PER_PAGE).limit(ORDERS_PER_PAGE)
     @has_more_orders = orders_scope.offset(@orders_page * ORDERS_PER_PAGE).limit(1).exists?
-    @free_products = Product.active.where(free_access: true).order(:code)
-    @license_cards = license_cards
+    @series_cards, @legacy_cards = license_cards
   end
 
   private
 
   # Every judgment is an existing one: License#effective_status (the badge this page always showed),
-  # License.longest_running / .latest_expired (the dashboard's period line, 0080), and
-  # ProductLine.customer_reachable (the episode gate's scope) for whether a series link is shown.
+  # License.longest_running / .latest_expired (the dashboard's period line, 0080), ProductLine.
+  # customer_reachable (the episode gate's scope) for whether a series link is shown, and
+  # Product#free_access? (what made a 무료 이용 card in 0081) for "paid".
   def license_cards
     reachable_line_ids = ProductLine.customer_reachable
       .where(product_id: @licenses.map(&:product_id).uniq).pluck(:id).to_set
-    free_codes = @free_products.map(&:code).to_set
+    cards = @licenses.group_by(&:product).filter_map { |product, licenses| license_card(product, licenses, reachable_line_ids) }
+    series, standalone = cards.partition { |card| card.product.product_line }
 
-    cards = @licenses.reject { |license| free_codes.include?(license.product.code) }
-      .group_by(&:product).filter_map { |product, licenses| license_card(product, licenses, reachable_line_ids) }
-    cards += @free_products.map.with_index do |product, index|
-      LicenseCard.new(product: product, title: product.name, status: "free", past: [],
-        link: product.landing_page_path.presence, sort_key: [ STATUS_ORDER["free"], index ])
-    end
-    cards.sort_by(&:sort_key)
+    legacy = standalone
+      .select { |card| !card.product.free_access? && %w[active scheduled].include?(card.status) }
+      .each { |card| card.past = [] } # past records stay in the order history (Tommy, 0082)
+    [ series.sort_by(&:sort_key), legacy.sort_by(&:sort_key) ]
   end
 
   # A product with only canceled licenses gets no card (the order history keeps them).
