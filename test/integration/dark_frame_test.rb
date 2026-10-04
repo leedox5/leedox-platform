@@ -32,7 +32,7 @@ class DarkFrameTest < ActionDispatch::IntegrationTest
     assert_select "footer:not(.bg-\\[\\#0e1014\\])", 0, "#{path}: a footer, if any, is dark"
   end
 
-  GUEST_PAGES = %i[root_path products_path pricing_path announcements_path terms_path privacy_path new_user_session_path
+  GUEST_PAGES = %i[root_path products_path announcements_path terms_path privacy_path new_user_session_path
                    new_user_registration_path new_user_password_path].freeze
 
   test "guests get the dark frame on every customer page, light-bodied ones included" do
@@ -46,14 +46,14 @@ class DarkFrameTest < ActionDispatch::IntegrationTest
 
   test "members get the dark frame too, with their menu in it" do
     sign_in(@user)
-    [ root_path, products_path, pricing_path, dashboard_path, mypage_path, edit_user_registration_path,
+    [ root_path, products_path, dashboard_path, mypage_path, edit_user_registration_path,
       announcements_path, product_episode_path("frame-line", "01") ].each { |path| assert_dark_frame(path) }
     get mypage_path
     assert_select "#{DARK_HEADER} a", text: "로그아웃"
   end
 
   test "the footer is dark wherever it appears, with the same links" do
-    [ root_path, products_path, pricing_path, announcements_path ].each do |path|
+    [ root_path, products_path, announcements_path ].each do |path| # /pricing removed in 0086
       get path
       assert_select DARK_FOOTER, 1
       links = css_select("footer a").map { |a| a.text.strip }
@@ -115,7 +115,7 @@ class DarkFrameTest < ActionDispatch::IntegrationTest
 
   test "light-bodied pages keep their light body and don't load the display font" do
     sign_in(@user)
-    [ mypage_path, pricing_path, announcements_path, edit_user_registration_path ].each do |path|
+    [ mypage_path, terms_path, announcements_path, edit_user_registration_path ].each do |path| # /pricing removed in 0086
       get path
       assert_select "div.bg-\\[\\#0e1014\\] > header", 0, "#{path}: body stays light"
       assert_select "link[href*='fonts.googleapis.com']", 0, path

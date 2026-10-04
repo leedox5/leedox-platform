@@ -84,7 +84,7 @@ class AnnouncementsHomeTest < ActionDispatch::IntegrationTest
 
   test "only the home shows the line" do
     Announcement.create!(title: "홈 전용", body: "본문", published: true, pinned: true)
-    [ products_path, pricing_path, announcements_path ].each do |path|
+    [ products_path, terms_path, announcements_path ].each do |path| # /pricing removed in 0086
       get path
       assert_nil line, "#{path} shows the home notice line"
     end

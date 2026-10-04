@@ -247,13 +247,14 @@ class MypageLicenseCardsTest < ActionDispatch::IntegrationTest
     ENV.delete("LEEDOX_COMMERCE_ENABLED")
   end
 
-  test "buying and extending stay reachable from /pricing and the product page (0081 R2)" do
+  # 0086: the pricing page is gone; the home's AI row is the way to the product page now.
+  test "buying and extending stay reachable from the home and the product page (0081 R2)" do
     ENV["LEEDOX_COMMERCE_ENABLED"] = "true"
     @chatdox.update!(sale_enabled: true)
     license!(@chatdox, starts_on: Date.current - 5, last_usable_on: Date.current + 25)
     sign_in
-    get pricing_path
-    assert_select "a[href='/chatdox']", text: "자세히 보기"
+    get root_path
+    assert_select "section[aria-labelledby='track-ai'] a[href='/chatdox']"
     get "/chatdox"
     checkout = css_select("a").select { |a| a["href"].to_s.include?("checkout") }
     assert checkout.any?

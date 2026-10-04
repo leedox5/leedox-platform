@@ -38,10 +38,10 @@ class V1ProductContractRegressionTest < ActionDispatch::IntegrationTest
     assert_match(/Claudox 챕터 텍스트 20장/, claudox_body)
     assert_match(/읽기 경로와 적용 힌트, 실제 협업 사례 맥락/, claudox_body)
 
-    # Pricing page (/pricing) - summary page
-    get pricing_path
+    # The summary of both products' lowest prices -- the home's AI row since 0086 removed the /pricing page
+    get root_path
     assert_response :success
-    pricing_body = response.body
+    pricing_body = css_select("section[aria-labelledby='track-ai']").first.text
     assert_match(/Chatdox/, pricing_body)
     assert_match(/Claudox/, pricing_body)
     assert_match(/최저 7,700원부터/, pricing_body)

@@ -124,37 +124,15 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
     assert_no_match OLD_TONE, own_copy(css_select("main").first)
   end
 
-  # Handoff 0085 -- the trial's chapter range lived on the earlier-product cards of 더 둘러보기, which are gone; the
-  # banner itself is unchanged (still shown while an earlier product on sale isn't licensed).
-  test "during the trial the banner shows, and 더 둘러보기 has no earlier-product trial line" do
+  # Handoff 0086 -- the trial banners (D-N, and "ended" with its 가격 보기 link) are gone with the pricing page, and
+  # the card CTA wording went with it (pricing_removal_test.rb covers both banners and the trial's chapter access).
+  test "during the trial the dashboard has no banner and no earlier-product trial line" do
     trial = User.create!(name: "체험", email: "dc-trial-#{SecureRandom.hex(3)}@example.com", password: "password123")
     sign_in(trial)
     get dashboard_path
-    # 0084: found by its text -- its color changed with the dark dashboard (it was border-violet-100).
-    banner = css_select("main p").find { |p| p.text.include?("무료 체험 D-") }
-    assert banner, "the trial banner (unchanged copy)"
-    assert_includes banner.text, "무료 체험 D-"
+    assert_not_includes css_select("main").text, "무료 체험"
     assert_not_includes css_select("main").text, "(체험 중)"
     assert_no_match OLD_TONE, own_copy(css_select("main").first)
-  end
-
-  test "after the trial ended the banner keeps its 가격 보기 link" do
-    sign_in(@user.tap { |u| u.update!(created_at: 10.days.ago) })
-    get dashboard_path
-    banner = css_select("main p").find { |p| p.text.include?("무료 체험 기간이 끝났습니다.") } # 0084: by text, not color
-    assert banner
-    assert_includes banner.text, "무료 체험 기간이 끝났습니다."
-    assert banner.at_css("a[href='#{pricing_path}']")
-  end
-
-  test "the CTA wording is the one /pricing uses (free products start, others take a closer look)" do
-    view = ActionView::Base.empty
-    view.extend(StandaloneProductsHelper)
-    assert_equal "무료로 시작하기", view.standalone_product_cta_label(Product.find_by!(code: "aistart"))
-    assert_equal "자세히 보기", view.standalone_product_cta_label(Product.find_by!(code: "claudox"))
-    get pricing_path
-    assert_select "a[href='/content/aistart']", text: "무료로 시작하기"
-    assert_select "a[href='/claudox']", text: "자세히 보기"
   end
 
   test "an admin opening /dashboard gets the same member dashboard; the admin dashboard is untouched" do

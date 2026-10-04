@@ -250,14 +250,14 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
   end
 
   # Handoff 0083/0084 (D-010) -- the frame (header) is dark on every customer page; the body is dark on the home and
-  # the series pages, light on /pricing, and the display font only loads where the body is dark (the full per-page
-  # check is test/integration/series_dark_theme_test.rb).
-  test "the home is dark with the display font; /pricing has the dark header but a light body and no font" do
+  # the series pages, light on the notices (it was /pricing until 0086 removed that page), and the display font only
+  # loads where the body is dark (the full per-page check is test/integration/series_dark_theme_test.rb).
+  test "the home is dark with the display font; the notices have the dark header but a light body and no font" do
     get root_path
     assert_select "div.bg-\\[\\#0e1014\\] > header.bg-\\[\\#0e1014\\]\\/90"
     assert_select "link[href*='fonts.googleapis.com'][href*='Gowun+Batang']", 1
 
-    get pricing_path
+    get announcements_path
     assert_select "header.bg-\\[\\#0e1014\\]\\/90", 1
     assert_select "div.bg-\\[\\#0e1014\\] > header", 0
     assert_select "link[href*='fonts.googleapis.com']", 0

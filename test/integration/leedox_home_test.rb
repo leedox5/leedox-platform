@@ -58,7 +58,7 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
       assert_select "a[href=?]", products_path, text: "시리즈", minimum: 2 # desktop + mobile menu
     end
 
-    get pricing_path
+    get products_path # was /pricing, removed in 0086
     assert_select "header a[href=?]", chatdox_path, count: 0
   end
 
@@ -73,7 +73,7 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     [ nil, user, admin ].each do |viewer|
       delete destroy_user_session_path
       post user_session_path, params: { user: { email: viewer.email, password: "password123" } } if viewer
-      [ root_path, pricing_path, products_path, chatdox_path, claudox_path, aigravity_path ].each do |path|
+      [ root_path, products_path, chatdox_path, claudox_path, aigravity_path ].each do |path| # /pricing removed in 0086
         get path
         assert_response :success, "#{path} as #{viewer&.email || 'guest'}"
         assert_select "footer" do

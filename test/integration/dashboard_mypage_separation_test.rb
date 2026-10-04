@@ -69,13 +69,14 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
     assert_match(/새 비밀번호는 10자 이상/, response.body)
   end
 
-  test "trial remaining days shown on dashboard, not on my page (R2: 이용 상태 card removed from my page)" do
+  # Handoff 0086 -- the dashboard's trial banner went too, so neither page shows trial status now.
+  test "trial status shows on neither the dashboard nor my page (R2: 이용 상태 card removed from my page; 0086: banner)" do
     @user.update!(created_at: 1.day.ago)
     assert @user.trial_active?, "expected a fresh user to be in an active trial"
 
     get dashboard_path
     assert_response :success
-    assert_match(/무료 체험/, response.body)
+    assert_no_match(/무료 체험/, response.body)
 
     get mypage_path
     assert_response :success

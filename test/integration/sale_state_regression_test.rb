@@ -24,51 +24,43 @@ class SaleStateRegressionTest < ActionDispatch::IntegrationTest
     @previous_env.each { |key, value| value.nil? ? ENV.delete(key) : ENV[key] = value }
   end
 
-  test "/pricing renders badges, prices, and CTAs consistently for Chatdox and Claudox under enabled/disabled sales states" do
+  # Handoff 0086 -- the pricing page is gone; the home's AI row shows the same badge and price line (the same
+  # StandaloneProductsHelper), so the sale-state checks moved there.
+  def home_card(code)
+    css_select("section[aria-labelledby='track-ai'] [data-product-code='#{code}']").first.text.squish
+  end
+
+  test "the home's earlier-product cards render badges, prices, and links consistently under enabled/disabled sales states" do
     # When Chatdox and Claudox have sale_enabled: true
     @chatdox.update!(sale_enabled: true)
     @claudox.update!(sale_enabled: true)
-
-    # 1. Logged out user view on /pricing
-    get pricing_path
-    assert_response :success
-
-    # Badges
-    assert_select "span.rounded-full", text: "판매 중", count: 2
-    assert_select "span.rounded-full", text: "무료 이용 가능", count: 1
-
-    # Prices
     chatdox_cheapest = @chatdox.product_offers.active.ordered.first
     claudox_cheapest = @claudox.product_offers.active.ordered.first
-    assert_select "p", text: /최저 #{number_with_delimiter(chatdox_cheapest.total_amount)}원부터/
-    assert_select "p", text: /최저 #{number_with_delimiter(claudox_cheapest.total_amount)}원부터/
 
-    # Detail CTA links are direct product links for guests too
-    assert_select "a[href=?]", chatdox_path, text: "자세히 보기"
-    assert_select "a[href=?]", claudox_path, text: "자세히 보기"
-
-    # 2. Logged in user view on /pricing
-    sign_in(@user)
-    get pricing_path
+    # 1. Logged out
+    get root_path
     assert_response :success
+    assert_includes home_card("chatdox"), "판매 중 · 최저 #{number_with_delimiter(chatdox_cheapest.total_amount)}원부터"
+    assert_includes home_card("claudox"), "판매 중 · 최저 #{number_with_delimiter(claudox_cheapest.total_amount)}원부터"
+    assert_includes home_card("aistart"), "무료 이용 가능 · 무료"
+    # Direct product links for guests too
+    assert_select "a[href=?][data-product-code='chatdox']", chatdox_path
+    assert_select "a[href=?][data-product-code='claudox']", claudox_path
 
-    assert_select "a[href=?]", chatdox_path, text: "자세히 보기"
-    assert_select "a[href=?]", claudox_path, text: "자세히 보기"
+    # 2. Logged in
+    sign_in(@user)
+    get root_path
+    assert_select "a[href=?][data-product-code='chatdox']", chatdox_path
+    assert_select "a[href=?][data-product-code='claudox']", claudox_path
     delete destroy_user_session_path
 
-    # 3. When sale_enabled is false for Chatdox & Claudox
+    # 3. When sale_enabled is false for Chatdox & Claudox -- prices remain displayed even when sales are paused
     @chatdox.update!(sale_enabled: false)
     @claudox.update!(sale_enabled: false)
-
-    get pricing_path
-    assert_response :success
-    assert_select "span.rounded-full", text: "준비 중", minimum: 2
-    assert_select "span.rounded-full", text: "무료 이용 가능", count: 1
-    # Prices remain displayed from bootstrap catalog even when sales are paused
-    assert_select "p", text: /최저 #{number_with_delimiter(chatdox_cheapest.total_amount)}원부터/
-    assert_select "p", text: /최저 #{number_with_delimiter(claudox_cheapest.total_amount)}원부터/
-    assert_select "a[href=?]", chatdox_path, text: "자세히 보기"
-    assert_select "a[href=?]", claudox_path, text: "자세히 보기"
+    get root_path
+    assert_includes home_card("chatdox"), "준비 중 · 최저 #{number_with_delimiter(chatdox_cheapest.total_amount)}원부터"
+    assert_includes home_card("claudox"), "준비 중 · 최저 #{number_with_delimiter(claudox_cheapest.total_amount)}원부터"
+    assert_includes home_card("aistart"), "무료 이용 가능 · 무료"
   end
 
   test "Logged-out user sign in and seamless return to original checkout destination" do
@@ -179,9 +171,10 @@ class SaleStateRegressionTest < ActionDispatch::IntegrationTest
 
     ENV["LEEDOX_COMMERCE_ENABLED"] = "false"
 
-    get pricing_path
+    get root_path # was /pricing, removed in 0086 -- the home's cards share its sale-state rule
     assert_response :success
-    assert_select "span.rounded-full", text: "준비 중", minimum: 2
+    assert_includes home_card("chatdox"), "준비 중"
+    assert_includes home_card("claudox"), "준비 중"
 
     get chatdox_path
     assert_response :success

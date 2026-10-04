@@ -79,13 +79,14 @@ class AigravityLandingPageTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "pricing page links Antigravity product to /aigravity landing page" do
+  # 0086: the pricing page is gone; the home's AI row is where the Antigravity card links to its page now.
+  test "the home's AI row links the Antigravity product to /aigravity landing page" do
     user = User.create!(name: "Test User", email: "aigravity-user@example.com", password: "password123")
     post user_session_path, params: { user: { email: user.email, password: "password123" } }
 
-    get pricing_path
+    get root_path
     assert_response :success
-    assert_select "a[href=?]", aigravity_path, text: /자세히 보기/
+    assert_select "section[aria-labelledby='track-ai'] a[href=?]", aigravity_path
   end
 
   test "enforces admin DB guest_chapter_limit and trial_chapter_limit overrides dynamically (handoff 0045 R2 & 0017)" do

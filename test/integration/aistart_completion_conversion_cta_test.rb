@@ -22,7 +22,7 @@ class AistartCompletionConversionCtaTest < ActionDispatch::IntegrationTest
 
       # Guest Primary & Secondary CTAs
       assert_select "a[href=?]", new_user_registration_path, text: "회원가입하고 실전 가이드 둘러보기"
-      assert_select "a[href=?]", pricing_path, text: "전체 상품과 가격 보기"
+      assert_select "a[href=?]", products_path, text: "시리즈 둘러보기" # 0086: was 전체 상품과 가격 보기 -> /pricing
     end
   end
 
@@ -38,7 +38,7 @@ class AistartCompletionConversionCtaTest < ActionDispatch::IntegrationTest
 
       # Logged-in Primary & Secondary CTAs
       assert_select "a[href=?]", dashboard_path, text: "내 콘텐츠에서 이어보기"
-      assert_select "a[href=?]", pricing_path, text: "전체 상품과 가격 보기"
+      assert_select "a[href=?]", products_path, text: "시리즈 둘러보기" # 0086: was 전체 상품과 가격 보기 -> /pricing
     end
   end
 

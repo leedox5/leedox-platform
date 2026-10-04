@@ -15,10 +15,8 @@ class DashboardController < ApplicationController
     # usable now, and the series not in use (not earlier products) under 더 둘러보기.
     @owned_dashboards = legacy_products_in_use.map { |product| build_product_dashboard(product) }
     load_series_to_browse
-
-    # The trial banners keep their 0046 rule (unchanged in 0085, reported in result.md e): only while some earlier
-    # product on sale is still not licensed -- the trial opens more chapters of those, not of series.
-    @has_unowned_product = dashboard_products.any? { |product| !current_user.licensed_for?(product.code) }
+    # Handoff 0086 -- no trial banners (D-N / ended) any more; the trial itself (more chapters of the earlier
+    # products early on, accessible_chapter_count / DocPolicy) is unchanged.
   end
 
   private
@@ -68,16 +66,6 @@ class DashboardController < ApplicationController
     @browse_states = lines.to_h { |line| [ line.id, line.access_state(owned: false) ] }
     @browse_published_counts = ContentEpisode.where(product_line_id: lines.map(&:id), status: "published")
       .group(:product_line_id).count
-  end
-
-  # Handoff 0079-0084: the earlier products on sale. Since 0085 only the trial banners use it.
-  def dashboard_products
-    Product.standalone.active
-      .where(free_access: false)
-      .joins(:product_offers)
-      .merge(ProductOffer.active)
-      .distinct
-      .to_a
   end
 
   def build_product_dashboard(product)

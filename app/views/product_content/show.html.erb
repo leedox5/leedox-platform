@@ -122,7 +122,8 @@
                   <%= link_to "회원가입하고 실전 가이드 둘러보기", new_user_registration_path,
                     class: "inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" %>
                 <% end %>
-                <%= link_to "전체 상품과 가격 보기", pricing_path,
+                <%# Handoff 0086 -- was "전체 상품과 가격 보기" -> /pricing (the pricing page is gone). %>
+                <%= link_to "시리즈 둘러보기", products_path,
                   class: "inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" %>
               </div>
             </div>

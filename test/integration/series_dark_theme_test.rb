@@ -1,7 +1,7 @@
 require "test_helper"
 
 # Handoff 0083 -- "browse" pages are dark, "read/handle" pages light: the home, the series list (/products, R1) and
-# the series detail (/products/:slug, R2) use the dark header, the dark page and the display serif; /pricing, my page
+# the series detail (/products/:slug, R2) use the dark header, the dark page and the display serif; notices, my page
 # and the admin preview keep the light look and never load the font (the dashboard and the episode turned dark in
 # 0084 -- see dark_frame_test.rb and dark_episode_test.rb). Only colors and fonts changed on the list -- its cards,
 # badges and links are covered, unchanged, by product_line_list_test.rb.
@@ -51,7 +51,7 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
   end
 
   test "light-bodied pages keep their light body under the dark frame, without the font" do
-    get pricing_path
+    get announcements_path # was /pricing, removed in 0086
     assert_light_body
 
     sign_in
@@ -60,7 +60,7 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
   end
 
   test "the mobile menu panel is dark on every customer page" do
-    [ products_path, root_path, pricing_path, announcements_path ].each do |path|
+    [ products_path, root_path, announcements_path ].each do |path| # /pricing removed in 0086
       get path
       assert_select "details[data-controller='mobile-menu'] div.bg-\\[\\#15181e\\]", 1
       assert_select "details[data-controller='mobile-menu'] div.bg-white", 0

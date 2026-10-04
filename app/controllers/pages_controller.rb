@@ -3,8 +3,8 @@ class PagesController < ApplicationController
   # per-track rows (the AI row also carries the four standalone products) and the fixed
   # brand / series-season-episode blocks.
   def home
-    # The standalone products, in /pricing's own order (pricing_rank) and with /pricing's own
-    # sale-state rule (StandaloneProductsHelper) -- the home adds no rule of its own.
+    # The standalone products, in the old /pricing order (pricing_rank) and with its sale-state rule
+    # (StandaloneProductsHelper) -- the home adds no rule of its own. The pricing page itself is gone (0086).
     @standalone_products = home_standalone_products
     load_story_series
     load_episode_updates
@@ -19,10 +19,6 @@ class PagesController < ApplicationController
   def aigravity; end
 
   def getting_started; end
-
-  def pricing
-    @products = Product.standalone.order(:code).sort_by { |product| [ pricing_rank(product), product.code ] }
-  end
 
   def community; end
 
@@ -56,7 +52,8 @@ class PagesController < ApplicationController
     @home_notice = nil
   end
 
-  # /pricing's card order (handoff 0019): on sale first, then free, then
+  # The standalone products' card order (handoff 0019, first for /pricing; the home's AI row since 0071 and
+  # the only user since the pricing page went in 0086): on sale first, then free, then
   # everything still prepping -- ahead of the plain code-alphabetical order,
   # so a not-yet-purchasable product (e.g. Antigravity) never happens to
   # sort ahead of what's actually buyable right now.

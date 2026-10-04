@@ -2,7 +2,7 @@ require "test_helper"
 require Rails.root.join("db/migrate/20261004040000_add_show_on_home_to_products")
 
 # Handoff 0078 -- the home switch for standalone (pre-series) products and the tagline field on the admin
-# product edit page. Home only: /pricing, product pages and access are untouched.
+# product edit page. Home only: product pages and access are untouched (/pricing too, until 0086 removed it).
 class ProductHomeToggleTest < ActionDispatch::IntegrationTest
   setup do
     Commerce::CatalogBootstrap.call!
@@ -19,11 +19,6 @@ class ProductHomeToggleTest < ActionDispatch::IntegrationTest
   def home_codes
     get root_path
     css_select("section[aria-labelledby='track-ai'] [data-product-code]").map { |n| n["data-product-code"] }
-  end
-
-  def pricing_names
-    get pricing_path
-    css_select("main article h2").map { |n| n.text.strip }
   end
 
   def save(product, attrs)
@@ -60,12 +55,11 @@ class ProductHomeToggleTest < ActionDispatch::IntegrationTest
 
   # --- home / pricing -----------------------------------------------------------------
 
-  test "the home's AI row shows only the switched-on standalone products, in /pricing's order; /pricing keeps all" do
+  test "the home's AI row shows only the switched-on standalone products, in the same order; the product page stays" do
     all = home_codes
     assert_equal 4, all.size
     @chatdox.update!(show_on_home: false)
     assert_equal all - [ "chatdox" ], home_codes, "same order, chatdox left out"
-    assert_includes pricing_names, "Chatdox", "/pricing still lists a product that's off the home"
     get "/chatdox"
     assert_response :success
   end
@@ -74,7 +68,6 @@ class ProductHomeToggleTest < ActionDispatch::IntegrationTest
     Product.standalone.update_all(show_on_home: false)
     get root_path
     assert_select "section[aria-labelledby='track-ai']", 0
-    assert_equal 4, pricing_names.size
   end
 
   test "with every standalone product off, an AI series alone keeps the row" do
@@ -136,8 +129,9 @@ class ProductHomeToggleTest < ActionDispatch::IntegrationTest
     get edit_admin_commerce_product_path(@chatdox)
     assert_select "input[type=checkbox][name='product[show_on_home]'][checked]"
     assert_select "input[name='product[tagline]'][maxlength='100']"
-    assert_includes response.body, "켜면 홈 'AI와 함께 만들기' 줄에 나옵니다. 가격 페이지와 상품 페이지에는 영향이 없습니다."
-    assert_includes response.body, "홈 카드와 가격 페이지 카드에 제목 아래 한 줄로 나옵니다. 비워 두면 그 줄이 생략됩니다."
+    # 0086: the pricing page is gone, so the two help lines no longer mention it.
+    assert_includes response.body, "켜면 홈 'AI와 함께 만들기' 줄에 나옵니다. 상품 페이지에는 영향이 없습니다."
+    assert_includes response.body, "홈 카드에 제목 아래 한 줄로 나옵니다. 비워 두면 그 줄이 생략됩니다."
 
     save(@chatdox, show_on_home: "0", tagline: "  새 한 줄 설명  ")
     assert_redirected_to admin_commerce_products_path

@@ -57,28 +57,10 @@ class User < ApplicationRecord
     remaining.to_i.positive? ? remaining.to_i : 0
   end
 
-  def trial_days_remaining
-    days = (trial_remaining_seconds / 86_400.0).ceil
-    days.positive? ? days : 0
-  end
-
+  # The access rule (DocPolicy#view_as_trial?, the dashboard's chapter count). Handoff 0086 removed the dashboard's
+  # trial banners and with them the display-only helpers (days remaining, end date, the 14-day "just ended" window).
   def trial_active?
     trial_remaining_seconds.positive?
-  end
-
-  # How long the trial-expired dashboard banner keeps showing after
-  # trial_ends_on (handoff 0046) -- long enough to still catch someone who
-  # comes back a week or two later, short enough not to nag forever. Purely
-  # time-based (no dismissal state to store) so it stays a display-only
-  # calculation, same as the rest of this class.
-  TRIAL_EXPIRED_BANNER_WINDOW = 14.days
-
-  def trial_ends_on
-    (trial_started_at + 7.days).to_date
-  end
-
-  def trial_recently_expired?
-    !trial_active? && Time.current < trial_started_at + 7.days + TRIAL_EXPIRED_BANNER_WINDOW
   end
 
   def licensed_for?(product_code, at: Time.current)

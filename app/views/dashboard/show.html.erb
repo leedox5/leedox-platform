@@ -7,7 +7,9 @@
     Handoff 0084 (D-010) -- dark body like the home and the series pages (colors only; content unchanged), with the
     display serif for the page and section headings.
     Handoff 0085 R1 -- "what can I watch": the earlier products only while in use, under an 이전 상품 heading, and
-    더 둘러보기 shows the series not in use (the /products card, at most four) instead of earlier products. %>
+    더 둘러보기 shows the series not in use (the /products card, at most four) instead of earlier products.
+    Handoff 0086 -- the two trial banners (무료 체험 D-N / 기간이 끝났습니다 · 가격 보기 →) are gone with the pricing
+    page; the trial rule itself is unchanged. %>
 <% content_for :head do %>
   <%= render "shared/display_font" %>
 <% end %>
@@ -28,17 +30,6 @@
         mypage_path,
         class: "text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
     </header>
-
-    <% if current_user.trial_active? && @has_unowned_product %>
-      <p class="mb-6 rounded-lg border border-white/10 bg-[#15181e] px-4 py-3 text-sm font-semibold text-[#f2efe8]">
-        무료 체험 D-<%= current_user.trial_days_remaining %> · <%= I18n.l(current_user.trial_ends_on, locale: :ko, format: :long) %>까지 — 체험 기간에는 상품별로 더 많은 챕터가 열립니다. 기간이 끝나면 비로그인 방문자와 같은 범위로 돌아갑니다.
-      </p>
-    <% elsif current_user.trial_recently_expired? && @has_unowned_product %>
-      <p class="mb-6 rounded-lg border border-[#f0a53c]/40 bg-[#f0a53c]/10 px-4 py-3 text-sm font-semibold text-[#f0a53c]">
-        무료 체험 기간이 끝났습니다. 지금은 비로그인 방문자와 같은 범위까지 열려 있습니다. 이어서 읽으려면 라이선스를 확인해보세요.
-        <%= link_to "가격 보기 →", pricing_path, class: "underline decoration-[#f0a53c]/60 underline-offset-2 hover:text-[#f5b85e]" %>
-      </p>
-    <% end %>
 
     <% if @series_in_use.any? %>
       <section aria-label="이용 중인 시리즈" class="mb-10">

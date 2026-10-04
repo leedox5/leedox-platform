@@ -81,7 +81,8 @@ class BillingController < ApplicationController
 
   def cancel
     product_code = params[:product_code].presence || params[:product].presence
-    target_path = product_code.present? ? billing_checkout_path_for(product_code) : pricing_path
+    # Handoff 0086 -- with no product code, the series list (it was /pricing, which now redirects there).
+    target_path = product_code.present? ? billing_checkout_path_for(product_code) : products_path
     flash[:alert] ||= "결제가 취소되었습니다. 선택한 상품 결제 화면에서 다시 시도하실 수 있습니다."
     flash.keep(:alert)
     redirect_to target_path

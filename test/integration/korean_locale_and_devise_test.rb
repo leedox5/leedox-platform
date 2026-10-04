@@ -132,7 +132,7 @@ class KoreanLocaleAndDeviseTest < ActionDispatch::IntegrationTest
   test "number/date formatting used sitewide is unaffected (numbers still comma-delimited)" do
     Commerce::CatalogBootstrap.call!
 
-    get pricing_path
+    get chatdox_path # was /pricing, removed in 0086; Chatdox's own price block shows the same amounts
     assert_response :success
     assert_match(/7,700원/, response.body)
   end

@@ -65,22 +65,20 @@ class AistartFreeProductTest < ActionDispatch::IntegrationTest
     assert_nil section, "aistart must be excluded from user dashboard under Option B policy"
   end
 
-  test "aistart shows up on /pricing as a free product, not a not-yet-launched paid one" do
-    get pricing_path
+  # 0086: the pricing page is gone; the home's AI row shows the same card (same StandaloneProductsHelper rule).
+  test "aistart shows up on the home's AI row as a free product, not a not-yet-launched paid one" do
+    get root_path
     assert_response :success
 
     doc = Nokogiri::HTML(response.body)
-    card = doc.css("article").find { |c| c.text.include?(@aistart.name) }
-    assert card, "expected a pricing card for aistart"
+    card = doc.css("section[aria-labelledby='track-ai'] a").find { |c| c.text.include?(@aistart.name) }
+    assert card, "expected a home card for aistart"
     assert_match(/무료 이용 가능/, card.text)
     assert_match(/무료/, card.text)
     assert_no_match(/준비 중/, card.text)
 
-    link = card.at_css("a")
-    # Free-access products skip the login funnel (leedox_restore_free_content_guest_access_r1)
-    # -- unlike paid products, whose /pricing detail link still routes through sign-in first.
-    assert link, "expected a link straight to the content, bypassing the login funnel"
-    assert_equal product_content_index_path("aistart"), link["href"]
+    # Free-access products skip the login funnel (leedox_restore_free_content_guest_access_r1).
+    assert_equal product_content_index_path("aistart"), card["href"], "a link straight to the content"
   end
 
   test "checkout for aistart shows the same graceful not-ready screen as any other sale_enabled: false product" do

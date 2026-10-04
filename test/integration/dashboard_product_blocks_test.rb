@@ -26,7 +26,7 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
 
     # Claudox (unowned) no longer shows -- 0085: 더 둘러보기 lists series, not earlier products
     assert_no_match(/Claudox/, doc.at_css("main").text)
-    assert_nil doc.at_css("main a[href='#{pricing_path}']")
+    assert_nil doc.at_css("main a[href='/pricing']")
   end
 
   test "GitHub Lab entry point is not present in dashboard sections in V1" do

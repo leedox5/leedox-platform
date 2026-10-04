@@ -87,7 +87,9 @@ Rails.application.routes.draw do
   delete "/chapter_progresses", to: "chapter_progresses#destroy"
 
   get "/getting-started", to: "pages#getting_started"
-  get "/pricing", to: "pages#pricing"
+  # Handoff 0086 -- the pricing page is gone (it only listed the earlier products, each of which has its own price
+  # block); the address moves permanently to the series list for bookmarks, search results and shared links.
+  get "/pricing", to: redirect("/products", status: 301)
   get "/community", to: "pages#community"
   get "/login", to: "pages#login"
   # Handoff 0077 -- notices (공지), readable by everyone. Model/controller are named Announcement

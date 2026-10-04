@@ -526,9 +526,7 @@ class ProductLineSalesAndPurchaseTest < ActionDispatch::IntegrationTest
     name = @line.product.name
     buy!(@buyer, @line)
 
-    get pricing_path
-    assert_response :success
-    assert_no_match(/#{Regexp.escape(name)}/, response.body)
+    # (/pricing, the old term-product catalog, was removed in 0086 -- the home's standalone cards below are it now.)
     # The home shows ProductLine series and episodes on purpose since handoff 0071; what must hold is that a line
     # product never joins the standalone term-product cards there.
     get root_path
@@ -567,7 +565,7 @@ class ProductLineSalesAndPurchaseTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "input[name='order[requested_start_on]']"
     assert_includes css_select("main").text, "개월"
-    get pricing_path
-    assert_match(/Chatdox/, response.body)
+    get root_path # was /pricing, removed in 0086
+    assert_select "[data-product-code='chatdox']"
   end
 end

@@ -72,11 +72,11 @@ class UserDashboardVisibilityFilterTest < ActionDispatch::IntegrationTest
     assert_select "section[aria-label='더 둘러보기']", 0
   end
 
-  test "4. Scope is restricted to user dashboard cards -- pricing page and admin page remain untouched" do
-    # Pricing page still displays aistart (free product) and preparing products
-    get pricing_path
+  test "4. Scope is restricted to user dashboard cards -- the home and admin page remain untouched" do
+    # The home's AI row still shows aistart (free product); it was /pricing until 0086 removed that page
+    get root_path
     assert_response :success
-    assert_select "h2", text: /AI, 오늘부터 시작/
+    assert_includes css_select("section[aria-labelledby='track-ai']").first.text, "AI, 오늘부터 시작"
 
     # Admin user management still includes all products in subscription column logic
     admin = User.create!(name: "관리자", email: "admin-visibility@example.com", password: "password123", role: :admin)

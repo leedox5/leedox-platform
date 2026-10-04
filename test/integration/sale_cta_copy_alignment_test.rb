@@ -77,7 +77,7 @@ class SaleCtaCopyAlignmentTest < ActionDispatch::IntegrationTest
   test "6. Public customer screens do not leave '가격과 준비 상태' or '판매 준비 상태' phrases when sales are enabled" do
     enable_sales!
 
-    [ chatdox_path, claudox_path, pricing_path, root_path ].each do |path|
+    [ chatdox_path, claudox_path, root_path ].each do |path| # /pricing removed in 0086
       get path
       assert_response :success
       assert_no_match(/가격과 준비 상태/, response.body)
@@ -85,7 +85,7 @@ class SaleCtaCopyAlignmentTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "7. Non-regression of home page, pricing summary page, and Aistart free product CTAs" do
+  test "7. Non-regression of home page and Aistart free product CTAs (the pricing summary page went in 0086)" do
     enable_sales!
 
     # Home page -- since handoff 0071 the products are whole-card links in the "AI와 함께 만들기" row, showing
@@ -95,12 +95,9 @@ class SaleCtaCopyAlignmentTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", chatdox_path, text: /판매 중/
     assert_select "a[href=?]", claudox_path, text: /판매 중/
 
-    # Pricing summary page
-    get pricing_path
-    assert_response :success
-    assert_select "h1", text: "상품별 가격"
-    assert_select "a[href*='chatdox']", text: "자세히 보기"
-    assert_select "a[href*='claudox']", text: "자세히 보기"
+    # The pricing summary page is gone (0086): its address moves to the series list
+    get "/pricing"
+    assert_redirected_to products_path
 
     # Aistart free product CTA (shows on the last chapter)
     get product_chapter_path("aistart", "08")
