@@ -19,6 +19,17 @@ class License < ApplicationRecord
   scope :for_product, ->(code) { joins(:product).where(products: { code: code }) }
   scope :not_canceled, -> { where.not(status: "canceled") }
 
+  # Handoff 0080/0081 -- which of several licenses a card's period line speaks for: an indefinite one
+  # if any, else the one that ends last (dashboard series cards, /mypage cards).
+  def self.longest_running(licenses)
+    licenses.max_by { |license| [ license.indefinite? ? 1 : 0, license.last_usable_on || Date.new(1) ] }
+  end
+
+  # The expired license whose last day came latest -- "이용 기간이 끝났습니다 (… 까지)".
+  def self.latest_expired(licenses)
+    licenses.select { |license| license.effective_status == "expired" }.max_by(&:last_usable_on)
+  end
+
   # Handoff 0057 -- NULL access_ends_at (the policy's "expires_at") means the
   # license never expires. It is deliberately not a far-future date: every
   # "is this still valid" question goes through active_at?/effective_status

@@ -154,11 +154,11 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  # HQ verification -- the my page link uses the dashboard's new word (진행률).
-  test "the my page links to the dashboard as 진행률" do
+  # 0079 renamed the my page link to "진행률은 대시보드에서 →"; 0081 R2 removed it (the header menu has 대시보드).
+  test "the my page no longer links to the dashboard from the account card" do
     sign_in(@user)
     get mypage_path
-    assert_select "a[href=?]", dashboard_path, text: "진행률은 대시보드에서 →"
+    assert_not_includes response.body, "진행률은 대시보드에서"
     assert_not_includes response.body, "학습 진도는 대시보드에서"
   end
 

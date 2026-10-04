@@ -32,7 +32,7 @@ class DashboardController < ApplicationController
     @series_in_use = lines.sort_by { |line| [ -active[line.product_id].map(&:starts_on).max.jd, line.id ] }
     # The license whose period the card shows: an indefinite one if there is one, else the latest end.
     @series_licenses = lines.to_h do |line|
-      [ line.id, active[line.product_id].max_by { |license| [ license.indefinite? ? 1 : 0, license.last_usable_on || Date.new(1) ] } ]
+      [ line.id, License.longest_running(active[line.product_id]) ]
     end
 
     ids = lines.map(&:id)
@@ -51,7 +51,7 @@ class DashboardController < ApplicationController
     licenses = @user_licenses.select { |license| license.product_id == product.id }
     return nil if licenses.any?(&:active_at?)
 
-    licenses.select { |license| license.effective_status == "expired" }.max_by(&:last_usable_on)
+    License.latest_expired(licenses)
   end
 
   def dashboard_products

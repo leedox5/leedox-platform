@@ -56,7 +56,7 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
     assert_no_match(/학습 요약/, response.body)
     assert_no_match(/완료한 챕터/, response.body)
     assert_select "a[href=?]", dashboard_path, text: /대시보드/
-    assert_select "title", text: /마이페이지 - LEEDOX/
+    assert_select "title", text: /마이페이지 \| LEEDOX/
 
     get edit_user_registration_path
     assert_response :success

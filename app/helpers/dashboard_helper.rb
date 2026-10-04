@@ -23,7 +23,7 @@ module DashboardHelper
     elsif (license = user.licenses.for_product(product.code).not_canceled.find { |item| item.active_at? })
       dashboard_license_period_text(license)
     elsif expired_license
-      "이용 기간이 끝났습니다 (#{I18n.l(expired_license.last_usable_on, format: :long, locale: :ko)}까지)"
+      license_expired_period_text(expired_license)
     else
       "이용 중인 라이선스가 없습니다"
     end
@@ -34,5 +34,15 @@ module DashboardHelper
   # license_period_text(user, product) of its own.
   def dashboard_license_period_text(license)
     license.indefinite? ? "무기한 이용 중" : "이용 종료일: #{I18n.l(license.last_usable_on, format: :long, locale: :ko)}"
+  end
+
+  # Handoff 0080/0081 -- an ended license (dashboard 만료 cards, /mypage 만료 cards).
+  def license_expired_period_text(license)
+    "이용 기간이 끝났습니다 (#{I18n.l(license.last_usable_on, format: :long, locale: :ko)}까지)"
+  end
+
+  # Handoff 0081 -- a license that hasn't started yet (/mypage 이용 예정 cards).
+  def license_scheduled_period_text(license)
+    "#{I18n.l(license.starts_on, format: :long, locale: :ko)}부터 이용 예정"
   end
 end
