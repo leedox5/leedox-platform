@@ -16,8 +16,10 @@ class V1ProductContractRegressionTest < ActionDispatch::IntegrationTest
     get terms_path
     assert_response :success
     terms_body = response.body
-    assert_match(/Chatdox 핵심 웹 챕터 20개 및 라이선스 기간 중 신규 웹 콘텐츠/, terms_body)
-    assert_match(/Claudox 핵심 웹 챕터 20개, 라이선스 전용 특별판 및 신규 챕터/, terms_body)
+    # 0088: the terms name no product -- each product's chapters are shown on its own page (checked below), and the
+    # terms' per-type row points there; what isn't promised is still not in the terms.
+    assert_no_match(/Chatdox|Claudox/, terms_body)
+    assert_match(/상품 페이지에 표시된 웹 챕터와 이용 기간 중 추가되는 웹 콘텐츠/, terms_body)
     assert_no_match(/소스코드 전체.*포함\(수동 초대\)/, terms_body)
     assert_no_match(/GitHub 비공개 저장소\(Lab\) 접근/, terms_body)
 

@@ -6,26 +6,25 @@ class LegalPagesCommentsClauseTest < ActionDispatch::IntegrationTest
     get terms_path
     assert_response :success
     text = css_select("body").text.squish
-    assert_includes text, "시행일: 2026년 10월 4일"
+    assert_includes text, "시행일: 2026년 10월 5일" # 0088 revised the terms again (제4조의2 itself unchanged)
     assert_operator text.index("제4조 금지 행위"), :<, text.index("제4조의2 이용자 게시물")
-    assert_operator text.index("제4조의2 이용자 게시물"), :<, text.index("제5조")
+    assert_operator text.index("제4조의2 이용자 게시물"), :<, text.index("제5조 라이선스 방식") # 0088: 제1조 now mentions 제5조
     [ "게시물의 내용에 대한 책임과 권리는 작성한 이용자에게 있습니다.",
       "작성자 이름의 일부를 가린 표시 이름이 함께 표시됩니다.",
       "제7조의 콘텐츠 권리를 침해하는 내용",
       "사전 통지 없이 해당 게시물을 숨길 수 있습니다. 작성자는 제15조(문의)의 방법으로 이의를 제기할 수 있습니다.",
       "탈퇴 전에 직접 삭제하거나 회사에 요청할 수 있습니다." ].each { |clause| assert_includes text, clause }
-    assert_select "ol.list-decimal > li", 5
+    assert_select "#article-4-2 > ol.list-decimal > li", 5 # 0088: 제5조·제9조·부칙 are numbered lists too
   end
 
-  # Handoff 0075 -- a one-line revision note right under the effective date; on /terms, 제4조의2 links to the article.
-  test "the terms show the revision note under the effective date, linking 제4조의2 to the article" do
+  # Handoff 0075 -- a one-line revision note right under the effective date. Handoff 0088 replaced the 10월 4일 line
+  # (its 제4조의2 link and 0077's 공지 보기 link went with it -- this revision has no notice); the anchor stays.
+  test "the terms show the revision note under the effective date, without a notice link" do
     get terms_path
     date, note = css_select("h1 ~ p").first(2).map { |n| n.text.squish }
-    assert_equal "시행일: 2026년 10월 4일", date
-    # 0077 R2 -- the confirmed sentence is unchanged; a "공지 보기" link to /notices follows it.
-    assert_equal "개정 안내: 2026년 10월 4일 — 편 댓글 기능 도입에 따라 제4조의2(이용자 게시물)를 추가했습니다. 공지 보기", note
-    assert_select "h1 ~ p a[href='#article-4-2']", text: "제4조의2"
-    assert_select "h1 ~ p a[href=?]", announcements_path, text: "공지 보기"
+    assert_equal "시행일: 2026년 10월 5일", date
+    assert_equal "개정 안내: 2026년 10월 5일 — 시리즈(무기한 이용) 방식에 맞춰 상품별 조항을 상품 유형 기준으로 정리했습니다(제1조, 제4조, 제5조~제10조, 부칙).", note
+    assert_select "h1 ~ p a", 0
     assert_select "#article-4-2 h3", text: "제4조의2 이용자 게시물"
   end
 
@@ -42,7 +41,7 @@ class LegalPagesCommentsClauseTest < ActionDispatch::IntegrationTest
       User.create!(name: "관리자", email: "legal-admin-#{SecureRandom.hex(3)}@example.com", password: "password123", role: :admin) ].each do |user|
       post user_session_path, params: { user: { email: user.email, password: "password123" } }
       get terms_path
-      assert_includes css_select("body").text.squish, "개정 안내: 2026년 10월 4일 — 편 댓글 기능 도입에 따라 제4조의2(이용자 게시물)를 추가했습니다."
+      assert_includes css_select("body").text.squish, "개정 안내: 2026년 10월 5일 — 시리즈(무기한 이용) 방식에 맞춰 상품별 조항을 상품 유형 기준으로 정리했습니다"
       get privacy_path
       assert_includes css_select("body").text.squish, "개정 안내: 2026년 10월 4일 — 편 댓글 기능 도입에 따라 수집 항목에 게시물 정보를"
       delete destroy_user_session_path
