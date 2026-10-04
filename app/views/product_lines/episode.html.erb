@@ -66,5 +66,10 @@
         <% end %>
       <% end %>
     </div>
+
+    <%# Handoff 0074 -- nil when comments couldn't be loaded (EpisodePage#load_episode_comments): the episode still shows. %>
+    <% if @comment_threads %>
+      <%= render "product_lines/comments" %>
+    <% end %>
   </main>
 </div>

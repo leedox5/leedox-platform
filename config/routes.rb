@@ -35,6 +35,9 @@ Rails.application.routes.draw do
   # constraint is what keeps them apart from the old Season slugs below.
   get "/products/:product_slug/:episode_id", to: "product_lines#episode", as: :product_episode, constraints: { episode_id: /\d+/ }
   get "/products/:product_slug/:episode_id/assets/:asset_id", to: "product_asset_downloads#show", as: :product_episode_asset, constraints: { episode_id: /\d+/ }
+  # Handoff 0074 -- comments under an episode page (same gates as the page, EpisodeCommentsController).
+  post "/products/:product_slug/:episode_id/comments", to: "episode_comments#create", as: :product_episode_comments, constraints: { episode_id: /\d+/ }
+  delete "/products/:product_slug/:episode_id/comments/:id", to: "episode_comments#destroy", as: :product_episode_comment, constraints: { episode_id: /\d+/ }
   # Handoff 0065 (D5) -- the old Season URLs: /products/:line/:season[/:episode[/assets/:asset]]
   # redirect permanently to the product that Season became.
   get "/products/:product_slug/:season_slug", to: "legacy_season_redirects#show", as: :legacy_product_season
@@ -129,6 +132,13 @@ Rails.application.routes.draw do
     # content_episodes routes above for edit/update/show/destroy/transition/
     # takeaways (they don't care which kind of parent an episode has); only
     # new/create need their own nesting under a product.
+    # Handoff 0074 R2 -- episode comments: the newest-first list, and hide/unhide (never delete).
+    resources :episode_comments, only: %i[index], path: "comments" do
+      member do
+        patch :hide
+        patch :unhide
+      end
+    end
     resources :product_lines, only: %i[index show new create edit update] do
       resources :content_episodes, only: %i[new create], shallow: true
       # Handoff 0057/0065 -- one-time price and sale switch for the product.

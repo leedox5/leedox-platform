@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_04_020000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -152,6 +152,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_010000) do
     t.datetime "updated_at", null: false
     t.index ["episode_id", "position"], name: "index_content_takeaways_on_episode_id_and_position"
     t.index ["episode_id"], name: "index_content_takeaways_on_episode_id"
+  end
+
+  create_table "episode_comments", force: :cascade do |t|
+    t.text "body", null: false
+    t.integer "content_episode_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "deleted_at"
+    t.datetime "hidden_at"
+    t.integer "parent_id"
+    t.datetime "updated_at", null: false
+    t.integer "user_id"
+    t.index ["content_episode_id", "created_at"], name: "index_episode_comments_on_content_episode_id_and_created_at"
+    t.index ["created_at"], name: "index_episode_comments_on_created_at"
+    t.index ["parent_id"], name: "index_episode_comments_on_parent_id"
+    t.index ["user_id"], name: "index_episode_comments_on_user_id"
   end
 
   create_table "episode_views", force: :cascade do |t|
@@ -435,6 +450,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_010000) do
   add_foreign_key "content_revisions", "content_episodes", column: "episode_id"
   add_foreign_key "content_revisions", "users", column: "editor_id"
   add_foreign_key "content_takeaways", "content_episodes", column: "episode_id"
+  add_foreign_key "episode_comments", "content_episodes", on_delete: :cascade
+  add_foreign_key "episode_comments", "episode_comments", column: "parent_id", on_delete: :cascade
+  add_foreign_key "episode_comments", "users", on_delete: :nullify
   add_foreign_key "episode_views", "content_episodes", on_delete: :cascade
   add_foreign_key "external_account_links", "users"
   add_foreign_key "licenses", "order_items"

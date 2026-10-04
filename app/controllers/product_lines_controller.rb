@@ -16,6 +16,7 @@
 class ProductLinesController < ApplicationController
   include ProductLineGates
   include EpisodeViewTracking
+  include EpisodePage
 
   # "무료"/"유료" also include a product already owned in that same money sense (0068 R2),
   # so a purchased product doesn't vanish from every filter that isn't "내 제품". "mine" is
@@ -69,15 +70,10 @@ class ProductLinesController < ApplicationController
     @free_open = @product_line.free_start_open?
   end
 
+  # Handoff 0074 -- the page itself (body, takeaways, files, comments) is prepared in EpisodePage,
+  # shared with EpisodeCommentsController so a rejected comment re-renders this same page.
   def episode
-    index = @episodes.index(@current_episode)
-    @prev_episode = index.positive? ? @episodes[index - 1] : nil
-    @next_episode = @episodes[index + 1]
-    @content_html = ContentMarkdown.render(strip_leading_heading(@current_episode.body.to_s), parent: @current_episode)
-    @takeaways = @current_episode.content_takeaways.ordered.map do |takeaway|
-      { kind: takeaway.kind, body_html: ContentMarkdown.render(takeaway.body.to_s, parent: @current_episode) }
-    end
-    @assets = @current_episode.content_assets.ordered.with_attached_file
+    prepare_episode_page
   end
 
   private
@@ -92,9 +88,5 @@ class ProductLinesController < ApplicationController
     when "mine" then lines.select { |line| @access_states[line.id] == :owned }
     else lines
     end
-  end
-
-  def strip_leading_heading(raw_markdown)
-    raw_markdown.sub(/\A\s*#[^\n]*\n?/, "")
   end
 end

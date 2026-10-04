@@ -1,0 +1,34 @@
+<%# Handoff 0074 -- one comment or reply on the customer episode page. The body is plain text: ERB escapes it (no
+    HTML/markdown, no auto-linking) and whitespace-pre-wrap keeps the author's line breaks. A top-level comment that
+    isn't visible any more is rendered as a placeholder line instead (its replies stay below it).
+    R2 -- an admin also sees a hidden (not deleted) comment, dimmed and labelled 숨김, and gets 숨김 / 숨김 해제 on
+    every live comment. Those buttons post to the admin controller, which brings the admin back here. %>
+<% reply = comment.reply? %>
+<% admin = current_user&.admin? %>
+<% shown = comment.visible? || (admin && comment.hidden? && !comment.deleted?) %>
+<div id="comment-<%= comment.id %>" class="<%= reply ? "ml-6 border-l-2 border-gray-100 pl-4 sm:ml-8" : "" %> <%= "opacity-50" if shown && comment.hidden? %> scroll-mt-24 py-3">
+  <% if shown %>
+    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+      <%= comment_author_label(comment) %>
+      <span class="text-xs text-gray-400"><%= comment_time(comment) %></span>
+      <% if comment.hidden? %>
+        <span class="rounded-full bg-gray-200 px-2 py-0.5 text-[11px] font-bold text-gray-600">숨김</span>
+      <% end %>
+      <span class="ml-auto flex items-center gap-3">
+        <% if admin %>
+          <%= button_to comment.hidden? ? "숨김 해제" : "숨김",
+            comment.hidden? ? unhide_admin_episode_comment_path(comment, from: "episode") : hide_admin_episode_comment_path(comment, from: "episode"),
+            method: :patch, class: "text-xs font-semibold text-gray-500 hover:text-amber-700" %>
+        <% end %>
+        <% if comment.authored_by?(current_user) %>
+          <%= button_to "삭제", product_episode_comment_path(@product_line.slug, @current_episode.display_id, comment),
+            method: :delete, data: { turbo_confirm: "이 댓글을 삭제할까요?" },
+            class: "text-xs font-semibold text-gray-400 hover:text-red-600" %>
+        <% end %>
+      </span>
+    </div>
+    <p class="mt-1 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-gray-800"><%= comment.body %></p>
+  <% else %>
+    <p class="text-sm italic text-gray-400"><%= comment_placeholder(comment) %></p>
+  <% end %>
+</div>

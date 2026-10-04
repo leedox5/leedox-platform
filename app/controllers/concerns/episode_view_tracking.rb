@@ -19,8 +19,16 @@
 # "Same person": a signed-in user by user id, a guest by a random id kept in the existing
 # Rails session cookie. Either is stored only as an HMAC (viewer_key) -- no IP, User-Agent or
 # raw user id is written.
+#
+# 0074 R2 -- the redirect back to the episode after a comment action (post, delete, admin hide/
+# unhide) isn't a view. The action sets flash[SKIP_FLASH] = episode id; the very next request
+# consumes it (flash lives exactly one request), and only skips counting if it's that episode's
+# page. It sits in the encrypted session cookie, so a visitor can't set it from a URL, and it
+# can't outlive the redirect to suppress a later ordinary view.
 module EpisodeViewTracking
   extend ActiveSupport::Concern
+
+  SKIP_FLASH = :skip_episode_view
 
   BOT_USER_AGENT = /bot|crawl|spider|slurp|preview|fetch|scrape|facebookexternalhit|embedly|whatsapp|
     kakaotalk-scrap|daumoa|yeti|headless|python-requests|curl|wget|httpclient|okhttp|go-http-client/ix
@@ -43,7 +51,7 @@ module EpisodeViewTracking
 
   def countable_episode_view?
     request.get? && !request.head? && response.status == 200 &&
-      !prefetch_request? && !bot_request? &&
+      !prefetch_request? && !bot_request? && flash[SKIP_FLASH] != @current_episode&.id &&
       @current_episode&.published? && @product_line.visibility == "public"
   end
 

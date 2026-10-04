@@ -1,0 +1,87 @@
+<% content_for :title, "댓글 관리" %>
+<%# Handoff 0074 R2 -- every series' episode comments, newest first. Unlike the customer page, the author's full name and
+    email are shown here. Hiding is the only moderation action (reversible); deleting is the author's own.
+    R3 -- a fixed table layout (colgroup widths): with the default auto layout the one-line truncated excerpt claimed its
+    full text width and squeezed 시리즈 · 편 into a narrow column while pushing 상태/관리 off screen (~930px). Now every
+    column but 내용 has a set width and 내용 takes what's left, cut with an ellipsis; 시리즈 and 편 sit on two lines. %>
+<div class="min-h-screen bg-slate-50">
+  <%= render "shared/header" %>
+  <main class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <header>
+      <p class="text-sm font-bold uppercase tracking-[0.2em] text-blue-700">Admin Comments</p>
+      <h1 class="mt-2 text-3xl font-black text-slate-950">댓글 관리</h1>
+      <p class="mt-2 text-slate-600">
+        모든 시리즈의 편 댓글을 최신순으로 봅니다. 문제가 있는 댓글은 삭제하지 않고 숨깁니다(언제든 숨김 해제 가능).
+        <% if @total_count > @comments.size %>최근 <%= @comments.size %>개만 표시합니다(전체 <%= @total_count %>개).<% end %>
+      </p>
+    </header>
+
+    <section class="mt-8 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <table class="w-full min-w-[52rem] table-fixed divide-y divide-slate-200 text-sm">
+        <colgroup>
+          <%# 시각 fits "2026.10.04 09:10" on one line, 상태 fits "삭제됨", 관리 fits "숨김 해제"; at ~930px 내용 keeps ~130px. %>
+          <col class="w-40">
+          <col class="w-52">
+          <col class="w-44">
+          <col>
+          <col class="w-24">
+          <col class="w-28">
+        </colgroup>
+        <thead class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+          <tr>
+            <th class="whitespace-nowrap px-4 py-3">시각</th>
+            <th class="px-4 py-3">시리즈 · 편</th>
+            <th class="px-4 py-3">작성자</th>
+            <th class="px-4 py-3">내용</th>
+            <th class="whitespace-nowrap px-4 py-3">상태</th>
+            <th class="whitespace-nowrap px-4 py-3 text-right">관리</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% @comments.each do |comment| %>
+            <% episode = comment.content_episode %>
+            <% line = episode.product_line %>
+            <tr id="comment-<%= comment.id %>" class="<%= "bg-slate-50 text-slate-500" unless comment.visible? %>">
+              <td class="whitespace-nowrap px-4 py-3 tabular-nums text-slate-600"><%= comment.created_at.strftime("%Y.%m.%d %H:%M") %></td>
+              <td class="px-4 py-3">
+                <% if line %>
+                  <%= link_to product_episode_path(line.slug, episode.display_id, anchor: "comment-#{comment.id}"), data: { turbo_prefetch: false }, class: "group block min-w-0 hover:underline" do %>
+                    <span class="block truncate text-xs text-slate-500" title="<%= line.customer_name %>"><%= line.customer_name %></span>
+                    <span class="block truncate font-semibold text-blue-700" title="<%= episode.customer_title %>"><%= episode.display_id %> <%= episode.customer_title.presence || "(제목 없음)" %></span>
+                  <% end %>
+                <% end %>
+                <% if comment.reply? %><span class="text-xs text-slate-500">(답글)</span><% end %>
+              </td>
+              <td class="px-4 py-3">
+                <% if comment.user %>
+                  <span class="block truncate font-semibold text-slate-900" title="<%= comment.user.name %>"><%= comment.user.name %><% if comment.user.admin? %><span class="ml-1 rounded-full bg-blue-600 px-2 py-0.5 text-[11px] font-bold text-white">운영자</span><% end %></span>
+                  <span class="block truncate text-xs text-slate-500" title="<%= comment.user.email %>"><%= comment.user.email %></span>
+                <% else %>
+                  <span class="text-slate-400">탈퇴한 사용자</span>
+                <% end %>
+              </td>
+              <td class="px-4 py-3"><p class="truncate" title="<%= comment.body %>"><%= truncate(comment.body.squish, length: 80) %></p></td>
+              <td class="whitespace-nowrap px-4 py-3" data-comment-status>
+                <% if comment.deleted? %>
+                  <span class="rounded-full bg-slate-200 px-2.5 py-0.5 text-xs font-bold text-slate-600">삭제됨</span>
+                <% elsif comment.hidden? %>
+                  <span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-800">숨김</span>
+                <% else %>
+                  <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700">공개</span>
+                <% end %>
+              </td>
+              <td class="whitespace-nowrap px-4 py-3 text-right">
+                <% unless comment.deleted? %>
+                  <%= button_to comment.hidden? ? "숨김 해제" : "숨김",
+                    comment.hidden? ? unhide_admin_episode_comment_path(comment) : hide_admin_episode_comment_path(comment),
+                    method: :patch, class: "font-semibold text-blue-700 hover:underline" %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <% if @comments.empty? %><p class="p-8 text-center text-slate-500">아직 댓글이 없습니다.</p><% end %>
+    </section>
+  </main>
+</div>

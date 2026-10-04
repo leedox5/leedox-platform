@@ -16,6 +16,8 @@ class ContentEpisode < ApplicationRecord
   has_many :content_assets, dependent: :destroy
   # Handoff 0073 -- view counts go with the episode (the FK also cascades in the DB).
   has_many :episode_views, dependent: :delete_all
+  # Handoff 0074 -- comments go with the episode (the FK also cascades in the DB).
+  has_many :episode_comments, dependent: :delete_all
   # Inline images for the body and takeaways (handoff 0063).
   has_many :content_images, dependent: :destroy
 

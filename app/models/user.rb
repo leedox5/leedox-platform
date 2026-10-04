@@ -37,6 +37,8 @@ class User < ApplicationRecord
     foreign_key: :processed_by_id, dependent: :restrict_with_error
   has_many :commerce_audit_events, foreign_key: :actor_id, dependent: :restrict_with_error
   has_one :external_account_link, dependent: :restrict_with_error
+  # Handoff 0074 -- a deleted account's comments stay, shown as "탈퇴한 사용자".
+  has_many :episode_comments, dependent: :nullify
 
   enum :role, { user: 0, admin: 1 }
 
