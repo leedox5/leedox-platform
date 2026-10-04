@@ -17,6 +17,35 @@ class LegalPagesCommentsClauseTest < ActionDispatch::IntegrationTest
     assert_select "ol.list-decimal > li", 5
   end
 
+  # Handoff 0075 -- a one-line revision note right under the effective date; on /terms, 제4조의2 links to the article.
+  test "the terms show the revision note under the effective date, linking 제4조의2 to the article" do
+    get terms_path
+    date, note = css_select("h1 ~ p").first(2).map { |n| n.text.squish }
+    assert_equal "시행일: 2026년 10월 4일", date
+    assert_equal "개정 안내: 2026년 10월 4일 — 편 댓글 기능 도입에 따라 제4조의2(이용자 게시물)를 추가했습니다.", note
+    assert_select "h1 ~ p a[href='#article-4-2']", text: "제4조의2"
+    assert_select "#article-4-2 h3", text: "제4조의2 이용자 게시물"
+  end
+
+  test "the privacy policy shows its revision note under the effective date" do
+    get privacy_path
+    date, note = css_select("h1 ~ p").first(2).map { |n| n.text.squish }
+    assert_equal "시행일: 2026년 10월 4일", date
+    assert_equal "개정 안내: 2026년 10월 4일 — 편 댓글 기능 도입에 따라 수집 항목에 게시물 정보를, 이용 목적에 작성자 표시(이름 일부를 가린 형태)를 추가했습니다.", note
+  end
+
+  test "signed-in users and admins see the same notes as guests" do
+    [ User.create!(name: "회원", email: "legal-#{SecureRandom.hex(3)}@example.com", password: "password123"),
+      User.create!(name: "관리자", email: "legal-admin-#{SecureRandom.hex(3)}@example.com", password: "password123", role: :admin) ].each do |user|
+      post user_session_path, params: { user: { email: user.email, password: "password123" } }
+      get terms_path
+      assert_includes css_select("body").text.squish, "개정 안내: 2026년 10월 4일 — 편 댓글 기능 도입에 따라 제4조의2(이용자 게시물)를 추가했습니다."
+      get privacy_path
+      assert_includes css_select("body").text.squish, "개정 안내: 2026년 10월 4일 — 편 댓글 기능 도입에 따라 수집 항목에 게시물 정보를"
+      delete destroy_user_session_path
+    end
+  end
+
   test "the privacy policy lists comments as collected data and the masked author display as a purpose" do
     get privacy_path
     assert_response :success
