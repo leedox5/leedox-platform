@@ -38,15 +38,19 @@ class Admin::Commerce::ProductsController < Admin::BaseController
 
     redirect_to admin_commerce_products_path, notice: notice_msg
   rescue ActiveRecord::RecordInvalid => e
-    flash.now[:alert] = "저장 중 오류가 발생했습니다: #{e.message}"
+    flash.now[:alert] = "저장 중 오류가 발생했습니다: #{e.record.errors.map(&:message).to_sentence.presence || e.message}"
     ensure_offers_exist_for(@product)
     render :edit, status: :unprocessable_entity
   end
 
   private
 
+  # Handoff 0078 -- the home switch and the tagline only mean something for a standalone (pre-series)
+  # product; for the commerce side of a ProductLine they're neither shown nor accepted.
   def product_params
-    params.require(:product).permit(:name, :sale_enabled, :free_access, :guest_chapter_limit, :trial_chapter_limit, :active)
+    keys = %i[name sale_enabled free_access guest_chapter_limit trial_chapter_limit active]
+    keys += %i[show_on_home tagline] if @product.standalone?
+    params.require(:product).permit(*keys)
   end
 
   def ensure_offers_exist_for(product)

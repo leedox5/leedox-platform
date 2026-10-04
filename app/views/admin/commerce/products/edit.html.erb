@@ -52,6 +52,24 @@
             <span>상품 활성화 (Active)</span>
           </label>
         </div>
+
+        <%# Handoff 0078 -- only for a standalone (pre-series) product; a ProductLine's commerce product has neither. %>
+        <% if @product.standalone? %>
+          <div class="space-y-6 border-t border-slate-100 pt-6">
+            <div>
+              <label class="inline-flex cursor-pointer items-center gap-2 text-sm font-bold text-slate-800">
+                <%= f.check_box :show_on_home, class: "rounded border-slate-300 text-blue-600 focus:ring-blue-500" %>
+                <span>홈에 표시</span>
+              </label>
+              <p class="mt-1 pl-6 text-xs text-slate-500">켜면 홈 'AI와 함께 만들기' 줄에 나옵니다. 가격 페이지와 상품 페이지에는 영향이 없습니다.</p>
+            </div>
+            <div>
+              <%= f.label :tagline, "한 줄 설명", class: "mb-1 block text-sm font-bold text-slate-700" %>
+              <%= f.text_field :tagline, maxlength: Product::TAGLINE_MAX, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" %>
+              <p class="mt-1 text-xs text-slate-500">홈 카드와 가격 페이지 카드에 제목 아래 한 줄로 나옵니다. 비워 두면 그 줄이 생략됩니다. <%= Product::TAGLINE_MAX %>자까지.</p>
+            </div>
+          </div>
+        <% end %>
       </section>
 
       <!-- 요금제 설정 (1, 3, 6, 12개월) -->

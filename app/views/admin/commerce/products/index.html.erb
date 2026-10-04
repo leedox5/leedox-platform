@@ -42,6 +42,14 @@
                       <span class="inline-block rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-bold text-blue-700 whitespace-nowrap">영구 무료</span>
                     </div>
                   <% end %>
+                  <%# Handoff 0078 -- whether this product shows on the home's AI row (this list is standalone products only). %>
+                  <div data-home-flag>
+                    <% if product.show_on_home? %>
+                      <span class="inline-block whitespace-nowrap rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-800">홈 표시</span>
+                    <% else %>
+                      <span class="inline-block whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-500">홈 숨김</span>
+                    <% end %>
+                  </div>
                 </td>
                 <td class="px-4 py-4 whitespace-nowrap">
                   <span class="inline-block font-semibold text-slate-800 whitespace-nowrap">

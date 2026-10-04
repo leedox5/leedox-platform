@@ -5,7 +5,7 @@ class PagesController < ApplicationController
   def home
     # The standalone products, in /pricing's own order (pricing_rank) and with /pricing's own
     # sale-state rule (StandaloneProductsHelper) -- the home adds no rule of its own.
-    @standalone_products = Product.standalone.order(:code).sort_by { |product| [ pricing_rank(product), product.code ] }
+    @standalone_products = home_standalone_products
     load_story_series
     load_episode_updates
     load_home_notice
@@ -33,6 +33,17 @@ class PagesController < ApplicationController
   def privacy; end
 
   private
+
+  # Handoff 0078 -- the AI row's standalone products: only those switched on for the home, in
+  # /pricing's order (pricing_rank). Same single query as before plus one condition. If the column
+  # isn't there yet (between deploy and migrate) the row just goes without them for that window
+  # rather than taking the home down.
+  def home_standalone_products
+    Product.on_home.order(:code).to_a.sort_by { |product| [ pricing_rank(product), product.code ] }
+  rescue StandardError => e
+    Rails.logger.warn("[home_products] not loaded: #{e.class}: #{e.message}")
+    []
+  end
 
   # Handoff 0077 R2 -- the published + pinned notice the home announces in one line, or nil (no
   # line at all). One query, no Rails.cache (broken in production, backlog 0058). Best-effort like

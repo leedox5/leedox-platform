@@ -74,6 +74,10 @@ module Commerce
             record.sale_enabled = false
             record.tagline = attributes.fetch(:tagline)
             record.landing_page_path = attributes.fetch(:landing_page_path)
+            # Handoff 0078 -- the catalog products start on the home's AI row (the same state the
+            # migration backfilled in production); only set when the product is first created, so
+            # re-running this never undoes an admin's choice.
+            record.show_on_home = true
           end
           product.update!(
             landing_page_path: attributes.fetch(:landing_page_path),

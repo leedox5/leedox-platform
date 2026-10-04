@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_030000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_04_040000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -373,6 +373,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_030000) do
     t.string "landing_page_path"
     t.string "name", null: false
     t.boolean "sale_enabled", default: false, null: false
+    t.boolean "show_on_home", default: false, null: false
     t.string "tagline"
     t.integer "trial_chapter_limit"
     t.datetime "updated_at", null: false
