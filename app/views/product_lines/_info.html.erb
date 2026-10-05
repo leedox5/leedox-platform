@@ -37,9 +37,15 @@
 <% if purchase %>
   <%= render "product_lines/purchase_box", product_line: product_line, dark: dark, **purchase %>
 <% end %>
+<%# Handoff 0090 -- the customer page passes `section_nav` (the 소개 / 에피소드 links), right under the purchase box. %>
+<% if local_assigns[:section_nav].present? %>
+  <%= render "product_lines/section_nav", items: section_nav %>
+<% end %>
 
 <div class="mt-6 space-y-6 break-words <%= series_theme(:body, dark) %>">
-  <div>
+  <% if series_intro_section?(product_line) %>
+  <%# Handoff 0090 -- #intro is a permanent address; scroll-mt keeps the first line clear of the header + section links. %>
+  <div id="<%= ProductLinesHelper::SERIES_SECTION_IDS[:intro] %>" class="scroll-mt-28">
     <h2 class="sr-only">소개</h2>
     <%# Restricted Markdown (handoff 0063): hard line breaks keep the plain text of handoff 0060 looking as it did;
         images resolve only to this product's own images (admin preview points at the admin-only image route).
@@ -47,6 +53,7 @@
         line height is already 1.75 via `.doc-content p` (leading-7). %>
     <div class="<%= series_theme(:intro, dark) %> mt-11 max-w-[740px] [&_p]:mb-4 [&>:last-child]:mb-0"><%= ContentMarkdown.render(product_line.introduction, parent: product_line, profile: :marketing, admin: admin) %></div>
   </div>
+  <% end %>
   <% if product_line.ai_supporter.present? %>
     <div>
       <%# Same heading as 소개 (handoff 0066). %>

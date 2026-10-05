@@ -40,7 +40,12 @@ class DashboardController < ApplicationController
     end
 
     # Handoff 0089 -- the card is the /products card (공개 N편 only; no first-episode button, no 공개 예정 count).
-    @series_published_counts = ContentEpisode.published.where(product_line_id: lines.map(&:id)).group(:product_line_id).count
+    ids = lines.map(&:id)
+    @series_published_counts = ContentEpisode.published.where(product_line_id: ids).group(:product_line_id).count
+    # Handoff 0090 -- the card jumps to the series page's 에피소드 section when the page has one: published or
+    # 공개 예정 episodes, the same rule that draws it (ProductLinesHelper#series_episode_section?).
+    upcoming_ids = ContentEpisode.upcoming(ContentEpisode.where(product_line_id: ids)).map(&:product_line_id)
+    @series_with_episode_section = (@series_published_counts.select { |_, count| count.positive? }.keys + upcoming_ids).to_set
   end
 
   # Handoff 0085 R1 -- an earlier (standalone, paid) product the member holds a license usable right now

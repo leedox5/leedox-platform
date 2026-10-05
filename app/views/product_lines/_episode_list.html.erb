@@ -12,8 +12,10 @@
 <%# Handoff 0083 R2 -- `dark: true` on the customer page only (SeriesThemeHelper); the admin preview is unchanged. %>
 <% dark = local_assigns.fetch(:dark, false) %>
 <% upcoming_episodes = local_assigns.fetch(:upcoming_episodes, []) %>
-<% if episodes.any? || upcoming_episodes.any? %>
-  <h2 class="<%= series_theme(:list_heading, dark) %>">에피소드</h2>
+<% if series_episode_section?(episodes, upcoming_episodes) %>
+  <%# Handoff 0090 -- #episodes (customer page only) is a permanent address: the section links and the dashboard's
+      in-use card jump here; scroll-mt keeps the heading clear of the header + section links. %>
+  <h2 <% unless admin %>id="<%= ProductLinesHelper::SERIES_SECTION_IDS[:episodes] %>"<% end %> class="scroll-mt-28 <%= series_theme(:list_heading, dark) %>">에피소드</h2>
   <ol class="space-y-3">
     <% episodes.each do |episode| %>
       <li><%= render "product_lines/episode_card", episode: episode, admin: admin, dark: dark,

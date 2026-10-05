@@ -163,11 +163,12 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
     # 0083 R2: same size/weight/spacing; the color is the dark page's (#f2efe8) on the customer page.
     assert_select "main h2.text-2xl.font-semibold", text: "에피소드", count: 1
     heading = css_select("main h2").find { |h| h.text == "에피소드" }
-    assert_equal %w[mb-3 mt-8 text-2xl font-semibold text-[#f2efe8]].sort, heading["class"].split.sort
+    # 0090: scroll-mt-28 keeps it clear of the header + section links when jumped to (#episodes).
+    assert_equal %w[mb-3 mt-8 scroll-mt-28 text-2xl font-semibold text-[#f2efe8]].sort, heading["class"].split.sort
 
     body = response.body
-    assert_operator body.index(">소개</h2>"), :<, body.index(">에피소드<"), "에피소드 heading comes after the intro"
-    assert_operator body.index(">에피소드<"), :<, body.index(product_episode_path(@line.slug, "01")), "and right above the first card"
+    assert_operator body.index(">소개</h2>"), :<, body.index(">에피소드</h2>"), "에피소드 heading comes after the intro"
+    assert_operator body.index(">에피소드</h2>"), :<, body.index(product_episode_path(@line.slug, "01")), "and right above the first card"
   end
 
   test "no 에피소드 heading when there are no cards to show" do

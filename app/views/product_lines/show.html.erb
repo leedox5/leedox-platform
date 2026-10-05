@@ -18,8 +18,10 @@
     <%# Handoff 0065 -- the product is the sellable unit, so what used to be the Season page (purchase box,
         episode list, files) is part of this page. Handoff 0066: the access banner sits right under the cover image
         (inside the info block, which owns the cover), for every product. %>
+    <%# Handoff 0090 -- section_nav: the sticky 소개 · 에피소드 links under the purchase box. %>
     <%= render "product_lines/info", product_line: @product_line, dark: true,
-      purchase: { owned: @owned, for_sale: @for_sale, offer: @offer, free: @free, free_open: @free_open } %>
+      purchase: { owned: @owned, for_sale: @for_sale, offer: @offer, free: @free, free_open: @free_open },
+      section_nav: series_section_nav_items(@product_line, @episodes, @upcoming_episodes) %>
 
     <%= render "product_lines/episode_list", episodes: @episodes, product_line: @product_line, upcoming_episodes: @upcoming_episodes, dark: true %>
 

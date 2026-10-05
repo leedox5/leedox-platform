@@ -50,7 +50,7 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
     landmarks << [ :introduction, ">소개<" ]
     landmarks << [ :ai, "AI 서포터" ] if with_ai
     # Handoff 0069 R3 -- the "에피소드" heading (and the <ol> under it) exists only when there's at least one card.
-    landmarks << [ :episodes, ">에피소드<" ] if with_episodes
+    landmarks << [ :episodes, ">에피소드</h2>" ] if with_episodes # 0090: the heading, not the section link
 
     positions = landmark_order(main_html, landmarks)
     missing = positions.select { |_, pos| pos.nil? }.map(&:first)

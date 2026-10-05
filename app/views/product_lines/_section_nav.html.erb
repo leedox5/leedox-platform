@@ -1,0 +1,19 @@
+<%# Handoff 0090 -- the series page's section links (소개 · 에피소드), right under the purchase box. Sticky just under
+    the sticky header: the header is 65px tall on mobile (the 40px menu button) and 63px from md up (the bordered
+    login / logout button), so the bar sticks 1px higher than that and slides under the header's bottom border -- never
+    a gap, whatever the font rounding. Its own background hides the text scrolling under it. Shown only with two or
+    more sections (series_section_nav_items -- the same conditions that draw the sections).
+    The links work as plain anchors; section_nav_controller only marks the section in view (aria-current). %>
+<% if items.size > 1 %>
+  <nav aria-label="시리즈 바로가기" data-controller="section-nav"
+    class="sticky top-[64px] z-40 -mx-5 mt-6 border-b border-white/10 bg-[#0e1014] px-5 sm:-mx-7 sm:px-7 md:top-[62px]">
+    <ul class="flex gap-6 text-sm font-semibold">
+      <% items.each do |label, id| %>
+        <li>
+          <a href="#<%= id %>" data-section-nav-target="link"
+            class="inline-block border-b-2 border-transparent py-2.5 text-[#a8a39a] transition hover:text-[#f2efe8] aria-[current=true]:border-[#f0a53c] aria-[current=true]:text-[#f2efe8]"><%= label %></a>
+        </li>
+      <% end %>
+    </ul>
+  </nav>
+<% end %>

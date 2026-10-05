@@ -40,6 +40,23 @@ module ProductLinesHelper
 
   def series_start_label = SERIES_START_LABEL
 
+  # Handoff 0090 -- the two places on a series page the section links (and the dashboard's in-use card) jump to.
+  # Permanent addresses (/products/:slug#episodes may be bookmarked or shared) -- don't rename them.
+  SERIES_SECTION_IDS = { intro: "intro", episodes: "episodes" }.freeze
+
+  # Whether each section is on the page at all -- the very conditions that draw them (_info's introduction block,
+  # _episode_list's heading and cards), so the section links never point at something that isn't there.
+  def series_intro_section?(product_line) = product_line.introduction.present?
+  def series_episode_section?(episodes, upcoming_episodes) = episodes.any? || upcoming_episodes.any?
+
+  # [label, id] for each section on the page, in page order. A third one (리뷰, backlog 0067) would be one more line.
+  def series_section_nav_items(product_line, episodes, upcoming_episodes)
+    items = []
+    items << [ "소개", SERIES_SECTION_IDS[:intro] ] if series_intro_section?(product_line)
+    items << [ "에피소드", SERIES_SECTION_IDS[:episodes] ] if series_episode_section?(episodes, upcoming_episodes)
+    items
+  end
+
   # Handoff 0071 -- the hero's release line: "공개 2편 · 공개 예정 3편", or just "공개 N편" when nothing
   # is coming up. Counts, not episode numbers -- visitors never see a number (position is only an
   # ordering key and can be 0). Published = what the product page lists; 공개 예정 =

@@ -2,9 +2,10 @@
     since 0089, its series in use, so all three show the same cover, name, summary, 공개 N편, badge and 자세히 보기 →
     with the same hover. `heading:` is the title's tag (h2 on the list, h3 under a dashboard heading).
     Dashboard-only extras (0089): `badge:` [label, classes] in place of the list's state badge, `period:` a line under
-    공개 N편 (the license period), `data:` attributes for the link. %>
+    공개 N편 (the license period), `data:` attributes for the link. Handoff 0090: `path:` in place of the series page
+    (the in-use card jumps to its 에피소드 section). %>
 <% badge = local_assigns[:badge] %>
-<%= link_to product_line_path(line.slug), data: local_assigns.fetch(:data, {}),
+<%= link_to local_assigns.fetch(:path) { product_line_path(line.slug) }, data: local_assigns.fetch(:data, {}),
   class: "flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#15181e] transition hover:border-[#f0a53c]/60" do %>
   <% if line.cover_image.attached? %>
     <%= render "product_lines/cover_image", product_line: line, variant: :thumb, classes: "block aspect-video w-full object-cover" %>

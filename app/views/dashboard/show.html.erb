@@ -29,7 +29,9 @@
         <section aria-label="이용 중인 시리즈" class="mb-10">
           <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <% @series_in_use.each do |line| %>
+              <%# Handoff 0090 -- straight to the 에피소드 section (#episodes) when the page has one. %>
               <%= render "product_lines/list_card", line: line, state: nil, heading: :h3,
+                path: product_line_path(line.slug, anchor: (ProductLinesHelper::SERIES_SECTION_IDS[:episodes] if @series_with_episode_section.include?(line.id))),
                 published_count: @series_published_counts.fetch(line.id, 0), badge: dashboard_in_use_badge,
                 period: dashboard_license_period_text(@series_licenses[line.id]), data: { series_card: line.slug } %>
             <% end %>

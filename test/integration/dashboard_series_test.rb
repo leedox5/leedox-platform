@@ -57,7 +57,7 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
     assert_equal "이용 중", card.at_css("span.rounded-full").text.strip
     assert card.at_css("div[aria-hidden='true'].aspect-video"), "no cover image -- the 0068 placeholder"
     assert_equal "a", card.name, "the whole card is the link"
-    assert_equal product_line_path("git-core"), card["href"]
+    assert_equal product_line_path("git-core", anchor: "episodes"), card["href"] # 0090: straight to the 에피소드 section
     assert_empty card.css("a")
     [ "첫 편부터 보기", "시리즈 소개" ].each { |gone| assert_not_includes text, gone }
     html = response.body
@@ -104,13 +104,13 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
     assert_equal [ "unlisted-line" ], cards.map { |c| c["data-series-card"] }
   end
 
-  test "a series with no published episode yet: the same link card to the series" do
+  test "a series with no published episode yet but a 공개 예정 one: the same link card, to its 에피소드 section" do
     line = series!("empty-line", published: [], upcoming: [ 1 ])
     license!(line.product)
     sign_in
     get dashboard_path
     card = cards.sole
-    assert_equal product_line_path("empty-line"), card["href"]
+    assert_equal product_line_path("empty-line", anchor: "episodes"), card["href"] # 0090: 공개 예정 cards are that section
     assert_includes card.text.squish, "공개 0편"
   end
 
