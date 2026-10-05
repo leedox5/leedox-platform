@@ -617,14 +617,15 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_equal "edit-name@example.com", user.email
   end
 
-  test "dashboard greets the signed-in user by name" do
+  # Handoff 0089 -- the greeting went; the user's name is in the one heading instead.
+  test "dashboard names the signed-in user in its heading" do
     user = User.create!(name: "대시보드 유저", email: "dashboard-name@example.com", password: "password123")
     post user_session_path, params: { user: { email: user.email, password: "password123" } }
 
     get dashboard_path
 
     assert_response :success
-    assert_match(/안녕하세요, 대시보드 유저님/, response.body)
+    assert_select "h1", text: "대시보드 유저님이 이용 중인 콘텐츠"
     assert_no_match(/dashboard-name@example\.com/, response.body)
   end
 

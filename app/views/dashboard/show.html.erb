@@ -9,7 +9,8 @@
     Handoff 0085 R1 -- "what can I watch": the earlier products only while in use, under an 이전 상품 heading, and
     더 둘러보기 shows the series not in use (the /products card, at most four) instead of earlier products.
     Handoff 0086 -- the two trial banners (무료 체험 D-N / 기간이 끝났습니다 · 가격 보기 →) are gone with the pricing
-    page; the trial rule itself is unchanged. %>
+    page; the trial rule itself is unchanged.
+    Handoff 0089 -- simplified: no header block, one h1 "{이름}님이 이용 중인 콘텐츠", link cards, 다른 콘텐츠. %>
 <% content_for :head do %>
   <%= render "shared/display_font" %>
 <% end %>
@@ -17,139 +18,57 @@
   <%= render "shared/header" %>
 
   <main class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-    <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        <p class="text-sm font-semibold uppercase tracking-wide text-[#f0a53c]">My Dashboard</p>
-        <h1 class="mt-1 font-display text-3xl font-bold text-[#f2efe8]">
-          안녕하세요, <%= current_user.name %>님
-        </h1>
-        <p class="mt-2 text-[#c9c4ba]">보던 곳에서 이어서 보세요.</p>
-      </div>
+    <%# Handoff 0089 -- no header block (eyebrow, greeting, 이어서 보세요, my page link): the page opens on what's in use,
+        under the one h1. Series cards are the /products card (the whole card links to the series), earlier products
+        are small link cards (name, 이용 중, period) to their table of contents. Which cards appear is unchanged
+        (0080/0085). %>
+    <section aria-label="이용 중인 콘텐츠">
+      <h1 class="mb-6 font-display text-2xl font-bold text-[#f2efe8] sm:text-3xl"><%= current_user.name %>님이 이용 중인 콘텐츠</h1>
 
-      <%= link_to "결제·라이선스 내역은 마이페이지에서 →",
-        mypage_path,
-        class: "text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
-    </header>
+      <% if @series_in_use.any? %>
+        <section aria-label="이용 중인 시리즈" class="mb-10">
+          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <% @series_in_use.each do |line| %>
+              <%= render "product_lines/list_card", line: line, state: nil, heading: :h3,
+                published_count: @series_published_counts.fetch(line.id, 0), badge: dashboard_in_use_badge,
+                period: dashboard_license_period_text(@series_licenses[line.id]), data: { series_card: line.slug } %>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
 
-    <% if @series_in_use.any? %>
-      <section aria-label="이용 중인 시리즈" class="mb-10">
-        <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-          <h2 class="font-display text-xl font-bold text-[#f2efe8]">이용 중인 시리즈</h2>
-          <%= link_to "시리즈 둘러보기 →", products_path, class: "text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
-        </div>
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <% @series_in_use.each do |line| %>
-            <%= render "dashboard/series_card", line: line, license: @series_licenses[line.id] %>
+      <% if @legacy_products.any? %>
+        <h2 class="mb-4 font-display text-xl font-bold text-[#f2efe8]">이전 상품</h2>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <% @legacy_products.each do |product| %>
+            <%# The aria-label keeps the section the earlier tests and screen readers find by the product's name. %>
+            <section aria-label="<%= product.name %> 현황">
+              <%= link_to product_content_index_path(product.code), data: { legacy_card: product.code },
+                class: "block rounded-xl border border-white/10 bg-[#15181e] px-5 py-4 transition hover:border-[#f0a53c]/60" do %>
+                <span class="flex items-center justify-between gap-3">
+                  <span class="min-w-0 break-words font-bold text-[#f2efe8]"><%= product.name %></span>
+                  <span class="<%= dashboard_in_use_badge.last %>"><%= dashboard_in_use_badge.first %></span>
+                </span>
+                <span class="mt-1 block text-sm text-[#c9c4ba]"><%= dashboard_license_period_text(@legacy_licenses[product.id]) %></span>
+              <% end %>
+            </section>
           <% end %>
         </div>
-      </section>
-    <% end %>
-
-    <% if @owned_dashboards.any? %>
-      <h2 class="mb-4 font-display text-xl font-bold text-[#f2efe8]">이전 상품</h2>
-      <div class="space-y-6">
-        <% @owned_dashboards.each do |pd| %>
-          <% product = pd[:product] %>
-          <section aria-label="<%= product.name %> 현황" class="rounded-2xl border border-white/10 bg-[#15181e] p-6">
-            <div class="flex items-center justify-between gap-3">
-              <h2 class="text-lg font-bold text-[#f2efe8]"><%= product.name %></h2>
-              <%= product_status_badge(current_user, product) %>
-            </div>
-            <p class="mt-1 text-sm text-[#c9c4ba]"><%= product_period_text(current_user, product) %></p>
-
-            <div class="mt-5 grid gap-4 sm:grid-cols-2">
-              <div class="rounded-lg bg-white/5 p-4">
-                <p class="text-sm font-semibold text-[#a8a39a]">볼 수 있는 챕터</p>
-                <p class="mt-1 text-2xl font-bold text-[#f2efe8]"><%= pd[:accessible] %>/<%= pd[:total] %></p>
-              </div>
-
-              <div class="rounded-lg bg-white/5 p-4">
-                <div class="flex items-center justify-between">
-                  <p class="text-sm font-semibold text-[#a8a39a]">진행률</p>
-                  <strong class="text-lg text-[#f0a53c]"><%= pd[:progress_percent] %>%</strong>
-                </div>
-                <p class="mt-1 text-xs text-[#a8a39a]"><%= pd[:total] %>개 중 <%= pd[:completed_count] %>개 읽음</p>
-                <div class="mt-3 h-2 overflow-hidden rounded-full bg-white/15"
-                     role="progressbar"
-                     aria-label="<%= product.name %> 진행률"
-                     aria-valuenow="<%= pd[:progress_percent] %>"
-                     aria-valuemin="0"
-                     aria-valuemax="100">
-                  <div class="h-full rounded-full bg-[#f0a53c] transition-all" style="width: <%= pd[:progress_percent] %>%"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-6 grid gap-4 lg:grid-cols-3">
-              <div class="rounded-lg border border-white/10 p-5 lg:col-span-2">
-                <div class="flex items-center justify-between gap-4">
-                  <h3 class="font-semibold text-[#f2efe8]">최근에 읽은 챕터</h3>
-                  <%= link_to "전체 보기", product_content_index_path(product.code), class: "text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
-                </div>
-
-                <% if pd[:recent_chapters].any? %>
-                  <ul class="mt-3 divide-y divide-white/10">
-                    <% pd[:recent_chapters].each do |chapter| %>
-                      <li class="flex items-center justify-between gap-4 py-3">
-                        <div class="min-w-0">
-                          <p class="text-xs text-[#a8a39a]">Chapter <%= chapter[:id] %></p>
-                          <p class="truncate text-sm font-medium text-[#f2efe8]"><%= chapter[:title] %></p>
-                        </div>
-                        <%= link_to "다시 보기",
-                          product_chapter_path(product.code, chapter[:id]),
-                          class: "shrink-0 text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
-                      </li>
-                    <% end %>
-                  </ul>
-                <% else %>
-                  <div class="mt-3 rounded-lg bg-white/5 p-5 text-center">
-                    <p class="text-sm text-[#c9c4ba]">아직 읽은 챕터가 없습니다.</p>
-                  </div>
-                <% end %>
-              </div>
-
-              <aside class="rounded-lg border border-[#f0a53c]/30 bg-[#f0a53c]/10 p-5 text-[#f2efe8]">
-                <p class="text-xs font-semibold uppercase tracking-wide text-[#f0a53c]">다음 챕터</p>
-                <% if pd[:next_chapter] %>
-                  <h3 class="mt-2 text-lg font-bold"><%= pd[:next_chapter][:title] %></h3>
-                  <p class="mt-1 text-xs text-[#c9c4ba]">Chapter <%= pd[:next_chapter][:id] %></p>
-                  <%= link_to (pd[:completed_count].zero? ? "첫 챕터 시작" : "이어서 보기"),
-                    product_chapter_path(product.code, pd[:next_chapter][:id]),
-                    class: "mt-4 block rounded-lg bg-[#f0a53c] px-4 py-2 text-center text-sm font-semibold text-[#0e1014] transition hover:bg-[#f5b85e]" %>
-                <% else %>
-                  <h3 class="mt-2 text-lg font-bold">모든 챕터를 읽었습니다.</h3>
-                  <p class="mt-1 text-xs text-[#c9c4ba]">필요한 챕터를 다시 읽어 보세요.</p>
-                <% end %>
-              </aside>
-            </div>
-          </section>
-        <% end %>
-      </div>
-    <% elsif @series_in_use.none? %>
-      <section aria-label="이용 중인 콘텐츠 없음" class="rounded-2xl border border-white/10 bg-[#15181e] p-8 text-center">
-        <p class="text-base font-semibold text-[#f2efe8]">아직 이용 중인 콘텐츠가 없습니다.</p>
-        <% if @browse_series.any? %>
-          <p class="mt-1 text-sm text-[#c9c4ba]">아래에서 관심 있는 콘텐츠를 둘러보세요.</p>
-        <% else %>
-          <%= link_to "시리즈 둘러보기 →", products_path, class: "mt-2 inline-block text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
-        <% end %>
-      </section>
-    <% end %>
+      <% elsif @series_in_use.none? %>
+        <section aria-label="이용 중인 콘텐츠 없음" class="rounded-2xl border border-white/10 bg-[#15181e] p-8 text-center">
+          <p class="text-base font-semibold text-[#f2efe8]">아직 이용 중인 콘텐츠가 없습니다.</p>
+          <% if @browse_series.any? %>
+            <p class="mt-1 text-sm text-[#c9c4ba]">아래에서 관심 있는 콘텐츠를 둘러보세요.</p>
+          <% else %>
+            <%= link_to "시리즈 둘러보기 →", products_path, class: "mt-2 inline-block text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
+          <% end %>
+        </section>
+      <% end %>
+    </section>
 
     <% if @browse_series.any? %>
-      <section aria-label="더 둘러보기" class="mt-12">
-        <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 class="font-display text-xl font-bold text-[#f2efe8]">더 둘러보기</h2>
-            <p class="mt-1 text-sm text-[#c9c4ba]">다른 이야기도 둘러보세요.</p>
-          </div>
-          <%# The series link sits on the series section's heading when that section shows -- never twice. It also
-              leads to the rest when there are more series than the four shown here. %>
-          <% unless @series_in_use.any? %>
-            <%= link_to "시리즈 둘러보기 →", products_path, class: "text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
-          <% end %>
-        </div>
-
+      <section aria-label="다른 콘텐츠" class="mt-12">
+        <h2 class="mb-4 font-display text-xl font-bold text-[#f2efe8]">다른 콘텐츠</h2>
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <% @browse_series.each do |line| %>
             <%= render "product_lines/list_card", line: line, state: @browse_states[line.id],

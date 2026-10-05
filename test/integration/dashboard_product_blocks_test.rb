@@ -1,5 +1,8 @@
 require "test_helper"
 
+# Handoff 0089 -- an owned earlier product is a small card (name, 이용 중, period) linking to its contents; the
+# learning block (chapters you can see, progress, recent and next chapters) is gone. Tests that checked that block
+# now check the card and that reading records don't bring the block back.
 class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
   setup do
     Commerce::CatalogBootstrap.call!
@@ -7,7 +10,7 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
     post user_session_path, params: { user: { email: @user.email, password: "password123" } }
   end
 
-  test "owned products get detailed main learning section while unowned products appear in bottom catalog grid" do
+  test "an owned product gets a small card linking to its contents; unowned products don't show" do
     grant_license(@user, "chatdox")
 
     get dashboard_path
@@ -15,14 +18,10 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
 
     doc = Nokogiri::HTML(response.body)
 
-    # Chatdox (owned) appears in main section with full learning block
     chatdox_section = doc.at_css("section[aria-label='Chatdox 현황']")
-    assert chatdox_section, "expected a Chatdox 현황 main section"
-    assert_match(/볼 수 있는 챕터/, chatdox_section.text)
-    assert_match(/진행률/, chatdox_section.text)
-    assert_match(/최근에 읽은 챕터/, chatdox_section.text)
-    assert_match(/다음 챕터/, chatdox_section.text)
-    assert chatdox_section.at_css("a[href*='/content/chatdox/']"), "expected learning CTA for owned Chatdox"
+    assert chatdox_section, "expected a Chatdox card"
+    assert_equal [ product_content_index_path("chatdox") ], chatdox_section.css("a").map { |a| a["href"] }
+    assert_no_match(/볼 수 있는 챕터|진행률|최근에 읽은 챕터|다음 챕터/, chatdox_section.text)
 
     # Claudox (unowned) no longer shows -- 0085: 더 둘러보기 lists series, not earlier products
     assert_no_match(/Claudox/, doc.at_css("main").text)
@@ -51,36 +50,27 @@ class DashboardProductBlocksTest < ActionDispatch::IntegrationTest
     assert_no_match(/Chatdox|Claudox/, doc.at_css("main").text)
   end
 
-  test "a user who completed Chatdox chapters sees accurate Chatdox progress and Next Step" do
+  test "reading records don't add progress or chapter links back to the card" do
     grant_license(@user, "chatdox")
     post chapter_progresses_path, params: { chapter_id: "01", product_code: "chatdox" }
     post chapter_progresses_path, params: { chapter_id: "02", product_code: "chatdox" }
+    assert_equal 2, @user.chapter_progresses.where(product_code: "chatdox").count, "the records themselves are kept"
 
     get dashboard_path
     assert_response :success
 
-    doc = Nokogiri::HTML(response.body)
-    chatdox_section = doc.at_css("section[aria-label='Chatdox 현황']").text
-
-    assert_match(/20개 중 2개 읽음/, chatdox_section)
-    assert_match(/Chapter 03/, chatdox_section)
-    assert_match(/이어서 보기/, chatdox_section)
+    chatdox_section = css_select("section[aria-label='Chatdox 현황']").first
+    assert_no_match(/개 중|Chapter 0|이어서 보기|다시 보기/, chatdox_section.text)
+    assert_equal [ product_content_index_path("chatdox") ], chatdox_section.css("a").map { |a| a["href"] }
   end
 
-  test "recent chapter and Next Step links point at the right product via generic content route" do
+  test "each card links to its own product's contents" do
     grant_license(@user, "claudox")
-    post chapter_progresses_path, params: { chapter_id: "01", product_code: "claudox" }
+    grant_license(@user, "chatdox")
 
     get dashboard_path
-    assert_response :success
-
-    doc = Nokogiri::HTML(response.body)
-    claudox_section = doc.at_css("section[aria-label='Claudox 현황']")
-
-    assert claudox_section.css("a[href='#{product_chapter_path('claudox', '01')}']").any?,
-      "expected a '다시 보기' link back into #{product_chapter_path('claudox', '01')}"
-    assert claudox_section.css("a[href='#{product_chapter_path('claudox', '02')}']").any?,
-      "expected the Next Step link to point at #{product_chapter_path('claudox', '02')}"
+    assert_select "section[aria-label='Claudox 현황'] a[href=?]", product_content_index_path("claudox")
+    assert_select "section[aria-label='Chatdox 현황'] a[href=?]", product_content_index_path("chatdox")
   end
 
   private

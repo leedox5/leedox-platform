@@ -392,7 +392,7 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
 
     get dashboard_path
     assert_response :success
-    assert_match(/진행률/, response.body)
+    assert_select "section[aria-label='Chatdox 현황'] a[href=?]", product_content_index_path("chatdox") # 0089: a link card, no progress
     assert_no_match(/상품별 라이선스/, response.body)
     assert_no_match(/결제 완료/, response.body)
     assert_select "a[href=?]", mypage_path, text: /마이페이지/

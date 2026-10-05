@@ -5,6 +5,9 @@ require "test_helper"
 # an existing one (License#active_at? / #effective_status, ProductLine.customer_reachable, ContentEpisode.upcoming).
 # Handoff 0085 R1 -- 더 둘러보기 lists series (not earlier products), so the tests that need it create a series
 # that isn't in use; an earlier product without a usable license no longer shows at all (no 만료 / 미보유 card).
+# Handoff 0089 -- the series card is the /products card: the whole card links to the series (no 첫 편부터 보기 button,
+# no 시리즈 소개 link, 공개 N편 without the 공개 예정 count), the lower section is 다른 콘텐츠 (no line under it), and
+# 시리즈 둘러보기 → only shows in the empty state when there's nothing to browse either.
 class DashboardSeriesTest < ActionDispatch::IntegrationTest
   setup do
     Commerce::CatalogBootstrap.call!
@@ -36,10 +39,10 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
 
   # --- the series section --------------------------------------------------------------
 
-  test "a series in use shows above everything, with cover slot, name, summary, counts, period, badge and buttons" do
+  test "a series in use shows above everything: one link card with cover slot, name, summary, count, period and badge" do
     line = series!("git-core", name: "Git의 기본", summary: "변경 이력을 남기는 법부터", published: [ 1, 2 ], upcoming: [ 3 ])
     license!(line.product)
-    series!("not-yet") # 0085: 더 둘러보기 shows a series not in use
+    series!("not-yet") # 0085: the lower section shows a series not in use
     sign_in
     get dashboard_path
     assert_response :success
@@ -48,14 +51,17 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
     text = card.text.squish
     assert_includes text, "Git의 기본"
     assert_includes text, "변경 이력을 남기는 법부터"
-    assert_includes text, "공개 2편 · 공개 예정 1편"
+    assert_includes text, "공개 2편"
+    assert_not_includes text, "공개 예정" # 0089: the list card's count line
     assert_includes text, "무기한 이용 중"
     assert_equal "이용 중", card.at_css("span.rounded-full").text.strip
     assert card.at_css("div[aria-hidden='true'].aspect-video"), "no cover image -- the 0068 placeholder"
-    links = card.css("a").map { |a| [ a.text.strip, a["href"] ] }
-    assert_equal [ [ "첫 편부터 보기", product_episode_path("git-core", "01") ], [ "시리즈 소개", product_line_path("git-core") ] ], links
+    assert_equal "a", card.name, "the whole card is the link"
+    assert_equal product_line_path("git-core"), card["href"]
+    assert_empty card.css("a")
+    [ "첫 편부터 보기", "시리즈 소개" ].each { |gone| assert_not_includes text, gone }
     html = response.body
-    assert_operator html.index("이용 중인 시리즈"), :<, html.index("더 둘러보기")
+    assert_operator html.index("이용 중인 시리즈"), :<, html.index("다른 콘텐츠")
   end
 
   test "a dated license shows its end date; no summary means no summary line; no 공개 예정 means no suffix" do
@@ -98,14 +104,14 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
     assert_equal [ "unlisted-line" ], cards.map { |c| c["data-series-card"] }
   end
 
-  test "a series with no published episode yet: only 시리즈 소개" do
+  test "a series with no published episode yet: the same link card to the series" do
     line = series!("empty-line", published: [], upcoming: [ 1 ])
     license!(line.product)
     sign_in
     get dashboard_path
     card = cards.sole
-    assert_equal [ "시리즈 소개" ], card.css("a").map { |a| a.text.strip }
-    assert_includes card.text.squish, "공개 0편 · 공개 예정 1편"
+    assert_equal product_line_path("empty-line"), card["href"]
+    assert_includes card.text.squish, "공개 0편"
   end
 
   test "no series in use: no section, no empty heading" do
@@ -165,29 +171,31 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
     assert standalone
   end
 
-  # --- the series link appears once ------------------------------------------------------------
+  # --- 시리즈 둘러보기 → and the lower section (0089) ------------------------------------------------
 
-  test "시리즈 둘러보기 → sits on the series heading when that section shows, otherwise on 더 둘러보기 -- once" do
-    series!("browse-line")
+  test "시리즈 둘러보기 → only in the empty state, when there's nothing to browse either" do
     sign_in
-    get dashboard_path
+    get dashboard_path # nothing in use, nothing to browse
     assert_equal 1, series_link_count
-    assert_select "section[aria-label='더 둘러보기'] a[href=?]", products_path, text: "시리즈 둘러보기 →"
+    assert_select "section[aria-label='이용 중인 콘텐츠 없음'] a[href=?]", products_path, text: "시리즈 둘러보기 →"
 
-    license!(series!("link-line").product)
+    series!("browse-line") # something to browse
     get dashboard_path
-    assert_equal 1, series_link_count
-    assert_select "section[aria-label='이용 중인 시리즈'] a[href=?]", products_path, text: "시리즈 둘러보기 →"
-    assert_select "section[aria-label='더 둘러보기'] a[href=?]", products_path, 0
+    assert_equal 0, series_link_count
+
+    license!(series!("link-line").product) # a series in use
+    get dashboard_path
+    assert_equal 0, series_link_count
   end
 
-  test "the lower section is 더 둘러보기, its line unchanged" do
+  test "the lower section is 다른 콘텐츠, without a line under it" do
     series!("browse-line")
     sign_in
     get dashboard_path
-    section = css_select("section[aria-label='더 둘러보기']").first
-    assert_equal "더 둘러보기", section.at_css("h2").text.strip
-    assert_includes section.text, "다른 이야기도 둘러보세요."
+    section = css_select("section[aria-label='다른 콘텐츠']").first
+    assert_equal "다른 콘텐츠", section.at_css("h2").text.strip
+    assert_not_includes section.text, "다른 이야기도 둘러보세요."
+    assert_not_includes css_select("main").text, "더 둘러보기"
   end
 
   # --- earlier products without a usable license ------------------------------------------------
@@ -206,7 +214,7 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
     text = css_select("main").text
     [ "Claudox", "Chatdox", "만료", "미보유", "이전 상품" ].each { |word| assert_not_includes text, word }
     assert_select "section[aria-label='이용 중인 콘텐츠 없음']", 1
-    assert_select "section[aria-label='더 둘러보기'] [href=?]", product_line_path("browse-line")
+    assert_select "section[aria-label='다른 콘텐츠'] [href=?]", product_line_path("browse-line")
   end
 
   test "a product with a usable license is never 만료 even with an older expired one" do

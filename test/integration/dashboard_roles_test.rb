@@ -2,7 +2,8 @@ require "test_helper"
 
 # Handoff 0085 R1 -- the dashboard answers "what can I watch": an earlier product shows while the member holds a paid
 # license usable now (whether or not it is still on sale), under an 이전 상품 heading; 더 둘러보기 lists the series
-# not in use (the /products card, the list's order, at most four) instead of earlier products.
+# not in use (the /products card, the list's order, at most four) instead of earlier products. Handoff 0089 renamed
+# that section 다른 콘텐츠 and made the earlier-product card a link to its contents.
 class DashboardRolesTest < ActionDispatch::IntegrationTest
   setup do
     Commerce::CatalogBootstrap.call!
@@ -30,7 +31,7 @@ class DashboardRolesTest < ActionDispatch::IntegrationTest
   end
 
   def legacy_heading = css_select("main h2").select { |h| h.text.strip == "이전 상품" }
-  def browse_slugs = css_select("section[aria-label='더 둘러보기'] a[href^='/products/']").map { |a| a["href"].delete_prefix("/products/") }
+  def browse_slugs = css_select("section[aria-label='다른 콘텐츠'] a[href^='/products/']").map { |a| a["href"].delete_prefix("/products/") }
 
   # --- a. earlier products: by license, not by sale -------------------------------------------------
 
@@ -43,9 +44,9 @@ class DashboardRolesTest < ActionDispatch::IntegrationTest
 
     card = css_select("section[aria-label='Chatdox 현황']").sole
     assert_includes card.text, "이용 중"
-    next_link = card.css("a").find { |a| a.text.strip == "첫 챕터 시작" }
-    assert next_link, "the next-chapter button"
-    get next_link["href"]
+    link = card.at_css("a") # 0089: the whole card links to the contents (was the 첫 챕터 시작 button)
+    assert_equal product_content_index_path("chatdox"), link["href"]
+    get link["href"]
     assert_response :success
     get product_chapter_path("chatdox", "20") # beyond the guest range -- opened by the license alone
     assert_response :success
@@ -89,6 +90,21 @@ class DashboardRolesTest < ActionDispatch::IntegrationTest
     assert_operator html.index(">이전 상품<"), :<, html.index("Chatdox 현황")
   end
 
+  # Handoff 0089 -- only an earlier product in use: the one heading, then 이전 상품 and its card, then 다른 콘텐츠.
+  test "only an earlier product in use: heading, 이전 상품 card, then 다른 콘텐츠 -- no empty box" do
+    license!(@chatdox)
+    series!("browse")
+    sign_in
+    get dashboard_path
+    assert_select "h1", count: 1, text: "회원님이 이용 중인 콘텐츠"
+    assert_select "section[aria-label='이용 중인 시리즈']", 0
+    assert_select "section[aria-label='이용 중인 콘텐츠 없음']", 0
+    html = response.body
+    assert_operator html.index("님이 이용 중인 콘텐츠</h1>"), :<, html.index(">이전 상품<")
+    assert_operator html.index(">이전 상품<"), :<, html.index("Chatdox 현황")
+    assert_operator html.index("Chatdox 현황"), :<, html.index(">다른 콘텐츠<")
+  end
+
   test "no earlier product in use: no 이전 상품 heading" do
     license!(series!("in-use").product)
     sign_in
@@ -105,7 +121,7 @@ class DashboardRolesTest < ActionDispatch::IntegrationTest
     sign_in
     get dashboard_path
     assert_equal %w[s1 s3 s4 s5], browse_slugs
-    card = css_select("section[aria-label='더 둘러보기'] a[href='#{product_line_path("s1")}']").sole
+    card = css_select("section[aria-label='다른 콘텐츠'] a[href='#{product_line_path("s1")}']").sole
     assert_equal "시리즈 s1", card.at_css("h3").text.strip
     assert_includes card.text.squish, "공개 1편"
     assert_includes card.text, "자세히 보기 →"
@@ -134,7 +150,7 @@ class DashboardRolesTest < ActionDispatch::IntegrationTest
     get products_path
     list = badges.call("main")
     get dashboard_path
-    dash = badges.call("section[aria-label='더 둘러보기']")
+    dash = badges.call("section[aria-label='다른 콘텐츠']")
     assert_equal list, dash
     assert_equal({ "free-line" => "무료", "paid-line" => "12,000원" }, dash.slice("free-line", "paid-line"))
   end
@@ -143,15 +159,15 @@ class DashboardRolesTest < ActionDispatch::IntegrationTest
     license!(series!("only").product)
     sign_in
     get dashboard_path
-    assert_select "section[aria-label='더 둘러보기']", 0
-    assert_select "main a[href=?]", products_path, text: "시리즈 둘러보기 →", count: 1
+    assert_select "section[aria-label='다른 콘텐츠']", 0
+    assert_select "main a[href=?]", products_path, text: "시리즈 둘러보기 →", count: 0 # 0089: only in the empty state
   end
 
   test "더 둘러보기 never lists an earlier product" do
     series!("browse")
     sign_in
     get dashboard_path
-    section = css_select("section[aria-label='더 둘러보기']").sole
+    section = css_select("section[aria-label='다른 콘텐츠']").sole
     assert_no_match(/Chatdox|Claudox|가격 보기|미보유|만료/, section.text)
   end
 

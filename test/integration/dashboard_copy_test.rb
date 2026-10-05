@@ -40,66 +40,52 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
     copy.text
   end
 
-  test "title, header line and footer" do
+  # Handoff 0089 -- no header block any more (eyebrow, greeting, "보던 곳에서 이어서 보세요.", my page link).
+  test "title, no header block, one heading with the name, and footer" do
     sign_in(@user)
     get dashboard_path
     assert_response :success
     assert_select "title", text: "대시보드 | LEEDOX"
-    assert_includes css_select("main header").text, "My Dashboard"
-    assert_includes css_select("main header").text, "보던 곳에서 이어서 보세요."
+    assert_select "main header", 0
+    assert_select "h1", count: 1, text: "회원님이 이용 중인 콘텐츠"
+    text = css_select("main").first.text
+    [ "My Dashboard", "안녕하세요", "보던 곳에서 이어서 보세요.", "결제·라이선스 내역은 마이페이지에서" ].each { |gone| assert_not_includes text, gone }
     assert_select "footer a[href=?]", announcements_path, text: "공지"
     assert_select "footer a[href=?]", terms_path
     assert_select "footer a[href=?]", privacy_path
   end
 
-  test "an owned product's card: short badge and end date, chapters you can see, progress in reading words" do
+  # Handoff 0089 -- an earlier product's card is the name, 이용 중 and its end date, and the whole card links to the
+  # product's contents; chapter counts, progress, recent and next chapters are gone (reading records still kept).
+  test "an owned product's card: name, 이용 중 and end date, the whole card linking to its contents" do
     grant("chatdox", last_usable_on: Date.new(2026, 10, 23))
     ChapterProgress.create!(user: @user, product_code: "chatdox", chapter_id: "01", completed_at: Time.current)
     sign_in(@user)
     get dashboard_path
     card = section("Chatdox 현황")
-    text = card.text.squish
-    assert_equal "이용 중", card.at_css("span.rounded-full").text.strip
-    assert_equal "이용 종료일: 2026년 10월 23일", card.at_css("h2 + span + p, div + p").text.strip
-    assert_includes text, "볼 수 있는 챕터 20/20"
-    assert_includes text, "진행률 5%"
-    assert_includes text, "20개 중 1개 읽음"
-    assert_includes text, "최근에 읽은 챕터"
-    assert_includes text, "다음 챕터"
-    assert card.css("a").any? { |a| a.text.strip == "이어서 보기" }
-    assert_equal "Chatdox 진행률", card.at_css("[role=progressbar]")["aria-label"], "the screen-reader label keeps the name"
+    link = card.at_css("a")
+    assert_equal product_content_index_path("chatdox"), link["href"]
+    assert_equal 1, card.css("a").size, "one link: the card itself"
+    assert_equal "Chatdox 이용 중 이용 종료일: 2026년 10월 23일", link.text.squish
+    [ "볼 수 있는 챕터", "진행률", "개 중", "최근에 읽은 챕터", "다음 챕터", "이어서 보기", "첫 챕터 시작", "다시 보기", "전체 보기" ].each do |gone|
+      assert_not_includes card.text, gone
+    end
+    assert_nil card.at_css("[role=progressbar]")
     assert_no_match OLD_TONE, own_copy(card)
   end
 
-  test "an owned product with nothing read yet, and with everything read" do
-    grant("chatdox")
-    sign_in(@user)
-    get dashboard_path
-    text = section("Chatdox 현황").text.squish
-    assert_includes text, "아직 읽은 챕터가 없습니다."
-    assert_includes text, "첫 챕터 시작"
-
-    chapters = ProductContent.for("chatdox").chapters.reject { |c| c[:kind] == :appendix }
-    chapters.each { |c| ChapterProgress.create!(user: @user, product_code: "chatdox", chapter_id: c[:id], completed_at: Time.current) }
-    get dashboard_path
-    text = section("Chatdox 현황").text.squish
-    assert_includes text, "모든 챕터를 읽었습니다."
-    assert_includes text, "필요한 챕터를 다시 읽어 보세요."
-    assert_includes text, "진행률 100%"
-  end
-
-  # Handoff 0085 R1 -- 더 둘러보기 shows series (the /products card), no earlier product (no 미보유 card, no
-  # 가격 보기 →); the section's heading and line are unchanged.
+  # Handoff 0085 R1 -- the lower section shows series (the /products card), no earlier product (no 미보유 card, no
+  # 가격 보기 →). Handoff 0089 -- it's called 다른 콘텐츠, without the line under it or a 시리즈 둘러보기 link.
   test "not-yet-seen cards are series: the series list's card, no earlier product, no prices link" do
     grant("chatdox")
     series!("copy-line", name: "이야기 시리즈", summary: "한 줄 요약")
     sign_in(@user)
     get dashboard_path
-    seen = section("더 둘러보기")
+    seen = section("다른 콘텐츠")
     assert seen
-    assert_includes seen.text, "더 둘러보기"
-    assert_includes seen.text, "다른 이야기도 둘러보세요."
-    assert_select "section[aria-label='더 둘러보기'] a[href=?]", products_path, text: "시리즈 둘러보기 →"
+    assert_equal "다른 콘텐츠", seen.at_css("h2").text.strip
+    assert_not_includes seen.text, "다른 이야기도 둘러보세요."
+    assert_select "main a", text: "시리즈 둘러보기 →", count: 0
 
     card = seen.at_css("a[href='#{product_line_path("copy-line")}']")
     text = card.text.squish
@@ -120,7 +106,7 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
     assert empty
     assert_includes empty.text, "아직 이용 중인 콘텐츠가 없습니다."
     assert_includes empty.text, "아래에서 관심 있는 콘텐츠를 둘러보세요."
-    assert section("더 둘러보기")
+    assert section("다른 콘텐츠")
     assert_no_match OLD_TONE, own_copy(css_select("main").first)
   end
 
@@ -141,7 +127,7 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
     get dashboard_path
     assert_response :success
     assert_select "title", text: "대시보드 | LEEDOX"
-    assert_includes css_select("main header").text, "보던 곳에서 이어서 보세요."
+    assert_select "h1", text: "관리자님이 이용 중인 콘텐츠" # 0089: the member heading (was the greeting block)
     get admin_dashboard_path
     assert_response :success
   end

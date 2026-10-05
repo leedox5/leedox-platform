@@ -7,7 +7,9 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
     post user_session_path, params: { user: { email: @user.email, password: "password123" } }
   end
 
-  test "dashboard is a learning hub: progress, recent chapters, next step, GitHub Lab, doc access -- no order/license ledger" do
+  # Handoff 0089 -- the dashboard is now just what's in use (a card per product linking to its contents); reading
+  # progress, recent and next chapters went. Still no order/license ledger.
+  test "dashboard lists what's in use, linking to the contents -- no progress, no order/license ledger" do
     product = Product.find_by!(code: "chatdox")
     today = Time.current.in_time_zone(Commerce::PeriodCalculator::KST).to_date
     end_date = today + 1.month
@@ -24,11 +26,9 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
     get dashboard_path
     assert_response :success
 
-    assert_match(/진행률/, response.body)
-    assert_match(/최근에 읽은 챕터/, response.body)
-    assert_match(/다음 챕터/, response.body)
+    assert_select "section[aria-label='Chatdox 현황'] a[href=?]", product_content_index_path("chatdox")
+    assert_no_match(/진행률|최근에 읽은 챕터|다음 챕터|볼 수 있는 챕터/, css_select("main").first.text)
     assert_no_match(/GitHub Lab/, response.body)
-    assert_match(/볼 수 있는 챕터/, response.body)
 
     assert_no_match(/상품별 라이선스/, response.body)
     assert_select "[aria-label='상품별 라이선스']", count: 0
@@ -106,7 +106,9 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
     claudox_section = doc.at_css("section[aria-label='Claudox 현황']").text
 
     assert_match(/이용 중/, claudox_section)
-    assert_match(%r{20/20}, claudox_section)
+    # 0089: the card no longer counts chapters (it was "20/20"); the license still opens them all.
+    get product_chapter_path("claudox", "20")
+    assert_response :success
     assert_no_match(/Chatdox|미보유/, doc.at_css("main").text)
   end
 

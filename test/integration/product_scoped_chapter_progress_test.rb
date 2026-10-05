@@ -59,7 +59,9 @@ class ProductScopedChapterProgressTest < ActionDispatch::IntegrationTest
       "deleting the Claudox completion must not touch the Chatdox record for the same chapter number"
   end
 
-  test "dashboard's Chatdox progress count is unaffected by Claudox completions (regression check for section E)" do
+  # Handoff 0089 -- the dashboard no longer shows reading progress; the per-product scoping of the records it used to
+  # count is what still matters (and the dashboard still lists Chatdox).
+  test "Chatdox's completed chapters are unaffected by Claudox completions (regression check for section E)" do
     kst = ActiveSupport::TimeZone["Asia/Seoul"]
     today = Date.current
     last_usable = today + 30.days
@@ -75,8 +77,10 @@ class ProductScopedChapterProgressTest < ActionDispatch::IntegrationTest
     post chapter_progresses_path, params: { chapter_id: "02", product_code: "claudox" }
     post chapter_progresses_path, params: { chapter_id: "03", product_code: "claudox" }
 
+    assert_equal 1, @user.chapter_progresses.where(product_code: "chatdox").completed.count
+    assert_equal 3, @user.chapter_progresses.where(product_code: "claudox").completed.count
     get dashboard_path
     assert_response :success
-    assert_match(/20개 중 1개 읽음/, response.body)
+    assert_select "section[aria-label='Chatdox 현황']", 1
   end
 end

@@ -90,7 +90,7 @@ class DarkFrameTest < ActionDispatch::IntegrationTest
     get dashboard_path
     assert_select "div.bg-\\[\\#0e1014\\] > #{DARK_HEADER}"
     assert_select "link[href*='fonts.googleapis.com'][href*='Gowun+Batang']", 1
-    assert_select "main h1.font-display", text: /안녕하세요/
+    assert_select "main h1.font-display", text: /님이 이용 중인 콘텐츠\z/ # 0089: the heading replaced the greeting
     assert_not_includes css_select("main").first.to_html, "bg-white "
   end
 
@@ -106,10 +106,10 @@ class DarkFrameTest < ActionDispatch::IntegrationTest
 
     assert_select "[data-series-card='frame-in-use'].bg-\\[\\#15181e\\]"
     assert_select "[data-series-card='frame-in-use'] span.text-\\[\\#7dd3a8\\]", text: "이용 중"
-    assert_select "section[aria-label='Chatdox 현황'].bg-\\[\\#15181e\\] span.text-\\[\\#7dd3a8\\]", text: "이용 중"
-    assert_select "section[aria-label='Chatdox 현황'] [role=progressbar] div.bg-\\[\\#f0a53c\\]"
-    # 0085: 더 둘러보기 holds series (the dark /products card; frame-line isn't in use), no 만료 earlier product.
-    assert_select "section[aria-label='더 둘러보기'] a.bg-\\[\\#15181e\\][href=?]", product_line_path("frame-line")
+    # 0089: the earlier product is a small dark link card (no progress bar any more).
+    assert_select "section[aria-label='Chatdox 현황'] a.bg-\\[\\#15181e\\] span.text-\\[\\#7dd3a8\\]", text: "이용 중"
+    # 0085: 다른 콘텐츠 (더 둘러보기 until 0089) holds series (the dark /products card), no 만료 earlier product.
+    assert_select "section[aria-label='다른 콘텐츠'] a.bg-\\[\\#15181e\\][href=?]", product_line_path("frame-line")
     assert_not_includes css_select("main").text, "Claudox"
   end
 

@@ -58,7 +58,7 @@ class GuestPurchaseFlowRegressionTest < ActionDispatch::IntegrationTest
     assert_redirected_to dashboard_path
     follow_redirect!
     assert_select "div", text: /Chatdox 결제가 완료되었습니다/
-    assert_select "a[href=?]", product_chapter_path("chatdox", "01"), text: /첫 챕터 시작/
+    assert_select "a[data-legacy-card=chatdox][href=?]", product_content_index_path("chatdox") # 0089: the dashboard card links to the contents (no 첫 챕터 시작)
 
     # 7. Access Chatdox paid web content
     get product_chapter_path("chatdox", "06")
@@ -108,7 +108,7 @@ class GuestPurchaseFlowRegressionTest < ActionDispatch::IntegrationTest
     assert_redirected_to dashboard_path
     follow_redirect!
     assert_select "div", text: /Claudox 결제가 완료되었습니다/
-    assert_select "a[href=?]", product_chapter_path("claudox", "01"), text: /첫 챕터 시작/
+    assert_select "a[data-legacy-card=claudox][href=?]", product_content_index_path("claudox") # 0089: the dashboard card links to the contents (no 첫 챕터 시작)
 
     # 7. Access Claudox paid web content
     get product_chapter_path("claudox", "06")
