@@ -6,7 +6,7 @@ class LegalPagesCommentsClauseTest < ActionDispatch::IntegrationTest
     get terms_path
     assert_response :success
     text = css_select("body").text.squish
-    assert_includes text, "시행일: 2026년 10월 5일" # 0088 revised the terms again (제4조의2 itself unchanged)
+    assert_includes text, "시행일: 2026년 10월 6일" # 0088/0091 revised the terms again (제4조의2 itself unchanged)
     assert_operator text.index("제4조 금지 행위"), :<, text.index("제4조의2 이용자 게시물")
     assert_operator text.index("제4조의2 이용자 게시물"), :<, text.index("제5조 라이선스 방식") # 0088: 제1조 now mentions 제5조
     [ "게시물의 내용에 대한 책임과 권리는 작성한 이용자에게 있습니다.",
@@ -22,8 +22,8 @@ class LegalPagesCommentsClauseTest < ActionDispatch::IntegrationTest
   test "the terms show the revision note under the effective date, without a notice link" do
     get terms_path
     date, note = css_select("h1 ~ p").first(2).map { |n| n.text.squish }
-    assert_equal "시행일: 2026년 10월 5일", date
-    assert_equal "개정 안내: 2026년 10월 5일 — 시리즈(무기한 이용) 방식에 맞춰 상품별 조항을 상품 유형 기준으로 정리했습니다(제1조, 제4조, 제5조~제10조, 부칙).", note
+    assert_equal "시행일: 2026년 10월 6일", date
+    assert_equal "개정 안내: 2026년 10월 6일 — 상품 유형의 이름 \"시리즈\"를 \"가이드\"로 바꿨습니다(제1조, 제8조, 부칙). 이용 조건과 제공 범위는 달라지지 않습니다.", note # 0091
     assert_select "h1 ~ p a", 0
     assert_select "#article-4-2 h3", text: "제4조의2 이용자 게시물"
   end
@@ -41,7 +41,7 @@ class LegalPagesCommentsClauseTest < ActionDispatch::IntegrationTest
       User.create!(name: "관리자", email: "legal-admin-#{SecureRandom.hex(3)}@example.com", password: "password123", role: :admin) ].each do |user|
       post user_session_path, params: { user: { email: user.email, password: "password123" } }
       get terms_path
-      assert_includes css_select("body").text.squish, "개정 안내: 2026년 10월 5일 — 시리즈(무기한 이용) 방식에 맞춰 상품별 조항을 상품 유형 기준으로 정리했습니다"
+      assert_includes css_select("body").text.squish, "개정 안내: 2026년 10월 6일 — 상품 유형의 이름 \"시리즈\"를 \"가이드\"로 바꿨습니다"
       get privacy_path
       assert_includes css_select("body").text.squish, "개정 안내: 2026년 10월 4일 — 편 댓글 기능 도입에 따라 수집 항목에 게시물 정보를"
       delete destroy_user_session_path

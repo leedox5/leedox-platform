@@ -41,7 +41,7 @@ class PricingRemovalTest < ActionDispatch::IntegrationTest
     assert_match %r{/billing/checkout}, response.location # unchanged: back to that product's checkout (exact URL in the billing tests)
 
     get product_chapter_path("aistart", "08") # aistart's last chapter: the completion box
-    assert_select "#aistart-completion-cta a[href=?]", products_path, text: "시리즈 둘러보기"
+    assert_select "#aistart-completion-cta a[href=?]", products_path, text: "가이드 둘러보기"
     assert_select "a[href='/pricing']", 0
   end
 
@@ -49,22 +49,22 @@ class PricingRemovalTest < ActionDispatch::IntegrationTest
 
   test "guests: 시리즈 · 로그인 · 회원가입, no 가격 (desktop and mobile panel)" do
     get root_path
-    assert_equal [ "시리즈", "로그인", "회원가입" ], menu_labels("주요 내비게이션")
-    assert_equal [ "시리즈", "로그인", "회원가입" ], menu_labels("모바일 내비게이션")
+    assert_equal [ "가이드", "로그인", "회원가입" ], menu_labels("주요 내비게이션")
+    assert_equal [ "가이드", "로그인", "회원가입" ], menu_labels("모바일 내비게이션")
     assert_select "header a", text: "가격", count: 0
   end
 
   test "members: 시리즈 · 대시보드 · 마이페이지 · 로그아웃, no 가격" do
     sign_in(user!)
     get products_path
-    assert_equal [ "시리즈", "대시보드", "마이페이지", "로그아웃" ], menu_labels("주요 내비게이션")
-    assert_equal [ "시리즈", "대시보드", "마이페이지", "로그아웃" ], menu_labels("모바일 내비게이션")
+    assert_equal [ "가이드", "대시보드", "마이페이지", "로그아웃" ], menu_labels("주요 내비게이션")
+    assert_equal [ "가이드", "대시보드", "마이페이지", "로그아웃" ], menu_labels("모바일 내비게이션")
     assert_select "header a", text: "가격", count: 0
   end
 
   test "admins: only 가격 is gone, on the dark customer header and the light admin header" do
     sign_in(user!(role: :admin))
-    expected = [ "시리즈", "대시보드", "서비스데스크", "참조", "사용자관리", "마이페이지", "로그아웃" ]
+    expected = [ "가이드", "대시보드", "서비스데스크", "참조", "사용자관리", "마이페이지", "로그아웃" ]
     [ root_path, admin_dashboard_path ].each do |path|
       get path
       assert_equal expected, menu_labels("주요 내비게이션"), path

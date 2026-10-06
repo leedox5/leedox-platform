@@ -8,7 +8,7 @@ module ProductLinesHelper
   PRODUCT_LIST_FILTERS = [ [ "all", "전체" ], [ "free", "무료" ], [ "paid", "유료" ] ].freeze
 
   def product_list_filter_options
-    user_signed_in? ? PRODUCT_LIST_FILTERS + [ [ "mine", "내 시리즈" ] ] : PRODUCT_LIST_FILTERS
+    user_signed_in? ? PRODUCT_LIST_FILTERS + [ [ "mine", "내 가이드" ] ] : PRODUCT_LIST_FILTERS
   end
 
   # Handoff 0083 -- the series list is dark (the home's palette); these two helpers are used only there.
@@ -19,10 +19,10 @@ module ProductLinesHelper
 
   def product_list_empty_message(filter)
     case filter
-    when "free" then "무료 시리즈가 아직 없습니다."
-    when "paid" then "유료 시리즈가 아직 없습니다."
-    when "mine" then "아직 이용 중인 시리즈가 없습니다."
-    else "곧 새 시리즈가 공개됩니다."
+    when "free" then "무료 가이드가 아직 없습니다."
+    when "paid" then "유료 가이드가 아직 없습니다."
+    when "mine" then "아직 이용 중인 가이드가 없습니다."
+    else "곧 새 가이드가 공개됩니다."
     end
   end
   def product_list_state_label(state, product_line)

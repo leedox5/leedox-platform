@@ -98,6 +98,6 @@ class AistartFreeProductTest < ActionDispatch::IntegrationTest
     # part shows its empty line. What this test guards -- the page renders for such a user -- is unchanged.
     assert_no_match(/무료 이용/, response.body)
     assert_select "[data-license-card='aistart']", 0
-    assert_match(/아직 이용 중인 시리즈가 없습니다/, response.body)
+    assert_match(/아직 이용 중인 가이드가 없습니다/, response.body)
   end
 end

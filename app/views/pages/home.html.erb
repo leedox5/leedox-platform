@@ -2,9 +2,10 @@
     Sections, top to bottom: the pinned notice line (0077, only when one is published and pinned), featured series (only when one is featured and listed), brand line, new / coming
     episodes, one row per track (the AI row also carries the standalone products), what series / season /
     episode mean, footer. "만든 사람" waits for Tommy's copy (out of scope). %>
-<% content_for :title, "LEEDOX | 실제로 만들고 겪은 개발자의 시리즈" %>
+<%# Handoff 0091 (D-011) -- the brand sentence; 시리즈 is called 가이드 now and 시즌 is gone from the screens. %>
+<% content_for :title, "LEEDOX | 실제로 만들고 부딪히며 엮은 개발자의 실전 가이드" %>
 <% content_for :head do %>
-  <meta name="description" content="실제로 만들고, 막히고, 고친 과정을 시즌과 에피소드로 따라갑니다. Git·Java·WSL 같은 개발 기초부터 AI와 함께 만드는 이야기까지.">
+  <meta name="description" content="실제로 만들고 부딪히며 엮은 개발자의 실전 가이드. 매끈한 강의 대신, 막히고 고친 과정까지 한 편씩 따라갑니다. Git·Java·WSL 같은 개발 기초부터 AI와 함께 만드는 이야기까지.">
   <%# The display serif (see --font-display in application.css) -- shared with the series list since 0083. %>
   <%= render "shared/display_font" %>
 <% end %>

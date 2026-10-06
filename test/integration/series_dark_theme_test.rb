@@ -39,8 +39,8 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     get products_path
     assert_response :success
     assert_dark
-    assert_select "title", text: "시리즈 | LEEDOX"
-    assert_select "main h1.font-display", text: "시리즈"
+    assert_select "title", text: "가이드 | LEEDOX"
+    assert_select "main h1.font-display", text: "가이드" # 0091 (D-011)
     assert_select "main a.bg-\\[\\#15181e\\][href=?]", product_line_path("dark-line")
     assert_not_includes css_select("main").first.to_html, "bg-white"
   end
@@ -78,8 +78,8 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
   test "the list's filter tabs and state badges use the dark palette" do
     sign_in
     get products_path
-    assert_select "nav[aria-label='시리즈 필터'] a.bg-\\[\\#f0a53c\\]", text: /^전체/
-    assert_select "nav[aria-label='시리즈 필터'] a.bg-\\[\\#15181e\\]", minimum: 1
+    assert_select "nav[aria-label='가이드 필터'] a.bg-\\[\\#f0a53c\\]", text: /^전체/
+    assert_select "nav[aria-label='가이드 필터'] a.bg-\\[\\#15181e\\]", minimum: 1
   end
 
   # --- R2: the series detail -------------------------------------------------------------------------
@@ -103,7 +103,7 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     assert_dark
     assert_select "title", text: "다크 시리즈 | LEEDOX"
     assert_select "main h1.font-display", text: "다크 시리즈"
-    assert_select "a[href=?]", products_path, text: "← 시리즈 목록"
+    assert_select "a[href=?]", products_path, text: "← 가이드 목록"
     assert_select "main .doc-content.doc-content-dark h2", text: "소제목"
     assert_select "main ol a.bg-\\[\\#15181e\\][data-turbo-prefetch='false'][href=?]", product_episode_path("dark-line", "01")
     assert_select "main ol div.opacity-70", 1
@@ -122,7 +122,7 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     order = Commerce::OrderCreator.call!(user: @user, product_code: @line.product.code, offer_code: @line.lifetime_offer.code, requested_start_on: nil, provider: "manual")
     Commerce::ConfirmManualPayment.call!(order: order, actor: User.find_by!(role: :admin))
     get product_line_path("dark-line")                     # owned
-    assert_includes box.text, "구매한 시리즈입니다 · 무기한 이용"
+    assert_includes box.text, "구매한 가이드입니다 · 무기한 이용"
     assert_select "#product-purchase p.text-\\[\\#f2efe8\\]", minimum: 1
 
     free = ProductLine.create!(internal_name: "무료", customer_name: "무료 시리즈", slug: "dark-free", introduction: "소개", status: "published")
@@ -164,7 +164,7 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
   test "the series list's wording (0083 R2 d)" do
     sign_in
     get products_path
-    assert_select "main p", text: "Series"
-    assert_select "nav[aria-label='시리즈 필터'] a", text: /\A내 시리즈/
+    assert_select "main p", text: "Guides" # 0091 (D-011)
+    assert_select "nav[aria-label='가이드 필터'] a", text: /\A내 가이드/
   end
 end

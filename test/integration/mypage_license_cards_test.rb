@@ -47,17 +47,17 @@ class MypageLicenseCardsTest < ActionDispatch::IntegrationTest
     get mypage_path
     outer = css_select("section[aria-label='상품별 라이선스']").first
     assert_equal "상품별 라이선스", outer.at_css("h2").text.strip
-    assert_equal [ "시리즈", "이전 상품" ], outer.css("section > h3").map { |h| h.text.strip }
-    assert_equal [ "git_core" ], codes("시리즈")
+    assert_equal [ "가이드", "이전 상품" ], outer.css("section > h3").map { |h| h.text.strip }
+    assert_equal [ "git_core" ], codes("가이드")
     assert_equal [ "chatdox" ], codes("이전 상품")
   end
 
   test "no license at all: 시리즈 shows its empty line and link; no 이전 상품 part; no free cards; no old empty line" do
     sign_in
     get mypage_path
-    series = part("시리즈")
-    assert_includes series.text, "아직 이용 중인 시리즈가 없습니다."
-    assert_equal products_path, series.css("a").find { |a| a.text.strip == "시리즈 둘러보기 →" }["href"]
+    series = part("가이드")
+    assert_includes series.text, "아직 이용 중인 가이드가 없습니다."
+    assert_equal products_path, series.css("a").find { |a| a.text.strip == "가이드 둘러보기 →" }["href"]
     assert_nil part("이전 상품")
     assert_select "[data-license-card]", 0
     assert_not_includes response.body, "무료 이용"
@@ -111,7 +111,7 @@ class MypageLicenseCardsTest < ActionDispatch::IntegrationTest
     license!(@chatdox, starts_on: Date.current - 5, last_usable_on: Date.current + 25)
     sign_in
     get mypage_path
-    assert_includes part("시리즈").text, "아직 이용 중인 시리즈가 없습니다."
+    assert_includes part("가이드").text, "아직 이용 중인 가이드가 없습니다."
     assert_equal [ "chatdox" ], codes("이전 상품")
   end
 
@@ -163,7 +163,7 @@ class MypageLicenseCardsTest < ActionDispatch::IntegrationTest
     license!(canceled.product, starts_on: Date.current - 5, status: "canceled")
     sign_in
     get mypage_path
-    assert_equal %w[newer older soon ended_later ended_earlier], codes("시리즈")
+    assert_equal %w[newer older soon ended_later ended_earlier], codes("가이드")
   end
 
   # HQ 0082 -- with a long title the badge stays on one line and doesn't shrink.
@@ -195,7 +195,7 @@ class MypageLicenseCardsTest < ActionDispatch::IntegrationTest
     license!(@chatdox, starts_on: Date.current - 5, last_usable_on: Date.current + 25)
     sign_in
     get mypage_path
-    [ "시리즈", "이전 상품" ].each do |label|
+    [ "가이드", "이전 상품" ].each do |label|
       assert_select "section[aria-label='#{label}'] ul.divide-y > li[data-license-card]", 1, label
       assert_select "section[aria-label='#{label}'] .grid", 0, label
     end
@@ -206,10 +206,10 @@ class MypageLicenseCardsTest < ActionDispatch::IntegrationTest
     assert_not_includes css_select("section[aria-label='상품별 라이선스']").first.text, "콘텐츠 보기"
   end
 
-  test "the 시리즈 empty line keeps its 시리즈 둘러보기 → link" do
+  test "the 가이드 empty line keeps its 가이드 둘러보기 → link" do
     sign_in
     get mypage_path
-    assert_select "section[aria-label='시리즈'] a[href=?]", products_path, text: "시리즈 둘러보기 →"
+    assert_select "section[aria-label='가이드'] a[href=?]", products_path, text: "가이드 둘러보기 →"
   end
 
   # --- page-level (0081) -------------------------------------------------------------------------------

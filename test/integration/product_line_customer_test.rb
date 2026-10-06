@@ -56,13 +56,15 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "the series label shows only for a product that belongs to a series" do
+  # Handoff 0091 (D-011) -- the season label (series_label) above the name is no longer shown, even when set.
+  test "the season label is not shown, even for a product that has one" do
     get product_line_path(@line.slug)
     assert_select "main > p.uppercase", 0
 
-    @line.update!(series_key: "grp", series_label: "시즌1")
+    @line.update!(series_key: "grp", series_label: "S02")
     get product_line_path(@line.slug)
-    assert_select "main > p.uppercase", text: "시즌1"
+    assert_select "main > p.uppercase", 0
+    assert_not_includes css_select("main").text, "S02"
   end
 
   test "ai_supporter block appears only when set" do

@@ -7,7 +7,7 @@
 <% @track_rows.each do |track, lines, extras| %>
   <section aria-labelledby="track-<%= track %>" class="mx-auto max-w-6xl px-5 py-12 sm:px-7">
     <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
-      <h2 id="track-<%= track %>" class="font-display text-2xl font-bold text-[#f2efe8]"><%= ProductLine::TRACKS[track] %></h2>
+      <h2 id="track-<%= track %>" class="font-display text-2xl font-bold text-[#f2efe8]"><%= ProductLine::TRACK_TITLES[track] %></h2>
       <p class="text-sm text-[#a8a39a]"><%= taglines[track] %></p>
     </div>
     <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

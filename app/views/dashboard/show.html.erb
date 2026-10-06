@@ -26,7 +26,7 @@
       <h1 class="mb-6 font-display text-2xl font-bold text-[#f2efe8] sm:text-3xl"><%= current_user.name %>님이 이용 중인 콘텐츠</h1>
 
       <% if @series_in_use.any? %>
-        <section aria-label="이용 중인 시리즈" class="mb-10">
+        <section aria-label="이용 중인 가이드" class="mb-10">
           <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <% @series_in_use.each do |line| %>
               <%# Handoff 0090 -- straight to the 에피소드 section (#episodes) when the page has one. %>
@@ -62,7 +62,7 @@
           <% if @browse_series.any? %>
             <p class="mt-1 text-sm text-[#c9c4ba]">아래에서 관심 있는 콘텐츠를 둘러보세요.</p>
           <% else %>
-            <%= link_to "시리즈 둘러보기 →", products_path, class: "mt-2 inline-block text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
+            <%= link_to "가이드 둘러보기 →", products_path, class: "mt-2 inline-block text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
           <% end %>
         </section>
       <% end %>

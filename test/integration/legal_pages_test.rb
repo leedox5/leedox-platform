@@ -20,8 +20,9 @@ class LegalPagesTest < ActionDispatch::IntegrationTest
     assert table, "expected a per-product-type scope table"
     assert_equal [ "상품 유형", "이용 방식", "제공 콘텐츠", "포함되지 않는 것" ], table.css("thead th").map { |th| th.text.strip }
     rows = table.css("tbody tr").map { |row| row.css("td").map { |td| td.text.strip } }
-    assert_equal [ "시리즈", "무기한 이용(한 번 결제 또는 무료 이용 시작)",
-      "해당 시리즈에 공개된 편과 편에 딸린 자료·첨부 파일, 이후 같은 시리즈에 추가되는 편", "다른 시리즈, 별도 상품으로 출시되는 콘텐츠" ], rows[0]
+    # 0091 (D-011): the type is called 가이드 (was 시리즈).
+    assert_equal [ "가이드", "무기한 이용(한 번 결제 또는 무료 이용 시작)",
+      "해당 가이드에 공개된 편과 편에 딸린 자료·첨부 파일, 이후 같은 가이드에 추가되는 편", "다른 가이드, 별도 상품으로 출시되는 콘텐츠" ], rows[0]
     assert_equal [ "기간제 콘텐츠 상품", "기간제 이용", "상품 페이지에 표시된 웹 챕터와 이용 기간 중 추가되는 웹 콘텐츠", "다른 상품" ], rows[1]
     assert_equal 2, rows.size
     assert_no_match(/Chatdox|Claudox/, doc.at_css("main, body").text)
@@ -77,8 +78,11 @@ class LegalPagesTest < ActionDispatch::IntegrationTest
     addenda = doc.at_css("section#addenda")
     assert_equal "부칙", addenda.at_css("h2").text.strip
     items = addenda.css("ol > li").map { |li| li.text.strip }
-    assert_equal "이 개정 약관은 2026년 10월 5일부터 시행합니다.", items[0]
+    assert_equal "이 개정 약관은 2026년 10월 6일부터 시행합니다.", items[0]
     assert_match(/시행일 전에 기간제 콘텐츠 상품의 라이선스를 구매한 이용자에게는/, items[1])
+    # 0091: the old name maps onto the new one.
+    assert_equal "종전 약관의 \"시리즈\"는 이 약관의 \"가이드\"와 같은 상품 유형을 가리키며, 이미 발급된 라이선스의 이용 조건은 달라지지 않습니다.", items[2]
+    assert_equal 3, items.size
     assert_equal addenda, doc.css("section").last, "부칙 is the last section, after 제15조"
   end
 

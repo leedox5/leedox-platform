@@ -1,8 +1,8 @@
 <%# Handoff 0071 (b) -- the featured series. Rendered only when a featured series is listed (the page skips
     this partial entirely otherwise -- never an empty hero). Everything shown comes from existing judgments:
     price/owned from ProductLine#access_state (0068), published vs 공개 예정 from the product page's own split
-    (0070). The season slot shows series_label when the admin has set one (the only season-like field on a
-    ProductLine -- free text, e.g. "S01"), otherwise the fixed "S01". %>
+    (0070). Handoff 0091 (D-011) -- no season slot any more (it showed series_label, or a fixed "S01"); the
+    column and its admin field stay, only the output went. %>
 <% line = @featured_line %>
 <% state = @series_access_states[line.id] %>
 <% total = @featured_published.size + @featured_upcoming.size %>
@@ -10,7 +10,7 @@
   <div class="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-7 lg:grid-cols-2 lg:items-center lg:py-20">
     <div class="min-w-0">
       <p class="text-xs font-semibold tracking-wide text-[#f0a53c]">
-        지금 시작하는 시리즈 · <%= line.series_label.presence || "S01" %> · <%= total %>편<% if state %> · <%= product_list_state_label(state, line) %><% end %>
+        지금 시작하는 가이드 · <%= total %>편<% if state %> · <%= product_list_state_label(state, line) %><% end %>
       </p>
       <h1 id="featured-series-title" class="mt-4 break-keep font-display text-4xl font-bold leading-tight text-[#f2efe8] sm:text-5xl"><%= line.customer_name %></h1>
       <% if line.summary.present? %>
@@ -22,7 +22,7 @@
           <%= link_to series_start_label, product_episode_path(line.slug, first.display_id), data: { turbo_prefetch: false },
             class: "inline-flex items-center rounded-lg bg-[#f0a53c] px-5 py-3 text-sm font-bold text-[#0e1014] hover:bg-[#f5b85e]" %>
         <% end %>
-        <%= link_to "시리즈 소개", product_line_path(line.slug),
+        <%= link_to "가이드 소개", product_line_path(line.slug),
           class: "inline-flex items-center rounded-lg border border-white/25 px-5 py-3 text-sm font-bold text-[#f2efe8] hover:border-white/50" %>
       </div>
     </div>

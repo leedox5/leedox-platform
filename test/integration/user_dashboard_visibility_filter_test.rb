@@ -57,7 +57,7 @@ class UserDashboardVisibilityFilterTest < ActionDispatch::IntegrationTest
   end
 
   # Handoff 0085 -- the separate "nothing to show" box (no earlier product on sale) is gone: with nothing in use the
-  # member gets the one empty box, and with no series to browse either, it carries the 시리즈 둘러보기 link.
+  # member gets the one empty box, and with no series to browse either, it carries the 가이드 둘러보기 link.
   test "3. Empty state UI is rendered when nothing is in use and there is no series to browse" do
     ProductOffer.update_all(active: false)
 
@@ -67,7 +67,7 @@ class UserDashboardVisibilityFilterTest < ActionDispatch::IntegrationTest
     assert_select "section[aria-label='대시보드 안내']", 0
     assert_select "section[aria-label='이용 중인 콘텐츠 없음']" do
       assert_select "p", text: "아직 이용 중인 콘텐츠가 없습니다."
-      assert_select "a[href=?]", products_path, text: "시리즈 둘러보기 →"
+      assert_select "a[href=?]", products_path, text: "가이드 둘러보기 →"
     end
     assert_select "section[aria-label='더 둘러보기']", 0
   end

@@ -119,16 +119,16 @@ class ProductLineListTest < ActionDispatch::IntegrationTest
     get products_path
     assert_select "a[href=?] span", product_line_path(free_open.slug), text: "이용 중"
     get product_line_path(free_open.slug)
-    assert_match(/무료로 이용 중인 시리즈입니다/, css_select("#product-purchase").text)
+    assert_match(/무료로 이용 중인 가이드입니다/, css_select("#product-purchase").text)
   end
 
   test "the header's product link and the detail page's back-to-list link both point at /products" do
     line = ProductLine.create!(internal_name: "n", customer_name: "제품", slug: "list-nav", introduction: "소개", status: "published")
     get product_line_path(line.slug)
     # Labelled 시리즈 since handoff 0071 (the link itself is unchanged).
-    assert_select "header nav[aria-label='주요 내비게이션'] a[href=?]", products_path, text: "시리즈"
-    assert_select "nav[aria-label='모바일 내비게이션'] a[href=?]", products_path, text: "시리즈"
-    assert_select "a[href=?]", products_path, text: "← 시리즈 목록"
+    assert_select "header nav[aria-label='주요 내비게이션'] a[href=?]", products_path, text: "가이드"
+    assert_select "nav[aria-label='모바일 내비게이션'] a[href=?]", products_path, text: "가이드"
+    assert_select "a[href=?]", products_path, text: "← 가이드 목록"
   end
 
   # --- R2: filter tabs --------------------------------------------------------
@@ -145,15 +145,15 @@ class ProductLineListTest < ActionDispatch::IntegrationTest
   test "the mine option only exists for a signed-in user, and a guest asking for it anyway falls back to all" do
     user = User.create!(name: "일반", email: "list-plain-#{SecureRandom.hex(3)}@example.com", password: "password123")
     get products_path
-    assert_no_match(/내 시리즈/, css_select("nav[aria-label='시리즈 필터']").text)
+    assert_no_match(/내 가이드/, css_select("nav[aria-label='가이드 필터']").text)
 
     get products_path(filter: "mine")
     assert_response :success
-    assert_select "nav[aria-label='시리즈 필터'] a.bg-\\[\\#f0a53c\\]", text: /^전체/
+    assert_select "nav[aria-label='가이드 필터'] a.bg-\\[\\#f0a53c\\]", text: /^전체/
 
     sign_in(user)
     get products_path
-    assert_match(/내 시리즈/, css_select("nav[aria-label='시리즈 필터']").text)
+    assert_match(/내 가이드/, css_select("nav[aria-label='가이드 필터']").text)
   end
 
   test "an unrecognized filter value falls back to all instead of erroring" do
@@ -161,7 +161,7 @@ class ProductLineListTest < ActionDispatch::IntegrationTest
     get products_path(filter: "bogus")
     assert_response :success
     assert_select "a[href=?]", product_line_path(line.slug)
-    assert_select "nav[aria-label='시리즈 필터'] a.bg-\\[\\#f0a53c\\]", text: /^전체/
+    assert_select "nav[aria-label='가이드 필터'] a.bg-\\[\\#f0a53c\\]", text: /^전체/
   end
 
   test "free/paid/mine reuse access_state exactly -- a product already owned counts by what it costs, not just its exact badge" do
@@ -208,14 +208,14 @@ class ProductLineListTest < ActionDispatch::IntegrationTest
     sign_in(user)
 
     get products_path(filter: "free")
-    assert_match(/무료 시리즈가 아직 없습니다/, css_select("main").text)
+    assert_match(/무료 가이드가 아직 없습니다/, css_select("main").text)
     assert_select "a[href=?]", products_path, text: "전체 보기"
 
     get products_path(filter: "paid")
-    assert_match(/유료 시리즈가 아직 없습니다/, css_select("main").text)
+    assert_match(/유료 가이드가 아직 없습니다/, css_select("main").text)
 
     get products_path(filter: "mine")
-    assert_match(/아직 이용 중인 시리즈가 없습니다/, css_select("main").text)
+    assert_match(/아직 이용 중인 가이드가 없습니다/, css_select("main").text)
 
     get products_path
     assert_no_match(/전체 보기/, css_select("main").text, "전체 has nothing to link back to")
@@ -227,7 +227,7 @@ class ProductLineListTest < ActionDispatch::IntegrationTest
     2.times { |i| ProductLine.create!(internal_name: "p#{i}", customer_name: "유료#{i}", slug: "list-r2-count-paid-#{i}", introduction: "소개", status: "published").tap { |l| open_sale!(l, 1_000) } }
 
     get products_path
-    counts = css_select("nav[aria-label='시리즈 필터'] a").to_h { |a| [ a.text.split.first, a.text.split.last.to_i ] }
+    counts = css_select("nav[aria-label='가이드 필터'] a").to_h { |a| [ a.text.split.first, a.text.split.last.to_i ] }
     assert_equal counts["전체"], css_select("main a[href^='/products/']").size
     get products_path(filter: "free")
     assert_equal counts["무료"], css_select("main a[href^='/products/']").size

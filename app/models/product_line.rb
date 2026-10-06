@@ -20,6 +20,9 @@ class ProductLine < ApplicationRecord
   VISIBILITIES = %w[public unlisted private].freeze
   # Handoff 0071 -- the home row a series appears in; nil keeps it off the home rows.
   TRACKS = { "basics" => "개발 기초 시즌", "ai" => "AI와 함께 만들기" }.freeze
+  # Handoff 0091 (D-011) -- the home rows' titles: no 시즌 on customer screens. TRACKS stays the admin's wording
+  # (the 홈 줄 select and the list) until the admin screens' words are decided (backlog 0068).
+  TRACK_TITLES = { "basics" => "개발 기초", "ai" => "AI와 함께 만들기" }.freeze
 
   # Recommended upload is 16:9 at 1600x900. 5MB is far above a well-compressed
   # 1600x900 JPEG/WebP (~0.2-0.8MB) and a flat PNG (~1-3MB) while stopping

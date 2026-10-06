@@ -1,12 +1,13 @@
-<%# Handoff 0071 (f) -- what "series / season / episode" mean here, fixed copy from the request. %>
+<%# Handoff 0071 (f) -- what the units mean here, fixed copy from the request. Handoff 0091 (D-011) -- 가이드 ·
+    에피소드 · 실전 (시즌 is gone); same three blocks, same shape. %>
 <% blocks = [
-  [ "시리즈", "하나의 주제, 하나의 이야기", "Git, Java, WSL, AI 협업처럼 주제마다 하나의 시리즈가 있습니다." ],
-  [ "시즌", "한 단계씩 깊어지는 흐름", "S01에서 기본 흐름을 익히면, 다음 시즌에서 한 단계 더 나아갑니다." ],
-  [ "에피소드", "한 편에 한 장면", "각 편은 질문 하나에 답하고, 다음 편의 질문을 남기며 끝납니다." ]
+  [ "가이드", "하나의 주제, 하나의 완결", "Git, Java, WSL, AI 협업처럼 주제마다 가이드 하나. 그 자체로 끝까지 갑니다." ],
+  [ "에피소드", "한 편에 한 장면", "각 편은 질문 하나에 답하고, 다음 편의 질문을 남기며 끝납니다." ],
+  [ "실전", "부딪힌 자리까지", "잘 된 결과만이 아니라, 막히고 고친 과정을 그대로 엮었습니다." ]
 ] %>
 <section aria-labelledby="series-explainer" class="border-t border-white/10">
   <div class="mx-auto max-w-6xl px-5 py-14 sm:px-7">
-    <h2 id="series-explainer" class="sr-only">시리즈·시즌·에피소드</h2>
+    <h2 id="series-explainer" class="sr-only">가이드 · 에피소드 · 실전</h2>
     <div class="grid gap-8 md:grid-cols-3">
       <% blocks.each do |label, title, body| %>
         <div>

@@ -5,7 +5,7 @@
 <%# Handoff 0083 -- dark like the home ("browse" pages are dark, reading/handling pages light): the home's palette
     (#0e1014 page, #15181e cards, #f2efe8 / #c9c4ba / #a8a39a text, #f0a53c accent), its dark header and its display
     serif. Only colors and fonts changed; what shows (cards, badges, filters, links) is the same. %>
-<% content_for :title, "시리즈 | LEEDOX" %>
+<% content_for :title, "가이드 | LEEDOX" %>
 <% content_for :head do %>
   <%= render "shared/display_font" %>
 <% end %>
@@ -16,11 +16,11 @@
   <main class="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
     <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p class="text-sm font-black uppercase tracking-[0.18em] text-[#f0a53c]">Series</p>
-        <h1 class="mt-2 break-keep font-display text-3xl font-bold tracking-tight text-[#f2efe8] sm:text-4xl">시리즈</h1>
+        <p class="text-sm font-black uppercase tracking-[0.18em] text-[#f0a53c]">Guides</p>
+        <h1 class="mt-2 break-keep font-display text-3xl font-bold tracking-tight text-[#f2efe8] sm:text-4xl">가이드</h1>
       </div>
       <%# R2 -- filter tabs, plain links (work with no JS); the current one is the only visual state that matters. %>
-      <nav aria-label="시리즈 필터" class="flex flex-wrap items-center gap-2">
+      <nav aria-label="가이드 필터" class="flex flex-wrap items-center gap-2">
         <% product_list_filter_options.each do |value, label| %>
           <%= link_to "#{label} #{@filter_counts.fetch(value, @filter_counts["all"])}",
             value == "all" ? products_path : products_path(filter: value),

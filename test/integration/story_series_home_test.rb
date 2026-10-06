@@ -59,21 +59,23 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
     get root_path
     assert hero, "hero rendered"
     text = hero.text
-    assert_includes text, "지금 시작하는 시리즈 · S01 · 5편 · 무료"
+    assert_includes text, "지금 시작하는 가이드 · 5편 · 무료" # 0091: no season slot
     assert_equal "시리즈 git-core", hero.at_css("h1").text.strip
     assert_includes text, "변경 이력을 남기는 법부터"
     assert_includes text, "공개 2편 · 공개 예정 3편"
     assert hero.at_css("a[href='#{product_episode_path(git.slug, '01')}']")&.text&.include?("첫 편부터 보기")
     assert_no_match(/E0\d/, text, "no episode numbers in the hero")
-    assert hero.at_css("a[href='#{product_line_path(git.slug)}']")&.text&.include?("시리즈 소개")
+    assert hero.at_css("a[href='#{product_line_path(git.slug)}']")&.text&.include?("가이드 소개")
     assert hero.at_css("div[aria-hidden='true'].aspect-video"), "no cover -- the placeholder takes its place"
   end
 
-  test "the season slot uses the series' own label when set, S01 otherwise" do
+  # Handoff 0091 (D-011) -- no season slot: neither the series' own label nor the fixed "S01".
+  test "no season slot in the label, even when the series has a label" do
     line = series("season-line", featured: true, series_label: "S02")
     episodes(line, published: [ 1 ])
     get root_path
-    assert_includes hero.text, "지금 시작하는 시리즈 · S02 · 1편"
+    assert_includes hero.text, "지금 시작하는 가이드 · 1편"
+    assert_no_match(/S0\d/, hero.text)
   end
 
   test "with nothing coming up the release line is just the published count; with nothing published only 시리즈 소개 remains" do
@@ -119,7 +121,7 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
     get root_path
     basics = css_select("section[aria-labelledby='track-basics']").first
     assert basics
-    assert_equal "개발 기초 시즌", basics.at_css("h2").text
+    assert_equal "개발 기초", basics.at_css("h2").text # 0091: ProductLine::TRACK_TITLES (no 시즌)
     assert_includes basics.text, "개발환경부터 버전 관리까지, 손에 익히는 기초"
     hrefs = basics.css("a").map { |a| a["href"] }
     assert_equal [ product_line_path(old.slug), product_line_path(newer.slug) ], hrefs
@@ -232,16 +234,19 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
 
   # --- R2 f. theme, header, fixed blocks --------------------------------------------------
 
-  test "the fixed brand and series / season / episode copy, and the brand line steps down to <p> when a hero owns the h1" do
+  # Handoff 0091 (D-011) -- the brand sentence and the 가이드 · 에피소드 · 실전 blocks (no 시리즈 / 시즌).
+  test "the fixed brand and guide / episode / practice copy, and the brand line steps down to <p> when a hero owns the h1" do
     get root_path
-    assert_select "#brand-line", text: "실제로 만들고, 막히고, 고친 과정을 시즌과 에피소드로 따라갑니다."
-    assert_match(/매끈한 강의 대신, 한 편씩 이어지는 시리즈/, response.body)
-    { "하나의 주제, 하나의 이야기" => "주제마다 하나의 시리즈가 있습니다.",
-      "한 단계씩 깊어지는 흐름" => "다음 시즌에서 한 단계 더 나아갑니다.",
-      "한 편에 한 장면" => "다음 편의 질문을 남기며 끝납니다." }.each do |title, body|
-      assert_select "section[aria-labelledby='series-explainer'] h3", text: title
-      assert_match(/#{Regexp.escape(body)}/, response.body)
-    end
+    assert_select "title", text: "LEEDOX | 실제로 만들고 부딪히며 엮은 개발자의 실전 가이드"
+    assert_select "#brand-line", text: "실제로 만들고 부딪히며 엮은 개발자의 실전 가이드."
+    assert_match(/매끈한 강의 대신, 막히고 고친 과정까지 한 편씩 따라갑니다\. Git·Java·WSL 같은 개발 기초부터 AI와 함께 만드는 이야기까지\./, response.body)
+    assert_select "section[aria-labelledby='series-explainer'] h2", text: "가이드 · 에피소드 · 실전"
+    blocks = css_select("section[aria-labelledby='series-explainer'] .grid > div").map { |d| d.css("p, h3").map { |n| n.text.strip } }
+    assert_equal [
+      [ "가이드", "하나의 주제, 하나의 완결", "Git, Java, WSL, AI 협업처럼 주제마다 가이드 하나. 그 자체로 끝까지 갑니다." ],
+      [ "에피소드", "한 편에 한 장면", "각 편은 질문 하나에 답하고, 다음 편의 질문을 남기며 끝납니다." ],
+      [ "실전", "부딪힌 자리까지", "잘 된 결과만이 아니라, 막히고 고친 과정을 그대로 엮었습니다." ]
+    ], blocks
 
     series("hero-owner", featured: true)
     get root_path

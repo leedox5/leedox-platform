@@ -227,7 +227,7 @@ class ProductLineSalesAndPurchaseTest < ActionDispatch::IntegrationTest
     get download
     assert_response :success
     get product_line_path(@line.slug)
-    assert_includes css_select("#product-purchase").text, "무료로 이용 중인 시리즈입니다 · 무기한 이용"
+    assert_includes css_select("#product-purchase").text, "무료로 이용 중인 가이드입니다 · 무기한 이용"
     assert_select "#product-purchase form", 0
 
     assert_no_difference "License.count" do
@@ -344,7 +344,7 @@ class ProductLineSalesAndPurchaseTest < ActionDispatch::IntegrationTest
     buy!(@buyer, @line)
     sign_in(@buyer)
     get product_line_path(@line.slug)
-    assert_includes css_select("#product-purchase").text, "구매한 시리즈입니다 · 무기한 이용"
+    assert_includes css_select("#product-purchase").text, "구매한 가이드입니다 · 무기한 이용"
     assert_select "#product-purchase a", 0
   end
 
@@ -539,9 +539,9 @@ class ProductLineSalesAndPurchaseTest < ActionDispatch::IntegrationTest
     sign_in(@buyer)
     get dashboard_path
     assert_response :success
-    assert_select "section[aria-label='이용 중인 시리즈'] [data-series-card=?]", @line.slug, 1
+    assert_select "section[aria-label='이용 중인 가이드'] [data-series-card=?]", @line.slug, 1
     standalone = css_select("main").first.dup
-    standalone.css("section[aria-label='이용 중인 시리즈']").each(&:remove)
+    standalone.css("section[aria-label='이용 중인 가이드']").each(&:remove)
     assert_no_match(/#{Regexp.escape(name)}/, standalone.text)
     sign_out
 

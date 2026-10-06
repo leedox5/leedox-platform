@@ -75,7 +75,7 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
   end
 
   # Handoff 0085 R1 -- the lower section shows series (the /products card), no earlier product (no 미보유 card, no
-  # 가격 보기 →). Handoff 0089 -- it's called 다른 콘텐츠, without the line under it or a 시리즈 둘러보기 link.
+  # 가격 보기 →). Handoff 0089 -- it's called 다른 콘텐츠, without the line under it or a 가이드 둘러보기 link.
   test "not-yet-seen cards are series: the series list's card, no earlier product, no prices link" do
     grant("chatdox")
     series!("copy-line", name: "이야기 시리즈", summary: "한 줄 요약")
@@ -85,7 +85,7 @@ class DashboardCopyTest < ActionDispatch::IntegrationTest
     assert seen
     assert_equal "다른 콘텐츠", seen.at_css("h2").text.strip
     assert_not_includes seen.text, "다른 이야기도 둘러보세요."
-    assert_select "main a", text: "시리즈 둘러보기 →", count: 0
+    assert_select "main a", text: "가이드 둘러보기 →", count: 0
 
     card = seen.at_css("a[href='#{product_line_path("copy-line")}']")
     text = card.text.squish

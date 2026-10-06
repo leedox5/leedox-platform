@@ -7,7 +7,7 @@ require "test_helper"
 # that isn't in use; an earlier product without a usable license no longer shows at all (no 만료 / 미보유 card).
 # Handoff 0089 -- the series card is the /products card: the whole card links to the series (no 첫 편부터 보기 button,
 # no 시리즈 소개 link, 공개 N편 without the 공개 예정 count), the lower section is 다른 콘텐츠 (no line under it), and
-# 시리즈 둘러보기 → only shows in the empty state when there's nothing to browse either.
+# 가이드 둘러보기 → only shows in the empty state when there's nothing to browse either.
 class DashboardSeriesTest < ActionDispatch::IntegrationTest
   setup do
     Commerce::CatalogBootstrap.call!
@@ -34,8 +34,8 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
       starts_on: starts_on, last_usable_on: last_usable_on, access_ends_at: ends)
   end
 
-  def cards = css_select("section[aria-label='이용 중인 시리즈'] [data-series-card]")
-  def series_link_count = css_select("main a[href='#{products_path}']").count { |a| a.text.strip == "시리즈 둘러보기 →" }
+  def cards = css_select("section[aria-label='이용 중인 가이드'] [data-series-card]")
+  def series_link_count = css_select("main a[href='#{products_path}']").count { |a| a.text.strip == "가이드 둘러보기 →" }
 
   # --- the series section --------------------------------------------------------------
 
@@ -59,9 +59,9 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
     assert_equal "a", card.name, "the whole card is the link"
     assert_equal product_line_path("git-core", anchor: "episodes"), card["href"] # 0090: straight to the 에피소드 section
     assert_empty card.css("a")
-    [ "첫 편부터 보기", "시리즈 소개" ].each { |gone| assert_not_includes text, gone }
+    [ "첫 편부터 보기", "가이드 소개" ].each { |gone| assert_not_includes text, gone }
     html = response.body
-    assert_operator html.index("이용 중인 시리즈"), :<, html.index("다른 콘텐츠")
+    assert_operator html.index("이용 중인 가이드"), :<, html.index("다른 콘텐츠")
   end
 
   test "a dated license shows its end date; no summary means no summary line; no 공개 예정 means no suffix" do
@@ -117,8 +117,8 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
   test "no series in use: no section, no empty heading" do
     sign_in
     get dashboard_path
-    assert_select "section[aria-label='이용 중인 시리즈']", 0
-    assert_not_includes css_select("main").text, "이용 중인 시리즈"
+    assert_select "section[aria-label='이용 중인 가이드']", 0
+    assert_not_includes css_select("main").text, "이용 중인 가이드"
   end
 
   test "the series in use match what /mypage labels 이용 중" do
@@ -153,31 +153,31 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
     license!(line.product) # series only
     get dashboard_path
     assert_select "section[aria-label='이용 중인 콘텐츠 없음']", 0
-    assert_select "section[aria-label='이용 중인 시리즈']", 1
+    assert_select "section[aria-label='이용 중인 가이드']", 1
 
     standalone = license!(chatdox, last_usable_on: Date.current + 30) # both
     get dashboard_path
     assert_select "section[aria-label='이용 중인 콘텐츠 없음']", 0
     assert_select "section[aria-label='Chatdox 현황']", 1
-    assert_select "section[aria-label='이용 중인 시리즈']", 1
+    assert_select "section[aria-label='이용 중인 가이드']", 1
     html = response.body
-    assert_operator html.index("이용 중인 시리즈"), :<, html.index("Chatdox 현황")
+    assert_operator html.index("이용 중인 가이드"), :<, html.index("Chatdox 현황")
 
     License.where(product: line.product, user: @user).delete_all # standalone only
     get dashboard_path
     assert_select "section[aria-label='이용 중인 콘텐츠 없음']", 0
-    assert_select "section[aria-label='이용 중인 시리즈']", 0
+    assert_select "section[aria-label='이용 중인 가이드']", 0
     assert_select "section[aria-label='Chatdox 현황']", 1
     assert standalone
   end
 
-  # --- 시리즈 둘러보기 → and the lower section (0089) ------------------------------------------------
+  # --- 가이드 둘러보기 → and the lower section (0089) ------------------------------------------------
 
-  test "시리즈 둘러보기 → only in the empty state, when there's nothing to browse either" do
+  test "가이드 둘러보기 → only in the empty state, when there's nothing to browse either" do
     sign_in
     get dashboard_path # nothing in use, nothing to browse
     assert_equal 1, series_link_count
-    assert_select "section[aria-label='이용 중인 콘텐츠 없음'] a[href=?]", products_path, text: "시리즈 둘러보기 →"
+    assert_select "section[aria-label='이용 중인 콘텐츠 없음'] a[href=?]", products_path, text: "가이드 둘러보기 →"
 
     series!("browse-line") # something to browse
     get dashboard_path

@@ -86,7 +86,7 @@ class DashboardRolesTest < ActionDispatch::IntegrationTest
     get dashboard_path
     assert_equal 1, legacy_heading.size
     html = response.body
-    assert_operator html.index("이용 중인 시리즈"), :<, html.index(">이전 상품<")
+    assert_operator html.index("이용 중인 가이드"), :<, html.index(">이전 상품<")
     assert_operator html.index(">이전 상품<"), :<, html.index("Chatdox 현황")
   end
 
@@ -97,7 +97,7 @@ class DashboardRolesTest < ActionDispatch::IntegrationTest
     sign_in
     get dashboard_path
     assert_select "h1", count: 1, text: "회원님이 이용 중인 콘텐츠"
-    assert_select "section[aria-label='이용 중인 시리즈']", 0
+    assert_select "section[aria-label='이용 중인 가이드']", 0
     assert_select "section[aria-label='이용 중인 콘텐츠 없음']", 0
     html = response.body
     assert_operator html.index("님이 이용 중인 콘텐츠</h1>"), :<, html.index(">이전 상품<")
@@ -160,7 +160,7 @@ class DashboardRolesTest < ActionDispatch::IntegrationTest
     sign_in
     get dashboard_path
     assert_select "section[aria-label='다른 콘텐츠']", 0
-    assert_select "main a[href=?]", products_path, text: "시리즈 둘러보기 →", count: 0 # 0089: only in the empty state
+    assert_select "main a[href=?]", products_path, text: "가이드 둘러보기 →", count: 0 # 0089: only in the empty state
   end
 
   test "더 둘러보기 never lists an earlier product" do

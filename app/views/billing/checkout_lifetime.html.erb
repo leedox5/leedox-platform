@@ -5,7 +5,7 @@
 
   <main class="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6">
     <div class="mb-8">
-      <% if @product_line.series_label.present? %><p class="text-sm font-black uppercase tracking-[0.18em] text-blue-700"><%= @product_line.series_label %></p><% end %>
+      <%# Handoff 0091 (D-011) -- the season label (series_label, e.g. "S01") above the title is no longer shown. %>
       <h1 class="mt-2 break-keep text-3xl font-black tracking-tight text-slate-950"><%= @product_line.customer_name %> <%= @free ? "무료 이용" : "구매" %></h1>
       <% if @free %>
         <p class="mt-3 break-keep text-sm leading-6 text-slate-600">결제나 주문 없이 이 제품을 무료로 시작합니다. 시작하면 기간 제한 없이 이용할 수 있으며, 다른 제품은 포함되지 않습니다.</p>

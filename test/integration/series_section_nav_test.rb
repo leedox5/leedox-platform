@@ -4,7 +4,7 @@ require "test_helper"
 # #episodes (permanent addresses). A section that isn't on the page gets no link, and one link or fewer means no bar --
 # decided by the same conditions that draw the sections. The dashboard's in-use card jumps to #episodes.
 class SeriesSectionNavTest < ActionDispatch::IntegrationTest
-  NAV = "nav[aria-label='시리즈 바로가기']"
+  NAV = "nav[aria-label='가이드 바로가기']"
 
   setup do
     @admin = User.create!(name: "관리자", email: "sn-adm-#{SecureRandom.hex(3)}@example.com", password: "password123", role: :admin)
@@ -35,8 +35,8 @@ class SeriesSectionNavTest < ActionDispatch::IntegrationTest
     assert_select "#intro h2", text: "소개"
     assert_select "h2#episodes", text: "에피소드"
     body = response.body
-    assert_operator body.index('id="product-purchase"'), :<, body.index("시리즈 바로가기")
-    assert_operator body.index("시리즈 바로가기"), :<, body.index('id="intro"')
+    assert_operator body.index('id="product-purchase"'), :<, body.index("가이드 바로가기")
+    assert_operator body.index("가이드 바로가기"), :<, body.index('id="intro"')
     assert_operator body.index('id="intro"'), :<, body.index('id="episodes"')
   end
 
@@ -119,7 +119,7 @@ class SeriesSectionNavTest < ActionDispatch::IntegrationTest
     end
     sign_in(@user)
     get dashboard_path
-    hrefs = css_select("section[aria-label='이용 중인 시리즈'] [data-series-card]").to_h { |a| [ a["data-series-card"], a["href"] ] }
+    hrefs = css_select("section[aria-label='이용 중인 가이드'] [data-series-card]").to_h { |a| [ a["data-series-card"], a["href"] ] }
     assert_equal "/products/nav-line#episodes", hrefs["nav-line"]
     assert_equal "/products/empty-line", hrefs["empty-line"]
     assert_select "section[aria-label='다른 콘텐츠'] a[href=?]", product_line_path(other.slug)

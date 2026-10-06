@@ -14,10 +14,10 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "title", text: /LEEDOX/
-    assert_select "meta[name='description'][content*='시즌과 에피소드']"
+    assert_select "meta[name='description'][content*='부딪히며 엮은 개발자의 실전 가이드']" # 0091 (D-011)
     assert_select "header a[href=?]", root_path, text: /LEEDOX/
     assert_select "h1", count: 1
-    assert_select "h1", text: "실제로 만들고, 막히고, 고친 과정을 시즌과 에피소드로 따라갑니다."
+    assert_select "h1", text: "실제로 만들고 부딪히며 엮은 개발자의 실전 가이드."
     assert_select "main a[href=?]", chatdox_path, minimum: 1
     assert_select "main a[href=?]", claudox_path, minimum: 1
     assert_select "main a[href=?]", aigravity_path, minimum: 1
@@ -55,7 +55,7 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
       assert_select "a[href=?]", chatdox_path, count: 0
       assert_select "a[href=?]", claudox_path, count: 0
       assert_select "a[href=?]", aigravity_path, count: 0
-      assert_select "a[href=?]", products_path, text: "시리즈", minimum: 2 # desktop + mobile menu
+      assert_select "a[href=?]", products_path, text: "가이드", minimum: 2 # desktop + mobile menu
     end
 
     get products_path # was /pricing, removed in 0086
