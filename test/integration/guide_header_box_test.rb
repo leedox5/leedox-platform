@@ -108,16 +108,63 @@ class GuideHeaderBoxTest < ActionDispatch::IntegrationTest
 
   # --- unchanged ------------------------------------------------------------------------------------------------
 
-  test "with an image the page is as before: name, summary, image, access box -- no header box" do
+  # Handoff 0095 -- with an image the header box too: the cover is its top (edge to edge, no rounding or margin of its
+  # own -- the box's corners cut it), then name -> summary -> the bare access box under the same padding. One box.
+  test "with an image: the cover tops the header box, then name, summary and the access box" do
     @free.cover_image.attach(io: file_fixture("covers/cover.jpg").open, filename: "c.jpg", content_type: "image/jpeg")
     @free.update!(cover_image_alt: "표지")
     get product_line_path("free-guide")
+    assert header
+    assert_equal "main", header.parent.name
+    assert_equal header, css_select("main").first.element_children.first, "the box is the page's first block"
+    assert_includes header["class"].split, "overflow-hidden"
+    assert_includes header["class"].split, "rounded-2xl"
+    kids = header.element_children
+    assert_equal %w[img div], kids.map(&:name)
+    img = kids[0]
+    assert_equal "표지", img["alt"]
+    %w[aspect-video w-full object-cover].each { |klass| assert_includes img["class"].split, klass }
+    assert_not_includes img["class"].split, "rounded-2xl"
+    assert_equal %w[h1 p section], kids[1].element_children.map(&:name)
+    assert_includes kids[1]["class"].split, "p-3.5"
+    section = kids[1].at_css("section")
+    assert_includes section["class"].split, "border-t"
+    assert_not_includes section["class"].split, "rounded-2xl"
+    assert_equal 1, css_select("#product-purchase").size
+    assert_equal 1, css_select("main img").size, "the cover isn't drawn a second time"
+    assert_equal "#{FREE_LINE} 이용하기 E01은 로그인 없이 볼 수 있습니다.", box_text
+    assert_includes kids[1].at_css("h1")["class"].split, "break-keep"
+    html = css_select("main").first.to_html
+    assert_operator html.index("data-guide-header"), :<, html.index("가이드 바로가기")
+  end
+
+  test "with an image, every state's box contents are as before (in use, closed, paid)" do
+    [ @free, @paid ].each do |line|
+      line.cover_image.attach(io: file_fixture("covers/cover.jpg").open, filename: "c.jpg", content_type: "image/jpeg")
+      line.update!(cover_image_alt: "표지")
+    end
+    get product_line_path("paid-guide")
+    assert css_select("[data-guide-cover]").any?
+    assert_includes box_text, "1,100원 (VAT 포함)"
+    sign_in(@member)
+    post claim_free_access_path(@free.product.code)
+    get product_line_path("free-guide")
+    assert_equal "이용 중인 가이드입니다.", box_text
+    @free.product.update!(sale_enabled: false)
+    delete destroy_user_session_path
+    get product_line_path("free-guide")
+    assert_match(/\A현재 시작할 수 없습니다/, box_text)
+  end
+
+  test "with an image but no access box (no commerce product): the old layout -- name, summary, image" do
+    plain = ProductLine.create!(internal_name: "pi", customer_name: "가격 없는 그림 가이드", slug: "plain-image", summary: "요약", introduction: "소개", status: "published")
+    plain.content_episodes.create!(position: 1, customer_title: "편", body: "본문", status: "published")
+    plain.cover_image.attach(io: file_fixture("covers/cover.jpg").open, filename: "c.jpg", content_type: "image/jpeg")
+    plain.update!(cover_image_alt: "표지")
+    get product_line_path("plain-image")
     assert_nil header
-    kids = css_select("main").first.element_children
-    assert_equal %w[h1 p div section], kids.first(4).map(&:name)
-    assert_equal "product-purchase", kids[3]["id"]
-    assert_includes kids[3]["class"].split, "rounded-2xl"
-    assert_includes kids[0]["class"].split, "break-keep" # the same word breaking there too
+    assert_equal %w[h1 p div], css_select("main").first.element_children.first(3).map(&:name)
+    assert_includes css_select("main > div.min-w-0 img").first["class"].split, "rounded-2xl"
   end
 
   test "a guide without a commerce product (no access box) is as before" do

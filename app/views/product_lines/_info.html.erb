@@ -20,8 +20,12 @@
     puts the name, the summary and the access box into one header box (the box's own contents, below a thin rule) --
     only when there is an access box to put in (a guide without a commerce product has none, and stays as it was).
     break-keep: lines break between words, not mid-word (break-words still wraps a single overlong word). %>
-<% image_drawn = admin || product_line.cover_image.attached? %>
-<% header_box = purchase.present? && !image_drawn && product_line.access_state(owned: purchase[:owned]).present? %>
+<%# Handoff 0095 -- a guide WITH a cover gets the header box too (customer page, when there's an access box): the
+    cover is the box's top, edge to edge (cut round by the box's corners), and the text below has the same padding as
+    the box without a cover. Same checks as 0093; the box without a cover is unchanged. The admin preview keeps its own
+    image block, and a guide without an access box keeps the old layout. %>
+<% cover = !admin && product_line.cover_image.attached? %>
+<% header_box = !admin && purchase.present? && product_line.access_state(owned: purchase[:owned]).present? %>
 <% heading = capture do %>
   <h1 class="break-words break-keep font-bold <%= series_theme(:name_size, dark) %> <%= series_theme(:name, dark) %>"><%= product_line.customer_name %></h1>
 
@@ -30,7 +34,16 @@
   <% end %>
 <% end %>
 
-<% if header_box %>
+<% if header_box && cover %>
+  <div class="overflow-hidden rounded-2xl border <%= series_theme(:box, dark) %>" data-guide-header data-guide-cover>
+    <%= render "product_lines/cover_image", product_line: product_line, variant: :hero, admin: false,
+      classes: "block aspect-video w-full max-w-full bg-white/5 object-cover" %>
+    <div class="p-3.5 sm:px-6 sm:py-7">
+      <%= heading %>
+      <%= render "product_lines/purchase_box", product_line: product_line, dark: dark, bare: true, **purchase %>
+    </div>
+  </div>
+<% elsif header_box %>
   <%# 0094 A4 -- 14px inside on phones. %>
   <div class="rounded-2xl border <%= series_theme(:box, dark) %> p-3.5 sm:px-6 sm:py-7" data-guide-header>
     <%= heading %>
@@ -46,7 +59,7 @@
   <div class="mt-6 min-w-0">
     <%= render "admin/product_lines/cover_link", product_line: product_line, variant: :hero, caption: true, link: false %>
   </div>
-<% elsif product_line.cover_image.attached? %>
+<% elsif cover && !header_box %>
   <%# 0094 -- closer on phones (the customer page only). %>
   <div class="mt-3 min-w-0 sm:mt-6">
     <%= render "product_lines/cover_image", product_line: product_line, variant: :hero, admin: false %>

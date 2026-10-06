@@ -43,13 +43,13 @@ class GuideDensityTest < ActionDispatch::IntegrationTest
     assert_classes "#product-purchase a", "px-4", "py-[7px]", "sm:px-6", "sm:py-3", "text-sm" # 이용하기, 34px tall on phones
   end
 
-  test "a guide with an image: the standalone box and the image sit closer on phones" do
+  # 0095: a guide with an image gets the header box too (cover on top); the text under the cover has the same padding.
+  test "a guide with an image: the text under the cover has the header box's phone padding" do
     @line.cover_image.attach(io: file_fixture("covers/cover.jpg").open, filename: "c.jpg", content_type: "image/jpeg")
     @line.update!(cover_image_alt: "표지")
     get product_line_path("dense-guide")
-    assert_select "[data-guide-header]", 0
-    assert_classes "#product-purchase", "mt-3", "p-3.5", "sm:mt-6", "sm:p-5", "rounded-2xl"
-    assert_classes "main > div.min-w-0", "mt-3", "sm:mt-6"
+    assert_classes "[data-guide-cover] > div", "p-3.5", "sm:px-6", "sm:py-7"
+    assert_classes "#product-purchase", "mt-3.5", "pt-3.5", "border-t"
   end
 
   test "section links: 16px at every width, closer on phones; the intro starts 16px below on phones" do

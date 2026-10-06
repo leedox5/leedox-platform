@@ -194,7 +194,8 @@ class ProductLineSalesAndPurchaseTest < ActionDispatch::IntegrationTest
     @line.update!(cover_image_alt: "표지")
     get product_line_path(@line.slug)
     h1, cover, banner, intro, list = order.call(response.body)
-    assert h1 < cover && cover < banner && banner < intro && intro < list, "name -> cover -> banner -> introduction -> episodes"
+    # 0095: with a cover the header box starts with it (the cover is the box's top), then the name and the banner.
+    assert cover < h1 && h1 < banner && banner < intro && intro < list, "cover -> name -> banner -> introduction -> episodes"
   end
 
   test "free start: locked before, POST creates one indefinite license without any order, open after, and a repeat press is harmless" do
