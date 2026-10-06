@@ -18,10 +18,13 @@
   <h2 <% unless admin %>id="<%= ProductLinesHelper::SERIES_SECTION_IDS[:episodes] %>"<% end %> class="scroll-mt-28 <%= series_theme(:list_heading, dark) %>">에피소드</h2>
   <ol class="space-y-3">
     <% episodes.each do |episode| %>
-      <%# Handoff 0092 R3 -- `cta_for` (customer page): what this viewer's click on each card does. %>
-      <li><%= render "product_lines/episode_card", episode: episode, admin: admin, dark: dark,
-        **(local_assigns[:cta_for] ? { cta: cta_for.call(episode) } : {}),
-        path: admin ? admin_content_episode_path(episode) : product_episode_path(product_line.slug, episode.display_id) %></li>
+      <%# Handoff 0092 R3 -- `cta_for` (customer page): what this viewer's click on each card does. R4 -- a card the
+          viewer can't open yet goes to /products/:slug/continue?to=NN (sign in / start / buy, then that episode). %>
+      <% cta = local_assigns[:cta_for]&.call(episode) %>
+      <% path = if admin then admin_content_episode_path(episode)
+                elsif cta&.last then product_continue_path(product_line.slug, to: episode.display_id)
+                else product_episode_path(product_line.slug, episode.display_id) end %>
+      <li><%= render "product_lines/episode_card", episode: episode, admin: admin, dark: dark, **(cta ? { cta: cta } : {}), path: path %></li>
     <% end %>
     <% upcoming_episodes.each do |episode| %>
       <li><%= render "product_lines/upcoming_episode_card", episode: episode, dark: dark %></li>

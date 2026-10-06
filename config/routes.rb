@@ -49,6 +49,10 @@ Rails.application.routes.draw do
   # Handoff 0074 -- comments under an episode page (same gates as the page, EpisodeCommentsController).
   post "/products/:product_slug/:episode_id/comments", to: "episode_comments#create", as: :product_episode_comments, constraints: { episode_id: /\d+/ }
   delete "/products/:product_slug/:episode_id/comments/:id", to: "episode_comments#destroy", as: :product_episode_comment, constraints: { episode_id: /\d+/ }
+  # Handoff 0092 R4 -- "읽은 뒤 이어 보기": sign in if needed, then (free guide) confirm once and start, then go to the
+  # episode in ?to= (or the episode list). Above the old Season URLs, which would otherwise take "continue" as a slug.
+  get "/products/:product_slug/continue", to: "guide_continuations#show", as: :product_continue
+  post "/products/:product_slug/continue", to: "guide_continuations#create"
   # Handoff 0065 (D5) -- the old Season URLs: /products/:line/:season[/:episode[/assets/:asset]]
   # redirect permanently to the product that Season became.
   get "/products/:product_slug/:season_slug", to: "legacy_season_redirects#show", as: :legacy_product_season

@@ -25,7 +25,8 @@
           <%= button_to "이용하기", claim_free_access_path(product_line.product.code), method: :post,
             class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-6 py-3 text-sm font-bold #{series_theme(:free_button, dark)}" %>
         <% else %>
-          <%= link_to "이용하기", billing_checkout_path(product_line.product.code),
+          <%# Handoff 0092 R4 -- guests: sign in -> confirm once -> the episode list (the old free checkout URL still works). %>
+          <%= link_to "이용하기", product_continue_path(product_line.slug),
             class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-6 py-3 text-sm font-bold #{series_theme(:free_button, dark)}" %>
         <% end %>
       </div>

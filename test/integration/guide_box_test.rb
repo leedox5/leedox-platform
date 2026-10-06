@@ -36,11 +36,12 @@ class GuideBoxTest < ActionDispatch::IntegrationTest
     GONE.each { |gone| assert_not_includes box_text, gone }
   end
 
-  test "a guest on a free guide: one line and 이용하기, still going to the checkout (sign in first)" do
+  # 0092 R4: the guest's 이용하기 goes to /products/:slug/continue (sign in -> confirm -> episode list); was the checkout.
+  test "a guest on a free guide: one line and 이용하기, going to continue (sign in first)" do
     get product_line_path("free-guide")
     assert_free_not_started
     link = box.at_css("a")
-    assert_equal billing_checkout_path(@free.product.code), link["href"]
+    assert_equal product_continue_path("free-guide"), link["href"]
     get link["href"]
     assert_redirected_to new_user_session_path
   end

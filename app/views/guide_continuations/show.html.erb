@@ -1,0 +1,23 @@
+<%# Handoff 0092 R4 -- one confirmation before a free guide starts (D-012: a GET never starts anything). A light body
+    like the free checkout page (D-010 -- input/payment screens), the dark frame. The button is the same free start
+    as 이용하기 (Commerce::ClaimFreeAccess), then the episode in ?to= or the episode list. %>
+<% content_for :title, "#{@product_line.customer_name} 시작하기 | LEEDOX" %>
+<% episode = target_episode %>
+<div class="min-h-screen bg-slate-50">
+  <%= render "shared/header" %>
+
+  <main class="mx-auto w-full max-w-xl px-4 py-14 sm:px-6">
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8" aria-label="가이드 시작" id="guide-continue">
+      <p class="text-sm font-semibold text-slate-500"><%= @product_line.customer_name %></p>
+      <h1 class="mt-2 break-keep text-2xl font-black tracking-tight text-slate-950">
+        <%= episode ? "이 가이드를 시작하고 E#{episode.display_id}부터 볼까요?" : "이 가이드를 시작할까요?" %>
+      </h1>
+      <p class="mt-3 break-keep text-sm leading-6 text-slate-600">지금은 모든 에피소드를 무료로 이용할 수 있습니다. 시작해 두면 계속 볼 수 있습니다.</p>
+      <div class="mt-6 flex flex-wrap items-center gap-4">
+        <%= button_to (episode ? "이용하고 이어 보기" : "이용하기"), product_continue_path(@product_line.slug, to: episode&.display_id), method: :post,
+          class: "inline-flex items-center justify-center whitespace-nowrap rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-emerald-700" %>
+        <%= link_to "← 가이드로 돌아가기", product_line_path(@product_line.slug), class: "text-sm font-semibold text-slate-600 hover:text-slate-900" %>
+      </div>
+    </section>
+  </main>
+</div>

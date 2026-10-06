@@ -29,12 +29,17 @@ class OpenPreviewLabelsTest < ActionDispatch::IntegrationTest
     post user_session_path, params: { user: { email: user.email, password: "password123" } }
   end
 
-  # { "01" => [cta text, badge text or nil] } for the published episode cards (not the 공개 예정 one).
+  # { "01" => [cta text, badge text or nil] } for the published episode cards (not the 공개 예정 one). R4: a card that
+  # can't be opened links to /products/:slug/continue?to=NN, one that can to the episode itself -- checked here too.
   def cards(slug)
     get product_line_path(slug)
     css_select("#episodes + ol > li > a").to_h do |a|
       spans = a.css("div > span")
-      [ a["href"].split("/").last, [ spans.last.text.strip, spans.size > 2 ? spans.first.text.strip : nil ] ]
+      cta = spans.last.text.strip
+      id = a["href"][/\?to=(\d+)\z/, 1] || a["href"].split("/").last
+      expected = cta == "보기 →" ? product_episode_path(slug, id) : product_continue_path(slug, to: id)
+      assert_equal expected, a["href"], "#{slug} #{id} (#{cta})"
+      [ id, [ cta, spans.size > 2 ? spans.first.text.strip : nil ] ]
     end
   end
 

@@ -73,13 +73,18 @@
         <div></div>
       <% end %>
 
-      <% if @next_episode %>
+      <%# Handoff 0092 R4 -- without the license (an 열린 편) the next episode wouldn't open, so the box below takes the
+          place of this link. %>
+      <% if @next_episode && @full_episode_access %>
         <%= link_to product_episode_path(@product_line.slug, @next_episode.display_id), data: { turbo_prefetch: false }, class: "flex items-center gap-2 text-sm text-[#a8a39a] hover:text-[#f2efe8]" do %>
           <span><%= @next_episode.customer_title.presence || "(제목 없음)" %></span>
           <span>→</span>
         <% end %>
       <% end %>
     </div>
+    <% unless @full_episode_access %>
+      <%= render "product_lines/continue_box", product_line: @product_line, next_episode: @next_episode %>
+    <% end %>
 
     <%# Handoff 0074 -- nil when comments couldn't be loaded (EpisodePage#load_episode_comments): the episode still shows. %>
     <%# Handoff 0092 R2 -- without the license (an 열린 편): the count and one line; no list, no form. %>

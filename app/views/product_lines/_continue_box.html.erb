@@ -1,0 +1,35 @@
+<%# Handoff 0092 R4 (D-012) -- the end of an 열린 편 for someone without the license: where the next-episode link
+    would be, what it takes to go on and one button. A member who hasn't started a free guide starts it right here
+    (the same POST as the confirmation page); everyone else goes through /products/:slug/continue (sign in, or the
+    checkout for a paid guide). With no next episode, the box offers the guide itself. Nothing in the body. %>
+<% free = product_line.free? %>
+<% signed_in = user_signed_in? %>
+<% to = next_episode&.display_id %>
+<% number = next_episode && "E#{to}" %>
+<% message = if next_episode.nil?
+     free ? "이 가이드를 시작하면 실전 자료와 댓글을 볼 수 있습니다." : "구매하면 실전 자료와 댓글을 볼 수 있습니다."
+   elsif !free
+     "#{number}부터는 구매하면 볼 수 있습니다."
+   elsif signed_in
+     "#{number}부터는 이용을 시작하면 볼 수 있습니다. 지금은 모든 에피소드를 무료로 이용할 수 있고, 시작해 두면 계속 볼 수 있습니다."
+   else
+     "#{number}부터는 로그인하고 이어서 보세요. 지금은 모든 에피소드를 무료로 이용할 수 있고, 시작해 두면 계속 볼 수 있습니다."
+   end %>
+<% label = if !free then (next_episode ? "구매하고 이어 보기" : "구매하기")
+           elsif signed_in then (next_episode ? "이용하고 이어 보기" : "이용하기")
+           else (next_episode ? "로그인하고 이어 보기" : "이용하기") end %>
+<section aria-label="이어 보기" id="continue-box" class="mt-8 rounded-2xl border border-white/10 bg-[#15181e] p-5">
+  <p class="break-keep text-sm leading-6 text-[#c9c4ba]"><%= message %></p>
+  <% if next_episode %>
+    <p class="mt-2 truncate text-xs text-[#a8a39a]">다음 편 · <%= next_episode.customer_title.presence || "(제목 없음)" %></p>
+  <% end %>
+  <div class="mt-4">
+    <% if free && signed_in %>
+      <%= button_to label, product_continue_path(product_line.slug, to: to), method: :post,
+        class: "inline-flex items-center justify-center whitespace-nowrap rounded-xl bg-[#7dd3a8] px-6 py-3 text-sm font-bold text-[#0e1014] hover:bg-[#9be0bd]" %>
+    <% else %>
+      <%= link_to label, product_continue_path(product_line.slug, to: to), data: { turbo_prefetch: false },
+        class: "inline-flex items-center justify-center whitespace-nowrap rounded-xl bg-[#f0a53c] px-6 py-3 text-sm font-bold text-[#0e1014] hover:bg-[#f5b85e]" %>
+    <% end %>
+  </div>
+</section>

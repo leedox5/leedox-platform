@@ -170,7 +170,7 @@ class ProductLineSalesAndPurchaseTest < ActionDispatch::IntegrationTest
     # 0092 R1: one line and 이용하기 (was 무료 · 무기한 이용 / 무료 / 로그인하고 무료로 시작); the button still goes to checkout.
     assert_includes css_select("#product-purchase").text, "지금은 모든 에피소드를 무료로 이용할 수 있습니다. 시작해 두면 계속 볼 수 있습니다."
     assert_no_match(/구매하기|VAT|₩/, css_select("#product-purchase").text)
-    assert_select "#product-purchase a[href=?]", billing_checkout_path(code), text: "이용하기"
+    assert_select "#product-purchase a[href=?]", product_continue_path(@line.slug), text: "이용하기" # 0092 R4: via continue
 
     sign_in(@buyer)
     get product_line_path(@line.slug)
