@@ -58,6 +58,17 @@
         <%= f.number_field :position, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
       </div>
 
+      <%# Handoff 0092 R2 (D-012) -- a guide's episode only (not a legacy bundle's), and only once the column exists. %>
+      <% if @episode.product_line_id? && @episode.has_attribute?(:open_preview) %>
+        <div>
+          <label class="inline-flex cursor-pointer items-center gap-2 text-sm font-bold text-slate-700">
+            <%= f.check_box :open_preview, class: "rounded border-slate-300" %>
+            로그인 없이 보기 허용
+          </label>
+          <p class="mt-1 pl-6 text-xs text-slate-500">켜면 로그인하지 않은 방문자와 이용 전 회원도 이 편의 본문을 볼 수 있습니다. 실전 자료와 댓글은 이용을 시작해야 보입니다.</p>
+        </div>
+      <% end %>
+
       <div>
         <%= f.label :body, "본문 (Markdown)", class: "block text-sm font-bold text-slate-700 mb-1" %>
         <%= f.text_area :body, rows: 16, data: { markdown_editor_target: "textarea" }, class: "w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm" %>

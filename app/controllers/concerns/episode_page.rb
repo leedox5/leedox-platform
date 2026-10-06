@@ -16,6 +16,9 @@ module EpisodePage
       { kind: takeaway.kind, body_html: ContentMarkdown.render(takeaway.body.to_s, parent: @current_episode) }
     end
     @assets = @current_episode.content_assets.ordered.with_attached_file
+    # Handoff 0092 R2 -- on an 열린 편 without the license: the body only; files and comments become one line each
+    # (the view), and only the comment count is shown.
+    @full_episode_access = full_episode_access?
     load_episode_comments
   end
 

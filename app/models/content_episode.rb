@@ -47,6 +47,12 @@ class ContentEpisode < ApplicationRecord
 
   before_update :snapshot_previous_body, if: :body_changed?
 
+  # Handoff 0092 R2 -- an "열린 편": the body is open to anyone the guide is open to, licensed or not (files and
+  # comments still need the license). False while the column doesn't exist yet (between deploy and migrate).
+  def open_preview_on?
+    has_attribute?(:open_preview) && open_preview?
+  end
+
   def published?
     status == "published"
   end

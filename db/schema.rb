@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_040000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_06_060000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -114,6 +114,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_040000) do
     t.string "customer_title"
     t.string "internal_ref"
     t.integer "lock_version", default: 0, null: false
+    t.boolean "open_preview", default: false, null: false
     t.integer "position", default: 0, null: false
     t.integer "product_line_id"
     t.integer "product_season_id"
@@ -184,6 +185,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_040000) do
   create_table "episode_views", force: :cascade do |t|
     t.integer "content_episode_id", null: false
     t.datetime "created_at", null: false
+    t.boolean "signed_in"
     t.integer "view_count", default: 1, null: false
     t.date "viewed_on", null: false
     t.string "viewer_key", null: false

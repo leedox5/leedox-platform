@@ -40,8 +40,12 @@ module EpisodeViewTracking
 
     # One statement: INSERT ... ON CONFLICT (uniqueness) DO UPDATE SET view_count = view_count + 1, so two
     # concurrent opens can neither both insert nor lose an increment.
+    row = { content_episode_id: @current_episode.id, viewed_on: Date.current, viewer_key: episode_viewer_key, view_count: 1, created_at: Time.current }
+    # Handoff 0092 R2 -- whether it was a signed-in member (an 열린 편 is read by guests too). Set on the new row; the
+    # (episode, viewer, day) row's viewer is one person, so it can't change. Skipped until the column exists.
+    row[:signed_in] = current_user.present? if EpisodeView.column_names.include?("signed_in")
     EpisodeView.upsert(
-      { content_episode_id: @current_episode.id, viewed_on: Date.current, viewer_key: episode_viewer_key, view_count: 1, created_at: Time.current },
+      row,
       unique_by: EpisodeView::UNIQUENESS,
       on_duplicate: Arel.sql("view_count = episode_views.view_count + 1")
     )

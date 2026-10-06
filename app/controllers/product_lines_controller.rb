@@ -26,7 +26,8 @@ class ProductLinesController < ApplicationController
 
   before_action :load_product_line, except: %i[index]
   before_action :load_episode, only: %i[episode]
-  before_action :require_product_license, only: %i[episode]
+  # Handoff 0092 R2 -- the page opens for an 열린 편 too (ProductLineGates); files and comments don't.
+  before_action :require_product_license_or_open_preview, only: %i[episode]
   # Handoff 0073 -- after rendering, so only a request that passed every gate above is counted.
   after_action :record_episode_view, only: %i[episode]
 

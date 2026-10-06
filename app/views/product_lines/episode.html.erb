@@ -20,7 +20,14 @@
       <%= @content_html %>
     </div>
 
-    <% if @takeaways.present? || @assets.present? %>
+    <%# Handoff 0092 R2 -- on an 열린 편 without the license the 실전 자료 (takeaways and files) are one line instead;
+        with no 실전 자료 at all there's no section, as before. %>
+    <% if !@full_episode_access && (@takeaways.present? || @assets.present?) %>
+      <section class="mt-10">
+        <h2 class="text-lg font-bold text-[#f2efe8]">이 편의 실전 자료</h2>
+        <p class="mt-3 rounded-lg bg-[#15181e] px-4 py-3 text-sm text-[#c9c4ba]">실전 자료는 이용을 시작하면 받을 수 있습니다.</p>
+      </section>
+    <% elsif @takeaways.present? || @assets.present? %>
       <section class="mt-10">
         <h2 class="text-lg font-bold text-[#f2efe8]">이 편의 실전 자료</h2>
 
@@ -75,8 +82,14 @@
     </div>
 
     <%# Handoff 0074 -- nil when comments couldn't be loaded (EpisodePage#load_episode_comments): the episode still shows. %>
-    <% if @comment_threads %>
+    <%# Handoff 0092 R2 -- without the license (an 열린 편): the count and one line; no list, no form. %>
+    <% if @comment_threads && @full_episode_access %>
       <%= render "product_lines/comments" %>
+    <% elsif @comment_threads %>
+      <section id="comments" class="mt-12 scroll-mt-24 border-t border-white/10 pt-8">
+        <h2 class="text-lg font-bold text-[#f2efe8]">댓글 <span class="text-[#a8a39a]"><%= @comment_count %></span></h2>
+        <p class="mt-3 rounded-lg bg-[#15181e] px-4 py-3 text-sm text-[#c9c4ba]">이용을 시작하면 댓글을 보고 남길 수 있습니다.</p>
+      </section>
     <% end %>
   </main>
 </div>

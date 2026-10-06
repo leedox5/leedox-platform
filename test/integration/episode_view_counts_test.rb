@@ -220,10 +220,12 @@ class EpisodeViewCountsTest < ActionDispatch::IntegrationTest
     assert_equal 0, EpisodeView.count
   end
 
-  test "only the episode, the day, an HMAC viewer key, a count and created_at are stored" do
+  # Handoff 0092 R2 adds signed_in (a member's view or a guest's -- a yes/no, nothing that identifies anyone).
+  test "only the episode, the day, an HMAC viewer key, a count, created_at and signed_in are stored" do
     sign_in(@user)
     view
-    assert_equal %w[content_episode_id created_at id view_count viewed_on viewer_key], EpisodeView.column_names.sort
+    assert_equal %w[content_episode_id created_at id signed_in view_count viewed_on viewer_key], EpisodeView.column_names.sort
+    assert_equal true, EpisodeView.last.signed_in
     key = EpisodeView.last.viewer_key
     assert_match(/\A\h{32}\z/, key)
     assert_not_includes key, @user.id.to_s if @user.id.to_s.length > 2

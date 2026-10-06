@@ -28,6 +28,24 @@ module ProductLineGates
     render_not_found if @current_episode.nil?
   end
 
+  # Handoff 0092 R2 (D-012) -- the episode PAGE also opens for an "열린 편": a published episode of a guide customers
+  # can reach, switched on by the admin (open_preview). Only the page -- file downloads and comment posts keep
+  # require_product_license, so the license still gates them even on an open episode.
+  def require_product_license_or_open_preview
+    return if open_preview_episode?
+
+    require_product_license
+  end
+
+  def open_preview_episode?
+    @product_line.customer_reachable? && @current_episode.published? && @current_episode.open_preview_on?
+  end
+
+  # Whether the viewer gets the whole episode (files, comments) -- the same check require_product_license makes.
+  def full_episode_access?
+    !@product_line.gated? || Entitlements::ProductAccess.allowed?(user: current_user, product_code: @product_line.product.code)
+  end
+
   def require_product_license
     return unless @product_line.gated?
     return if Entitlements::ProductAccess.allowed?(user: current_user, product_code: @product_line.product.code)

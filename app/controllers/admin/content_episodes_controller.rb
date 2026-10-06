@@ -162,6 +162,9 @@ class Admin::ContentEpisodesController < Admin::BaseController
   end
 
   def episode_params
-    params.require(:content_episode).permit(:customer_title, :summary, :position, :body, :lock_version, :internal_ref)
+    keys = %i[customer_title summary position body lock_version internal_ref]
+    # Handoff 0092 R2 -- 로그인 없이 보기 허용, for a guide's episode, once the column exists.
+    keys << :open_preview if @episode&.product_line_id? && ContentEpisode.column_names.include?("open_preview")
+    params.require(:content_episode).permit(*keys)
   end
 end
