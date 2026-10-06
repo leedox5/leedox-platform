@@ -59,7 +59,7 @@ class GuideWordingTest < ActionDispatch::IntegrationTest
     sign_in(@member)
     %w[/products/git-guide /products/git-guide/01 /mypage /dashboard].each { |path| assert_no_leftover(path) }
     get product_line_path("git-guide")
-    assert_includes css_select("#product-purchase").text, "무료로 이용 중인 가이드입니다 · 무기한 이용"
+    assert_equal "이용 중인 가이드입니다.", css_select("#product-purchase").text.squish # 0092 R1
   end
 
   test "the header says 가이드 for guests, members and admins" do

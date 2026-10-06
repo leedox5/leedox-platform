@@ -122,14 +122,14 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     order = Commerce::OrderCreator.call!(user: @user, product_code: @line.product.code, offer_code: @line.lifetime_offer.code, requested_start_on: nil, provider: "manual")
     Commerce::ConfirmManualPayment.call!(order: order, actor: User.find_by!(role: :admin))
     get product_line_path("dark-line")                     # owned
-    assert_includes box.text, "구매한 가이드입니다 · 무기한 이용"
+    assert_equal "이용 중인 가이드입니다.", box.text.squish # 0092 R1
     assert_select "#product-purchase p.text-\\[\\#f2efe8\\]", minimum: 1
 
     free = ProductLine.create!(internal_name: "무료", customer_name: "무료 시리즈", slug: "dark-free", introduction: "소개", status: "published")
     gate!(free, 0)
     delete destroy_user_session_path
     get product_line_path("dark-free")                     # free start (guest)
-    assert_select "#product-purchase a.bg-\\[\\#7dd3a8\\]", text: "로그인하고 무료로 시작"
+    assert_select "#product-purchase a.bg-\\[\\#7dd3a8\\]", text: "이용하기" # 0092 R1
 
     free.product.update!(sale_enabled: false)
     get product_line_path("dark-free")                     # unavailable

@@ -2,29 +2,28 @@
     product, an explicit "무료 이용 시작" for a 0-won one. A product without a commerce Product renders nothing.
     Handoff 0068 -- which of these four states applies now comes from ProductLine#access_state, the same call the
     product list uses, so the two can't disagree about a product's state; only which HTML to show for it stays here. %>
-<%# Handoff 0083 R2 -- colors from SeriesThemeHelper (`dark:` on the customer page); content and conditions unchanged. %>
+<%# Handoff 0083 R2 -- colors from SeriesThemeHelper (`dark:` on the customer page); content and conditions unchanged.
+    Handoff 0092 R1 (D-012) -- shorter boxes: in use is one line whatever the source (free start or purchase -- so a
+    free starter no longer reads "구매한 …"), and a free guide not started yet is one line plus 이용하기. What the button
+    does is unchanged (guests: the checkout path, which signs them in first; members: the free-start POST). The
+    for-sale and closed boxes are unchanged. %>
 <% dark = local_assigns.fetch(:dark, false) %>
 <% state = product_line.access_state(owned: owned) %>
 <% if state %>
   <section class="mt-6 rounded-2xl border <%= series_theme(:box, dark) %> p-5" aria-label="이용 안내" id="product-purchase">
     <% if state == :owned %>
-      <p class="font-bold <%= series_theme(:box_title, dark) %>"><%= free ? "무료로 이용 중인 가이드입니다 · 무기한 이용" : "구매한 가이드입니다 · 무기한 이용" %></p>
-      <p class="mt-1 text-sm <%= series_theme(:box_text, dark) %>">이 가이드의 모든 편과 산출물을 계속 이용하실 수 있습니다.</p>
+      <p class="font-bold <%= series_theme(:box_title, dark) %>">이용 중인 가이드입니다.</p>
     <% elsif state == :free_open %>
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p class="text-xs font-bold uppercase tracking-wide <%= series_theme(:box_free_label, dark) %>">무료 · 무기한 이용</p>
-          <p class="mt-1 text-2xl font-black <%= series_theme(:box_price, dark) %>">무료</p>
-        </div>
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+        <p class="min-w-0 flex-1 basis-64 text-sm <%= series_theme(:box_text, dark) %>">지금은 모든 에피소드를 무료로 이용할 수 있습니다. 시작해 두면 계속 볼 수 있습니다.</p>
         <% if user_signed_in? %>
-          <%= button_to "무료로 이용 시작", claim_free_access_path(product_line.product.code), method: :post,
+          <%= button_to "이용하기", claim_free_access_path(product_line.product.code), method: :post,
             class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-6 py-3 text-sm font-bold #{series_theme(:free_button, dark)}" %>
         <% else %>
-          <%= link_to "로그인하고 무료로 시작", billing_checkout_path(product_line.product.code),
+          <%= link_to "이용하기", billing_checkout_path(product_line.product.code),
             class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-6 py-3 text-sm font-bold #{series_theme(:free_button, dark)}" %>
         <% end %>
       </div>
-      <p class="mt-3 text-xs <%= series_theme(:box_note, dark) %>">결제나 주문 없이 시작할 수 있습니다. 다른 가이드는 포함되지 않습니다.</p>
     <% elsif state == :for_sale %>
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div>

@@ -110,7 +110,7 @@ class ProductLineListTest < ActionDispatch::IntegrationTest
 
     # the list and the detail page must show a guest the same underlying state (0068c) --
     # the exact wording differs (a badge vs. the full purchase box), never the judgment.
-    { free_open => "로그인하고 무료로 시작", for_sale => "구매하기", stopped => "현재 구매할 수 없습니다" }.each do |line, detail_text|
+    { free_open => "이용하기", for_sale => "구매하기", stopped => "현재 구매할 수 없습니다" }.each do |line, detail_text|
       get product_line_path(line.slug)
       assert_includes css_select("#product-purchase").text, detail_text, "#{line.slug}: detail page"
     end
@@ -119,7 +119,7 @@ class ProductLineListTest < ActionDispatch::IntegrationTest
     get products_path
     assert_select "a[href=?] span", product_line_path(free_open.slug), text: "이용 중"
     get product_line_path(free_open.slug)
-    assert_match(/무료로 이용 중인 가이드입니다/, css_select("#product-purchase").text)
+    assert_equal "이용 중인 가이드입니다.", css_select("#product-purchase").text.squish # 0092 R1
   end
 
   test "the header's product link and the detail page's back-to-list link both point at /products" do

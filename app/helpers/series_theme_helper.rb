@@ -18,7 +18,6 @@ module SeriesThemeHelper
     box_title: [ "text-blue-900", "text-[#f2efe8]" ],
     box_text: [ "text-blue-800", "text-[#c9c4ba]" ],
     box_label: [ "text-blue-700", "text-[#f0a53c]" ],
-    box_free_label: [ "text-blue-700", "text-[#7dd3a8]" ],
     box_price: [ "text-slate-950", "text-[#f2efe8]" ],
     box_muted: [ "text-slate-500", "text-[#a8a39a]" ],
     box_note: [ "text-slate-600", "text-[#c9c4ba]" ],

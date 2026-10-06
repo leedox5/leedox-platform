@@ -167,13 +167,14 @@ class ProductLineSalesAndPurchaseTest < ActionDispatch::IntegrationTest
     Commerce::ProductLineSales.start_sale!(product_line: @line, actor: @admin)
     code = @line.reload.product.code
     get product_line_path(@line.slug)
-    assert_includes css_select("#product-purchase").text, "무료 · 무기한 이용"
+    # 0092 R1: one line and 이용하기 (was 무료 · 무기한 이용 / 무료 / 로그인하고 무료로 시작); the button still goes to checkout.
+    assert_includes css_select("#product-purchase").text, "지금은 모든 에피소드를 무료로 이용할 수 있습니다. 시작해 두면 계속 볼 수 있습니다."
     assert_no_match(/구매하기|VAT|₩/, css_select("#product-purchase").text)
-    assert_select "#product-purchase a[href=?]", billing_checkout_path(code), text: "로그인하고 무료로 시작"
+    assert_select "#product-purchase a[href=?]", billing_checkout_path(code), text: "이용하기"
 
     sign_in(@buyer)
     get product_line_path(@line.slug)
-    assert_select "#product-purchase form[action=?] button", claim_free_access_path(code), text: "무료로 이용 시작"
+    assert_select "#product-purchase form[action=?] button", claim_free_access_path(code), text: "이용하기" # 0092 R1: same POST
   end
 
   # Handoff 0066: the access banner sits right under the cover image (under the name when there is none), above the
@@ -227,7 +228,7 @@ class ProductLineSalesAndPurchaseTest < ActionDispatch::IntegrationTest
     get download
     assert_response :success
     get product_line_path(@line.slug)
-    assert_includes css_select("#product-purchase").text, "무료로 이용 중인 가이드입니다 · 무기한 이용"
+    assert_equal "이용 중인 가이드입니다.", css_select("#product-purchase").text.squish # 0092 R1: one line, free start or purchase
     assert_select "#product-purchase form", 0
 
     assert_no_difference "License.count" do
@@ -344,7 +345,7 @@ class ProductLineSalesAndPurchaseTest < ActionDispatch::IntegrationTest
     buy!(@buyer, @line)
     sign_in(@buyer)
     get product_line_path(@line.slug)
-    assert_includes css_select("#product-purchase").text, "구매한 가이드입니다 · 무기한 이용"
+    assert_equal "이용 중인 가이드입니다.", css_select("#product-purchase").text.squish # 0092 R1: no "구매한 …" either
     assert_select "#product-purchase a", 0
   end
 
