@@ -13,9 +13,12 @@
     it). A guest is told it opens without signing in; a member who hasn't bought a paid guide, before buying. A member
     who hasn't started a free guide gets no line (이용하기 is right there). %>
 <% open_episode = local_assigns[:open_episode] %>
+<%# Handoff 0093 -- `bare: true`: inside the header box of a guide without an image -- no border or background of its
+    own, just a thin rule above. Same contents, same conditions. %>
+<% bare = local_assigns.fetch(:bare, false) %>
 <% open_line = if open_episode.nil? then nil elsif !user_signed_in? then "로그인 없이" elsif state == :for_sale then "구매 전에" end %>
 <% if state %>
-  <section class="mt-6 rounded-2xl border <%= series_theme(:box, dark) %> p-5" aria-label="이용 안내" id="product-purchase">
+  <section class="<%= bare ? "mt-5 border-t #{series_theme(:box_rule, dark)} pt-5" : "mt-6 rounded-2xl border #{series_theme(:box, dark)} p-5" %>" aria-label="이용 안내" id="product-purchase">
     <% if state == :owned %>
       <p class="font-bold <%= series_theme(:box_title, dark) %>">이용 중인 가이드입니다.</p>
     <% elsif state == :free_open %>

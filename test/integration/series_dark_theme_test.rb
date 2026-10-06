@@ -114,7 +114,8 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
   test "purchase box, all four states, on the dark palette with the same content" do
     gate!(@line, 33_000)
     get product_line_path("dark-line")                     # for sale (guest)
-    assert_includes box["class"], "bg-[#15181e]"
+    # 0093: dark-line has no image, so the box sits inside the header box, which carries the card color.
+    assert_includes css_select("[data-guide-header]").first["class"], "bg-[#15181e]"
     assert_includes box.text, "33,000원"
     assert_select "#product-purchase a.bg-\\[\\#f0a53c\\]", text: "구매하기"
 

@@ -15,11 +15,28 @@
 <% admin = local_assigns.fetch(:admin, false) %>
 <% purchase = local_assigns[:purchase] %>
 <% dark = local_assigns.fetch(:dark, false) %>
+<%# Handoff 0093 -- whether an image is drawn below: the very branches below (the admin preview always draws one --
+    the cover or the labelled placeholder; the customer page only an attached cover). Without one, the customer page
+    puts the name, the summary and the access box into one header box (the box's own contents, below a thin rule) --
+    only when there is an access box to put in (a guide without a commerce product has none, and stays as it was).
+    break-keep: lines break between words, not mid-word (break-words still wraps a single overlong word). %>
+<% image_drawn = admin || product_line.cover_image.attached? %>
+<% header_box = purchase.present? && !image_drawn && product_line.access_state(owned: purchase[:owned]).present? %>
+<% heading = capture do %>
+  <h1 class="break-words break-keep text-3xl font-bold <%= series_theme(:name, dark) %> md:text-4xl"><%= product_line.customer_name %></h1>
 
-<h1 class="break-words text-3xl font-bold <%= series_theme(:name, dark) %> md:text-4xl"><%= product_line.customer_name %></h1>
+  <% if product_line.summary.present? %>
+    <p class="mt-2 text-lg break-words break-keep <%= series_theme(:summary, dark) %>"><%= product_line.summary %></p>
+  <% end %>
+<% end %>
 
-<% if product_line.summary.present? %>
-  <p class="mt-2 text-lg <%= series_theme(:summary, dark) %>"><%= product_line.summary %></p>
+<% if header_box %>
+  <div class="rounded-2xl border <%= series_theme(:box, dark) %> px-5 py-6 sm:px-6 sm:py-7" data-guide-header>
+    <%= heading %>
+    <%= render "product_lines/purchase_box", product_line: product_line, dark: dark, bare: true, **purchase %>
+  </div>
+<% else %>
+  <%= heading %>
 <% end %>
 
 <% if admin %>
@@ -34,7 +51,7 @@
   </div>
 <% end %>
 
-<% if purchase %>
+<% if purchase && !header_box %>
   <%= render "product_lines/purchase_box", product_line: product_line, dark: dark, **purchase %>
 <% end %>
 <%# Handoff 0090 -- the customer page passes `section_nav` (the 소개 / 에피소드 links), right under the purchase box. %>

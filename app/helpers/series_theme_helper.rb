@@ -15,6 +15,7 @@ module SeriesThemeHelper
     heading: [ "text-slate-900", "text-[#f2efe8]" ],
     # _purchase_box
     box: [ "border-blue-200 bg-blue-50", "border-white/10 bg-[#15181e]" ],
+    box_rule: [ "border-blue-200", "border-white/10" ], # 0093 -- the rule above the access box inside the header box
     box_title: [ "text-blue-900", "text-[#f2efe8]" ],
     box_text: [ "text-blue-800", "text-[#c9c4ba]" ],
     box_label: [ "text-blue-700", "text-[#f0a53c]" ],
