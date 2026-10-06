@@ -260,11 +260,11 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
   test "the home is dark with the display font; the notices have the dark header but a light body and no font" do
     get root_path
     assert_select "div.bg-\\[\\#0e1014\\] > header.bg-\\[\\#0e1014\\]\\/90"
-    assert_select "link[href*='fonts.googleapis.com'][href*='Gowun+Batang']", 1
+    assert_select "link[rel='preload'][href*='Pretendard-Bold']", 1
 
     get announcements_path
     assert_select "header.bg-\\[\\#0e1014\\]\\/90", 1
     assert_select "div.bg-\\[\\#0e1014\\] > header", 0
-    assert_select "link[href*='fonts.googleapis.com']", 0
+    assert_select "link[rel='preload'][href*='Pretendard-Bold']", 0
   end
 end

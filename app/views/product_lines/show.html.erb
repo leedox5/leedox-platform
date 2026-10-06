@@ -6,12 +6,9 @@
 <% end %>
 <div class="min-h-screen bg-[#0e1014] text-[#f2efe8]">
   <%= render "shared/header", dark: true %>
-  <%# Handoff 0068 -- back to the list this product is (or was) reachable from. Outside <main>, above the Hero, so
-      the Hero's own name -> image -> introduction order (handoff 0056 R5) stays exactly as it was. %>
-  <div class="mx-auto max-w-3xl px-5 pt-6 sm:px-7">
-    <%= link_to "← 가이드 목록", products_path, class: "text-sm font-semibold text-[#a8a39a] hover:text-[#f2efe8]" %>
-  </div>
-  <main class="mx-auto max-w-3xl px-5 pb-12 pt-3 sm:px-7">
+  <%# Handoff 0094 A1 -- no "← 가이드 목록" line any more (the header's 가이드 goes there); 0068 put it here. %>
+  <%# 0094 A2/A3 -- 10px side and top margins on phones. %>
+  <main class="mx-auto max-w-3xl px-2.5 pb-12 pt-2.5 sm:px-7 sm:pt-6">
     <%# Handoff 0091 (D-011) -- the season label (series_label, e.g. "S01") above the name is no longer shown. %>
     <%# Handoff 0065 -- the product is the sellable unit, so what used to be the Season page (purchase box,
         episode list, files) is part of this page. Handoff 0066: the access banner sits right under the cover image

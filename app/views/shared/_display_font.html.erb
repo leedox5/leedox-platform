@@ -1,5 +1,4 @@
-<%# Handoff 0071/0083 -- the display serif (--font-display in application.css) for the dark "browse" pages that use
-    it: the home and the series list. Rendered into <head> via content_for :head; other pages never load it. %>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap">
+<%# Handoff 0071/0083 -- the display face (--font-display in application.css) for the dark pages that use it,
+    rendered into <head> via content_for :head. Handoff 0094 B -- Pretendard Bold from our own assets (was Gowun
+    Batang from Google Fonts): one preloaded woff2, so the first paint doesn't wait on a third party. %>
+<link rel="preload" href="<%= asset_path("Pretendard-Bold.subset.woff2") %>" as="font" type="font/woff2" crossorigin>

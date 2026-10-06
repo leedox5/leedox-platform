@@ -7,10 +7,38 @@
    header's menu button hover never worked since 0071), so they are generated explicitly. */
 @source inline("hover:bg-white/5 hover:bg-white/10");
 
-/* Handoff 0071 -- the home's display serif (series names, brand line). A new token, so no other page's
-   fonts change; the font file itself is only requested by the dark "browse" pages (home, series list -- 0083). */
+/* Handoff 0071 -- the display face (guide names, page and section titles on the dark pages). A token of its own, so
+   no other font changes. Handoff 0094 B -- Pretendard Bold (was Gowun Batang), served from app/assets/fonts: the
+   KS X 1001 subset (2,350 Hangul + Latin, 265 KB woff2, SIL OFL -- Pretendard-LICENSE.txt next to it), one weight
+   only. swap: the system sans shows first and the face replaces it once loaded. Only pages that render
+   shared/_display_font preload it; elsewhere the token isn't used. A rare Hangul syllable outside the subset falls
+   back to the system sans. */
+@font-face {
+	font-family: "Pretendard";
+	src: url("Pretendard-Bold.subset.woff2") format("woff2");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
 @theme {
-	--font-display: "Gowun Batang", ui-serif, Georgia, serif;
+	--font-display: "Pretendard", ui-sans-serif, system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+
+/* 0094 B -- the tighter tracking the HQ mock used with the face. */
+.font-display {
+	letter-spacing: -0.02em;
+}
+
+/* Handoff 0094 R2 (A10) -- on phones the guide page's intro starts 16px under the section links, whether it opens
+   with a heading or a paragraph: its first element loses its own top margin. A plain (unlayered) rule on purpose:
+   `.doc-content h2 { margin-top }` below is unlayered too, and an unlayered rule beats any layered Tailwind utility
+   (which is why max-sm:[&>:first-child]:mt-0 didn't take). Only the guide page's intro has this class (SERIES_THEME
+   intro_gap), so episode bodies, notices and the rest of .doc-content keep their first heading's margin. */
+@media (width < 40rem) {
+	.guide-intro > :first-child {
+		margin-top: 0;
+	}
 }
 
 .doc-content h1 {

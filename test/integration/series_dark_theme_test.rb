@@ -8,7 +8,7 @@ require "test_helper"
 class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
   DARK_HEADER = "header.bg-\\[\\#0e1014\\]\\/90"
   LIGHT_HEADER = "header.bg-white\\/90"
-  FONT = "link[href*='fonts.googleapis.com'][href*='Gowun+Batang']"
+  FONT = "link[rel='preload'][href*='Pretendard-Bold']"
 
   setup do
     @user = User.create!(name: "회원", email: "dt-#{SecureRandom.hex(3)}@example.com", password: "password123")
@@ -32,7 +32,7 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     assert_select DARK_HEADER, 1
     assert_select LIGHT_HEADER, 0
     assert_select "div.bg-\\[\\#0e1014\\] > #{DARK_HEADER}", 0
-    assert_select "link[href*='fonts.googleapis.com']", 0
+    assert_select "link[rel='preload'][href*='Pretendard-Bold']", 0
   end
 
   test "the series list is dark like the home, titled 시리즈, with the display serif" do
@@ -103,7 +103,7 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     assert_dark
     assert_select "title", text: "다크 시리즈 | LEEDOX"
     assert_select "main h1.font-display", text: "다크 시리즈"
-    assert_select "a[href=?]", products_path, text: "← 가이드 목록"
+    assert_select "a", text: "← 가이드 목록", count: 0 # 0094 A1: the back-to-list line is gone (the header has 가이드)
     assert_select "main .doc-content.doc-content-dark h2", text: "소제목"
     assert_select "main ol a.bg-\\[\\#15181e\\][data-turbo-prefetch='false'][href=?]", product_episode_path("dark-line", "01")
     assert_select "main ol div.opacity-70", 1
@@ -147,7 +147,7 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select LIGHT_HEADER, 1 # the admin area keeps the light frame (D-010)
     assert_select DARK_HEADER, 0
-    assert_select "link[href*='fonts.googleapis.com']", 0
+    assert_select "link[rel='preload'][href*='Pretendard-Bold']", 0
     html = css_select("main").first.to_html
     assert_not_includes html, "doc-content-dark"
     assert_not_includes html, "#15181e"

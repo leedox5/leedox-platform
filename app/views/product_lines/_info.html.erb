@@ -23,15 +23,16 @@
 <% image_drawn = admin || product_line.cover_image.attached? %>
 <% header_box = purchase.present? && !image_drawn && product_line.access_state(owned: purchase[:owned]).present? %>
 <% heading = capture do %>
-  <h1 class="break-words break-keep text-3xl font-bold <%= series_theme(:name, dark) %> md:text-4xl"><%= product_line.customer_name %></h1>
+  <h1 class="break-words break-keep font-bold <%= series_theme(:name_size, dark) %> <%= series_theme(:name, dark) %>"><%= product_line.customer_name %></h1>
 
   <% if product_line.summary.present? %>
-    <p class="mt-2 text-lg break-words break-keep <%= series_theme(:summary, dark) %>"><%= product_line.summary %></p>
+    <p class="<%= series_theme(:summary_size, dark) %> break-words break-keep <%= series_theme(:summary, dark) %>"><%= product_line.summary %></p>
   <% end %>
 <% end %>
 
 <% if header_box %>
-  <div class="rounded-2xl border <%= series_theme(:box, dark) %> px-5 py-6 sm:px-6 sm:py-7" data-guide-header>
+  <%# 0094 A4 -- 14px inside on phones. %>
+  <div class="rounded-2xl border <%= series_theme(:box, dark) %> p-3.5 sm:px-6 sm:py-7" data-guide-header>
     <%= heading %>
     <%= render "product_lines/purchase_box", product_line: product_line, dark: dark, bare: true, **purchase %>
   </div>
@@ -46,7 +47,8 @@
     <%= render "admin/product_lines/cover_link", product_line: product_line, variant: :hero, caption: true, link: false %>
   </div>
 <% elsif product_line.cover_image.attached? %>
-  <div class="mt-6 min-w-0">
+  <%# 0094 -- closer on phones (the customer page only). %>
+  <div class="mt-3 min-w-0 sm:mt-6">
     <%= render "product_lines/cover_image", product_line: product_line, variant: :hero, admin: false %>
   </div>
 <% end %>
@@ -59,7 +61,7 @@
   <%= render "product_lines/section_nav", items: section_nav %>
 <% end %>
 
-<div class="mt-6 space-y-6 break-words <%= series_theme(:body, dark) %>">
+<div class="<%= series_theme(:body_gap, dark) %> space-y-6 break-words <%= series_theme(:body, dark) %>">
   <% if series_intro_section?(product_line) %>
   <%# Handoff 0090 -- #intro is a permanent address; scroll-mt keeps the first line clear of the header + section links. %>
   <div id="<%= ProductLinesHelper::SERIES_SECTION_IDS[:intro] %>" class="scroll-mt-28">
@@ -68,7 +70,7 @@
         images resolve only to this product's own images (admin preview points at the admin-only image route).
         Handoff 0066: a real section heading (h2, 24px) instead of a small blue label, and a reading-width column;
         line height is already 1.75 via `.doc-content p` (leading-7). %>
-    <div class="<%= series_theme(:intro, dark) %> mt-11 max-w-[740px] [&_p]:mb-4 [&>:last-child]:mb-0"><%= ContentMarkdown.render(product_line.introduction, parent: product_line, profile: :marketing, admin: admin) %></div>
+    <div class="<%= series_theme(:intro, dark) %> <%= series_theme(:intro_gap, dark) %> max-w-[740px] [&_p]:mb-4 [&>:last-child]:mb-0"><%= ContentMarkdown.render(product_line.introduction, parent: product_line, profile: :marketing, admin: admin) %></div>
   </div>
   <% end %>
   <% if product_line.ai_supporter.present? %>

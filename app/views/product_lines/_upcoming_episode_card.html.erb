@@ -6,11 +6,17 @@
     reads as one continuous list, just muted (gray, lower opacity) to read as "not yet". %>
 <% dark = local_assigns.fetch(:dark, false) %>
 <div class="<%= series_theme(:upcoming_card, dark) %>">
-  <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+  <%# Handoff 0094 R2 (③) -- phones: the title wraps across the card, 공개 예정 leads the second line (" · " teaser);
+      from sm: 공개 예정 on the title's row and the teaser below, as before. %>
+  <div class="<%= series_theme(:card_row, dark) %>">
     <span class="<%= series_theme(:upcoming_title, dark) %>" title="<%= episode.customer_title %>"><%= episode.customer_title %></span>
     <span class="<%= series_theme(:upcoming_label, dark) %>">공개 예정</span>
   </div>
-  <% if episode.summary.present? %>
-    <p class="<%= series_theme(:upcoming_summary, dark) %>" title="<%= episode.summary %>"><%= episode.summary %></p>
-  <% end %>
+  <p class="<%= series_theme(:upcoming_summary, dark) %><%= " sm:hidden" if episode.summary.blank? %>">
+    <span class="<%= series_theme(:upcoming_meta_status, dark) %>">공개 예정</span>
+    <% if episode.summary.present? %>
+      <span class="<%= dark ? "sm:hidden" : "hidden" %>" aria-hidden="true">·</span>
+      <span class="min-w-0 truncate" title="<%= episode.summary %>"><%= episode.summary %></span>
+    <% end %>
+  </p>
 </div>

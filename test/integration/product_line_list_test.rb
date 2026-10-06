@@ -122,13 +122,14 @@ class ProductLineListTest < ActionDispatch::IntegrationTest
     assert_equal "이용 중인 가이드입니다.", css_select("#product-purchase").text.squish # 0092 R1
   end
 
-  test "the header's product link and the detail page's back-to-list link both point at /products" do
+  # Handoff 0094 A1 -- the detail page's "← 가이드 목록" line is gone; the header's 가이드 is the way back.
+  test "the header's product link points at /products, and the detail page has no back-to-list line" do
     line = ProductLine.create!(internal_name: "n", customer_name: "제품", slug: "list-nav", introduction: "소개", status: "published")
     get product_line_path(line.slug)
     # Labelled 시리즈 since handoff 0071 (the link itself is unchanged).
     assert_select "header nav[aria-label='주요 내비게이션'] a[href=?]", products_path, text: "가이드"
     assert_select "nav[aria-label='모바일 내비게이션'] a[href=?]", products_path, text: "가이드"
-    assert_select "a[href=?]", products_path, text: "← 가이드 목록"
+    assert_select "a", text: "← 가이드 목록", count: 0
   end
 
   # --- R2: filter tabs --------------------------------------------------------

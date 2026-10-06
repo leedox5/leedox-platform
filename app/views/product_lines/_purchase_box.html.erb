@@ -18,7 +18,7 @@
 <% bare = local_assigns.fetch(:bare, false) %>
 <% open_line = if open_episode.nil? then nil elsif !user_signed_in? then "로그인 없이" elsif state == :for_sale then "구매 전에" end %>
 <% if state %>
-  <section class="<%= bare ? "mt-5 border-t #{series_theme(:box_rule, dark)} pt-5" : "mt-6 rounded-2xl border #{series_theme(:box, dark)} p-5" %>" aria-label="이용 안내" id="product-purchase">
+  <section class="<%= bare ? "mt-3.5 border-t pt-3.5 sm:mt-5 sm:pt-5 #{series_theme(:box_rule, dark)}" : "mt-3 rounded-2xl border p-3.5 sm:mt-6 sm:p-5 #{series_theme(:box, dark)}" %>" aria-label="이용 안내" id="product-purchase">
     <% if state == :owned %>
       <p class="font-bold <%= series_theme(:box_title, dark) %>">이용 중인 가이드입니다.</p>
     <% elsif state == :free_open %>
@@ -26,11 +26,11 @@
         <p class="min-w-0 flex-1 basis-64 text-sm <%= series_theme(:box_text, dark) %>">지금은 모든 에피소드를 무료로 이용할 수 있습니다. 시작해 두면 계속 볼 수 있습니다.</p>
         <% if user_signed_in? %>
           <%= button_to "이용하기", claim_free_access_path(product_line.product.code), method: :post,
-            class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-6 py-3 text-sm font-bold #{series_theme(:free_button, dark)}" %>
+            class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-4 py-[7px] text-sm font-bold sm:px-6 sm:py-3 #{series_theme(:free_button, dark)}" %>
         <% else %>
           <%# Handoff 0092 R4 -- guests: sign in -> confirm once -> the episode list (the old free checkout URL still works). %>
           <%= link_to "이용하기", product_continue_path(product_line.slug),
-            class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-6 py-3 text-sm font-bold #{series_theme(:free_button, dark)}" %>
+            class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-4 py-[7px] text-sm font-bold sm:px-6 sm:py-3 #{series_theme(:free_button, dark)}" %>
         <% end %>
       </div>
       <%= render "product_lines/open_episode_line", product_line: product_line, episode: open_episode, when_text: open_line, dark: dark if open_line %>
@@ -41,7 +41,7 @@
           <p class="mt-1 text-2xl font-black <%= series_theme(:box_price, dark) %>"><%= number_with_delimiter(offer.total_amount) %>원 <span class="text-sm font-semibold <%= series_theme(:box_muted, dark) %>">(VAT 포함)</span></p>
         </div>
         <%= link_to "구매하기", billing_checkout_path(product_line.product.code),
-          class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-6 py-3 text-sm font-bold #{series_theme(:buy_button, dark)}" %>
+          class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-4 py-[7px] text-sm font-bold sm:px-6 sm:py-3 #{series_theme(:buy_button, dark)}" %>
       </div>
       <p class="mt-3 text-xs <%= series_theme(:box_note, dark) %>">구매하면 이 가이드의 모든 편과 산출물을 이용할 수 있습니다. 다른 가이드는 포함되지 않습니다.</p>
       <%= render "product_lines/open_episode_line", product_line: product_line, episode: open_episode, when_text: open_line, dark: dark if open_line %>

@@ -28,7 +28,7 @@ class DarkEpisodeTest < ActionDispatch::IntegrationTest
     get episode_path
     assert_response :success
     assert_select "title", text: "첫 편 | LEEDOX"
-    assert_select "link[href*='fonts.googleapis.com'][href*='Gowun+Batang']", 1
+    assert_select "link[rel='preload'][href*='Pretendard-Bold']", 1
     assert_select "div.bg-\\[\\#0e1014\\] > #{DARK_HEADER}"
     assert_select "main h1.font-display.text-\\[\\#f2efe8\\]", text: "첫 편"
     assert_select "main > .doc-content.doc-content-dark h2", text: "소제목"

@@ -36,22 +36,23 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
     assert_select "ol a[href=?]", product_episode_path(@line.slug, "01") do
       assert_select "span", text: "보기 →"
     end
-    assert_select "ol a[href=?] span.truncate[title=?]", product_episode_path(@line.slug, "01"), "첫 편", text: "첫 편"
+    assert_select "ol a[href=?] span.flex-1[title=?]", product_episode_path(@line.slug, "01"), "첫 편", text: "첫 편"
     assert_select "ol a span", text: /\AE?\d+\z/, count: 0
     assert_select "ol a", count: 2
     assert_select "ol a[href*='E0']", count: 0
   end
 
   # Handoff 0067: title and CTA on one row -- the CTA never shrinks, only the title does (flex-1 + min-w-0, same
-  # truncate as 0066); below `sm` the CTA alone wraps to its own line (w-full forces the wrap). No number span at
-  # all on the customer card, so the row's gap doesn't push the title right.
-  test "the episode card lays title and CTA out as one flexible row, with the CTA forced onto its own line below sm" do
+  # truncate as 0066). No number span at all on the customer card, so the row's gap doesn't push the title right.
+  # Handoff 0094 A12: the CTA now stays on the title's line at every width (it used to wrap below `sm`), right-aligned.
+  # R2 (③): top-aligned; on phones the title wraps between words (truncated to one line only from sm).
+  test "the episode card lays title and CTA out as one row, the CTA on the title's line at every width" do
     get product_line_path(@line.slug)
     assert_select "ol a[href=?]", product_episode_path(@line.slug, "01") do
-      assert_select "div.flex.flex-wrap.items-center" do
+      assert_select "div.flex.items-start:not(.flex-wrap)" do
         assert_select "span", count: 2
-        assert_select "span.min-w-0.flex-1.truncate", text: "첫 편"
-        assert_select "span.w-full.shrink-0.whitespace-nowrap.sm\\:w-auto.sm\\:ml-auto", text: "보기 →"
+        assert_select "span.min-w-0.flex-1.break-keep.sm\\:truncate:not(.truncate)", text: "첫 편"
+        assert_select "span.ml-auto.shrink-0.whitespace-nowrap:not(.w-full)", text: "보기 →"
       end
     end
   end
@@ -163,10 +164,11 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
   test "an 에피소드 heading sits above the cards, styled like the intro guide's own subheadings" do
     get product_line_path(@line.slug)
     # 0083 R2: same size/weight/spacing; the color is the dark page's (#f2efe8) on the customer page.
-    assert_select "main h2.text-2xl.font-semibold", text: "에피소드", count: 1
+    assert_select "main h2.sm\\:text-2xl.font-semibold", text: "에피소드", count: 1
     heading = css_select("main h2").find { |h| h.text == "에피소드" }
     # 0090: scroll-mt-28 keeps it clear of the header + section links when jumped to (#episodes).
-    assert_equal %w[mb-3 mt-8 scroll-mt-28 text-2xl font-semibold text-[#f2efe8]].sort, heading["class"].split.sort
+    # 0094 A11: 21px with 22px / 10px around on phones; sm and up as before (24px, mt-8 / mb-3).
+    assert_equal %w[mt-[22px] mb-2.5 text-[21px] sm:mt-8 sm:mb-3 sm:text-2xl scroll-mt-28 font-semibold text-[#f2efe8]].sort, heading["class"].split.sort
 
     body = response.body
     assert_operator body.index(">소개</h2>"), :<, body.index(">에피소드</h2>"), "에피소드 heading comes after the intro"
@@ -193,7 +195,7 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
 
     upcoming = cards[1]
     assert_nil upcoming.at_css("a"), "a 공개 예정 card is a div, never a link"
-    assert_equal "공개 예정", upcoming.at_css("span.sm\\:ml-auto")&.text
+    assert_equal "공개 예정", upcoming.at_css("span.ml-auto")&.text # 0094 A12: on the title's line
     assert_no_match(/학습 시작|편집하기/, upcoming.text)
     assert_no_match(/E0\d/, upcoming.text, "no episode number on a 공개 예정 card either")
     # 0083 R2: still muted by opacity -- 70% on the dark page (60% in the light admin preview) so it reads at >= 4.5:1.
@@ -216,7 +218,9 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
     get product_line_path(@line.slug)
     assert_no_match(/준비 중입니다/, response.body)
     assert_select "main ol > li", 2
-    assert_select "main span", text: "공개 예정", count: 2
+    # 0094 R2: each card carries 공개 예정 twice -- on the title's row from sm, at the start of the second line on phones.
+    assert_select "main ol > li > div > div > span.sm\\:inline", text: "공개 예정", count: 2
+    assert_select "main ol > li > div > p > span.sm\\:hidden", text: "공개 예정", count: 2
   end
 
   test "the one-line teaser shows under the title on both a published and a 공개 예정 card, escaped, and only when present" do
@@ -224,12 +228,15 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
     @ep2.update!(status: "draft") # no summary -- must render no teaser line at all
 
     get product_line_path(@line.slug)
-    assert_select "main a[href=?] p.truncate", product_episode_path(@line.slug, "01"), text: "이번 편에서 <b>실습</b>합니다"
+    assert_select "main a[href=?] p span.truncate", product_episode_path(@line.slug, "01"), text: "이번 편에서 <b>실습</b>합니다" # 0094 R2
     assert_includes response.body, "이번 편에서 &lt;b&gt;실습&lt;/b&gt;합니다", "escaped in the raw HTML"
     assert_no_match(%r{<b>실습</b>}, response.body, "never rendered as a real <b> tag")
 
     upcoming = css_select("main ol > li")[1]
-    assert_nil upcoming.at_css("p"), "no summary set on this one -- no second line at all"
+    # 0094 R2: no teaser, so from sm there's no second line; on phones it only carries 공개 예정.
+    line = upcoming.at_css("p")
+    assert_includes line["class"].split, "sm:hidden"
+    assert_equal [ "공개 예정" ], line.css("span").map { |s| s.text.strip }
   end
 
   test "unknown slugs and unknown episodes 404 cleanly" do

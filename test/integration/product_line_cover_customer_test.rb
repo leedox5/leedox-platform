@@ -45,7 +45,8 @@ class ProductLineCoverCustomerTest < ActionDispatch::IntegrationTest
   def assert_single_column_order(main_html, with_image:, with_ai: true, with_summary: false, with_episodes: false)
     landmarks = [ [ :name, "<h1" ] ]
     # Found by its structure, not its color: the customer page is dark since 0083 R2, the admin preview light.
-    landmarks << [ :summary, '<p class="mt-2 text-lg ' ] if with_summary
+    # 0094 A6: the customer page's summary starts with its phone size (mt-1.5 …); the admin preview's is unchanged.
+    landmarks << [ :summary, /<p class="mt-(?:2 text-lg|1\.5 text-\[15px\]) / ] if with_summary
     landmarks << [ :image, "<img" ] if with_image
     landmarks << [ :introduction, ">소개<" ]
     landmarks << [ :ai, "AI 서포터" ] if with_ai

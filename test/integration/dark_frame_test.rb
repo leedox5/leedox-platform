@@ -89,7 +89,7 @@ class DarkFrameTest < ActionDispatch::IntegrationTest
     sign_in(@user)
     get dashboard_path
     assert_select "div.bg-\\[\\#0e1014\\] > #{DARK_HEADER}"
-    assert_select "link[href*='fonts.googleapis.com'][href*='Gowun+Batang']", 1
+    assert_select "link[rel='preload'][href*='Pretendard-Bold']", 1
     assert_select "main h1.font-display", text: /님이 이용 중인 콘텐츠\z/ # 0089: the heading replaced the greeting
     assert_not_includes css_select("main").first.to_html, "bg-white "
   end
@@ -118,7 +118,7 @@ class DarkFrameTest < ActionDispatch::IntegrationTest
     [ mypage_path, terms_path, announcements_path, edit_user_registration_path ].each do |path| # /pricing removed in 0086
       get path
       assert_select "div.bg-\\[\\#0e1014\\] > header", 0, "#{path}: body stays light"
-      assert_select "link[href*='fonts.googleapis.com']", 0, path
+      assert_select "link[rel='preload'][href*='Pretendard-Bold']", 0, path
     end
   end
 end

@@ -24,16 +24,42 @@
 <% cta_label, cta_badge, cta_locked = local_assigns.fetch(:cta) { [ admin ? "편집하기 →" : "보기 →", nil, false ] } %>
 <% title = episode.customer_title.presence || "(제목 없음)" %>
 <% dark = local_assigns.fetch(:dark, false) %>
+<% if local_assigns.key?(:cta) %>
+  <%# Handoff 0094 R2 (③) -- the customer card. Phones: the title takes the card's width and wraps between words; only
+      보기 → stays on its right; any other status (로그인 후 보기, 구매 후 보기, …) or the 열린 편 badge leads the second
+      line, then " · " and the teaser (only the teaser is cut short). From sm: one row (badge, title, status) and the
+      teaser below, as in R1. Same labels, links and checks as 0092. %>
+  <% summary = episode.summary.presence %>
+  <% lead = cta_badge || (cta_locked && cta_label) %>
+  <%= link_to path, data: { turbo_prefetch: false }, class: series_theme(:card, dark) do %>
+    <div class="<%= series_theme(:card_row, dark) %>">
+      <% if cta_badge %><span class="<%= series_theme(:card_badge, dark) %>"><%= cta_badge %></span><% end %>
+      <span class="<%= series_theme(:card_title_wrap, dark) %>" title="<%= title %>"><%= title %></span>
+      <span class="<%= series_theme(cta_locked ? :card_cta_locked : :card_cta, dark) %>"><%= cta_label %></span>
+    </div>
+    <% if lead || summary %>
+      <p class="<%= series_theme(:card_meta, dark) %><%= " sm:hidden" unless summary %>">
+        <% if cta_badge %>
+          <span class="<%= series_theme(:card_badge_inline, dark) %>"><%= cta_badge %></span>
+        <% elsif cta_locked %>
+          <span class="<%= series_theme(:card_meta_status, dark) %>"><%= cta_label %></span>
+          <% if summary %><span class="sm:hidden" aria-hidden="true">·</span><% end %>
+        <% end %>
+        <% if summary %><span class="min-w-0 truncate" title="<%= summary %>"><%= summary %></span><% end %>
+      </p>
+    <% end %>
+  <% end %>
+<% else %>
 <%= link_to path, data: { turbo_prefetch: false }, class: series_theme(:card, dark) do %>
-  <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+  <div class="<%= series_theme(:card_row, dark) %>">
     <% if admin %><span class="shrink-0 text-xs font-semibold text-gray-400"><%= episode.display_id %> · <%= episode.status %></span><% end %>
     <%# Handoff 0092 R2 -- the admin preview marks an 열린 편 (the customer card's own label comes in R3). %>
     <% if admin && episode.open_preview_on? %><span class="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">로그인 없이 보기</span><% end %>
-    <% if cta_badge %><span class="<%= series_theme(:card_badge, dark) %>"><%= cta_badge %></span><% end %>
     <span class="<%= series_theme(:card_title, dark) %>" title="<%= title %>"><%= title %></span>
-    <span class="<%= series_theme(cta_locked ? :card_cta_locked : :card_cta, dark) %>"><%= cta_label %></span>
+    <span class="<%= series_theme(:card_cta, dark) %>"><%= cta_label %></span>
   </div>
   <% if episode.summary.present? %>
     <p class="<%= series_theme(:card_summary, dark) %>" title="<%= episode.summary %>"><%= episode.summary %></p>
   <% end %>
+<% end %>
 <% end %>
