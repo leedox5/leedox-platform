@@ -37,8 +37,10 @@ module ProductLineGates
     require_product_license
   end
 
-  def open_preview_episode?
-    @product_line.customer_reachable? && @current_episode.published? && @current_episode.open_preview_on?
+  # Handoff 0092 R3 -- takes any episode of @product_line, so the guide page's cards and access box use this very
+  # check for each episode (the label always matches what the click does).
+  def open_preview_episode?(episode = @current_episode)
+    @product_line.customer_reachable? && episode.published? && episode.open_preview_on?
   end
 
   # Whether the viewer gets the whole episode (files, comments) -- the same check require_product_license makes.
@@ -53,7 +55,9 @@ module ProductLineGates
     authenticate_user!
     return if performed?
 
-    redirect_to product_line_path(@product_line.slug), alert: "이 제품을 구매하면 볼 수 있습니다."
+    # Handoff 0092 R3 -- the reason in the guide's own terms (only guides use this gate; earlier products' chapters
+    # have their own message in ProductContentController).
+    redirect_to product_line_path(@product_line.slug), alert: @product_line.free? ? "이용을 시작하면 볼 수 있습니다." : "구매하면 볼 수 있습니다."
   end
 
   def render_not_found

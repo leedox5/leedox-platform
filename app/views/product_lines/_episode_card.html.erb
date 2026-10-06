@@ -19,6 +19,9 @@
     response on click, so the click itself never reaches the server and the view can't be counted (prefetches are
     deliberately not counted). Every link to a customer episode page carries this. %>
 <% admin = local_assigns.fetch(:admin, false) %>
+<%# Handoff 0092 R3 -- the customer page passes `cta` ([label, badge, locked] from episode_card_cta); without it (the
+    admin preview) the card is as before. %>
+<% cta_label, cta_badge, cta_locked = local_assigns.fetch(:cta) { [ admin ? "편집하기 →" : "보기 →", nil, false ] } %>
 <% title = episode.customer_title.presence || "(제목 없음)" %>
 <% dark = local_assigns.fetch(:dark, false) %>
 <%= link_to path, data: { turbo_prefetch: false }, class: series_theme(:card, dark) do %>
@@ -26,8 +29,9 @@
     <% if admin %><span class="shrink-0 text-xs font-semibold text-gray-400"><%= episode.display_id %> · <%= episode.status %></span><% end %>
     <%# Handoff 0092 R2 -- the admin preview marks an 열린 편 (the customer card's own label comes in R3). %>
     <% if admin && episode.open_preview_on? %><span class="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">로그인 없이 보기</span><% end %>
+    <% if cta_badge %><span class="<%= series_theme(:card_badge, dark) %>"><%= cta_badge %></span><% end %>
     <span class="<%= series_theme(:card_title, dark) %>" title="<%= title %>"><%= title %></span>
-    <span class="<%= series_theme(:card_cta, dark) %>"><%= admin ? "편집하기 →" : "보기 →" %></span>
+    <span class="<%= series_theme(cta_locked ? :card_cta_locked : :card_cta, dark) %>"><%= cta_label %></span>
   </div>
   <% if episode.summary.present? %>
     <p class="<%= series_theme(:card_summary, dark) %>" title="<%= episode.summary %>"><%= episode.summary %></p>

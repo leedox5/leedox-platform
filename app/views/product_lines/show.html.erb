@@ -18,10 +18,11 @@
         (inside the info block, which owns the cover), for every product. %>
     <%# Handoff 0090 -- section_nav: the sticky 소개 · 에피소드 links under the purchase box. %>
     <%= render "product_lines/info", product_line: @product_line, dark: true,
-      purchase: { owned: @owned, for_sale: @for_sale, offer: @offer, free: @free, free_open: @free_open },
+      purchase: { owned: @owned, for_sale: @for_sale, offer: @offer, free: @free, free_open: @free_open, open_episode: @first_open_episode },
       section_nav: series_section_nav_items(@product_line, @episodes, @upcoming_episodes) %>
 
-    <%= render "product_lines/episode_list", episodes: @episodes, product_line: @product_line, upcoming_episodes: @upcoming_episodes, dark: true %>
+    <%= render "product_lines/episode_list", episodes: @episodes, product_line: @product_line, upcoming_episodes: @upcoming_episodes, dark: true,
+      cta_for: ->(episode) { episode_card_cta(episode, full_access: @full_episode_access, signed_in: user_signed_in?, free: @free) } %>
 
     <% if @assets_by_episode.any? %>
       <section class="mt-12">

@@ -18,7 +18,9 @@
   <h2 <% unless admin %>id="<%= ProductLinesHelper::SERIES_SECTION_IDS[:episodes] %>"<% end %> class="scroll-mt-28 <%= series_theme(:list_heading, dark) %>">에피소드</h2>
   <ol class="space-y-3">
     <% episodes.each do |episode| %>
+      <%# Handoff 0092 R3 -- `cta_for` (customer page): what this viewer's click on each card does. %>
       <li><%= render "product_lines/episode_card", episode: episode, admin: admin, dark: dark,
+        **(local_assigns[:cta_for] ? { cta: cta_for.call(episode) } : {}),
         path: admin ? admin_content_episode_path(episode) : product_episode_path(product_line.slug, episode.display_id) %></li>
     <% end %>
     <% upcoming_episodes.each do |episode| %>

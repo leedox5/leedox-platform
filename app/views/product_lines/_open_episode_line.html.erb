@@ -1,0 +1,6 @@
+<%# Handoff 0092 R3 -- the access box's line about the first 열린 편: "E01은 로그인 없이 볼 수 있습니다." / "E01은 구매 전에
+    볼 수 있습니다.", the episode number (from the data) linking to it. %>
+<p class="mt-3 text-sm <%= series_theme(:box_text, dark) %>">
+  <%= link_to "E#{episode.display_id}", product_episode_path(product_line.slug, episode.display_id), data: { turbo_prefetch: false },
+    class: "font-bold underline underline-offset-2 #{series_theme(:box_link, dark)}" %><%= number_topic_particle(episode.display_id) %> <%= when_text %> 볼 수 있습니다.
+</p>

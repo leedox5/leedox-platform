@@ -9,6 +9,11 @@
     for-sale and closed boxes are unchanged. %>
 <% dark = local_assigns.fetch(:dark, false) %>
 <% state = product_line.access_state(owned: owned) %>
+<%# Handoff 0092 R3 -- the first 열린 편 the viewer can read without the license (nil when there's none or they have
+    it). A guest is told it opens without signing in; a member who hasn't bought a paid guide, before buying. A member
+    who hasn't started a free guide gets no line (이용하기 is right there). %>
+<% open_episode = local_assigns[:open_episode] %>
+<% open_line = if open_episode.nil? then nil elsif !user_signed_in? then "로그인 없이" elsif state == :for_sale then "구매 전에" end %>
 <% if state %>
   <section class="mt-6 rounded-2xl border <%= series_theme(:box, dark) %> p-5" aria-label="이용 안내" id="product-purchase">
     <% if state == :owned %>
@@ -24,6 +29,7 @@
             class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-6 py-3 text-sm font-bold #{series_theme(:free_button, dark)}" %>
         <% end %>
       </div>
+      <%= render "product_lines/open_episode_line", product_line: product_line, episode: open_episode, when_text: open_line, dark: dark if open_line %>
     <% elsif state == :for_sale %>
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -34,6 +40,7 @@
           class: "inline-flex flex-shrink-0 items-center justify-center whitespace-nowrap rounded-xl px-6 py-3 text-sm font-bold #{series_theme(:buy_button, dark)}" %>
       </div>
       <p class="mt-3 text-xs <%= series_theme(:box_note, dark) %>">구매하면 이 가이드의 모든 편과 산출물을 이용할 수 있습니다. 다른 가이드는 포함되지 않습니다.</p>
+      <%= render "product_lines/open_episode_line", product_line: product_line, episode: open_episode, when_text: open_line, dark: dark if open_line %>
     <% else %>
       <p class="font-bold <%= series_theme(:box_closed, dark) %>">현재 <%= free ? "시작할" : "구매할" %> 수 없습니다</p>
       <p class="mt-1 text-sm <%= series_theme(:box_note, dark) %>">이 가이드는 준비 중이거나 이용 시작이 중지되었습니다. 이미 이용 중인 분은 로그인하면 계속 이용하실 수 있습니다.</p>

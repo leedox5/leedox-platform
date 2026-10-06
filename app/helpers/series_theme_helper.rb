@@ -21,6 +21,7 @@ module SeriesThemeHelper
     box_price: [ "text-slate-950", "text-[#f2efe8]" ],
     box_muted: [ "text-slate-500", "text-[#a8a39a]" ],
     box_note: [ "text-slate-600", "text-[#c9c4ba]" ],
+    box_link: [ "text-blue-700 hover:text-blue-800", "text-[#f0a53c] hover:text-[#f5b85e]" ], # 0092 R3 -- the 열린 편 link
     box_closed: [ "text-slate-800", "text-[#f2efe8]" ],
     buy_button: [ "bg-blue-600 text-white shadow-sm hover:bg-blue-700", "bg-[#f0a53c] text-[#0e1014] hover:bg-[#f5b85e]" ],
     free_button: [ "bg-emerald-600 text-white shadow-sm hover:bg-emerald-700", "bg-[#7dd3a8] text-[#0e1014] hover:bg-[#9be0bd]" ],
@@ -33,6 +34,12 @@ module SeriesThemeHelper
     card_cta: [ "order-last w-full shrink-0 whitespace-nowrap text-sm font-semibold text-blue-600 sm:order-none sm:ml-auto sm:w-auto",
                 "order-last w-full shrink-0 whitespace-nowrap text-sm font-semibold text-[#f0a53c] sm:order-none sm:ml-auto sm:w-auto" ],
     card_summary: [ "mt-1 truncate text-sm text-gray-500", "mt-1 truncate text-sm text-[#a8a39a]" ],
+    # Handoff 0092 R3 -- a card the viewer can't open yet says why (no arrow, muted), and an 열린 편 carries a small
+    # badge (the admin preview's green, on the dark palette).
+    card_cta_locked: [ "order-last w-full shrink-0 whitespace-nowrap text-sm font-semibold text-gray-500 sm:order-none sm:ml-auto sm:w-auto",
+                       "order-last w-full shrink-0 whitespace-nowrap text-sm font-semibold text-[#a8a39a] sm:order-none sm:ml-auto sm:w-auto" ],
+    card_badge: [ "shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700",
+                  "shrink-0 rounded-full border border-[#7dd3a8]/40 bg-[#7dd3a8]/10 px-2 py-0.5 text-xs font-semibold text-[#7dd3a8]" ],
     # 공개 예정 stays muted by the card's opacity, but on dark it's 70% (not 60%) with brighter text so it still reads
     # at >= 4.5:1 (title 8.0, label/summary 5.55 -- see 0083 result_r2.md).
     upcoming_card: [ "rounded-xl border border-gray-200 p-4 opacity-60", "rounded-xl border border-white/10 bg-[#15181e] p-4 opacity-70" ],

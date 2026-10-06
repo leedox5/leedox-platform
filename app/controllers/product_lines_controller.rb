@@ -28,6 +28,7 @@ class ProductLinesController < ApplicationController
   before_action :load_episode, only: %i[episode]
   # Handoff 0092 R2 -- the page opens for an 열린 편 too (ProductLineGates); files and comments don't.
   before_action :require_product_license_or_open_preview, only: %i[episode]
+  helper_method :open_preview_episode?
   # Handoff 0073 -- after rendering, so only a request that passed every gate above is counted.
   after_action :record_episode_view, only: %i[episode]
 
@@ -69,6 +70,10 @@ class ProductLinesController < ApplicationController
     @for_sale = @product_line.for_sale?
     @free = @product_line.free?
     @free_open = @product_line.free_start_open?
+    # Handoff 0092 R3 -- the episode cards and the access box say what a click really does: the same checks the
+    # episode gate makes (ProductLineGates#full_episode_access?, #open_preview_episode?).
+    @full_episode_access = full_episode_access?
+    @first_open_episode = @episodes.find { |episode| open_preview_episode?(episode) } unless @full_episode_access
   end
 
   # Handoff 0074 -- the page itself (body, takeaways, files, comments) is prepared in EpisodePage,
