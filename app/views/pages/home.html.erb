@@ -1,5 +1,5 @@
 <%# Handoff 0071 -- the story-series home (D-009). Dark on the home only; every other page keeps its theme.
-    Sections, top to bottom: the pinned notice line (0077, only when one is published and pinned), featured series (only when one is featured and listed), brand line, one row per
+    Sections, top to bottom: the pinned notice line (0077, only when one is published and pinned), featured guides (0097: up to three, only when featured and listed), brand line, one row per
     track (the AI row also carries the standalone products), what series / season /
     episode mean, footer. "만든 사람" waits for Tommy's copy (out of scope). %>
 <%# Handoff 0091 (D-011) -- the brand sentence; 시리즈 is called 가이드 now and 시즌 is gone from the screens. %>
@@ -15,7 +15,7 @@
   <%= render "leedox_home/notice_line", notice_item: @home_notice if @home_notice %>
 
   <main>
-    <%= render "leedox_home/series_hero" if @featured_line %>
+    <%= render "leedox_home/series_hero" if @featured_lines.any? %>
     <%= render "leedox_home/brand_line" %>
     <%# Handoff 0096 -- no "새로 공개 · 공개 예정" row any more (Tommy: dull on a phone). %>
     <%= render "leedox_home/track_rows" %>

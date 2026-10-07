@@ -1,0 +1,29 @@
+<%# Handoff 0097 -- one card of the home's featured section (the card itself is 0096's): image -> state badge -> name
+    -> "에피소드 N" and the arrow, the whole card one link to the guide page, read as the guide's name.
+    wide: true -- the only card: full width, image 3 : text 2 from md (0096 R2 values).
+    wide: false -- one of two or three: stacked at every width, 86% of the row below md (scrolling sideways), a grid
+    cell from md; the count and the arrow sit at the card's bottom so cards of different name lengths line up.
+    Color classes stay in plain attributes: Tailwind can skip classes in an ERB Ruby string after a [#hex] class. %>
+<% state = @series_access_states[line.id] %>
+<% name_id = "featured-guide-name-#{line.id}" %>
+<a href="<%= product_line_path(line.slug) %>" aria-labelledby="<%= name_id %>" data-featured-card
+  class="overflow-hidden rounded-2xl border border-white/10 bg-[#15181e] transition hover:border-[#f0a53c]/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#f0a53c] <%= wide ? "mt-3 block md:grid md:grid-cols-5 md:items-center" : "flex w-[86%] shrink-0 snap-start flex-col md:w-auto" %>">
+  <div class="<%= "md:col-span-3" if wide %>">
+    <% if line.cover_image.attached? %>
+      <%= render "product_lines/cover_image", product_line: line, variant: :hero,
+        classes: "block aspect-video w-full max-w-full bg-white/5 object-cover" %>
+    <% else %>
+      <%= render "product_lines/cover_placeholder", product_line: line, dark: true %>
+    <% end %>
+  </div>
+  <div class="<%= wide ? "px-3.5 pt-3 pb-3.5 md:col-span-2 md:p-5 lg:p-7" : "flex flex-1 flex-col items-start px-3.5 pt-3 pb-3.5 md:px-[18px] md:pt-4 md:pb-[18px]" %>">
+    <% if state %>
+      <span class="inline-block <%= product_list_state_classes(state) %>"><%= product_list_state_label(state, line) %></span>
+    <% end %>
+    <h3 id="<%= name_id %>" class="mt-2 break-keep break-words font-display text-[22px] font-bold leading-[29px] text-[#f2efe8] <%= "md:text-[26px] md:leading-[34px] lg:mt-3 lg:text-[34px] lg:leading-[42px]" if wide %>"><%= line.customer_name %></h3>
+    <div class="flex items-center justify-between gap-3 <%= wide ? "mt-3 md:mt-4 lg:mt-5" : "mt-auto w-full pt-3" %>">
+      <span class="text-sm text-[#a8a39a]"><%= guide_episode_count_label(@published_counts.fetch(line.id, 0)) %></span>
+      <span aria-hidden="true" class="flex shrink-0 items-center justify-center rounded-full bg-[#f0a53c] font-bold text-[#0e1014] <%= wide ? "h-[34px] w-[34px] md:h-10 md:w-10 lg:h-11 lg:w-11" : "h-[34px] w-[34px] md:h-11 md:w-11" %>">→</span>
+    </div>
+  </div>
+</a>

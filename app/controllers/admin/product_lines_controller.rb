@@ -8,9 +8,31 @@ class Admin::ProductLinesController < Admin::BaseController
   helper_method :episode_view_stats
 
   def index
-    @product_lines = ProductLine.order(:id).with_attached_cover_image
-    # Handoff 0073 -- each series' views and people (all time / last 7 days), grouped queries for the whole list.
-    @view_stats = EpisodeView.stats_by_product_line(@product_lines.map(&:id))
+    load_index
+    @home_title = SiteSetting.home_featured_title_input
+  end
+
+  # Handoff 0097 -- the 홈 대표 섹션 box above the list: the title (blank = the default) and, for each featured guide,
+  # its place 1..3 or "" to take it off the home. Both are saved together; a problem with either saves nothing and
+  # shows the box again with what was typed.
+  def home_featured
+    @home_title = params[:home_title].to_s
+    positions = params.fetch(:positions, {}).permit!.to_h
+    error = nil
+    ActiveRecord::Base.transaction do
+      setting = SiteSetting.save_home_featured_title(@home_title)
+      error = "섹션 제목은 #{SiteSetting::HOME_FEATURED_TITLE_MAX}자까지 쓸 수 있습니다." if setting.errors.any?
+      error ||= ProductLine.arrange_featured!(positions)
+      raise ActiveRecord::Rollback if error
+    end
+
+    if error
+      load_index
+      flash.now[:alert] = error
+      render :index, status: :unprocessable_entity
+    else
+      redirect_to admin_product_lines_path, notice: "홈 대표 섹션을 저장했습니다."
+    end
   end
 
   # Admin-only preview: shows the customer-facing product info and every
@@ -59,6 +81,12 @@ class Admin::ProductLinesController < Admin::BaseController
   end
 
   private
+
+  def load_index
+    @product_lines = ProductLine.order(:id).with_attached_cover_image
+    # Handoff 0073 -- each series' views and people (all time / last 7 days), grouped queries for the whole list.
+    @view_stats = EpisodeView.stats_by_product_line(@product_lines.map(&:id))
+  end
 
   # Handoff 0073 -- per-episode views and people for the edit page's episode list (every path that renders
   # :edit sets @episodes first, so this is computed lazily from it rather than in each of them).

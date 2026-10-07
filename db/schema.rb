@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_06_060000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_07_060000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -306,6 +306,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_060000) do
     t.string "customer_name", null: false
     t.text "expected_result"
     t.boolean "featured", default: false, null: false
+    t.integer "featured_position"
     t.string "internal_name", null: false
     t.text "introduction", default: "", null: false
     t.bigint "legacy_season_id"
@@ -321,7 +322,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_060000) do
     t.string "track"
     t.datetime "updated_at", null: false
     t.string "visibility", default: "public", null: false
-    t.index ["featured"], name: "index_product_lines_on_featured_only_one", unique: true, where: "featured"
+    t.index ["featured_position"], name: "index_product_lines_on_featured_position", unique: true, where: "featured_position IS NOT NULL"
     t.index ["legacy_season_id"], name: "index_product_lines_on_legacy_season_id", unique: true
     t.index ["product_id"], name: "index_product_lines_on_product_id", unique: true
     t.index ["series_key"], name: "index_product_lines_on_series_key"
@@ -433,6 +434,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_060000) do
     t.datetime "updated_at", null: false
     t.integer "visibility", default: 0, null: false
     t.index ["request_number"], name: "index_service_desk_requests_on_request_number", unique: true
+  end
+
+  create_table "site_settings", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "key", null: false
+    t.datetime "updated_at", null: false
+    t.string "value"
+    t.index ["key"], name: "index_site_settings_on_key", unique: true
   end
 
   create_table "users", force: :cascade do |t|

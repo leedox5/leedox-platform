@@ -15,6 +15,44 @@
       <%= link_to "+ 새 제품", new_admin_product_line_path, class: "inline-flex flex-shrink-0 items-center justify-center self-start whitespace-nowrap rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700 sm:self-auto" %>
     </header>
 
+    <%# Handoff 0097 -- the home's featured section in one place: its title and the featured guides' order. Guides are
+        put on the home from their edit page (홈 대표 가이드); here they are ordered or taken off. %>
+    <% featured = @product_lines.select(&:featured?).sort_by { |line| [ line.featured_position || ProductLine::FEATURED_MAX + 1, line.id ] } %>
+    <section aria-labelledby="home-featured-box" class="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 id="home-featured-box" class="text-lg font-black text-slate-950">홈 대표 섹션</h2>
+      <p class="mt-1 text-sm text-slate-600">홈 맨 위에 나오는 섹션입니다. 가이드는 최대 <%= ProductLine::FEATURED_MAX %>개, 아래 순서대로 나옵니다(공개 가이드만). 가이드를 넣을 때는 그 가이드의 편집 화면에서 <strong>홈 대표 가이드</strong>를 켭니다.</p>
+      <%= form_with url: home_featured_admin_product_lines_path, method: :patch, class: "mt-4 space-y-4" do %>
+        <div>
+          <%= label_tag :home_title, "섹션 제목", class: "block text-sm font-bold text-slate-700 mb-1" %>
+          <%= text_field_tag :home_title, @home_title, maxlength: SiteSetting::HOME_FEATURED_TITLE_MAX,
+            placeholder: SiteSetting::HOME_FEATURED_TITLE_DEFAULT, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm sm:max-w-md" %>
+          <p class="mt-1 text-xs text-slate-500">비워 두면 "<%= SiteSetting::HOME_FEATURED_TITLE_DEFAULT %>"로 나옵니다. <%= SiteSetting::HOME_FEATURED_TITLE_MAX %>자까지, 한 줄로(줄바꿈은 빈칸 하나로 바뀝니다).</p>
+        </div>
+        <div>
+          <p class="text-sm font-bold text-slate-700">홈 대표 가이드</p>
+          <% if featured.empty? %>
+            <p class="mt-1 text-sm text-slate-500">지금 홈 대표 가이드가 없습니다 — 홈에 이 섹션이 나오지 않습니다.</p>
+          <% else %>
+            <ol class="mt-2 space-y-2">
+              <% featured.each do |line| %>
+                <li class="flex flex-wrap items-center gap-3" data-home-featured-row>
+                  <%= select_tag "positions[#{line.id}]",
+                    options_for_select((1..ProductLine::FEATURED_MAX).map { |n| [ "#{n}번째", n ] } + [ [ "홈 대표에서 빼기", "" ] ], line.featured_position),
+                    aria: { label: "#{line.customer_name} 순서" }, class: "rounded-lg border border-slate-300 px-2 py-1.5 text-sm" %>
+                  <span class="font-semibold text-slate-900"><%= line.customer_name %></span>
+                  <% unless ProductLine.listed.exists?(line.id) %>
+                    <span class="inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">비공개라 홈에 안 나옴</span>
+                  <% end %>
+                </li>
+              <% end %>
+            </ol>
+            <p class="mt-2 text-xs text-slate-500">순서는 1~<%= ProductLine::FEATURED_MAX %>을 하나씩 고릅니다(겹치면 저장되지 않습니다).</p>
+          <% end %>
+        </div>
+        <%= submit_tag "저장", class: "rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700" %>
+      <% end %>
+    </section>
+
     <section class="mt-8 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
       <table class="min-w-full divide-y divide-slate-200 text-sm">
         <thead class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
@@ -38,9 +76,9 @@
               </td>
               <td class="px-4 py-4 font-semibold text-slate-900">
                 <%= line.customer_name %>
-                <%# Handoff 0071 -- which series is the home hero, and whether it can actually show there. %>
+                <%# Handoff 0071 -- which series is the home hero, and whether it can actually show there. 0097: with its place. %>
                 <% if line.featured? %>
-                  <span class="ml-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">대표</span>
+                  <span class="ml-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">대표 <%= line.featured_position %></span>
                   <% unless ProductLine.listed.exists?(line.id) %>
                     <span class="ml-1 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">비공개라 홈에 안 나옴</span>
                   <% end %>

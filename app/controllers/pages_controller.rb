@@ -68,7 +68,9 @@ class PagesController < ApplicationController
   # access_state/owned_by? (0068, the purchase box's own judgment) and the published /
   # "공개 예정" episode split (0070). Nothing here decides who may see what by itself.
   def load_story_series
-    @featured_line = ProductLine.listed.find_by(featured: true)
+    # Handoff 0097 -- up to three featured guides in the operator's order, under the operator's title.
+    @featured_lines = ProductLine.home_featured
+    @featured_title = SiteSetting.home_featured_title if @featured_lines.any?
     track_lines = ProductLine.listed.where(track: ProductLine::TRACKS.keys).order(:id)
       .includes(:product, cover_image_attachment: :blob).to_a
     # Same order as /products (oldest first); a track with nothing in it is dropped entirely. The AI
@@ -79,7 +81,7 @@ class PagesController < ApplicationController
       [ track, lines, extras ] if lines.any? || extras.any?
     end
 
-    lines = [ @featured_line, *track_lines ].compact.uniq
+    lines = [ *@featured_lines, *track_lines ].uniq
     ids = lines.map(&:id)
     @series_access_states = lines.to_h { |line| [ line.id, line.access_state(owned: line.owned_by?(current_user)) ] }
     # Handoff 0096 -- the featured card and the track cards show "N편" = published episodes only (0 -> 공개 예정);

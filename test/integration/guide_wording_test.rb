@@ -75,10 +75,10 @@ class GuideWordingTest < ActionDispatch::IntegrationTest
     assert_select "title", text: "LEEDOX | 실제로 만들고 부딪히며 엮은 개발자의 실전 가이드"
     assert_select "meta[name='description'][content=?]",
       "실제로 만들고 부딪히며 엮은 개발자의 실전 가이드. 매끈한 강의 대신, 막히고 고친 과정까지 한 편씩 따라갑니다. Git·Java·WSL 같은 개발 기초부터 AI와 함께 만드는 이야기까지."
-    # 0096: the label line became the section heading; the card shows the badge and N편 -- published only, so 1편 (was 2편, all episodes).
+    # 0096: the label line became the section heading; the card shows the badge and the published count only (0097: 에피소드 N).
     hero = css_select("section[aria-labelledby='featured-guide-heading']").first
     assert_equal "지금 시작하는 가이드", hero.at_css("h2").text.strip
-    assert_equal [ "무료", "1편" ], [ hero.at_css("h3").previous_element.text.strip, hero.at_css("h3 + div > span").text.strip ]
+    assert_equal [ "무료", "에피소드 1" ], [ hero.at_css("h3").previous_element.text.strip, hero.at_css("h3 + div > span").text.strip ]
     assert_select "#track-basics", text: "개발 기초"
   end
 

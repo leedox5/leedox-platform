@@ -64,7 +64,7 @@ class ProductLineAdminUiTest < ActionDispatch::IntegrationTest
       assert_equal "편집", cells.last.at_css("a").text.strip
     end
 
-    card = css_select("main section").first
+    card = css_select("main section").find { |section| section.at_css("table") } # 0097: the 홈 대표 섹션 box sits above it
     assert_includes card["class"].split, "overflow-x-auto"
     assert_not_includes card["class"].split, "overflow-hidden", "overflow-hidden would clip the table at narrow widths"
     assert_includes css_select("main table").first["class"].split, "min-w-full"

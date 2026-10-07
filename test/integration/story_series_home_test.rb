@@ -35,6 +35,7 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
 
 
   # Handoff 0096 -- the featured guide is one card under the section heading "지금 시작하는 가이드".
+  # Handoff 0097 -- the heading is the operator's (that is still its default) and up to three cards.
   def hero = css_select("section[aria-labelledby='featured-guide-heading']").first
   def card_texts(card) = card.css("span, h3, p").map { |n| n.text.strip }.reject(&:empty?)
 
@@ -66,12 +67,12 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
     assert_equal 1, links.size, "the whole card is the only link (the arrow is part of it)"
     card = links.first
     assert_equal product_line_path(git.slug), card["href"]
-    assert_equal "featured-guide-name", card["aria-labelledby"]
+    assert_equal "featured-guide-name-#{git.id}", card["aria-labelledby"]
     image, text = card.element_children
     assert image.at_css("div[aria-hidden='true'].aspect-video"), "no cover -- the placeholder takes its place"
     assert_equal %w[span h3 div], text.element_children.map(&:name)
-    assert_equal [ "무료", "시리즈 git-core", "1편", "→" ], card_texts(text) # 1 published + 5 upcoming -> 1편
-    assert_equal "featured-guide-name", text.at_css("h3")["id"]
+    assert_equal [ "무료", "시리즈 git-core", "에피소드 1", "→" ], card_texts(text) # 1 published + 5 upcoming -> 에피소드 1 (0097)
+    assert_equal "featured-guide-name-#{git.id}", text.at_css("h3")["id"]
     assert_equal "true", text.css("span").last["aria-hidden"]
     [ "변경 이력을 남기는 법부터", "첫 편부터 보기", "가이드 소개", "공개 예정" ].each { |gone| assert_not_includes hero.text, gone }
     assert_no_match(/E0\d|S0\d/, hero.text)
@@ -99,7 +100,7 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
 
     fresh.content_episodes.find_by!(position: 1).update!(status: "published")
     get root_path
-    assert_equal "1편", hero.at_css("h3 + div > span").text.strip
+    assert_equal "에피소드 1", hero.at_css("h3 + div > span").text.strip
   end
 
   test "the badge follows access_state: 무료 for a guest, a price, then 이용 중 for someone who owns it" do
@@ -109,6 +110,7 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
     get root_path
     assert_equal "19,000원", hero.at_css("h3").previous_element.text.strip
 
+    paid.update!(featured: false) # 0097: both could be featured now; keep one card to read
     free = series("free-hero", featured: true)
     episodes(free, published: [ 1 ])
     open_sale!(free, 0)
@@ -194,7 +196,7 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
     image, text = card.element_children
     assert image.matches?("div[aria-hidden='true'].aspect-video")
     assert_equal %w[span h3 p], text.element_children.map(&:name)
-    assert_equal [ "무료", "시리즈 meta-line", "2편" ], card_texts(text)
+    assert_equal [ "무료", "시리즈 meta-line", "에피소드 2" ], card_texts(text)
     assert_not_includes card.text, "카드에 안 나오는 요약"
     assert_nil card.at_css("a"), "the whole card is the only link"
     blank = css_select("section[aria-labelledby='track-ai'] a[href='#{product_line_path(empty.slug)}']").first
@@ -226,7 +228,7 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
 
   # --- a. admin ---------------------------------------------------------------------
 
-  test "admin: the form sets track and featured, a second featured replaces the first, and the list shows it" do
+  test "admin: the edit form sets track and 홈 대표 가이드 (it goes last), a fourth is refused, and the list shows the places" do
     first = series("admin-a", featured: true)
     second = series("admin-b")
     draft = series("admin-c", status: "draft")
@@ -235,25 +237,144 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
     get edit_admin_product_line_path(second)
     assert_select "select[name='product_line[track]'] option[value='basics']", text: "개발 기초 시즌"
     assert_select "input[type=checkbox][name='product_line[featured]']"
-    assert_match(/켜면 기존 대표 시리즈는 자동으로 해제됩니다/, response.body)
+    assert_select "label", text: /홈 대표 가이드/
+    assert_match(/켜면 홈 맨 위 대표 섹션의 맨 뒤에 들어갑니다\(최대 3개, 공개 가이드만 나옴\)/, response.body)
+    assert_no_match(/대표 시리즈|자동으로 해제/, response.body)
 
     patch admin_product_line_path(second), params: { product_line: { track: "ai", featured: "1" } }
     assert_redirected_to edit_admin_product_line_path(second)
-    assert second.reload.featured?
+    assert_equal [ true, 2 ], [ second.reload.featured?, second.featured_position ]
     assert_equal "ai", second.track
-    assert_not first.reload.featured?
+    assert_equal 1, first.reload.featured_position, "the first one stays"
+    get edit_admin_product_line_path(second)
+    assert_select "input[type=checkbox][name='product_line[featured]'][checked]"
+    assert_select "label", text: /지금 2번째/
 
     patch admin_product_line_path(draft), params: { product_line: { featured: "1" } }
+    fourth = series("admin-d")
+    patch admin_product_line_path(fourth), params: { product_line: { featured: "1" } }
+    assert_response :unprocessable_entity
+    assert_includes response.body, "대표 가이드는 3개까지입니다. 지금: 시리즈 admin-a, 시리즈 admin-b, 시리즈 admin-c"
+    assert_not fourth.reload.featured?
+
     get admin_product_lines_path
     row = css_select("tr").find { |tr| tr.text.include?("시리즈 admin-c") }
-    assert_includes row.text, "대표"
+    assert_includes row.text, "대표 3"
     assert_includes row.text, "비공개라 홈에 안 나옴"
-    assert_not second.reload.featured?
+    assert_includes css_select("tr").find { |tr| tr.text.include?("시리즈 admin-a") }.text, "대표 1"
 
     patch admin_product_line_path(draft), params: { product_line: { featured: "0" } }
-    assert_equal 0, ProductLine.where(featured: true).count
+    assert_equal 2, ProductLine.where(featured: true).count
   end
 
+  # Handoff 0097 -- the list's 홈 대표 섹션 box: the title and the order, saved together, read back, shown on the home.
+  test "admin: the 홈 대표 섹션 box saves the title and the order; the form and the home read them back" do
+    a = series("box-a", featured: true)
+    b = series("box-b", featured: true)
+    c = series("box-c", featured: true)
+    [ a, b, c ].each { |line| episodes(line, published: [ 1 ]) }
+    sign_in(@admin)
+
+    get admin_product_lines_path
+    box = css_select("section[aria-labelledby='home-featured-box']").first
+    assert_equal "지금 시작하는 가이드", box.at_css("input[name='home_title']")["placeholder"]
+    assert_equal "30", box.at_css("input[name='home_title']")["maxlength"]
+    assert_equal [ "시리즈 box-a", "시리즈 box-b", "시리즈 box-c" ], box.css("[data-home-featured-row] span.font-semibold").map(&:text)
+
+    patch home_featured_admin_product_lines_path, params: { home_title: "BEST\n인기 가이드",
+      positions: { a.id => "3", b.id => "1", c.id => "2" } }
+    assert_redirected_to admin_product_lines_path
+    follow_redirect!
+    assert_select "input[name='home_title'][value=?]", "BEST 인기 가이드"
+    assert_equal [ "시리즈 box-b", "시리즈 box-c", "시리즈 box-a" ],
+      css_select("[data-home-featured-row] span.font-semibold").map(&:text)
+    assert_select "[data-home-featured-row] select[name='positions[#{b.id}]'] option[selected]", text: "1번째"
+
+    get root_path
+    assert_equal "BEST 인기 가이드", hero.at_css("h2").text.strip
+    assert_equal [ b, c, a ].map { |x| product_line_path(x.slug) }, hero.css("a").map { |x| x["href"] }
+
+    # a repeat is refused: nothing is saved, the box comes back with what was typed
+    patch home_featured_admin_product_lines_path, params: { home_title: "새로 만든 가이드", positions: { a.id => "1", b.id => "1", c.id => "2" } }
+    assert_response :unprocessable_entity
+    assert_includes response.body, "대표 순서가 겹칩니다"
+    assert_select "input[name='home_title'][value=?]", "새로 만든 가이드"
+    assert_equal "BEST 인기 가이드", SiteSetting.home_featured_title
+    assert_equal 3, a.reload.featured_position
+
+    patch home_featured_admin_product_lines_path, params: { home_title: "가" * 31, positions: { a.id => "3", b.id => "1", c.id => "2" } }
+    assert_response :unprocessable_entity
+    assert_includes response.body, "섹션 제목은 30자까지 쓸 수 있습니다."
+
+    # a blank title is the default again; a blank place takes the guide off the home
+    patch home_featured_admin_product_lines_path, params: { home_title: "", positions: { a.id => "", b.id => "1", c.id => "2" } }
+    assert_not a.reload.featured?
+    get root_path
+    assert_equal "지금 시작하는 가이드", hero.at_css("h2").text.strip
+    assert_equal 2, hero.css("a").size
+  end
+
+  test "admin: the box needs an admin" do
+    member = User.create!(name: "회원", email: "box-m-#{SecureRandom.hex(3)}@example.com", password: "password123")
+    sign_in(member)
+    patch home_featured_admin_product_lines_path, params: { home_title: "몰래" }
+    assert_equal "지금 시작하는 가이드", SiteSetting.home_featured_title
+  end
+
+  # --- 0097 B. two or three featured cards --------------------------------------------
+
+  test "the operator's title is printed as plain text (no HTML), in the section's h2" do
+    series("title-a", featured: true)
+    SiteSetting.save_home_featured_title("<b>굵게</b> 가이드")
+    get root_path
+    assert_equal "<b>굵게</b> 가이드", hero.at_css("h2").text.strip
+    assert_nil hero.at_css("h2 b")
+  end
+
+  test "one card is 0096's wide card; two or three sit in a row that scrolls sideways below md and is a grid from md" do
+    a = series("row-a", featured: true)
+    get root_path
+    assert_nil hero.at_css("[data-featured-row]")
+    assert_includes hero.at_css("a")["class"].split, "md:grid-cols-5"
+
+    b = series("row-b", featured: true)
+    get root_path
+    row = hero.at_css("[data-featured-row]")
+    %w[flex snap-x snap-mandatory gap-2.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-2 md:gap-4 md:overflow-visible].each do |k|
+      assert_includes row["class"].split, k
+    end
+    cards = row.css("> a")
+    assert_equal [ a, b ].map { |x| product_line_path(x.slug) }, cards.map { |x| x["href"] }
+    cards.each do |card|
+      %w[flex w-[86%] shrink-0 snap-start flex-col md:w-auto overflow-hidden rounded-2xl].each { |k| assert_includes card["class"].split, k }
+      assert_not_includes card["class"].split, "md:grid-cols-5"
+      text = card.element_children.last
+      %w[flex-1 flex-col px-3.5 pt-3 pb-3.5 md:px-[18px] md:pt-4 md:pb-[18px]].each { |k| assert_includes text["class"].split, k }
+      assert_includes text.at_css("h3 + div")["class"].split, "mt-auto", "the count and arrow sit at the card's bottom"
+      assert_equal card["aria-labelledby"], text.at_css("h3")["id"]
+      %w[h-[34px] w-[34px] md:h-11 md:w-11].each { |k| assert_includes text.at_css("span[aria-hidden='true']")["class"].split, k }
+    end
+    assert_equal 2, hero.css("h3").map { |h| h["id"] }.uniq.size, "each card has its own name id"
+
+    series("row-c", featured: true)
+    get root_path
+    assert_includes hero.at_css("[data-featured-row]")["class"].split, "md:grid-cols-3"
+    assert_equal 3, hero.css("[data-featured-row] > a").size
+  end
+
+  test "the featured cards follow the operator's order and only listed guides; each carries its own state" do
+    paid = series("ord-paid", featured: true)
+    episodes(paid, published: [ 1, 2 ])
+    open_sale!(paid, 19_000)
+    hidden = series("ord-hidden", featured: true, status: "draft")
+    free = series("ord-free", featured: true)
+    open_sale!(free, 0)
+    ProductLine.arrange_featured!({ paid.id.to_s => "2", hidden.id.to_s => "1", free.id.to_s => "3" })
+    get root_path
+    assert_equal [ product_line_path(paid.slug), product_line_path(free.slug) ], hero.css("a").map { |x| x["href"] }
+    assert_equal [ [ "19,000원", "에피소드 2" ], [ "무료", "공개 예정" ] ],
+      hero.css("a").map { |card| [ card.at_css("h3").previous_element.text.strip, card.at_css("h3 + div > span").text.strip ] }
+  end
 
   # --- R2 d. 새로 공개 · 공개 예정 -- removed in 0096 -------------------------------------
 
@@ -289,7 +410,7 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
     get root_path
     assert_select "h1", count: 1
     assert_select "h1#brand-line", 1
-    assert_select "section[aria-labelledby='featured-guide-heading'] h3#featured-guide-name", text: "시리즈 hero-owner"
+    assert_select "section[aria-labelledby='featured-guide-heading'] h3[id^='featured-guide-name']", text: "시리즈 hero-owner"
     html = response.body
     assert_operator html.index("featured-guide-heading"), :<, html.index('id="brand-line"'), "featured guide, then the brand line"
   end

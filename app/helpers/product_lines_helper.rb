@@ -75,8 +75,9 @@ module ProductLinesHelper
   end
 
   # Handoff 0096 -- a guide card's episode count on the home: published episodes only; none yet reads 공개 예정.
+  # Handoff 0097 -- "에피소드 N" (was "N편"); the home only -- other screens keep their own wording.
   def guide_episode_count_label(published_count)
-    published_count.positive? ? "#{published_count}편" : "공개 예정"
+    published_count.positive? ? "에피소드 #{published_count}" : "공개 예정"
   end
 
   def product_list_state_classes(state)

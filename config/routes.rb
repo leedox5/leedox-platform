@@ -170,6 +170,8 @@ Rails.application.routes.draw do
         patch :start
         patch :stop
       end
+      # Handoff 0097 -- the list's 홈 대표 섹션 box: the section title and the featured guides' order.
+      patch :home_featured, on: :collection
     end
     # Handoff 0063 -- inline images (introduction / episode body) and the Markdown preview.
     post "product_lines/:product_line_id/content_images", to: "content_images#create", as: :product_line_content_images

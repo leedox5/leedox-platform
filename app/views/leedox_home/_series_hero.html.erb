@@ -1,35 +1,23 @@
-<%# Handoff 0096 -- the featured guide as one card under a section heading (was 0071's hero: small line, h1, summary,
-    release line, two buttons and a side image). Rendered only when a guide is featured and listed (the page skips it
-    otherwise). The whole card links to the guide page; the arrow is part of the card, not a second link, and the
-    link reads as the guide's name. Badge: ProductLine#access_state with the /products card's label and colors (0068);
-    "N편" counts published episodes only (공개 예정 when none). Phones: image on top, text below. lg and up: two
-    columns inside the card (image 3 : text 2) -- Tommy kept it (R1).
-    R2 -- the two columns start at md (768px; was lg) so a small laptop window or a tablet isn't one big image.
-    md..lg has a narrow text column (~245-350px), so smaller values there: padding 20px, name 26px/34px, arrow 40px;
-    lg and up as R1. Below md (sm included) the card stays stacked. %>
-<% line = @featured_line %>
-<% state = @series_access_states[line.id] %>
+<%# Handoff 0096 -- the featured guide as a card under a section heading (was 0071's hero: small line, h1, summary,
+    release line, two buttons and a side image). The whole card links to the guide page; the arrow is part of the
+    card, not a second link, and the link reads as the guide's name. Badge: ProductLine#access_state with the
+    /products card's label and colors (0068); the count is published episodes only (공개 예정 when none).
+    Handoff 0097 -- the title is the operator's (SiteSetting, default 지금 시작하는 가이드) and up to three guides, in
+    the operator's order. One guide: exactly 0096 (stacked below md, image 3 : text 2 from md). Two or three: below
+    md a row of big cards that scrolls sideways (86% wide so the next one peeks in, snapping to each card's start,
+    no script, scrollbar hidden; only this row scrolls -- it stays inside the section's 10px margins, so the last
+    card ends 10px from the edge like the first starts); from md two or three stacked cards side by side.
+    Rendered only when at least one featured guide is listed (the page skips it otherwise). %>
+<% lines = @featured_lines %>
 <section aria-labelledby="featured-guide-heading" class="mx-auto max-w-6xl px-2.5 pt-3.5 pb-[18px] sm:px-7 sm:pt-8 sm:pb-9">
-  <h2 id="featured-guide-heading" class="font-display text-2xl font-bold text-[#f2efe8]">지금 시작하는 가이드</h2>
-  <%= link_to product_line_path(line.slug), aria: { labelledby: "featured-guide-name" },
-    class: "mt-3 block overflow-hidden rounded-2xl border border-white/10 bg-[#15181e] transition hover:border-[#f0a53c]/60 md:grid md:grid-cols-5 md:items-center" do %>
-    <div class="md:col-span-3">
-      <% if line.cover_image.attached? %>
-        <%= render "product_lines/cover_image", product_line: line, variant: :hero,
-          classes: "block aspect-video w-full max-w-full bg-white/5 object-cover" %>
-      <% else %>
-        <%= render "product_lines/cover_placeholder", product_line: line, dark: true %>
+  <h2 id="featured-guide-heading" class="break-keep break-words font-display text-2xl font-bold text-[#f2efe8]"><%= @featured_title %></h2>
+  <% if lines.one? %>
+    <%= render "leedox_home/featured_card", line: lines.first, wide: true %>
+  <% else %>
+    <div data-featured-row class="mt-3 flex snap-x snap-mandatory gap-2.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:gap-4 md:overflow-visible <%= lines.size == 2 ? "md:grid-cols-2" : "md:grid-cols-3" %>">
+      <% lines.each do |line| %>
+        <%= render "leedox_home/featured_card", line: line, wide: false %>
       <% end %>
-    </div>
-    <div class="px-3.5 pt-3 pb-3.5 md:col-span-2 md:p-5 lg:p-7">
-      <% if state %>
-        <span class="inline-block <%= product_list_state_classes(state) %>"><%= product_list_state_label(state, line) %></span>
-      <% end %>
-      <h3 id="featured-guide-name" class="mt-2 break-keep break-words font-display text-[22px] font-bold leading-[29px] text-[#f2efe8] md:text-[26px] md:leading-[34px] lg:mt-3 lg:text-[34px] lg:leading-[42px]"><%= line.customer_name %></h3>
-      <div class="mt-3 flex items-center justify-between gap-3 md:mt-4 lg:mt-5">
-        <span class="text-sm text-[#a8a39a]"><%= guide_episode_count_label(@published_counts.fetch(line.id, 0)) %></span>
-        <span aria-hidden="true" class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-[#f0a53c] font-bold text-[#0e1014] md:h-10 md:w-10 lg:h-11 lg:w-11">→</span>
-      </div>
     </div>
   <% end %>
 </section>

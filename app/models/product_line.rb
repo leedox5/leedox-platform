@@ -69,10 +69,14 @@ class ProductLine < ApplicationRecord
   validates :series_position, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :track, inclusion: { in: TRACKS.keys }, allow_nil: true
 
-  # Handoff 0071 -- at most one featured (home hero) series. Turning one on quietly turns the
-  # previous one off in the same transaction (Tommy's call: never block the save); the partial
-  # unique index backs this up at the database level.
-  before_save :unfeature_others, if: -> { featured? && will_save_change_to_featured? }
+  # Handoff 0097 -- up to FEATURED_MAX featured guides (was one, 0071), in the operator's order (featured_position
+  # 1..3, unique -- a partial unique index backs it). Turning one on puts it last; a fourth is refused, never
+  # switching another off. Turning one off clears its place. The order is changed from the admin list
+  # (ProductLine.arrange_featured!).
+  FEATURED_MAX = 3
+  before_validation :place_featured
+  validates :featured_position, inclusion: { in: 1..FEATURED_MAX }, allow_nil: true, if: -> { has_attribute?(:featured_position) }
+  validate :featured_position_free, if: -> { has_attribute?(:featured_position) && featured_position.present? && will_save_change_to_featured_position? }
   validates :cover_image_alt, presence: { message: "대표 이미지를 올리면 대체문구가 필요합니다" }, if: -> { cover_image.attached? }
   validates :cover_image_alt, length: { maximum: COVER_ALT_MAX_LENGTH }
   validate :cover_image_acceptable, if: :new_cover_image?
@@ -85,6 +89,34 @@ class ProductLine < ApplicationRecord
   # reachable by URL but deliberately not listed anywhere (see VISIBILITIES above).
   scope :listed, -> { published.where(visibility: "public") }
   scope :in_track, ->(track) { where(track: track) }
+
+  # Handoff 0097 -- the home's featured section: the listed featured guides in the operator's order (at most
+  # FEATURED_MAX). Sorted here rather than in SQL, and through `try`, so the home still renders (in id order) during
+  # the deploy window before the featured_position column exists.
+  def self.home_featured
+    listed.where(featured: true).includes(:product, cover_image_attachment: :blob).to_a
+      .sort_by { |line| [ line.try(:featured_position) || FEATURED_MAX + 1, line.id ] }
+      .first(FEATURED_MAX)
+  end
+
+  # Handoff 0097 -- the admin list's 홈 대표 섹션: {id => "1".."3" or "" (take it off the home)} for the guides that
+  # are featured now. The numbers must be distinct; returns an error message, or nil once saved. All places are
+  # cleared first and then set, so two guides can swap places in one save.
+  def self.arrange_featured!(positions)
+    lines = where(featured: true, id: positions.keys).to_a
+    places = lines.to_h { |line| [ line, positions[line.id.to_s].presence&.to_i ] }
+    kept = places.values.compact
+    return "대표 순서는 1~#{FEATURED_MAX} 중에서 골라 주세요." unless kept.all? { |n| (1..FEATURED_MAX).cover?(n) }
+    return "대표 순서가 겹칩니다. 1~#{FEATURED_MAX}을 하나씩 골라 주세요." unless kept.uniq.size == kept.size
+
+    transaction do
+      where(id: lines.map(&:id)).update_all(featured_position: nil, updated_at: Time.current)
+      places.each do |line, place|
+        line.update_columns(place ? { featured_position: place } : { featured: false, featured_position: nil })
+      end
+    end
+    nil
+  end
 
   def published?
     status == "published"
@@ -196,8 +228,29 @@ class ProductLine < ApplicationRecord
 
   private
 
-  def unfeature_others
-    self.class.where(featured: true).where.not(id: id).update_all(featured: false, updated_at: Time.current)
+  def place_featured
+    return unless has_attribute?(:featured_position) # the deploy window before the 0097 migration
+
+    unless featured?
+      self.featured_position = nil
+      return
+    end
+    return if featured_position.present?
+
+    taken = self.class.where(featured: true).where.not(id: id).where.not(featured_position: nil)
+    free = (1..FEATURED_MAX).to_a - taken.pluck(:featured_position)
+    if free.empty?
+      names = taken.order(:featured_position).pluck(:customer_name).join(", ")
+      errors.add(:base, "대표 가이드는 #{FEATURED_MAX}개까지입니다. 지금: #{names}")
+      throw :abort
+    end
+    after_last = (taken.maximum(:featured_position) || 0) + 1
+    self.featured_position = after_last <= FEATURED_MAX ? after_last : free.first
+  end
+
+  def featured_position_free
+    holder = self.class.where(featured_position: featured_position).where.not(id: id).first
+    errors.add(:base, "대표 순서 #{featured_position}번은 이미 '#{holder.customer_name}'이(가) 쓰고 있습니다") if holder
   end
 
   def storage_accepts_cover_upload
