@@ -17,7 +17,7 @@ class LeedoxHomeTest < ActionDispatch::IntegrationTest
     assert_select "meta[name='description'][content*='부딪히며 엮은 개발자의 실전 가이드']" # 0091 (D-011)
     assert_select "header a[href=?]", root_path, text: /LEEDOX/
     assert_select "h1", count: 1
-    assert_select "h1", text: "실제로 만들고 부딪히며 엮은 개발자의 실전 가이드."
+    assert_select "h1.sr-only", text: "실제로 만들고 부딪히며 엮은 개발자의 실전 가이드" # 0098: hidden; the visible one is on /about
     assert_select "main a[href=?]", chatdox_path, minimum: 1
     assert_select "main a[href=?]", claudox_path, minimum: 1
     assert_select "main a[href=?]", aigravity_path, minimum: 1

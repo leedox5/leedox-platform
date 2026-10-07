@@ -17,7 +17,8 @@
         <%# Handoff 0072 -- the Chatdox / Claudox / Antigravity links left with the header's shortcuts (0071); those
             products are introduced on the home's AI row and /pricing. Only the legal links stay here. %>
         <div class="flex flex-wrap gap-4 md:justify-end">
-          <%# Handoff 0077 -- notices sit before the legal links. %>
+          <%# Handoff 0077 -- notices sit before the legal links. Handoff 0098 -- LEEDOX 소개 first. %>
+          <%= link_to "LEEDOX 소개", about_path, class: FrameThemeHelper::FOOTER_LINK_CLASS %>
           <%= link_to "공지", announcements_path, class: FrameThemeHelper::FOOTER_LINK_CLASS %>
           <%= link_to "이용 약관", terms_path, class: FrameThemeHelper::FOOTER_LINK_CLASS %>
           <%= link_to "개인정보 처리 방침", privacy_path, class: FrameThemeHelper::FOOTER_LINK_CLASS %>

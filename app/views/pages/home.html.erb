@@ -1,7 +1,9 @@
 <%# Handoff 0071 -- the story-series home (D-009). Dark on the home only; every other page keeps its theme.
-    Sections, top to bottom: the pinned notice line (0077, only when one is published and pinned), featured guides (0097: up to three, only when featured and listed), brand line, one row per
-    track (the AI row also carries the standalone products), what series / season /
-    episode mean, footer. "만든 사람" waits for Tommy's copy (out of scope). %>
+    Sections, top to bottom: the pinned notice line (0077, only when one is published and pinned), featured guides
+    (0097: up to three, only when featured and listed), one row per track (the AI row also carries the standalone
+    products), the line to /about, footer.
+    Handoff 0098 -- content only: the brand line and the 가이드 · 에피소드 · 실전 blocks moved to /about. The page's one
+    h1 is the brand sentence, for screen readers only (sr-only) -- the visible headings are the sections' h2s. %>
 <%# Handoff 0091 (D-011) -- the brand sentence; 시리즈 is called 가이드 now and 시즌 is gone from the screens. %>
 <% content_for :title, "LEEDOX | 실제로 만들고 부딪히며 엮은 개발자의 실전 가이드" %>
 <% content_for :head do %>
@@ -15,11 +17,13 @@
   <%= render "leedox_home/notice_line", notice_item: @home_notice if @home_notice %>
 
   <main>
+    <h1 id="brand-line" class="sr-only">실제로 만들고 부딪히며 엮은 개발자의 실전 가이드</h1>
     <%= render "leedox_home/series_hero" if @featured_lines.any? %>
-    <%= render "leedox_home/brand_line" %>
     <%# Handoff 0096 -- no "새로 공개 · 공개 예정" row any more (Tommy: dull on a phone). %>
     <%= render "leedox_home/track_rows" %>
-    <%= render "leedox_home/series_explainer" %>
+    <p class="mx-auto max-w-6xl px-2.5 py-6 text-center text-sm sm:px-7" data-about-line>
+      <a href="<%= about_path %>" class="text-[#a8a39a] transition hover:text-[#f2efe8]">LEEDOX는 어떤 곳인가요? <span aria-hidden="true" class="text-[#f0a53c]">→</span></a>
+    </p>
   </main>
 
   <%= render "shared/footer" %>

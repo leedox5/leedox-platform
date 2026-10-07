@@ -391,30 +391,40 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
 
   # --- R2 f. theme, header, fixed blocks --------------------------------------------------
 
-  # Handoff 0091 (D-011) -- the brand sentence and the 가이드 · 에피소드 · 실전 blocks (no 시리즈 / 시즌).
-  # Handoff 0096 -- the brand line is always the page's one h1 (the featured guide's name is an h3 under its h2).
-  test "the fixed brand and guide / episode / practice copy, and the brand line is the one h1 with or without a featured guide" do
+  # Handoff 0098 -- the home is content only: the brand line and the 가이드 · 에피소드 · 실전 blocks moved to /about
+  # (test/integration/about_page_test.rb). The page's one h1 is the brand sentence for screen readers only; a line at
+  # the bottom leads to /about. Title and description meta unchanged.
+  test "the home: no brand line or explainer, one sr-only h1, the line to /about after the track rows" do
+    series("hero-owner", featured: true)
+    series("row-line", track: "basics")
     get root_path
     assert_select "title", text: "LEEDOX | 실제로 만들고 부딪히며 엮은 개발자의 실전 가이드"
-    assert_select "#brand-line", text: "실제로 만들고 부딪히며 엮은 개발자의 실전 가이드."
-    assert_match(/매끈한 강의 대신, 막히고 고친 과정까지 한 편씩 따라갑니다\. Git·Java·WSL 같은 개발 기초부터 AI와 함께 만드는 이야기까지\./, response.body)
-    assert_select "section[aria-labelledby='series-explainer'] h2", text: "가이드 · 에피소드 · 실전"
-    blocks = css_select("section[aria-labelledby='series-explainer'] .grid > div").map { |d| d.css("p, h3").map { |n| n.text.strip } }
-    assert_equal [
-      [ "가이드", "하나의 주제, 하나의 완결", "Git, Java, WSL, AI 협업처럼 주제마다 가이드 하나. 그 자체로 끝까지 갑니다." ],
-      [ "에피소드", "한 편에 한 장면", "각 편은 질문 하나에 답하고, 다음 편의 질문을 남기며 끝납니다." ],
-      [ "실전", "부딪힌 자리까지", "잘 된 결과만이 아니라, 막히고 고친 과정을 그대로 엮었습니다." ]
-    ], blocks
-
-    series("hero-owner", featured: true)
-    get root_path
+    assert_select "meta[name='description'][content^=?]", "실제로 만들고 부딪히며 엮은 개발자의 실전 가이드. 매끈한 강의 대신"
+    assert_select "section[aria-labelledby='brand-line']", 0
+    assert_select "section[aria-labelledby='series-explainer']", 0
+    main = css_select("main").first
+    assert_not_includes main.text, "매끈한 강의 대신"
+    assert_not_includes main.text, "하나의 주제, 하나의 완결"
     assert_select "h1", count: 1
-    assert_select "h1#brand-line", 1
+    assert_select "main > h1.sr-only", text: "실제로 만들고 부딪히며 엮은 개발자의 실전 가이드"
     assert_select "section[aria-labelledby='featured-guide-heading'] h3[id^='featured-guide-name']", text: "시리즈 hero-owner"
+
+    line = css_select("main [data-about-line]").first
+    assert_equal "LEEDOX는 어떤 곳인가요? →", line.text.squish
+    assert_equal about_path, line.at_css("a")["href"]
+    assert_equal "true", line.at_css("a span")["aria-hidden"]
+    %w[text-center text-sm py-6 px-2.5].each { |k| assert_includes line["class"].split, k }
+    assert_equal line, main.element_children.last, "the last thing before the footer"
     html = response.body
-    assert_operator html.index("featured-guide-heading"), :<, html.index('id="brand-line"'), "featured guide, then the brand line"
+    assert_operator html.index("featured-guide-heading"), :<, html.index("track-basics")
   end
 
+  test "a home with nothing to show: just the hidden h1 and the line to /about (no standalone products on the home)" do
+    Product.update_all(show_on_home: false)
+    get root_path
+    assert_response :success
+    assert_equal [ "h1", "p" ], css_select("main").first.element_children.map(&:name)
+  end
 
   # Handoff 0083/0084 (D-010) -- the frame (header) is dark on every customer page; the body is dark on the home and
   # the series pages, light on the notices (it was /pricing until 0086 removed that page), and the display font only

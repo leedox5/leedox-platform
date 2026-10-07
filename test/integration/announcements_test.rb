@@ -128,10 +128,11 @@ class AnnouncementsTest < ActionDispatch::IntegrationTest
   test "the footer has 공지 right before 이용 약관, legal links unchanged" do
     get root_path
     links = css_select("footer a").map { |a| [ a.text.strip, a["href"] ] }
-    assert_equal [ "공지", announcements_path ], links[0]
-    assert_equal [ "이용 약관", terms_path ], links[1]
-    assert_equal [ "개인정보 처리 방침", privacy_path ], links[2]
-    assert_equal "사업자정보확인", links[3][0]
+    assert_equal [ "LEEDOX 소개", about_path ], links[0] # 0098
+    assert_equal [ "공지", announcements_path ], links[1]
+    assert_equal [ "이용 약관", terms_path ], links[2]
+    assert_equal [ "개인정보 처리 방침", privacy_path ], links[3]
+    assert_equal "사업자정보확인", links[4][0]
     get announcements_path
     assert_select "footer a[href=?]", announcements_path, text: "공지"
   end

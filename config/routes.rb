@@ -102,6 +102,8 @@ Rails.application.routes.draw do
   delete "/chapter_progresses", to: "chapter_progresses#destroy"
 
   get "/getting-started", to: "pages#getting_started"
+  # Handoff 0098 -- what LEEDOX is (the brand sentence and the 가이드 · 에피소드 · 실전 blocks moved here from the home).
+  get "/about", to: "pages#about", as: :about
   # Handoff 0086 -- the pricing page is gone (it only listed the earlier products, each of which has its own price
   # block); the address moves permanently to the series list for bookmarks, search results and shared links.
   get "/pricing", to: redirect("/products", status: 301)

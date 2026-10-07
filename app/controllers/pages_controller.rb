@@ -1,7 +1,7 @@
 class PagesController < ApplicationController
-  # Handoff 0071 -- the story-series home (D-009): featured series, new / coming episodes,
-  # per-track rows (the AI row also carries the four standalone products) and the fixed
-  # brand / series-season-episode blocks.
+  # Handoff 0071 -- the story-series home (D-009): featured series and per-track rows (the AI row also carries the
+  # standalone products). Handoff 0098 -- content only; the brand sentence and the 가이드 · 에피소드 · 실전 blocks
+  # moved to /about.
   def home
     # The standalone products, in the old /pricing order (pricing_rank) and with its sale-state rule
     # (StandaloneProductsHelper) -- the home adds no rule of its own. The pricing page itself is gone (0086).
@@ -16,6 +16,9 @@ class PagesController < ApplicationController
   end
 
   def aigravity; end
+
+  # Handoff 0098 -- the about page: fixed copy, nothing to load.
+  def about; end
 
   def getting_started; end
 

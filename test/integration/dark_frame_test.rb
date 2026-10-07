@@ -57,7 +57,7 @@ class DarkFrameTest < ActionDispatch::IntegrationTest
       get path
       assert_select DARK_FOOTER, 1
       links = css_select("footer a").map { |a| a.text.strip }
-      assert_equal [ "공지", "이용 약관", "개인정보 처리 방침", "사업자정보확인" ], links
+      assert_equal [ "LEEDOX 소개", "공지", "이용 약관", "개인정보 처리 방침", "사업자정보확인" ], links # 0098: LEEDOX 소개 first
     end
   end
 
