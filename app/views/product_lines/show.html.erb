@@ -1,6 +1,7 @@
 <%# Handoff 0083 R2 -- dark like the home and the series list ("browse" pages are dark); the shared partials get
     `dark: true` (their admin-preview use stays light). Only colors and fonts changed; content and links are the same. %>
 <% content_for :title, "#{@product_line.customer_name} | LEEDOX" %>
+<% content_for :color_scheme, "dark" %><%# Handoff 0100 -- a dark page (FrameThemeHelper#body_class) %>
 <% content_for :head do %>
   <%= render "shared/display_font" %>
 <% end %>

@@ -43,8 +43,8 @@ class TailwindBuildTest < ActiveSupport::TestCase
   test "the frame and series theme tables only hold classes that are built" do
     css = built_css
     tables = FrameThemeHelper::FRAME_THEME.values.flatten + [ FrameThemeHelper::FOOTER_LINK_CLASS ] +
-      SeriesThemeHelper::SERIES_THEME.values.flatten
-    classes = tables.flat_map(&:split).uniq.select { |klass| klass.match?(/\[#|\/\d+\z/) }
+      FrameThemeHelper::BODY_CLASS.values + SeriesThemeHelper::SERIES_THEME.values.flatten # BODY_CLASS: 0100
+    classes = tables.flat_map(&:split).uniq.select { |klass| klass.match?(/\[#|\/\d+\z|\A\[color-scheme/) }
     missing = classes.reject { |klass| css.include?(selector(klass)) }
     assert_empty missing
   end

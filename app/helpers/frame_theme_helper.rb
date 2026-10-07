@@ -43,4 +43,25 @@ module FrameThemeHelper
   def dark_frame?
     !controller_path.start_with?("admin/") && !ADMIN_ONLY_CONTROLLERS.include?(controller_path)
   end
+
+  # Handoff 0100 -- the <body> classes. A page whose body is dark from edge to edge (home, /about, /products, a guide,
+  # an episode, the dashboard) says `content_for :color_scheme, "dark"`: the layout then adds
+  # <meta name="color-scheme" content="dark"> and this dark body, so the browser knows the page is dark (scrollbars,
+  # the canvas shown when the page is pulled past its ends or is shorter than the window, a browser's own dark mode).
+  # Per page, not per controller (/products/:slug/continue is light). Every other page keeps the body it always had.
+  # The text color stays text-slate-900: every dark page sets its own on its outer wrapper.
+  # Both live on <head> meta and <body>, which Turbo swaps per page (meta is a provisional head element; the body is
+  # replaced) -- unlike <html>'s attributes, which it keeps across visits.
+  BODY_CLASS = {
+    light: "bg-slate-50 text-slate-900 antialiased",
+    dark: "bg-[#0e1014] text-slate-900 antialiased [color-scheme:dark]"
+  }.freeze
+
+  def dark_page?
+    content_for(:color_scheme) == "dark"
+  end
+
+  def body_class
+    BODY_CLASS.fetch(dark_page? ? :dark : :light)
+  end
 end

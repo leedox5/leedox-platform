@@ -9,6 +9,8 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <%# Handoff 0100 -- see FrameThemeHelper#body_class. %>
+    <% if dark_page? %><meta name="color-scheme" content="dark"><% end %>
     <%= yield :head %>
 
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
@@ -24,7 +26,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="bg-slate-50 text-slate-900 antialiased">
+  <body class="<%= body_class %>">
     <% if notice.present? || alert.present? %>
       <div
         class="fixed right-4 top-[68px] z-[100] w-[calc(100%-2rem)] max-w-sm space-y-2 sm:right-6 md:top-[64px]"

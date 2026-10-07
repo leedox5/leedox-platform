@@ -6,6 +6,7 @@
     h1 is the brand sentence, for screen readers only (sr-only) -- the visible headings are the sections' h2s. %>
 <%# Handoff 0091 (D-011) -- the brand sentence; 시리즈 is called 가이드 now and 시즌 is gone from the screens. %>
 <% content_for :title, "LEEDOX | 실제로 만들고 부딪히며 엮은 개발자의 실전 가이드" %>
+<% content_for :color_scheme, "dark" %><%# Handoff 0100 -- a dark page (FrameThemeHelper#body_class) %>
 <% content_for :head do %>
   <meta name="description" content="실제로 만들고 부딪히며 엮은 개발자의 실전 가이드. 매끈한 강의 대신, 막히고 고친 과정까지 한 편씩 따라갑니다. Git·Java·WSL 같은 개발 기초부터 AI와 함께 만드는 이야기까지.">
   <%# The display serif (see --font-display in application.css) -- shared with the series list since 0083. %>

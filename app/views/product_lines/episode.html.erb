@@ -2,6 +2,7 @@
     content, links, the prefetch opt-out on episode links (0073) and the comment flow are unchanged). The body Markdown
     gets .doc-content-dark (0083); images are left as they are, framed by its thin border. %>
 <% content_for :title, "#{@current_episode.customer_title.presence || "(제목 없음)"} | LEEDOX" %>
+<% content_for :color_scheme, "dark" %><%# Handoff 0100 -- a dark page (FrameThemeHelper#body_class) %>
 <% content_for :head do %>
   <%= render "shared/display_font" %>
 <% end %>
