@@ -67,7 +67,8 @@ module SeriesThemeHelper
     card_summary_row: [ "mt-1 truncate text-sm text-gray-500", "mt-1 flex items-center gap-2 text-sm text-ink-3" ],
     # 공개 예정 stays muted by the card's opacity, but on dark it's 70% (not 60%) with brighter text so it still reads
     # at >= 4.5:1 (title 8.0, label/summary 5.55 -- see 0083 result_r2.md).
-    upcoming_card: [ "rounded-xl border border-gray-200 p-4 opacity-60", "rounded-xl border border-line/10 bg-card px-3.5 py-[11px] opacity-70 sm:p-4" ],
+    # Handoff 0103 -- 80% on the light side (70% there left the label / summary at 4.3:1; 80% gives 9.2 / 5.6).
+    upcoming_card: [ "rounded-xl border border-gray-200 p-4 opacity-60", "rounded-xl border border-line/10 bg-card px-3.5 py-[11px] opacity-70 [[data-theme=light]_&]:opacity-80 sm:p-4" ],
     upcoming_title: [ "min-w-0 flex-1 truncate font-semibold text-gray-500",
                       "min-w-0 flex-1 break-keep break-words font-semibold leading-[22px] text-ink sm:truncate sm:leading-6" ],
     upcoming_label: [ "order-last w-full shrink-0 whitespace-nowrap text-sm font-semibold text-gray-400 sm:order-none sm:ml-auto sm:w-auto",

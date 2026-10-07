@@ -90,7 +90,8 @@ class ThemePreviewTest < ActionDispatch::IntegrationTest
 
   test "the light values are only in the CSS behind the attribute: the default page carries no light value" do
     get root_path
-    assert_no_match(/data-theme/, response.body)
+    assert_nil css_select("body").first["data-theme"]
+    assert_no_match(/data-theme="/, response.body) # 0103: the switch's data-theme-toggle and its CSS variant are not the attribute
     assert_no_match(/f5f2ea/i, response.body)
   end
 end

@@ -1,0 +1,16 @@
+<%# Handoff 0103 (D-014 step 3) -- the dark / light switch in the customer header (PC menu and the phone header row).
+    One icon: the sun on the dark side (press for light), the moon on the light side (press for dark) -- both are in the
+    markup and the body's data-theme picks one, so the icon is always right without the script touching it. The name
+    (aria-label + title) says what a press does. A link to ?theme= without JavaScript; theme_toggle_controller.js
+    switches in place with it. Colors are tokens (ink-2, ink on hover). %>
+<a href="<%= theme_toggle_href %>" role="button" aria-label="<%= theme_toggle_label %>" title="<%= theme_toggle_label %>"
+  data-theme-toggle data-controller="theme-toggle" data-action="theme-toggle#toggle" data-turbo="false" data-turbo-prefetch="false"
+  class="inline-flex shrink-0 items-center justify-center rounded-lg text-ink-2 transition hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 <%= local_assigns[:classes] %>">
+  <svg aria-hidden="true" data-theme-icon="sun" class="h-5 w-5 [[data-theme=light]_&]:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="4"/>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+  </svg>
+  <svg aria-hidden="true" data-theme-icon="moon" class="hidden h-5 w-5 [[data-theme=light]_&]:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+  </svg>
+</a>

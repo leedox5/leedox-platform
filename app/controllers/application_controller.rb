@@ -21,9 +21,12 @@ class ApplicationController < ActionController::Base
   # remembers the choice in a cookie for a year and sends the visitor on to the same address without the parameter, so
   # the preview address is never what gets bookmarked, shared or indexed. Step 3 (the switch) keeps the same cookie.
   # Any other value of the parameter is left alone. FrameThemeHelper#light_theme? reads the cookie.
+  # Handoff 0103 -- the header switch links here too (without JavaScript): a prefetch of that link (Turbo's hover
+  # prefetch or the browser's own) must never switch the mode, so prefetch requests are passed through untouched.
   def apply_theme_preview
     mode = params[:theme]
     return unless request.get? && FrameThemeHelper::THEMES.include?(mode)
+    return if [ request.headers["X-Sec-Purpose"], request.headers["Sec-Purpose"], request.headers["Purpose"] ].compact.any? { |v| v.include?("prefetch") }
 
     cookies[FrameThemeHelper::THEME_COOKIE] = { value: mode, expires: 1.year, path: "/", same_site: :lax,
                                                 secure: request.ssl?, httponly: false }

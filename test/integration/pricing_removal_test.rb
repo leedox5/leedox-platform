@@ -18,7 +18,8 @@ class PricingRemovalTest < ActionDispatch::IntegrationTest
     User.create!(name: "회원", email: "pr-#{SecureRandom.hex(3)}@example.com", password: "password123", role: role, created_at: created_at)
   end
 
-  def menu_labels(nav) = css_select("nav[aria-label='#{nav}'] a").map { |a| a.text.strip }
+  # 0103: the dark / light switch sits in the header nav too, but it's not a menu item.
+  def menu_labels(nav) = css_select("nav[aria-label='#{nav}'] a:not([data-theme-toggle])").map { |a| a.text.strip }
 
   # --- /pricing ------------------------------------------------------------------------------------
 

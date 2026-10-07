@@ -117,7 +117,7 @@ class DashboardMypageSeparationTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     doc = Nokogiri::HTML(response.body)
-    desktop_labels = doc.css("header nav[aria-label='주요 내비게이션'] a").map(&:text)
+    desktop_labels = doc.css("header nav[aria-label='주요 내비게이션'] a:not([data-theme-toggle])").map(&:text) # 0103: the switch isn't a menu item
     mobile_labels = doc.css("nav[aria-label='모바일 내비게이션'] a").map(&:text)
 
     assert_includes desktop_labels, "대시보드"

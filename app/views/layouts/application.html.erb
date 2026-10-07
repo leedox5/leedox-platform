@@ -11,6 +11,8 @@
 
     <%# Handoff 0100 / 0102 -- see FrameThemeHelper#body_class and #light_theme?. %>
     <% if dark_page? %><meta name="color-scheme" content="<%= dark_page_color_scheme %>"><% end %>
+    <%# Handoff 0103 -- the phone browser bar follows the mode (the page token); customer pages only. %>
+    <% if dark_frame? %><meta name="theme-color" content="<%= theme_color %>"><% end %>
     <%= yield :head %>
 
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>

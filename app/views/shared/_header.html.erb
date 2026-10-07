@@ -22,6 +22,9 @@
         <%= link_to label, path, class: "rounded transition #{frame_theme(:nav_link, dark)} focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" %>
       <% end %>
 
+      <%# Handoff 0103 -- the dark / light switch, before 로그인 / 회원가입 or the name and 로그아웃; customer pages only. %>
+      <% if dark %><%= render "shared/theme_toggle", classes: "h-9 w-9" %><% end %>
+
       <% if user_signed_in? %>
         <span class="max-w-48 truncate <%= frame_theme(:user_name, dark) %>"><%= current_user.name %></span>
         <%= link_to "로그아웃",
@@ -37,6 +40,9 @@
           class: frame_theme(:signup, dark) %>
       <% end %>
     </nav>
+
+    <%# Handoff 0103 -- on phones the switch sits left of ☰ (ml-auto keeps it beside the menu button), one tap away. %>
+    <% if dark %><%= render "shared/theme_toggle", classes: "ml-auto mr-2 h-10 w-10 border border-line/25 hover:bg-tint/10 md:hidden" %><% end %>
 
     <details class="group relative md:hidden" data-controller="mobile-menu">
       <summary class="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-lg border transition <%= frame_theme(:menu_button, dark) %> focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" aria-label="메뉴 열기">

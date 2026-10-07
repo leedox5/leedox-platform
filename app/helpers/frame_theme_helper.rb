@@ -87,4 +87,29 @@ module FrameThemeHelper
   def dark_page_color_scheme
     light_theme? ? "light" : "dark"
   end
+
+  # Handoff 0103 (D-014 step 3) -- the header's switch (shared/_theme_toggle) and the browser bar color. The name says
+  # what a press does: 밝게 보기 on the dark side, 어둡게 보기 on the light side. theme-color is the page token's value.
+  # theme_toggle_controller.js keeps the same tables for the switch it does in place.
+  THEME_TOGGLE_LABELS = { "dark" => "밝게 보기", "light" => "어둡게 보기" }.freeze
+  THEME_COLORS = { "dark" => "#0e1014", "light" => "#f5f2ea" }.freeze
+
+  def current_theme
+    light_theme? ? "light" : "dark"
+  end
+
+  def theme_toggle_label
+    THEME_TOGGLE_LABELS.fetch(current_theme)
+  end
+
+  def theme_color
+    THEME_COLORS.fetch(current_theme)
+  end
+
+  # Without JavaScript the switch is a plain link to the same page with ?theme= (0102 turns it into the cookie and
+  # comes back here); with it, theme_toggle_controller.js switches in place and never follows the link.
+  def theme_toggle_href
+    other = current_theme == "light" ? "dark" : "light"
+    "#{request.path}?#{request.query_parameters.except("theme").merge("theme" => other).to_query}"
+  end
 end

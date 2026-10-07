@@ -103,6 +103,26 @@ class ColorTokensTest < ActiveSupport::TestCase
     end
   end
 
+  # Handoff 0103 -- the 공개 예정 card fades as a whole (opacity on the card: 70% dark, 80% light), so its text is
+  # composited with the card over the page; both sides keep 4.5:1.
+  def over(fg, bg, alpha)
+    f = fg.delete_prefix("#").scan(/../).map { |c| c.to_i(16) }
+    b = bg.delete_prefix("#").scan(/../).map { |c| c.to_i(16) }
+    "#" + f.zip(b).map { |x, y| format("%02x", (alpha * x + (1 - alpha) * y).round) }.join
+  end
+
+  test "the 공개 예정 card's text keeps 4.5:1 through the card's opacity on both sides" do
+    card_classes = SeriesThemeHelper::SERIES_THEME[:upcoming_card][1].split
+    assert_includes card_classes, "opacity-70"
+    assert_includes card_classes, "[[data-theme=light]_&]:opacity-80"
+    { "dark" => [ TOKENS, 0.7 ], "light" => [ LIGHT, 0.8 ] }.each do |side, (t, alpha)|
+      card = over(t["card"], t["page"], alpha)
+      %w[ink ink-2].each do |fg|
+        assert_operator contrast(over(t[fg], t["page"], alpha), card), :>=, 4.5, "#{side}: #{fg} on the 공개 예정 card"
+      end
+    end
+  end
+
   test "views and helpers write no hex color class of their own any more" do
     files = Dir[Rails.root.join("app/views/**/*.erb")] + Dir[Rails.root.join("app/helpers/**/*.rb")]
     left = files.flat_map do |file|
