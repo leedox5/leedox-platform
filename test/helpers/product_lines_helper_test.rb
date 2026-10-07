@@ -1,12 +1,11 @@
 require "test_helper"
 
-# Handoff 0071 R1 -- the hero's release label (counts only; no episode numbers are shown to visitors).
+# Handoff 0096 -- a guide card's episode count on the home: published episodes only, 공개 예정 when there are none.
+# (Replaces 0071's release-line test -- that line and its helper went with the old hero.)
 class ProductLinesHelperTest < ActionView::TestCase
-  def eps(count) = Array.new(count) { Object.new }
-
-  test "the release line counts both halves, or just the published count when nothing is coming" do
-    assert_equal "공개 2편 · 공개 예정 3편", series_release_label(eps(2), eps(3))
-    assert_equal "공개 2편", series_release_label(eps(2), [])
-    assert_equal "공개 예정 3편", series_release_label([], eps(3))
+  test "N편 counts published episodes; none yet reads 공개 예정" do
+    assert_equal "5편", guide_episode_count_label(5)
+    assert_equal "1편", guide_episode_count_label(1)
+    assert_equal "공개 예정", guide_episode_count_label(0)
   end
 end

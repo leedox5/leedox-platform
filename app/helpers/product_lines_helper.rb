@@ -34,12 +34,6 @@ module ProductLinesHelper
     end
   end
 
-  # Handoff 0071 -- the label of the button that opens a series at its first published episode (the
-  # home hero's main button; the member dashboard's series card shares it since 0080).
-  SERIES_START_LABEL = "첫 편부터 보기".freeze
-
-  def series_start_label = SERIES_START_LABEL
-
   # Handoff 0090 -- the two places on a series page the section links (and the dashboard's in-use card) jump to.
   # Permanent addresses (/products/:slug#episodes may be bookmarked or shared) -- don't rename them.
   SERIES_SECTION_IDS = { intro: "intro", episodes: "episodes" }.freeze
@@ -80,17 +74,9 @@ module ProductLinesHelper
     items
   end
 
-  # Handoff 0071 -- the hero's release line: "공개 2편 · 공개 예정 3편", or just "공개 N편" when nothing
-  # is coming up. Counts, not episode numbers -- visitors never see a number (position is only an
-  # ordering key and can be 0). Published = what the product page lists; 공개 예정 =
-  # ProductLine#upcoming_episodes.
-  def series_release_label(published, upcoming)
-    return "공개 #{published.size}편" if upcoming.empty?
-
-    parts = []
-    parts << "공개 #{published.size}편" if published.any?
-    parts << "공개 예정 #{upcoming.size}편"
-    parts.join(" · ")
+  # Handoff 0096 -- a guide card's episode count on the home: published episodes only; none yet reads 공개 예정.
+  def guide_episode_count_label(published_count)
+    published_count.positive? ? "#{published_count}편" : "공개 예정"
   end
 
   def product_list_state_classes(state)

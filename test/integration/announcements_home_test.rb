@@ -20,7 +20,7 @@ class AnnouncementsHomeTest < ActionDispatch::IntegrationTest
     assert_equal "공지 · 약관 개정 안내 →", line.text.squish
     html = response.body
     assert_operator html.index("data-home-notice"), :>, html.index("</header>"), "below the header"
-    assert_operator html.index("data-home-notice"), :<, html.index("featured-series-title"), "above the hero"
+    assert_operator html.index("data-home-notice"), :<, html.index("featured-guide-heading"), "above the featured guide"
   end
 
   test "no line at all without a published + pinned notice (unpublished pinned, or published unpinned)" do

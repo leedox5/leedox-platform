@@ -254,10 +254,4 @@ class DashboardSeriesTest < ActionDispatch::IntegrationTest
     three = count_for.call(2) # now 3 series in use
     assert_equal one, three, "1 series: #{one} queries, 3 series: #{three}"
   end
-
-  test "the home hero and the dashboard share the first-episode button label" do
-    view = ActionView::Base.empty
-    view.extend(ProductLinesHelper)
-    assert_equal "첫 편부터 보기", view.series_start_label
-  end
 end

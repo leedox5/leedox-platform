@@ -70,14 +70,15 @@ class GuideWordingTest < ActionDispatch::IntegrationTest
     assert_select "nav[aria-label='주요 내비게이션'] a[href=?]", products_path, text: "가이드"
   end
 
-  test "the home: brand title, the hero's label and button, the explainer and the row title" do
+  test "the home: brand title, the featured guide's heading and card, the explainer and the row title" do
     get root_path
     assert_select "title", text: "LEEDOX | 실제로 만들고 부딪히며 엮은 개발자의 실전 가이드"
     assert_select "meta[name='description'][content=?]",
       "실제로 만들고 부딪히며 엮은 개발자의 실전 가이드. 매끈한 강의 대신, 막히고 고친 과정까지 한 편씩 따라갑니다. Git·Java·WSL 같은 개발 기초부터 AI와 함께 만드는 이야기까지."
-    hero = css_select("section[aria-labelledby='featured-series-title']").first.text.squish
-    assert_includes hero, "지금 시작하는 가이드 · 2편 · 무료"
-    assert_includes hero, "가이드 소개"
+    # 0096: the label line became the section heading; the card shows the badge and N편 -- published only, so 1편 (was 2편, all episodes).
+    hero = css_select("section[aria-labelledby='featured-guide-heading']").first
+    assert_equal "지금 시작하는 가이드", hero.at_css("h2").text.strip
+    assert_equal [ "무료", "1편" ], [ hero.at_css("h3").previous_element.text.strip, hero.at_css("h3 + div > span").text.strip ]
     assert_select "#track-basics", text: "개발 기초"
   end
 

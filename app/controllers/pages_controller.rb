@@ -7,7 +7,6 @@ class PagesController < ApplicationController
     # (StandaloneProductsHelper) -- the home adds no rule of its own. The pricing page itself is gone (0086).
     @standalone_products = home_standalone_products
     load_story_series
-    load_episode_updates
     load_home_notice
   end
 
@@ -83,35 +82,8 @@ class PagesController < ApplicationController
     lines = [ @featured_line, *track_lines ].compact.uniq
     ids = lines.map(&:id)
     @series_access_states = lines.to_h { |line| [ line.id, line.access_state(owned: line.owned_by?(current_user)) ] }
+    # Handoff 0096 -- the featured card and the track cards show "N편" = published episodes only (0 -> 공개 예정);
+    # the 공개 예정 count, the featured series' episode lists and the "새로 공개 · 공개 예정" row went with the old hero.
     @published_counts = ContentEpisode.published.where(product_line_id: ids).group(:product_line_id).count
-    @upcoming_counts = ContentEpisode.upcoming(ContentEpisode.where(product_line_id: ids)).group_by(&:product_line_id).transform_values(&:size)
-
-    return unless @featured_line
-
-    @featured_published = @featured_line.published_episodes.to_a
-    @featured_upcoming = @featured_line.upcoming_episodes
-  end
-
-  UPDATES_LIMIT = 5
-  UPDATES_UPCOMING_SLOTS = 2
-
-  # Handoff 0071 (d) -- "새로 공개 · 공개 예정": up to 5 episodes of listed series, newest
-  # published first (by published_at -- set when an episode is published; updated_at only for an
-  # episode that somehow has none), then 공개 예정 ones (the 0070 rule). Two of the five are kept
-  # for 공개 예정 when there are that many, so a steady stream of new episodes can't push the
-  # "coming" half off the row entirely; either half fills the other's unused slots.
-  def load_episode_updates
-    listed = ProductLine.listed.select(:id)
-    published = ContentEpisode.published.where(product_line_id: listed).includes(:product_line)
-      .order(Arel.sql("COALESCE(content_episodes.published_at, content_episodes.updated_at) DESC"), :id)
-      .limit(UPDATES_LIMIT).to_a
-    upcoming = ContentEpisode.upcoming(ContentEpisode.where(product_line_id: listed).includes(:product_line))
-      .sort_by { |episode| [ episode.product_line_id, episode.position ] }
-
-    upcoming_taken = [ upcoming.size, UPDATES_UPCOMING_SLOTS, UPDATES_LIMIT ].min
-    published_taken = [ published.size, UPDATES_LIMIT - upcoming_taken ].min
-    upcoming_taken = [ upcoming.size, UPDATES_LIMIT - published_taken ].min
-    @episode_updates = published.first(published_taken).map { |episode| [ :published, episode ] } +
-      upcoming.first(upcoming_taken).map { |episode| [ :upcoming, episode ] }
   end
 end

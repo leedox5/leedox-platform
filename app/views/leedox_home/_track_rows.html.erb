@@ -1,16 +1,15 @@
 <%# Handoff 0071 (c, e) -- one row per track that has anything in it (a track with nothing prints nothing at all).
     Series cards are ordered like /products (oldest first); the AI row then carries the standalone products
-    (Chatdox, Claudox, aistart, Antigravity) in /pricing's order. 4 across on desktop; on smaller screens they
-    stack (2 across, then 1) rather than scrolling sideways -- the same grid as /products, no hidden cards and
-    nothing that needs a swipe to discover. %>
-<% taglines = { "basics" => "개발환경부터 버전 관리까지, 손에 익히는 기초", "ai" => "AI를 팀원처럼, 도구처럼 — 실제로 만든 기록" } %>
+    (Chatdox, Claudox, aistart, Antigravity) in /pricing's order.
+    Handoff 0096 -- leaner: the heading with "N개의 가이드" on its right (N = the cards actually drawn; the old tagline is
+    gone), and two cards a row on phones (sm two, lg four as before). Every card links to its page, nothing scrolls. %>
 <% @track_rows.each do |track, lines, extras| %>
-  <section aria-labelledby="track-<%= track %>" class="mx-auto max-w-6xl px-5 py-12 sm:px-7">
-    <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+  <section aria-labelledby="track-<%= track %>" class="mx-auto max-w-6xl px-2.5 pt-[22px] pb-2 sm:px-7 sm:py-12">
+    <div class="flex items-baseline justify-between gap-3">
       <h2 id="track-<%= track %>" class="font-display text-2xl font-bold text-[#f2efe8]"><%= ProductLine::TRACK_TITLES[track] %></h2>
-      <p class="text-sm text-[#a8a39a]"><%= taglines[track] %></p>
+      <p class="shrink-0 text-[13px] text-[#a8a39a]" data-track-count><%= lines.size + extras.size %>개의 가이드</p>
     </div>
-    <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="mt-3 grid grid-cols-2 gap-2 sm:mt-6 sm:gap-4 lg:grid-cols-4">
       <% lines.each do |line| %>
         <%= render "leedox_home/series_card", line: line %>
       <% end %>

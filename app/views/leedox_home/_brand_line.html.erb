@@ -1,9 +1,9 @@
-<%# Handoff 0071 (f) -- the brand line (D-009), fixed copy from the request; 0091 -- D-011's sentence. When there is no featured series
-    (so no hero h1), this line is the page's h1 -- the page always has exactly one. %>
-<% tag_name = local_assigns.fetch(:heading, false) ? :h1 : :p %>
+<%# Handoff 0071 (f) -- the brand line (D-009), fixed copy from the request; 0091 -- D-011's sentence.
+    Handoff 0096 -- always the page's one h1 (the featured guide is now a card under a section h2, its name an h3), so
+    the home has exactly one h1 with or without a featured guide. Looks as before. %>
 <section aria-labelledby="brand-line" class="border-b border-white/10">
-  <div class="mx-auto max-w-6xl px-5 py-12 sm:px-7">
-    <%= content_tag tag_name, "실제로 만들고 부딪히며 엮은 개발자의 실전 가이드.", id: "brand-line",
+  <div class="mx-auto max-w-6xl px-2.5 py-12 sm:px-7">
+    <%= content_tag :h1, "실제로 만들고 부딪히며 엮은 개발자의 실전 가이드.", id: "brand-line",
       class: "max-w-3xl break-keep font-display text-2xl leading-snug text-[#f2efe8] sm:text-3xl" %>
     <p class="mt-4 max-w-3xl break-keep text-[#a8a39a]">매끈한 강의 대신, 막히고 고친 과정까지 한 편씩 따라갑니다. Git·Java·WSL 같은 개발 기초부터 AI와 함께 만드는 이야기까지.</p>
   </div>
