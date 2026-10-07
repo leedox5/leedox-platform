@@ -71,11 +71,11 @@ class ProductLineListTest < ActionDispatch::IntegrationTest
       assert_select "img[alt=?]", "표지"
       assert_select "h2", text: "표지 있는 제품"
       assert_select "p", text: "한 줄로 설명하는 요약"
-      assert_select "p", text: "공개 1편"
+      assert_select "span", text: "에피소드 1" # 0104: the home's label (0097), published only
     end
     assert_select "a[href=?]", product_line_path(without_cover.slug) do
       assert_select "img", 0
-      assert_select "p", text: /^공개 0편$/
+      assert_select "span", text: /^공개 예정$/
     end
     assert_no_match(/\(제목 없음\)|초안 편/, css_select("main").text)
   end
@@ -83,7 +83,7 @@ class ProductLineListTest < ActionDispatch::IntegrationTest
   test "a summary left blank is simply not rendered as its own line" do
     line = ProductLine.create!(internal_name: "s", customer_name: "요약 없는 제품", slug: "list-no-summary", introduction: "소개", status: "published")
     get products_path
-    assert_select "a[href=?] p", product_line_path(line.slug), text: "공개 0편"
+    assert_select "a[href=?] p", product_line_path(line.slug), 0 # 0104: the count is a span now; no summary, no p
   end
 
   test "price/access badges match the detail page's purchase box exactly, for every state" do
@@ -153,7 +153,7 @@ class ProductLineListTest < ActionDispatch::IntegrationTest
     assert_select "nav[aria-label='가이드 필터'] a.bg-accent", text: /^전체/
 
     sign_in(user)
-    get products_path
+    get products_path(filter: "mine") # 0104: 내 가이드 0 shows only while it's the one you're on
     assert_match(/내 가이드/, css_select("nav[aria-label='가이드 필터']").text)
   end
 

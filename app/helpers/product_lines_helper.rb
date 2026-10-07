@@ -11,9 +11,18 @@ module ProductLinesHelper
     user_signed_in? ? PRODUCT_LIST_FILTERS + [ [ "mine", "내 가이드" ] ] : PRODUCT_LIST_FILTERS
   end
 
+  # Handoff 0104 -- the tabs drawn: every tab with something in it, plus 전체 always and the one you're on (even if
+  # it's empty -- an address with ?filter= still shows its empty-list message). Counts are the controller's.
+  def product_list_visible_filter_options(counts, current)
+    product_list_filter_options.select do |value, _label|
+      value == "all" || value == current || counts.fetch(value, counts["all"]).positive?
+    end
+  end
+
   # Handoff 0083 -- the series list is dark (the home's palette); these two helpers are used only there.
+  # Handoff 0104 -- smaller on phones (13px, 5px x 12px); sm and up as before.
   def product_list_filter_tab_classes(selected)
-    base = "flex-shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-bold transition"
+    base = "flex-shrink-0 whitespace-nowrap rounded-full px-3 py-[5px] text-[13px] font-bold transition sm:px-4 sm:py-1.5 sm:text-sm"
     selected ? "#{base} bg-accent text-on-accent" : "#{base} border border-line/15 bg-card text-ink-2 hover:border-line/30 hover:text-ink"
   end
 

@@ -77,9 +77,9 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
 
   test "the list's filter tabs and state badges use the dark palette" do
     sign_in
-    get products_path
-    assert_select "nav[aria-label='가이드 필터'] a.bg-accent", text: /^전체/
-    assert_select "nav[aria-label='가이드 필터'] a.bg-card", minimum: 1
+    get products_path(filter: "free") # 0104: an empty tab shows only while it's the one you're on
+    assert_select "nav[aria-label='가이드 필터'] a.bg-accent", text: /^무료/
+    assert_select "nav[aria-label='가이드 필터'] a.bg-card", text: /^전체/
   end
 
   # --- R2: the series detail -------------------------------------------------------------------------
@@ -165,8 +165,8 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
 
   test "the series list's wording (0083 R2 d)" do
     sign_in
-    get products_path
-    assert_select "main p", text: "Guides" # 0091 (D-011)
+    get products_path(filter: "mine") # 0104: 내 가이드 0 shows only while it's the one you're on
+    assert_no_match(/Guides/, css_select("main").text) # 0104: the label is gone (it was 0091's D-011 wording)
     assert_select "nav[aria-label='가이드 필터'] a", text: /\A내 가이드/
   end
 end

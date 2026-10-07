@@ -50,7 +50,7 @@ class GuideWordingTest < ActionDispatch::IntegrationTest
   test "a member before use: the same, plus the list's 내 가이드, my page and the dashboard" do
     sign_in(@member)
     (GUEST_PAGES - %w[/users/sign_in /users/sign_up] + %w[/products?filter=mine /mypage /dashboard /billing/checkout/git_guide]).each { |path| assert_no_leftover(path) }
-    get products_path
+    get products_path(filter: "mine") # 0104: 내 가이드 0 shows only while it's the one you're on
     assert_select "nav[aria-label='가이드 필터'] a", text: /\A내 가이드/
   end
 

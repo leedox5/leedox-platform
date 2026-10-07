@@ -1,0 +1,28 @@
+<%# Handoff 0104 -- one guide card of the guide list (/products). Was product_lines/_list_card, which the dashboard keeps
+    using as it was. The whole card is the one link to the guide page. Cover (or the placeholder) -> name -> summary ->
+    state badge and "에피소드 N" (the home's helper, 0097: published episodes only, 공개 예정 when none). Names and
+    summaries wrap between words (break-keep, 0093); the name is the display face (0094).
+    Phones (below sm): a row -- a 124x70 cover on the left, kept at the top, the text on the right; the summary at
+    most two lines. sm and up: the stacked card as before (cover on top), the badge and the count on one row at the
+    card's bottom. No "자세히 보기 →" (the card is the link). %>
+<%= link_to product_line_path(line.slug),
+  class: "flex overflow-hidden rounded-2xl border border-line/10 bg-card transition hover:border-accent-soft/60 sm:flex-col" do %>
+  <% cover = "max-sm:my-3 max-sm:ml-3 max-sm:w-[124px] max-sm:shrink-0 max-sm:self-start max-sm:rounded-lg" %>
+  <% if line.cover_image.attached? %>
+    <%= render "product_lines/cover_image", product_line: line, variant: :thumb, classes: "block aspect-video w-full object-cover #{cover}" %>
+  <% else %>
+    <%= render "product_lines/cover_placeholder", product_line: line, dark: true, classes: cover, letter_classes: "max-sm:text-[22px]" %>
+  <% end %>
+  <div class="flex min-w-0 flex-1 flex-col px-3 py-2.5 sm:p-5">
+    <h2 class="break-keep break-words font-display text-[15px] font-bold leading-[21px] text-ink sm:text-lg sm:leading-7"><%= line.customer_name %></h2>
+    <% if line.summary.present? %>
+      <p class="mt-[3px] break-keep break-words text-[13px] leading-[19px] text-ink-2 max-sm:line-clamp-2 sm:mt-1 sm:text-sm sm:leading-5"><%= line.summary %></p>
+    <% end %>
+    <div class="mt-2 flex flex-wrap items-center gap-2 sm:mt-auto sm:pt-4">
+      <% if state %>
+        <span class="<%= product_list_state_classes(state) %> max-sm:px-[9px] max-sm:py-0.5 max-sm:text-[11px]"><%= product_list_state_label(state, line) %></span>
+      <% end %>
+      <span class="text-xs font-semibold text-ink-3"><%= guide_episode_count_label(published_count) %></span>
+    </div>
+  </div>
+<% end %>

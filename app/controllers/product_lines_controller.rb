@@ -47,7 +47,8 @@ class ProductLinesController < ApplicationController
     @filter = FILTERS.include?(params[:filter]) && (params[:filter] != "mine" || user_signed_in?) ? params[:filter] : "all"
     @product_lines = filtered_lines(all_lines)
     @filter_counts = { "all" => all_lines.size }.merge(FILTERS.index_with { |f| filtered_lines(all_lines, f).size })
-    @published_episode_counts = ContentEpisode.where(product_line_id: all_lines.map(&:id), status: "published")
+    # Handoff 0104 -- the same scope the home counts with (the cards show guide_episode_count_label, 0097).
+    @published_episode_counts = ContentEpisode.published.where(product_line_id: all_lines.map(&:id))
       .group(:product_line_id).count
   end
 

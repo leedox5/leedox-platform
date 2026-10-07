@@ -3,8 +3,9 @@
     which ones have an uploaded cover. Purely decorative (aria-hidden, no text an assistive-tech user would
     care about) -- never mistaken for a real upload; the admin list/edit screens still say "대표 이미지 없음"
     exactly as before (unchanged by this handoff).
-    Handoff 0071: `dark: true` gives the same placeholder in the home's dark palette. %>
+    Handoff 0071: `dark: true` gives the same placeholder in the home's dark palette.
+    Handoff 0104: `letter_classes:` adds to the first letter's classes (the guide list's small phone cover). %>
 <% dark = local_assigns.fetch(:dark, false) %>
 <div aria-hidden="true" class="<%= local_assigns.fetch(:classes, "") %> flex aspect-video w-full items-center justify-center <%= dark ? "bg-gradient-to-br from-cover-1 via-cover-2 to-cover-3" : "bg-gradient-to-br from-indigo-50 via-blue-50 to-slate-100" %>">
-  <span class="text-4xl font-black <%= dark ? "text-accent-soft/40" : "text-indigo-200" %>"><%= product_line.customer_name.first %></span>
+  <span class="text-4xl font-black <%= dark ? "text-accent-soft/40" : "text-indigo-200" %> <%= local_assigns[:letter_classes] %>"><%= product_line.customer_name.first %></span>
 </div>
