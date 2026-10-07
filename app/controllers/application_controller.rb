@@ -9,12 +9,27 @@ class ApplicationController < ActionController::Base
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
 
+  prepend_before_action :apply_theme_preview
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :store_redirect_location
 
   helper_method :billing_checkout_path_for, :purchase_checkout_flow?, :purchase_checkout_product, :current_stored_return_to
 
   private
+
+  # Handoff 0102 (D-014 step 2) -- the light preview: any page opened with ?theme=light (or ?theme=dark to turn it off)
+  # remembers the choice in a cookie for a year and sends the visitor on to the same address without the parameter, so
+  # the preview address is never what gets bookmarked, shared or indexed. Step 3 (the switch) keeps the same cookie.
+  # Any other value of the parameter is left alone. FrameThemeHelper#light_theme? reads the cookie.
+  def apply_theme_preview
+    mode = params[:theme]
+    return unless request.get? && FrameThemeHelper::THEMES.include?(mode)
+
+    cookies[FrameThemeHelper::THEME_COOKIE] = { value: mode, expires: 1.year, path: "/", same_site: :lax,
+                                                secure: request.ssl?, httponly: false }
+    query = request.query_parameters.except("theme")
+    redirect_to(query.empty? ? request.path : "#{request.path}?#{query.to_query}", status: :see_other)
+  end
 
   def purchase_checkout_flow?
     return_to = current_stored_return_to

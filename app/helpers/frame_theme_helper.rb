@@ -52,9 +52,12 @@ module FrameThemeHelper
   # The text color stays text-slate-900: every dark page sets its own on its outer wrapper.
   # Both live on <head> meta and <body>, which Turbo swaps per page (meta is a provisional head element; the body is
   # replaced) -- unlike <html>'s attributes, which it keeps across visits.
+  #
+  # Handoff 0102 -- in the light preview the same six pages say color-scheme light and keep bg-page (its light value).
   BODY_CLASS = {
     light: "bg-slate-50 text-slate-900 antialiased",
-    dark: "bg-page text-slate-900 antialiased [color-scheme:dark]"
+    dark: "bg-page text-slate-900 antialiased [color-scheme:dark]",
+    dark_page_light: "bg-page text-slate-900 antialiased [color-scheme:light]"
   }.freeze
 
   def dark_page?
@@ -62,6 +65,26 @@ module FrameThemeHelper
   end
 
   def body_class
-    BODY_CLASS.fetch(dark_page? ? :dark : :light)
+    return BODY_CLASS[:light] unless dark_page?
+
+    light_theme? ? BODY_CLASS[:dark_page_light] : BODY_CLASS[:dark]
+  end
+
+  # Handoff 0102 (D-014 step 2) -- the light values of the color tokens (application.css, [data-theme="light"]) are
+  # previewed by whoever opens any page with ?theme=light (ApplicationController#apply_theme_preview sets this cookie;
+  # ?theme=dark sets it back). No link or button leads there yet; without the cookie everyone gets the dark side as
+  # before, and an unknown value is the dark side too. Customer pages only: the admin screens (dark_frame? false) never
+  # get the attribute, so they stay exactly as they were. The attribute goes on <body> (swapped per Turbo visit), never
+  # on <html> (kept across visits).
+  THEME_COOKIE = "leedox_theme"
+  THEMES = %w[light dark].freeze
+
+  def light_theme?
+    dark_frame? && cookies[THEME_COOKIE] == "light"
+  end
+
+  # The color-scheme a dark page declares (0100): the mode's own.
+  def dark_page_color_scheme
+    light_theme? ? "light" : "dark"
   end
 end

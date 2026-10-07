@@ -50,6 +50,35 @@
 	--color-cover-3: #0e1014;         /*   to */
 }
 
+/* Handoff 0102 (D-014 step 2) -- the light values (HQ / Tommy: candidate A, "warm paper"). FrameThemeHelper puts
+   data-theme="light" on <body> -- customer pages only, and only for whoever turned the preview on (?theme=light); the
+   default stays dark. Unlayered on purpose, so it beats the @theme values in Tailwind's theme layer. Every class that
+   uses a token (bg-page, text-ink, border-line/10 ...) follows; nothing else changes. test/assets/color_tokens_test.rb
+   pins these values and their contrast. */
+[data-theme="light"] {
+	--color-page: #f5f2ea;
+	--color-card: #fffefb;
+	--color-ink: #1c1b18;
+	--color-ink-2: #45423b;
+	--color-ink-3: #6b665d;
+	--color-accent: #f0a53c;
+	--color-accent-hover: #e8962a;
+	--color-accent-ink: #8f520e;
+	--color-accent-ink-hover: #6f3f08;
+	--color-accent-soft: #b4690f;
+	--color-ok: #7dd3a8;
+	--color-ok-hover: #66c597;
+	--color-ok-ink: #05684a;
+	--color-ok-soft: #0a7a57;
+	--color-on-accent: #0e1014;
+	--color-danger: #b3261e;
+	--color-line: #1c1b18;
+	--color-tint: #1c1b18;
+	--color-cover-1: #ebe6da;
+	--color-cover-2: #e0dacb;
+	--color-cover-3: #d6cfbe;
+}
+
 /* 0094 B -- the tighter tracking the HQ mock used with the face. */
 .font-display {
 	letter-spacing: -0.02em;
