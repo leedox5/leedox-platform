@@ -3,18 +3,18 @@
     /pricing uses (Product#name / #tagline / #landing_page_path, StandaloneProductsHelper) -- nothing is typed
     in here. These products have no cover image on record, so the card uses the drawn placeholder. The whole
     card links to the product's own page; a product without a landing page is shown but not linked. %>
-<% card_classes = "flex flex-col overflow-hidden rounded-xl border border-white/10 bg-[#15181e] transition hover:border-[#f0a53c]/60" %>
+<% card_classes = "flex flex-col overflow-hidden rounded-xl border border-line/10 bg-card transition hover:border-accent-soft/60" %>
 <% body = capture do %>
-  <div aria-hidden="true" class="flex aspect-video w-full items-center justify-center bg-gradient-to-br from-[#1b1e25] via-[#161920] to-[#0e1014]">
-    <span class="text-4xl font-black text-[#f0a53c]/40"><%= product.name.first %></span>
+  <div aria-hidden="true" class="flex aspect-video w-full items-center justify-center bg-gradient-to-br from-cover-1 via-cover-2 to-cover-3">
+    <span class="text-4xl font-black text-accent-soft/40"><%= product.name.first %></span>
   </div>
   <div class="flex flex-1 flex-col p-4">
-    <h3 class="break-keep font-bold text-[#f2efe8]"><%= product.name %></h3>
+    <h3 class="break-keep font-bold text-ink"><%= product.name %></h3>
     <% if product.tagline.present? %>
-      <p class="mt-1 break-keep text-sm leading-relaxed text-[#c9c4ba]"><%= product.tagline %></p>
+      <p class="mt-1 break-keep text-sm leading-relaxed text-ink-2"><%= product.tagline %></p>
     <% end %>
-    <p class="mt-auto pt-4 text-xs text-[#a8a39a]">
-      <%= standalone_product_badge(product) %> · <span class="font-semibold text-[#f0a53c]"><%= standalone_product_price(product) %></span>
+    <p class="mt-auto pt-4 text-xs text-ink-3">
+      <%= standalone_product_badge(product) %> · <span class="font-semibold text-accent-ink"><%= standalone_product_price(product) %></span>
     </p>
   </div>
 <% end %>

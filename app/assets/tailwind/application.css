@@ -1,12 +1,6 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-/* Handoff 0083 -- Tailwind's scanner misses classes inside an ERB Ruby string once that string holds an arbitrary
-   hex class (e.g. `dark ? "text-[#c9c4ba] hover:bg-white/5" : ...` in shared/_header): everything from the hex class
-   on is dropped. Hex classes used there happen to exist elsewhere; these two hover backgrounds didn't (the dark
-   header's menu button hover never worked since 0071), so they are generated explicitly. */
-@source inline("hover:bg-white/5 hover:bg-white/10");
-
 /* Handoff 0071 -- the display face (guide names, page and section titles on the dark pages). A token of its own, so
    no other font changes. Handoff 0094 B -- Pretendard Bold (was Gowun Batang), served from app/assets/fonts: the
    KS X 1001 subset (2,350 Hangul + Latin, 265 KB woff2, SIL OFL -- Pretendard-LICENSE.txt next to it), one weight
@@ -23,6 +17,37 @@
 
 @theme {
 	--font-display: "Pretendard", ui-sans-serif, system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+
+	/* Handoff 0101 (D-014 step 1) -- the customer pages' dark palette by role, not by value: bg-page, text-ink,
+	   border-line/10 ... instead of bg-[#0e1014], text-[#f2efe8], border-white/10. The values are exactly the hex
+	   (and white) the classes used before, so nothing looks different; the light mode (step 2) only has to give these
+	   names other values. A color that plays two roles has two names even where the value is the same today (the
+	   light side will split them): the amber fill vs amber text vs amber edges and tints, the same for the green, and
+	   #0e1014 as the page vs the text on an amber / green button. Opacity stays on the class (line/10, accent-soft/60),
+	   so the steps (10, 15, 20, 25, 30, 50 ...) are unchanged. test/assets/color_tokens_test.rb pins every value.
+	   The admin screens, the admin preview's light values and the light-bodied pages use the Tailwind palette, never
+	   these. */
+	--color-page: #0e1014;            /* page background, the header at /90 */
+	--color-card: #15181e;            /* cards, boxes, the mobile menu panel, code blocks */
+	--color-ink: #f2efe8;             /* titles, names, primary text */
+	--color-ink-2: #c9c4ba;           /* body text, summaries */
+	--color-ink-3: #a8a39a;           /* meta, captions, secondary text */
+	--color-accent: #f0a53c;          /* amber fills: primary buttons, the arrow circle, the logo mark, active tab */
+	--color-accent-hover: #f5b85e;    /* amber fills on hover */
+	--color-accent-ink: #f0a53c;      /* amber text: links, eyebrows, arrows, the 보유/이용 중 badge text */
+	--color-accent-ink-hover: #f5b85e; /* amber text / underline on hover */
+	--color-accent-soft: #f0a53c;     /* amber edges and tints (always with an opacity or as a focus ring) */
+	--color-ok: #7dd3a8;              /* green fill: the free 이용하기 button */
+	--color-ok-hover: #9be0bd;        /* green fill on hover */
+	--color-ok-ink: #7dd3a8;          /* green text: the 무료 / 이용 중 badge */
+	--color-ok-soft: #7dd3a8;         /* green badge edge and tint (with an opacity) */
+	--color-on-accent: #0e1014;       /* text on an amber or green fill */
+	--color-danger: #ff8a80;          /* errors, delete on hover */
+	--color-line: #ffffff;            /* lines and borders (with an opacity: /10 ... /50) */
+	--color-tint: #ffffff;            /* faint backgrounds (with an opacity: /5, /10) */
+	--color-cover-1: #1b1e25;         /* the no-cover placeholder's gradient: from */
+	--color-cover-2: #161920;         /*   via */
+	--color-cover-3: #0e1014;         /*   to */
 }
 
 /* 0094 B -- the tighter tracking the HQ mock used with the face. */
@@ -131,40 +156,40 @@
 .doc-content-dark h1,
 .doc-content-dark h2,
 .doc-content-dark h3 {
-	@apply text-[#f2efe8];
+	@apply text-ink;
 }
 
 .doc-content-dark p,
 .doc-content-dark li {
-	@apply text-[#c9c4ba];
+	@apply text-ink-2;
 }
 
 .doc-content-dark code {
-	@apply bg-white/10 text-[#f2efe8];
+	@apply bg-tint/10 text-ink;
 }
 
 .doc-content-dark pre {
-	@apply border border-white/10 bg-[#15181e] text-[#f2efe8];
+	@apply border border-line/10 bg-card text-ink;
 }
 
 .doc-content-dark pre code {
-	@apply bg-transparent text-[#f2efe8];
+	@apply bg-transparent text-ink;
 }
 
 .doc-content-dark a {
-	@apply text-[#f0a53c] decoration-[#f0a53c]/40 hover:text-[#f5b85e] hover:decoration-[#f5b85e];
+	@apply text-accent-ink decoration-accent-soft/40 hover:text-accent-ink-hover hover:decoration-accent-ink-hover;
 }
 
 .doc-content-dark img {
-	@apply border-white/10;
+	@apply border-line/10;
 }
 
 .doc-content-dark blockquote {
-	@apply border-[#f0a53c]/50 bg-[#15181e] text-[#c9c4ba];
+	@apply border-accent-soft/50 bg-card text-ink-2;
 }
 
 .doc-content-dark table,
 .doc-content-dark th,
 .doc-content-dark td {
-	@apply border-white/10;
+	@apply border-line/10;
 }

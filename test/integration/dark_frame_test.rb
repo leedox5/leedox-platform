@@ -4,10 +4,10 @@ require "test_helper"
 # area (/admin/...) and the screens only admins use (service desk, refs -- R2) keep the light header. The dashboard body is dark like the home and the series pages; pages for
 # input, payment and documents keep their light body. Colors only -- content is covered by the existing tests.
 class DarkFrameTest < ActionDispatch::IntegrationTest
-  DARK_HEADER = "header.bg-\\[\\#0e1014\\]\\/90"
+  DARK_HEADER = "header.bg-page\\/90"
   LIGHT_HEADER = "header.bg-white\\/90"
-  DARK_PANEL = "details[data-controller='mobile-menu'] div.bg-\\[\\#15181e\\]"
-  DARK_FOOTER = "footer.bg-\\[\\#0e1014\\]"
+  DARK_PANEL = "details[data-controller='mobile-menu'] div.bg-card"
+  DARK_FOOTER = "footer.bg-page"
 
   setup do
     Commerce::CatalogBootstrap.call!
@@ -29,7 +29,7 @@ class DarkFrameTest < ActionDispatch::IntegrationTest
     assert_select LIGHT_HEADER, 0, "#{path}: no light header"
     assert_select DARK_PANEL, 1, "#{path}: dark mobile panel"
     assert_operator css_select("footer").size, :<=, 1, "#{path}: at most one footer"
-    assert_select "footer:not(.bg-\\[\\#0e1014\\])", 0, "#{path}: a footer, if any, is dark"
+    assert_select "footer:not(.bg-page)", 0, "#{path}: a footer, if any, is dark"
   end
 
   GUEST_PAGES = %i[root_path products_path announcements_path terms_path privacy_path new_user_session_path
@@ -88,7 +88,7 @@ class DarkFrameTest < ActionDispatch::IntegrationTest
   test "the dashboard body is dark, with the display font and dark cards" do
     sign_in(@user)
     get dashboard_path
-    assert_select "div.bg-\\[\\#0e1014\\] > #{DARK_HEADER}"
+    assert_select "div.bg-page > #{DARK_HEADER}"
     assert_select "link[rel='preload'][href*='Pretendard-Bold']", 1
     assert_select "main h1.font-display", text: /님이 이용 중인 콘텐츠\z/ # 0089: the heading replaced the greeting
     assert_not_includes css_select("main").first.to_html, "bg-white "
@@ -104,12 +104,12 @@ class DarkFrameTest < ActionDispatch::IntegrationTest
     sign_in(@user)
     get dashboard_path
 
-    assert_select "[data-series-card='frame-in-use'].bg-\\[\\#15181e\\]"
-    assert_select "[data-series-card='frame-in-use'] span.text-\\[\\#7dd3a8\\]", text: "이용 중"
+    assert_select "[data-series-card='frame-in-use'].bg-card"
+    assert_select "[data-series-card='frame-in-use'] span.text-ok-ink", text: "이용 중"
     # 0089: the earlier product is a small dark link card (no progress bar any more).
-    assert_select "section[aria-label='Chatdox 현황'] a.bg-\\[\\#15181e\\] span.text-\\[\\#7dd3a8\\]", text: "이용 중"
+    assert_select "section[aria-label='Chatdox 현황'] a.bg-card span.text-ok-ink", text: "이용 중"
     # 0085: 다른 콘텐츠 (더 둘러보기 until 0089) holds series (the dark /products card), no 만료 earlier product.
-    assert_select "section[aria-label='다른 콘텐츠'] a.bg-\\[\\#15181e\\][href=?]", product_line_path("frame-line")
+    assert_select "section[aria-label='다른 콘텐츠'] a.bg-card[href=?]", product_line_path("frame-line")
     assert_not_includes css_select("main").text, "Claudox"
   end
 
@@ -117,7 +117,7 @@ class DarkFrameTest < ActionDispatch::IntegrationTest
     sign_in(@user)
     [ mypage_path, terms_path, announcements_path, edit_user_registration_path ].each do |path| # /pricing removed in 0086
       get path
-      assert_select "div.bg-\\[\\#0e1014\\] > header", 0, "#{path}: body stays light"
+      assert_select "div.bg-page > header", 0, "#{path}: body stays light"
       assert_select "link[rel='preload'][href*='Pretendard-Bold']", 0, path
     end
   end

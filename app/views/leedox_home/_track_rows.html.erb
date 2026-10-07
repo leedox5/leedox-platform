@@ -6,8 +6,8 @@
 <% @track_rows.each do |track, lines, extras| %>
   <section aria-labelledby="track-<%= track %>" class="mx-auto max-w-6xl px-2.5 pt-[22px] pb-2 sm:px-7 sm:py-12">
     <div class="flex items-baseline justify-between gap-3">
-      <h2 id="track-<%= track %>" class="font-display text-2xl font-bold text-[#f2efe8]"><%= ProductLine::TRACK_TITLES[track] %></h2>
-      <p class="shrink-0 text-[13px] text-[#a8a39a]" data-track-count><%= lines.size + extras.size %>개의 가이드</p>
+      <h2 id="track-<%= track %>" class="font-display text-2xl font-bold text-ink"><%= ProductLine::TRACK_TITLES[track] %></h2>
+      <p class="shrink-0 text-[13px] text-ink-3" data-track-count><%= lines.size + extras.size %>개의 가이드</p>
     </div>
     <div class="mt-3 grid grid-cols-2 gap-2 sm:mt-6 sm:gap-4 lg:grid-cols-4">
       <% lines.each do |line| %>

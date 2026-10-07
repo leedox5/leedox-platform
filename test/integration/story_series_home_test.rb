@@ -133,7 +133,7 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
     get root_path
     assert_includes hero["class"].split, "px-2.5"
     card = hero.at_css("a")["class"].split
-    %w[rounded-2xl overflow-hidden border bg-[#15181e] md:grid md:grid-cols-5 md:items-center].each { |k| assert_includes card, k }
+    %w[rounded-2xl overflow-hidden border bg-card md:grid md:grid-cols-5 md:items-center].each { |k| assert_includes card, k }
     assert_empty card.grep(/\A(sm|lg):grid/), "no columns below md, nothing extra at lg"
     image, text = hero.at_css("a").element_children
     assert_equal [ "md:col-span-3" ], image["class"].split
@@ -431,12 +431,12 @@ class StorySeriesHomeTest < ActionDispatch::IntegrationTest
   # loads where the body is dark (the full per-page check is test/integration/series_dark_theme_test.rb).
   test "the home is dark with the display font; the notices have the dark header but a light body and no font" do
     get root_path
-    assert_select "div.bg-\\[\\#0e1014\\] > header.bg-\\[\\#0e1014\\]\\/90"
+    assert_select "div.bg-page > header.bg-page\\/90"
     assert_select "link[rel='preload'][href*='Pretendard-Bold']", 1
 
     get announcements_path
-    assert_select "header.bg-\\[\\#0e1014\\]\\/90", 1
-    assert_select "div.bg-\\[\\#0e1014\\] > header", 0
+    assert_select "header.bg-page\\/90", 1
+    assert_select "div.bg-page > header", 0
     assert_select "link[rel='preload'][href*='Pretendard-Bold']", 0
   end
 end

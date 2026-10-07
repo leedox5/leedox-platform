@@ -8,19 +8,19 @@
   <%= render "shared/display_font" %>
 <% end %>
 
-<div class="min-h-screen bg-[#0e1014] text-[#f2efe8]">
+<div class="min-h-screen bg-page text-ink">
   <%= render "shared/header", dark: true %>
 
   <main>
     <section aria-labelledby="about-brand" class="mx-auto max-w-6xl px-2.5 pt-12 sm:px-7 md:pt-20">
-      <h1 id="about-brand" class="max-w-3xl break-keep font-display text-[28px] font-bold leading-9 text-[#f2efe8] md:text-[40px] md:leading-[52px]">실제로 만들고 부딪히며 엮은 개발자의 실전 가이드.</h1>
-      <p class="mt-4 max-w-3xl break-keep leading-relaxed text-[#a8a39a] md:mt-6 md:text-lg">매끈한 강의 대신, 막히고 고친 과정까지 한 편씩 따라갑니다. Git·Java·WSL 같은 개발 기초부터 AI와 함께 만드는 이야기까지.</p>
+      <h1 id="about-brand" class="max-w-3xl break-keep font-display text-[28px] font-bold leading-9 text-ink md:text-[40px] md:leading-[52px]">실제로 만들고 부딪히며 엮은 개발자의 실전 가이드.</h1>
+      <p class="mt-4 max-w-3xl break-keep leading-relaxed text-ink-3 md:mt-6 md:text-lg">매끈한 강의 대신, 막히고 고친 과정까지 한 편씩 따라갑니다. Git·Java·WSL 같은 개발 기초부터 AI와 함께 만드는 이야기까지.</p>
     </section>
 
     <%= render "pages/about_units" %>
 
     <div class="mx-auto max-w-6xl px-2.5 pb-16 sm:px-7 md:pb-24">
-      <a href="<%= products_path %>" class="inline-flex items-center justify-center whitespace-nowrap rounded-xl bg-[#f0a53c] px-6 py-3 text-sm font-bold text-[#0e1014] hover:bg-[#f5b85e]">가이드 보러 가기</a>
+      <a href="<%= products_path %>" class="inline-flex items-center justify-center whitespace-nowrap rounded-xl bg-accent px-6 py-3 text-sm font-bold text-on-accent hover:bg-accent-hover">가이드 보러 가기</a>
     </div>
   </main>
 

@@ -5,6 +5,6 @@
     exactly as before (unchanged by this handoff).
     Handoff 0071: `dark: true` gives the same placeholder in the home's dark palette. %>
 <% dark = local_assigns.fetch(:dark, false) %>
-<div aria-hidden="true" class="<%= local_assigns.fetch(:classes, "") %> flex aspect-video w-full items-center justify-center <%= dark ? "bg-gradient-to-br from-[#1b1e25] via-[#161920] to-[#0e1014]" : "bg-gradient-to-br from-indigo-50 via-blue-50 to-slate-100" %>">
-  <span class="text-4xl font-black <%= dark ? "text-[#f0a53c]/40" : "text-indigo-200" %>"><%= product_line.customer_name.first %></span>
+<div aria-hidden="true" class="<%= local_assigns.fetch(:classes, "") %> flex aspect-video w-full items-center justify-center <%= dark ? "bg-gradient-to-br from-cover-1 via-cover-2 to-cover-3" : "bg-gradient-to-br from-indigo-50 via-blue-50 to-slate-100" %>">
+  <span class="text-4xl font-black <%= dark ? "text-accent-soft/40" : "text-indigo-200" %>"><%= product_line.customer_name.first %></span>
 </div>

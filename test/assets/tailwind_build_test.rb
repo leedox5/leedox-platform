@@ -10,8 +10,13 @@ require "tailwindcss/ruby"
 #
 # This builds the app's CSS with the real Tailwind CLI and asserts that every color class with an arbitrary hex value
 # or a white/black opacity (the kinds this bug hits) written anywhere in app/views or app/helpers exists in it.
+# Handoff 0101 -- the dark palette is named tokens now (bg-page, text-ink, border-line/10 ...): the scan also covers
+# every class built on a `--color-*` token of application.css, so "every color class used is built" still holds.
 class TailwindBuildTest < ActiveSupport::TestCase
-  COLOR_CLASS = %r{(?<![\w\[-])((?:[a-z-]+:)*-?[a-z][a-z-]*-(?:\[\#[0-9a-fA-F]{3,8}\]|white|black)(?:/\d+)?)(?![\w\]\[/-])}
+  TOKENS = File.read(Rails.root.join("app/assets/tailwind/application.css")).scan(/--color-([a-z0-9-]+):/).flatten
+    .sort_by { |name| -name.length }.freeze
+  COLOR_UTILITY = "(?:bg|text|border(?:-[trblxy])?|ring|outline|decoration|from|via|to|divide|fill|stroke|caret|placeholder)"
+  COLOR_CLASS = %r{(?<![\w\[-])((?:[a-z-]+:)*-?(?:[a-z][a-z-]*-(?:\[\#[0-9a-fA-F]{3,8}\]|white|black)|#{COLOR_UTILITY}-(?:#{TOKENS.join("|")}))(?:/\d+)?)(?![\w\]\[/-])}
 
   def built_css
     Dir.mktmpdir do |dir|
@@ -27,12 +32,13 @@ class TailwindBuildTest < ActiveSupport::TestCase
     "." + klass.gsub(/([:\[\]#\/.])/) { "\\#{Regexp.last_match(1)}" }
   end
 
-  test "every hex / white / black color class used in views and helpers is in the built CSS" do
+  test "every hex / white / black / token color class used in views and helpers is in the built CSS" do
     files = Dir[Rails.root.join("app/views/**/*.erb")] + Dir[Rails.root.join("app/helpers/**/*.rb")]
     used = files.each_with_object(Hash.new { |h, k| h[k] = [] }) do |file, acc|
       File.read(file).scan(COLOR_CLASS).flatten.uniq.each { |klass| acc[klass] << file.delete_prefix("#{Rails.root}/") }
     end
-    assert used.key?("bg-[#0e1014]/90"), "the scan should see the dark header background"
+    assert used.key?("bg-page/90"), "the scan should see the dark header background (a token since 0101)"
+    assert_operator used.keys.count { |klass| klass.match?(/-(?:#{TOKENS.join("|")})(?:\/\d+)?\z/) }, :>, 40, "the scan sees the token classes"
 
     css = built_css
     missing = used.reject { |klass, _| css.include?(selector(klass)) }
@@ -44,7 +50,7 @@ class TailwindBuildTest < ActiveSupport::TestCase
     css = built_css
     tables = FrameThemeHelper::FRAME_THEME.values.flatten + [ FrameThemeHelper::FOOTER_LINK_CLASS ] +
       FrameThemeHelper::BODY_CLASS.values + SeriesThemeHelper::SERIES_THEME.values.flatten # BODY_CLASS: 0100
-    classes = tables.flat_map(&:split).uniq.select { |klass| klass.match?(/\[#|\/\d+\z|\A\[color-scheme/) }
+    classes = tables.flat_map(&:split).uniq.select { |klass| klass.match?(/\[#|\/\d+\z|\A\[color-scheme/) || klass.match?(COLOR_CLASS) }
     missing = classes.reject { |klass| css.include?(selector(klass)) }
     assert_empty missing
   end

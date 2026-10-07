@@ -2,11 +2,11 @@
     to it. Rendered only when there is one (no empty band); no close button -- it goes away when the admin unpins it.
     Colors on the home's dark theme: label #f0a53c and title #f2efe8 on #15181e (contrast 8.6:1 and 15.5:1; the · separator #a8a39a 7.1:1).
     `notice_item`, not `notice`, because `notice` is the flash helper. %>
-<div class="border-b border-white/10 bg-[#15181e]">
+<div class="border-b border-line/10 bg-card">
   <%= link_to announcement_path(notice_item), class: "group mx-auto flex max-w-6xl items-center gap-2 px-2.5 py-2.5 text-sm sm:px-7", data: { home_notice: true } do %>
-    <span class="shrink-0 font-bold text-[#f0a53c]">공지</span>
-    <span class="shrink-0 text-[#a8a39a]" aria-hidden="true">·</span>
-    <span class="min-w-0 truncate text-[#f2efe8] group-hover:underline" title="<%= notice_item.title %>"><%= notice_item.title %></span>
-    <span class="shrink-0 text-[#f0a53c]" aria-hidden="true">→</span>
+    <span class="shrink-0 font-bold text-accent-ink">공지</span>
+    <span class="shrink-0 text-ink-3" aria-hidden="true">·</span>
+    <span class="min-w-0 truncate text-ink group-hover:underline" title="<%= notice_item.title %>"><%= notice_item.title %></span>
+    <span class="shrink-0 text-accent-ink" aria-hidden="true">→</span>
   <% end %>
 </div>

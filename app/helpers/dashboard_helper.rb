@@ -11,7 +11,7 @@ module DashboardHelper
   # shape product_lines/_list_card's `badge:` takes; the earlier-product card uses the same pair.
   DASHBOARD_IN_USE_BADGE = [
     "이용 중",
-    "flex-shrink-0 whitespace-nowrap rounded-full border border-[#7dd3a8]/40 bg-[#7dd3a8]/10 px-3 py-1 text-xs font-bold text-[#7dd3a8]"
+    "flex-shrink-0 whitespace-nowrap rounded-full border border-ok-soft/40 bg-ok-soft/10 px-3 py-1 text-xs font-bold text-ok-ink"
   ].freeze
 
   def dashboard_in_use_badge = DASHBOARD_IN_USE_BADGE

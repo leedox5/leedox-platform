@@ -6,7 +6,7 @@ require "test_helper"
 # episode_view_counts_test and product_line_customer_test. The admin preview and the legacy chapters keep their look.
 class DarkEpisodeTest < ActionDispatch::IntegrationTest
   BROWSER = { "User-Agent" => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36" }.freeze
-  DARK_HEADER = "header.bg-\\[\\#0e1014\\]\\/90"
+  DARK_HEADER = "header.bg-page\\/90"
   LIGHT_HEADER = "header.bg-white\\/90"
 
   setup do
@@ -29,21 +29,21 @@ class DarkEpisodeTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "title", text: "첫 편 | LEEDOX"
     assert_select "link[rel='preload'][href*='Pretendard-Bold']", 1
-    assert_select "div.bg-\\[\\#0e1014\\] > #{DARK_HEADER}"
-    assert_select "main h1.font-display.text-\\[\\#f2efe8\\]", text: "첫 편"
+    assert_select "div.bg-page > #{DARK_HEADER}"
+    assert_select "main h1.font-display.text-ink", text: "첫 편"
     assert_select "main > .doc-content.doc-content-dark h2", text: "소제목"
-    assert_select "main .bg-\\[\\#f0a53c\\]\\/10 .doc-content.doc-content-dark li", text: "항목"
-    assert_select "main a.text-\\[\\#a8a39a\\][data-turbo-prefetch='false'][href=?]", episode_path(@ep2)
+    assert_select "main .bg-accent-soft\\/10 .doc-content.doc-content-dark li", text: "항목"
+    assert_select "main a.text-ink-3[data-turbo-prefetch='false'][href=?]", episode_path(@ep2)
     html = css_select("main").first.to_html
     %w[bg-white text-gray- bg-gray- text-blue- bg-blue- border-gray- bg-amber-].each { |light| assert_not_includes html, light }
   end
 
   test "the comment section is dark for a guest: heading, count, sign-in prompt, empty state" do
     get episode_path
-    assert_select "#comments.border-white\\/10 h2.text-\\[\\#f2efe8\\]", text: /댓글/
-    assert_select "#comments h2 span.text-\\[\\#a8a39a\\]", text: "0"
-    assert_select "#comments p.bg-\\[\\#15181e\\] a.text-\\[\\#f0a53c\\]", text: "로그인하고 댓글 쓰기"
-    assert_select "#comments p.text-\\[\\#a8a39a\\]", text: "첫 댓글을 남겨 보세요."
+    assert_select "#comments.border-line\\/10 h2.text-ink", text: /댓글/
+    assert_select "#comments h2 span.text-ink-3", text: "0"
+    assert_select "#comments p.bg-card a.text-accent-ink", text: "로그인하고 댓글 쓰기"
+    assert_select "#comments p.text-ink-3", text: "첫 댓글을 남겨 보세요."
   end
 
   test "comments, replies, the admin badge and the form are dark; a hidden comment is dimmed to 75%" do
@@ -53,14 +53,14 @@ class DarkEpisodeTest < ActionDispatch::IntegrationTest
     sign_in(@admin)
     get episode_path, headers: BROWSER
 
-    assert_select "#comment-#{parent.id} p.text-\\[\\#c9c4ba\\]", text: "좋은 편"
-    assert_select "#comment-#{parent.id} span.text-\\[\\#a8a39a\\]", minimum: 1 # time
-    assert_select "#comments div.border-white\\/10 span.bg-\\[\\#f0a53c\\].text-\\[\\#0e1014\\]", text: "운영자"
-    assert_select "#comments summary.text-\\[\\#a8a39a\\]", text: "답글"
-    assert_select "#comment-#{parent.id} form button.text-\\[\\#a8a39a\\]", text: "숨김"
-    assert_select "#comment-#{hidden.id}.opacity-75 span.text-\\[\\#c9c4ba\\]", text: "숨김"
-    assert_select "#comments textarea.bg-\\[\\#15181e\\].text-\\[\\#f2efe8\\]", minimum: 1
-    assert_select "#comments input[type=submit].bg-\\[\\#f0a53c\\].text-\\[\\#0e1014\\]", minimum: 1
+    assert_select "#comment-#{parent.id} p.text-ink-2", text: "좋은 편"
+    assert_select "#comment-#{parent.id} span.text-ink-3", minimum: 1 # time
+    assert_select "#comments div.border-line\\/10 span.bg-accent.text-on-accent", text: "운영자"
+    assert_select "#comments summary.text-ink-3", text: "답글"
+    assert_select "#comment-#{parent.id} form button.text-ink-3", text: "숨김"
+    assert_select "#comment-#{hidden.id}.opacity-75 span.text-ink-2", text: "숨김"
+    assert_select "#comments textarea.bg-card.text-ink", minimum: 1
+    assert_select "#comments input[type=submit].bg-accent.text-on-accent", minimum: 1
     html = css_select("#comments").first.to_html
     %w[text-gray- bg-gray- text-blue- bg-blue- border-gray- opacity-50].each { |light| assert_not_includes html, light }
   end
@@ -69,8 +69,8 @@ class DarkEpisodeTest < ActionDispatch::IntegrationTest
     sign_in(@user)
     post product_episode_comments_path(@line.slug, @ep1.display_id), params: { episode_comment: { body: "" } }, headers: BROWSER
     assert_response :unprocessable_entity
-    assert_select "div.bg-\\[\\#0e1014\\] > #{DARK_HEADER}"
-    assert_select "#comments p.text-\\[\\#ff8a80\\][role=alert]"
+    assert_select "div.bg-page > #{DARK_HEADER}"
+    assert_select "#comments p.text-danger[role=alert]"
   end
 
   test "the admin preview of an episode keeps its light look" do
@@ -81,12 +81,13 @@ class DarkEpisodeTest < ActionDispatch::IntegrationTest
     html = css_select("main").first.to_html
     assert_not_includes html, "doc-content-dark"
     assert_not_includes html, "#0e1014"
+    assert_not_includes html, "bg-page" # 0101: the dark page color is a token now
     assert_select "main p.uppercase.text-blue-600", text: /Episode/
   end
 
   test "the legacy chapter templates are untouched by the dark episode" do
     Dir[Rails.root.join("app/views/product_content/*.erb")].each do |file|
-      assert_no_match(/doc-content-dark|bg-\[#0e1014\]|font-display/, File.read(file), file)
+      assert_no_match(/doc-content-dark|bg-\[#0e1014\]|bg-page|font-display/, File.read(file), file) # bg-page: 0101
     end
   end
 end

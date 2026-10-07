@@ -6,15 +6,15 @@
 <% content_for :head do %>
   <%= render "shared/display_font" %>
 <% end %>
-<div class="min-h-screen bg-[#0e1014] text-[#f2efe8]">
+<div class="min-h-screen bg-page text-ink">
   <%= render "shared/header" %>
   <main class="mx-auto max-w-3xl px-5 py-10 sm:px-7">
     <%= link_to "← #{@product_line.customer_name}", product_line_path(@product_line.slug),
-      class: "mb-3 inline-block text-sm text-[#a8a39a] hover:text-[#f2efe8]" %>
+      class: "mb-3 inline-block text-sm text-ink-3 hover:text-ink" %>
 
-    <div class="mb-8 border-b border-white/10 pb-4">
-      <h1 class="font-display text-3xl font-bold text-[#f2efe8]"><%= @current_episode.customer_title.presence || "(제목 없음)" %></h1>
-      <p class="mt-3 text-sm text-[#a8a39a]">최종 업데이트: <%= l(@current_episode.updated_at, format: :long, locale: :ko) %></p>
+    <div class="mb-8 border-b border-line/10 pb-4">
+      <h1 class="font-display text-3xl font-bold text-ink"><%= @current_episode.customer_title.presence || "(제목 없음)" %></h1>
+      <p class="mt-3 text-sm text-ink-3">최종 업데이트: <%= l(@current_episode.updated_at, format: :long, locale: :ko) %></p>
     </div>
 
     <div class="doc-content doc-content-dark max-w-none">
@@ -25,18 +25,18 @@
         with no 실전 자료 at all there's no section, as before. %>
     <% if !@full_episode_access && (@takeaways.present? || @assets.present?) %>
       <section class="mt-10">
-        <h2 class="text-lg font-bold text-[#f2efe8]">이 편의 실전 자료</h2>
-        <p class="mt-3 rounded-lg bg-[#15181e] px-4 py-3 text-sm text-[#c9c4ba]">실전 자료는 이용을 시작하면 받을 수 있습니다.</p>
+        <h2 class="text-lg font-bold text-ink">이 편의 실전 자료</h2>
+        <p class="mt-3 rounded-lg bg-card px-4 py-3 text-sm text-ink-2">실전 자료는 이용을 시작하면 받을 수 있습니다.</p>
       </section>
     <% elsif @takeaways.present? || @assets.present? %>
       <section class="mt-10">
-        <h2 class="text-lg font-bold text-[#f2efe8]">이 편의 실전 자료</h2>
+        <h2 class="text-lg font-bold text-ink">이 편의 실전 자료</h2>
 
         <% if @takeaways.present? %>
           <div class="mt-4 space-y-4">
             <% @takeaways.each do |takeaway| %>
-              <div class="rounded-xl border border-[#f0a53c]/30 bg-[#f0a53c]/10 p-5">
-                <p class="text-xs font-bold uppercase tracking-wide text-[#f0a53c]"><%= takeaway[:kind] %></p>
+              <div class="rounded-xl border border-accent-soft/30 bg-accent-soft/10 p-5">
+                <p class="text-xs font-bold uppercase tracking-wide text-accent-ink"><%= takeaway[:kind] %></p>
                 <div class="doc-content doc-content-dark mt-2 max-w-none text-sm">
                   <%= takeaway[:body_html] %>
                 </div>
@@ -48,15 +48,15 @@
         <% if @assets.present? %>
           <div class="mt-4 space-y-3">
             <% @assets.each do |asset| %>
-              <div class="flex flex-col gap-3 rounded-xl border border-white/10 bg-[#15181e] p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex flex-col gap-3 rounded-xl border border-line/10 bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div class="min-w-0">
-                  <p class="text-xs font-bold uppercase tracking-wide text-[#f0a53c]"><%= asset.kind %></p>
-                  <p class="mt-1 font-bold text-[#f2efe8]"><%= asset.title %></p>
-                  <% if asset.description.present? %><p class="mt-1 text-sm text-[#c9c4ba]"><%= asset.description %></p><% end %>
-                  <p class="mt-1 truncate text-xs text-[#a8a39a]"><%= asset.file.filename %> · <%= number_to_human_size(asset.file.byte_size) %></p>
+                  <p class="text-xs font-bold uppercase tracking-wide text-accent-ink"><%= asset.kind %></p>
+                  <p class="mt-1 font-bold text-ink"><%= asset.title %></p>
+                  <% if asset.description.present? %><p class="mt-1 text-sm text-ink-2"><%= asset.description %></p><% end %>
+                  <p class="mt-1 truncate text-xs text-ink-3"><%= asset.file.filename %> · <%= number_to_human_size(asset.file.byte_size) %></p>
                 </div>
                 <%= link_to "다운로드", product_episode_asset_path(@product_line.slug, @current_episode.display_id, asset.id),
-                  class: "inline-flex flex-shrink-0 items-center justify-center rounded-lg bg-[#f0a53c] px-4 py-2 text-sm font-bold text-[#0e1014] hover:bg-[#f5b85e]" %>
+                  class: "inline-flex flex-shrink-0 items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-bold text-on-accent hover:bg-accent-hover" %>
               </div>
             <% end %>
           </div>
@@ -64,9 +64,9 @@
       </section>
     <% end %>
 
-    <div class="mt-16 flex justify-between border-t border-white/10 pt-8">
+    <div class="mt-16 flex justify-between border-t border-line/10 pt-8">
       <% if @prev_episode %>
-        <%= link_to product_episode_path(@product_line.slug, @prev_episode.display_id), data: { turbo_prefetch: false }, class: "flex items-center gap-2 text-sm text-[#a8a39a] hover:text-[#f2efe8]" do %>
+        <%= link_to product_episode_path(@product_line.slug, @prev_episode.display_id), data: { turbo_prefetch: false }, class: "flex items-center gap-2 text-sm text-ink-3 hover:text-ink" do %>
           <span>←</span>
           <span><%= @prev_episode.customer_title.presence || "(제목 없음)" %></span>
         <% end %>
@@ -77,7 +77,7 @@
       <%# Handoff 0092 R4 -- without the license (an 열린 편) the next episode wouldn't open, so the box below takes the
           place of this link. %>
       <% if @next_episode && @full_episode_access %>
-        <%= link_to product_episode_path(@product_line.slug, @next_episode.display_id), data: { turbo_prefetch: false }, class: "flex items-center gap-2 text-sm text-[#a8a39a] hover:text-[#f2efe8]" do %>
+        <%= link_to product_episode_path(@product_line.slug, @next_episode.display_id), data: { turbo_prefetch: false }, class: "flex items-center gap-2 text-sm text-ink-3 hover:text-ink" do %>
           <span><%= @next_episode.customer_title.presence || "(제목 없음)" %></span>
           <span>→</span>
         <% end %>
@@ -92,9 +92,9 @@
     <% if @comment_threads && @full_episode_access %>
       <%= render "product_lines/comments" %>
     <% elsif @comment_threads %>
-      <section id="comments" class="mt-12 scroll-mt-24 border-t border-white/10 pt-8">
-        <h2 class="text-lg font-bold text-[#f2efe8]">댓글 <span class="text-[#a8a39a]"><%= @comment_count %></span></h2>
-        <p class="mt-3 rounded-lg bg-[#15181e] px-4 py-3 text-sm text-[#c9c4ba]">이용을 시작하면 댓글을 보고 남길 수 있습니다.</p>
+      <section id="comments" class="mt-12 scroll-mt-24 border-t border-line/10 pt-8">
+        <h2 class="text-lg font-bold text-ink">댓글 <span class="text-ink-3"><%= @comment_count %></span></h2>
+        <p class="mt-3 rounded-lg bg-card px-4 py-3 text-sm text-ink-2">이용을 시작하면 댓글을 보고 남길 수 있습니다.</p>
       </section>
     <% end %>
   </main>

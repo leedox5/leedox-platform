@@ -10,7 +10,7 @@
     Rendered only when at least one featured guide is listed (the page skips it otherwise). %>
 <% lines = @featured_lines %>
 <section aria-labelledby="featured-guide-heading" class="mx-auto max-w-6xl px-2.5 pt-3.5 pb-[18px] sm:px-7 sm:pt-8 sm:pb-9">
-  <h2 id="featured-guide-heading" class="break-keep break-words font-display text-2xl font-bold text-[#f2efe8]"><%= @featured_title %></h2>
+  <h2 id="featured-guide-heading" class="break-keep break-words font-display text-2xl font-bold text-ink"><%= @featured_title %></h2>
   <% if lines.one? %>
     <%= render "leedox_home/featured_card", line: lines.first, wide: true %>
   <% else %>

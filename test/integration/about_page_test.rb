@@ -34,7 +34,7 @@ class AboutPageTest < ActionDispatch::IntegrationTest
 
     button = css_select("main a").find { |a| a.text.strip == "가이드 보러 가기" }
     assert_equal products_path, button["href"]
-    assert_includes button["class"].split, "bg-[#f0a53c]"
+    assert_includes button["class"].split, "bg-accent"
 
     html = css_select("main").first.to_html
     assert_operator html.index(BRAND), :<, html.index("series-explainer")
@@ -43,7 +43,7 @@ class AboutPageTest < ActionDispatch::IntegrationTest
 
   test "dark like the home, 10px phone margins, and the display font" do
     get about_path
-    assert_select "div.bg-\\[\\#0e1014\\] > header.bg-\\[\\#0e1014\\]\\/90"
+    assert_select "div.bg-page > header.bg-page\\/90"
     assert_select "link[rel='preload'][href*='Pretendard-Bold']", 1
     %w[px-2.5 sm:px-7].each { |k| assert_includes css_select("main > section").first["class"].split, k }
     assert_includes css_select("section[aria-labelledby='series-explainer'] > div").first["class"].split, "px-2.5"

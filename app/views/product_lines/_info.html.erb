@@ -37,7 +37,7 @@
 <% if header_box && cover %>
   <div class="overflow-hidden rounded-2xl border <%= series_theme(:box, dark) %>" data-guide-header data-guide-cover>
     <%= render "product_lines/cover_image", product_line: product_line, variant: :hero, admin: false,
-      classes: "block aspect-video w-full max-w-full bg-white/5 object-cover" %>
+      classes: "block aspect-video w-full max-w-full bg-tint/5 object-cover" %>
     <div class="p-3.5 sm:px-6 sm:py-7">
       <%= heading %>
       <%= render "product_lines/purchase_box", product_line: product_line, dark: dark, bare: true, **purchase %>

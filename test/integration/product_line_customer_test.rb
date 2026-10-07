@@ -168,7 +168,7 @@ class ProductLineCustomerTest < ActionDispatch::IntegrationTest
     heading = css_select("main h2").find { |h| h.text == "에피소드" }
     # 0090: scroll-mt-28 keeps it clear of the header + section links when jumped to (#episodes).
     # 0094 A11: 21px with 22px / 10px around on phones; sm and up as before (24px, mt-8 / mb-3).
-    assert_equal %w[mt-[22px] mb-2.5 text-[21px] sm:mt-8 sm:mb-3 sm:text-2xl scroll-mt-28 font-semibold text-[#f2efe8]].sort, heading["class"].split.sort
+    assert_equal %w[mt-[22px] mb-2.5 text-[21px] sm:mt-8 sm:mb-3 sm:text-2xl scroll-mt-28 font-semibold text-ink].sort, heading["class"].split.sort
 
     body = response.body
     assert_operator body.index(">소개</h2>"), :<, body.index(">에피소드</h2>"), "에피소드 heading comes after the intro"

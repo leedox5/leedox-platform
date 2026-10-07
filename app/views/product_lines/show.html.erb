@@ -5,7 +5,7 @@
 <% content_for :head do %>
   <%= render "shared/display_font" %>
 <% end %>
-<div class="min-h-screen bg-[#0e1014] text-[#f2efe8]">
+<div class="min-h-screen bg-page text-ink">
   <%= render "shared/header", dark: true %>
   <%# Handoff 0094 A1 -- no "← 가이드 목록" line any more (the header's 가이드 goes there); 0068 put it here. %>
   <%# 0094 A2/A3 -- 10px side and top margins on phones. %>
@@ -24,19 +24,19 @@
 
     <% if @assets_by_episode.any? %>
       <section class="mt-12">
-        <h2 class="text-lg font-bold text-[#f2efe8]">산출물</h2>
+        <h2 class="text-lg font-bold text-ink">산출물</h2>
         <div class="mt-4 space-y-3">
           <% @episodes.each do |episode| %>
             <% (@assets_by_episode[episode.id] || []).each do |asset| %>
-              <div class="flex flex-col gap-3 rounded-xl border border-white/10 bg-[#15181e] p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex flex-col gap-3 rounded-xl border border-line/10 bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div class="min-w-0">
-                  <p class="text-xs font-bold uppercase tracking-wide text-[#f0a53c]"><%= asset.kind %> · <%= episode.customer_title.presence || "(제목 없음)" %></p>
-                  <p class="mt-1 font-bold text-[#f2efe8]"><%= asset.title %></p>
-                  <% if asset.description.present? %><p class="mt-1 text-sm text-[#c9c4ba]"><%= asset.description %></p><% end %>
-                  <p class="mt-1 truncate text-xs text-[#a8a39a]"><%= asset.file.filename %> · <%= number_to_human_size(asset.file.byte_size) %></p>
+                  <p class="text-xs font-bold uppercase tracking-wide text-accent-ink"><%= asset.kind %> · <%= episode.customer_title.presence || "(제목 없음)" %></p>
+                  <p class="mt-1 font-bold text-ink"><%= asset.title %></p>
+                  <% if asset.description.present? %><p class="mt-1 text-sm text-ink-2"><%= asset.description %></p><% end %>
+                  <p class="mt-1 truncate text-xs text-ink-3"><%= asset.file.filename %> · <%= number_to_human_size(asset.file.byte_size) %></p>
                 </div>
                 <%= link_to "다운로드", product_episode_asset_path(@product_line.slug, episode.display_id, asset.id),
-                  class: "inline-flex flex-shrink-0 items-center justify-center rounded-lg bg-[#f0a53c] px-4 py-2 text-sm font-bold text-[#0e1014] hover:bg-[#f5b85e]" %>
+                  class: "inline-flex flex-shrink-0 items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-bold text-on-accent hover:bg-accent-hover" %>
               </div>
             <% end %>
           <% end %>

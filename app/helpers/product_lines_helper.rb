@@ -14,7 +14,7 @@ module ProductLinesHelper
   # Handoff 0083 -- the series list is dark (the home's palette); these two helpers are used only there.
   def product_list_filter_tab_classes(selected)
     base = "flex-shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-bold transition"
-    selected ? "#{base} bg-[#f0a53c] text-[#0e1014]" : "#{base} border border-white/15 bg-[#15181e] text-[#c9c4ba] hover:border-white/30 hover:text-[#f2efe8]"
+    selected ? "#{base} bg-accent text-on-accent" : "#{base} border border-line/15 bg-card text-ink-2 hover:border-line/30 hover:text-ink"
   end
 
   def product_list_empty_message(filter)
@@ -83,10 +83,10 @@ module ProductLinesHelper
   def product_list_state_classes(state)
     base = "flex-shrink-0 whitespace-nowrap rounded-full border px-3 py-1 text-xs font-bold"
     case state
-    when :owned then "#{base} border-[#f0a53c]/40 bg-[#f0a53c]/10 text-[#f0a53c]"
-    when :free_open then "#{base} border-[#7dd3a8]/40 bg-[#7dd3a8]/10 text-[#7dd3a8]"
-    when :for_sale then "#{base} border-white/20 bg-white/5 text-[#f2efe8]"
-    else "#{base} border-white/10 bg-transparent text-[#a8a39a]"
+    when :owned then "#{base} border-accent-soft/40 bg-accent-soft/10 text-accent-ink"
+    when :free_open then "#{base} border-ok-soft/40 bg-ok-soft/10 text-ok-ink"
+    when :for_sale then "#{base} border-line/20 bg-tint/5 text-ink"
+    else "#{base} border-line/10 bg-transparent text-ink-3"
     end
   end
 end

@@ -6,7 +6,7 @@ require "test_helper"
 # 0084 -- see dark_frame_test.rb and dark_episode_test.rb). Only colors and fonts changed on the list -- its cards,
 # badges and links are covered, unchanged, by product_line_list_test.rb.
 class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
-  DARK_HEADER = "header.bg-\\[\\#0e1014\\]\\/90"
+  DARK_HEADER = "header.bg-page\\/90"
   LIGHT_HEADER = "header.bg-white\\/90"
   FONT = "link[rel='preload'][href*='Pretendard-Bold']"
 
@@ -23,7 +23,7 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
   def assert_dark
     assert_select DARK_HEADER, 1
     assert_select FONT, 1
-    assert_select "div.bg-\\[\\#0e1014\\] > #{DARK_HEADER}"
+    assert_select "div.bg-page > #{DARK_HEADER}"
   end
 
   # D-010 (0084): a light-bodied customer page still has the dark frame (header, footer); only its body is light and
@@ -31,7 +31,7 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
   def assert_light_body
     assert_select DARK_HEADER, 1
     assert_select LIGHT_HEADER, 0
-    assert_select "div.bg-\\[\\#0e1014\\] > #{DARK_HEADER}", 0
+    assert_select "div.bg-page > #{DARK_HEADER}", 0
     assert_select "link[rel='preload'][href*='Pretendard-Bold']", 0
   end
 
@@ -41,7 +41,7 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     assert_dark
     assert_select "title", text: "가이드 | LEEDOX"
     assert_select "main h1.font-display", text: "가이드" # 0091 (D-011)
-    assert_select "main a.bg-\\[\\#15181e\\][href=?]", product_line_path("dark-line")
+    assert_select "main a.bg-card[href=?]", product_line_path("dark-line")
     assert_not_includes css_select("main").first.to_html, "bg-white"
   end
 
@@ -62,7 +62,7 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
   test "the mobile menu panel is dark on every customer page" do
     [ products_path, root_path, announcements_path ].each do |path| # /pricing removed in 0086
       get path
-      assert_select "details[data-controller='mobile-menu'] div.bg-\\[\\#15181e\\]", 1
+      assert_select "details[data-controller='mobile-menu'] div.bg-card", 1
       assert_select "details[data-controller='mobile-menu'] div.bg-white", 0
     end
   end
@@ -72,14 +72,14 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     get products_path
     assert_dark
     assert_select "#{DARK_HEADER} a", text: "로그아웃"
-    assert_select "details[data-controller='mobile-menu'] a.text-\\[\\#f0a53c\\]", text: "로그아웃"
+    assert_select "details[data-controller='mobile-menu'] a.text-accent-ink", text: "로그아웃"
   end
 
   test "the list's filter tabs and state badges use the dark palette" do
     sign_in
     get products_path
-    assert_select "nav[aria-label='가이드 필터'] a.bg-\\[\\#f0a53c\\]", text: /^전체/
-    assert_select "nav[aria-label='가이드 필터'] a.bg-\\[\\#15181e\\]", minimum: 1
+    assert_select "nav[aria-label='가이드 필터'] a.bg-accent", text: /^전체/
+    assert_select "nav[aria-label='가이드 필터'] a.bg-card", minimum: 1
   end
 
   # --- R2: the series detail -------------------------------------------------------------------------
@@ -105,7 +105,7 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     assert_select "main h1.font-display", text: "다크 시리즈"
     assert_select "a", text: "← 가이드 목록", count: 0 # 0094 A1: the back-to-list line is gone (the header has 가이드)
     assert_select "main .doc-content.doc-content-dark h2", text: "소제목"
-    assert_select "main ol a.bg-\\[\\#15181e\\][data-turbo-prefetch='false'][href=?]", product_episode_path("dark-line", "01")
+    assert_select "main ol a.bg-card[data-turbo-prefetch='false'][href=?]", product_episode_path("dark-line", "01")
     assert_select "main ol div.opacity-70", 1
     assert_select "footer a[href=?]", announcements_path, text: "공지"
     assert_not_includes css_select("main").first.to_html, "text-gray-900"
@@ -115,22 +115,22 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     gate!(@line, 33_000)
     get product_line_path("dark-line")                     # for sale (guest)
     # 0093: dark-line has no image, so the box sits inside the header box, which carries the card color.
-    assert_includes css_select("[data-guide-header]").first["class"], "bg-[#15181e]"
+    assert_includes css_select("[data-guide-header]").first["class"], "bg-card"
     assert_includes box.text, "33,000원"
-    assert_select "#product-purchase a.bg-\\[\\#f0a53c\\]", text: "구매하기"
+    assert_select "#product-purchase a.bg-accent", text: "구매하기"
 
     sign_in
     order = Commerce::OrderCreator.call!(user: @user, product_code: @line.product.code, offer_code: @line.lifetime_offer.code, requested_start_on: nil, provider: "manual")
     Commerce::ConfirmManualPayment.call!(order: order, actor: User.find_by!(role: :admin))
     get product_line_path("dark-line")                     # owned
     assert_equal "이용 중인 가이드입니다.", box.text.squish # 0092 R1
-    assert_select "#product-purchase p.text-\\[\\#f2efe8\\]", minimum: 1
+    assert_select "#product-purchase p.text-ink", minimum: 1
 
     free = ProductLine.create!(internal_name: "무료", customer_name: "무료 시리즈", slug: "dark-free", introduction: "소개", status: "published")
     gate!(free, 0)
     delete destroy_user_session_path
     get product_line_path("dark-free")                     # free start (guest)
-    assert_select "#product-purchase a.bg-\\[\\#7dd3a8\\]", text: "이용하기" # 0092 R1
+    assert_select "#product-purchase a.bg-ok", text: "이용하기" # 0092 R1
 
     free.product.update!(sale_enabled: false)
     get product_line_path("dark-free")                     # unavailable
@@ -151,6 +151,7 @@ class SeriesDarkThemeTest < ActionDispatch::IntegrationTest
     html = css_select("main").first.to_html
     assert_not_includes html, "doc-content-dark"
     assert_not_includes html, "#15181e"
+    assert_not_includes html, "bg-card" # 0101: the dark card color is a token now
     assert_select "main h1.text-gray-900", text: "다크 시리즈"
     assert_select "main h2.text-slate-900", text: "에피소드"
     assert_select "main ol a.border-gray-200"

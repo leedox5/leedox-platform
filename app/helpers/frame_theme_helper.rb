@@ -2,7 +2,7 @@
 # the screens only admins use. Each entry is [light, dark]; the light value is the class string the header always had.
 #
 # The classes live here, in a .rb file, on purpose: Tailwind's scanner drops classes that follow an arbitrary hex class
-# inside an ERB Ruby string (0083), and that is how the dark header's own background (`bg-[#0e1014]/90`) was never
+# inside an ERB Ruby string (0083), and that is how the dark header's own background (`bg-page/90`) was never
 # built -- the header has been transparent since 0071. test/assets/tailwind_build_test.rb builds the CSS and checks
 # every class here (and in the other theme tables) is actually in it.
 module FrameThemeHelper
@@ -10,30 +10,30 @@ module FrameThemeHelper
   ADMIN_ONLY_CONTROLLERS = %w[service_desk service_desk_jobs refs].freeze
 
   FRAME_THEME = {
-    header: [ "border-slate-200/70 bg-white/90 shadow-sm", "border-white/10 bg-[#0e1014]/90" ],
-    logo: [ "text-slate-950", "text-[#f2efe8]" ],
-    logo_mark: [ "bg-slate-950 text-white group-hover:bg-indigo-700", "bg-[#f0a53c] text-[#0e1014]" ],
-    nav: [ "text-slate-600", "text-[#c9c4ba]" ],
-    nav_link: [ "hover:text-slate-950", "hover:text-[#f2efe8]" ],
-    user_name: [ "text-slate-500", "text-[#a8a39a]" ],
+    header: [ "border-slate-200/70 bg-white/90 shadow-sm", "border-line/10 bg-page/90" ],
+    logo: [ "text-slate-950", "text-ink" ],
+    logo_mark: [ "bg-slate-950 text-white group-hover:bg-indigo-700", "bg-accent text-on-accent" ],
+    nav: [ "text-slate-600", "text-ink-2" ],
+    nav_link: [ "hover:text-slate-950", "hover:text-ink" ],
+    user_name: [ "text-slate-500", "text-ink-3" ],
     logout: [ "rounded-lg border border-red-200 px-4 py-2 text-red-600 transition hover:border-red-300 hover:bg-red-50",
-              "rounded-lg border border-white/25 px-4 py-2 text-[#f2efe8] transition hover:border-white/50" ],
+              "rounded-lg border border-line/25 px-4 py-2 text-ink transition hover:border-line/50" ],
     login: [ "rounded-lg border border-slate-200 px-4 py-2 text-slate-700 transition hover:border-slate-300 hover:text-slate-900",
-             "rounded-lg border border-white/25 px-4 py-2 text-[#f2efe8] transition hover:border-white/50" ],
+             "rounded-lg border border-line/25 px-4 py-2 text-ink transition hover:border-line/50" ],
     signup: [ "rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700",
-              "rounded-lg bg-[#f0a53c] px-4 py-2 font-semibold text-[#0e1014] transition hover:bg-[#f5b85e]" ],
-    menu_button: [ "border-slate-200 text-slate-700 hover:bg-slate-50", "border-white/25 text-[#f2efe8] hover:bg-white/10" ],
-    panel: [ "border-slate-200 bg-white", "border-white/10 bg-[#15181e]" ],
-    panel_link: [ "text-slate-700 hover:bg-slate-50 hover:text-slate-950", "text-[#c9c4ba] hover:bg-white/5 hover:text-[#f2efe8]" ],
-    panel_divider: [ "border-slate-100", "border-white/10" ],
-    panel_name: [ "text-slate-500", "text-[#a8a39a]" ],
-    panel_logout: [ "text-red-600 hover:bg-red-50", "text-[#f0a53c] hover:bg-white/5" ],
-    panel_login: [ "border-slate-200 text-slate-700 hover:bg-slate-50", "border-white/25 text-[#f2efe8] hover:border-white/50" ],
-    panel_signup: [ "bg-blue-600 text-white hover:bg-blue-700", "bg-[#f0a53c] text-[#0e1014] hover:bg-[#f5b85e]" ]
+              "rounded-lg bg-accent px-4 py-2 font-semibold text-on-accent transition hover:bg-accent-hover" ],
+    menu_button: [ "border-slate-200 text-slate-700 hover:bg-slate-50", "border-line/25 text-ink hover:bg-tint/10" ],
+    panel: [ "border-slate-200 bg-white", "border-line/10 bg-card" ],
+    panel_link: [ "text-slate-700 hover:bg-slate-50 hover:text-slate-950", "text-ink-2 hover:bg-tint/5 hover:text-ink" ],
+    panel_divider: [ "border-slate-100", "border-line/10" ],
+    panel_name: [ "text-slate-500", "text-ink-3" ],
+    panel_logout: [ "text-red-600 hover:bg-red-50", "text-accent-ink hover:bg-tint/5" ],
+    panel_login: [ "border-slate-200 text-slate-700 hover:bg-slate-50", "border-line/25 text-ink hover:border-line/50" ],
+    panel_signup: [ "bg-blue-600 text-white hover:bg-blue-700", "bg-accent text-on-accent hover:bg-accent-hover" ]
   }.freeze
 
   # The footer is only used on customer pages, so it is always dark; its link class sits here for the same reason.
-  FOOTER_LINK_CLASS = "transition hover:text-[#f2efe8]".freeze
+  FOOTER_LINK_CLASS = "transition hover:text-ink".freeze
 
   def frame_theme(key, dark)
     FRAME_THEME.fetch(key)[dark ? 1 : 0]
@@ -54,7 +54,7 @@ module FrameThemeHelper
   # replaced) -- unlike <html>'s attributes, which it keeps across visits.
   BODY_CLASS = {
     light: "bg-slate-50 text-slate-900 antialiased",
-    dark: "bg-[#0e1014] text-slate-900 antialiased [color-scheme:dark]"
+    dark: "bg-page text-slate-900 antialiased [color-scheme:dark]"
   }.freeze
 
   def dark_page?

@@ -4,7 +4,7 @@
     "N편" (published only; 공개 예정 when none). No teaser, no "공개 N편 · 공개 예정 M편" line. Phones (two a row): a
     smaller badge, a 14px name that wraps between words; from sm the old sizes. %>
 <% state = @series_access_states[line.id] %>
-<%= link_to product_line_path(line.slug), class: "flex flex-col overflow-hidden rounded-xl border border-white/10 bg-[#15181e] transition hover:border-[#f0a53c]/60" do %>
+<%= link_to product_line_path(line.slug), class: "flex flex-col overflow-hidden rounded-xl border border-line/10 bg-card transition hover:border-accent-soft/60" do %>
   <% if line.cover_image.attached? %>
     <%= render "product_lines/cover_image", product_line: line, variant: :thumb, classes: "block aspect-video w-full object-cover" %>
   <% else %>
@@ -14,7 +14,7 @@
     <% if state %>
       <span class="<%= product_list_state_classes(state) %> max-sm:px-2 max-sm:py-0.5 max-sm:text-[11px]"><%= product_list_state_label(state, line) %></span>
     <% end %>
-    <h3 class="mt-1.5 break-keep break-words text-sm font-bold leading-5 text-[#f2efe8] sm:mt-2 sm:text-base sm:leading-6"><%= line.customer_name %></h3>
-    <p class="mt-auto pt-1.5 text-xs text-[#a8a39a] sm:pt-3"><%= guide_episode_count_label(@published_counts.fetch(line.id, 0)) %></p>
+    <h3 class="mt-1.5 break-keep break-words text-sm font-bold leading-5 text-ink sm:mt-2 sm:text-base sm:leading-6"><%= line.customer_name %></h3>
+    <p class="mt-auto pt-1.5 text-xs text-ink-3 sm:pt-3"><%= guide_episode_count_label(@published_counts.fetch(line.id, 0)) %></p>
   </div>
 <% end %>

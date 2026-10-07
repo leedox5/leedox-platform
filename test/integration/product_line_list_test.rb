@@ -150,7 +150,7 @@ class ProductLineListTest < ActionDispatch::IntegrationTest
 
     get products_path(filter: "mine")
     assert_response :success
-    assert_select "nav[aria-label='가이드 필터'] a.bg-\\[\\#f0a53c\\]", text: /^전체/
+    assert_select "nav[aria-label='가이드 필터'] a.bg-accent", text: /^전체/
 
     sign_in(user)
     get products_path
@@ -162,7 +162,7 @@ class ProductLineListTest < ActionDispatch::IntegrationTest
     get products_path(filter: "bogus")
     assert_response :success
     assert_select "a[href=?]", product_line_path(line.slug)
-    assert_select "nav[aria-label='가이드 필터'] a.bg-\\[\\#f0a53c\\]", text: /^전체/
+    assert_select "nav[aria-label='가이드 필터'] a.bg-accent", text: /^전체/
   end
 
   test "free/paid/mine reuse access_state exactly -- a product already owned counts by what it costs, not just its exact badge" do

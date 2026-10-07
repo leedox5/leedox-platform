@@ -15,7 +15,7 @@
 <% content_for :head do %>
   <%= render "shared/display_font" %>
 <% end %>
-<div class="min-h-screen bg-[#0e1014] text-[#f2efe8]">
+<div class="min-h-screen bg-page text-ink">
   <%= render "shared/header" %>
 
   <main class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -24,7 +24,7 @@
         are small link cards (name, 이용 중, period) to their table of contents. Which cards appear is unchanged
         (0080/0085). %>
     <section aria-label="이용 중인 콘텐츠">
-      <h1 class="mb-6 font-display text-2xl font-bold text-[#f2efe8] sm:text-3xl"><%= current_user.name %>님이 이용 중인 콘텐츠</h1>
+      <h1 class="mb-6 font-display text-2xl font-bold text-ink sm:text-3xl"><%= current_user.name %>님이 이용 중인 콘텐츠</h1>
 
       <% if @series_in_use.any? %>
         <section aria-label="이용 중인 가이드" class="mb-10">
@@ -41,29 +41,29 @@
       <% end %>
 
       <% if @legacy_products.any? %>
-        <h2 class="mb-4 font-display text-xl font-bold text-[#f2efe8]">이전 상품</h2>
+        <h2 class="mb-4 font-display text-xl font-bold text-ink">이전 상품</h2>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <% @legacy_products.each do |product| %>
             <%# The aria-label keeps the section the earlier tests and screen readers find by the product's name. %>
             <section aria-label="<%= product.name %> 현황">
               <%= link_to product_content_index_path(product.code), data: { legacy_card: product.code },
-                class: "block rounded-xl border border-white/10 bg-[#15181e] px-5 py-4 transition hover:border-[#f0a53c]/60" do %>
+                class: "block rounded-xl border border-line/10 bg-card px-5 py-4 transition hover:border-accent-soft/60" do %>
                 <span class="flex items-center justify-between gap-3">
-                  <span class="min-w-0 break-words font-bold text-[#f2efe8]"><%= product.name %></span>
+                  <span class="min-w-0 break-words font-bold text-ink"><%= product.name %></span>
                   <span class="<%= dashboard_in_use_badge.last %>"><%= dashboard_in_use_badge.first %></span>
                 </span>
-                <span class="mt-1 block text-sm text-[#c9c4ba]"><%= dashboard_license_period_text(@legacy_licenses[product.id]) %></span>
+                <span class="mt-1 block text-sm text-ink-2"><%= dashboard_license_period_text(@legacy_licenses[product.id]) %></span>
               <% end %>
             </section>
           <% end %>
         </div>
       <% elsif @series_in_use.none? %>
-        <section aria-label="이용 중인 콘텐츠 없음" class="rounded-2xl border border-white/10 bg-[#15181e] p-8 text-center">
-          <p class="text-base font-semibold text-[#f2efe8]">아직 이용 중인 콘텐츠가 없습니다.</p>
+        <section aria-label="이용 중인 콘텐츠 없음" class="rounded-2xl border border-line/10 bg-card p-8 text-center">
+          <p class="text-base font-semibold text-ink">아직 이용 중인 콘텐츠가 없습니다.</p>
           <% if @browse_series.any? %>
-            <p class="mt-1 text-sm text-[#c9c4ba]">아래에서 관심 있는 콘텐츠를 둘러보세요.</p>
+            <p class="mt-1 text-sm text-ink-2">아래에서 관심 있는 콘텐츠를 둘러보세요.</p>
           <% else %>
-            <%= link_to "가이드 둘러보기 →", products_path, class: "mt-2 inline-block text-sm font-semibold text-[#f0a53c] hover:text-[#f5b85e]" %>
+            <%= link_to "가이드 둘러보기 →", products_path, class: "mt-2 inline-block text-sm font-semibold text-accent-ink hover:text-accent-ink-hover" %>
           <% end %>
         </section>
       <% end %>
@@ -71,7 +71,7 @@
 
     <% if @browse_series.any? %>
       <section aria-label="다른 콘텐츠" class="mt-12">
-        <h2 class="mb-4 font-display text-xl font-bold text-[#f2efe8]">다른 콘텐츠</h2>
+        <h2 class="mb-4 font-display text-xl font-bold text-ink">다른 콘텐츠</h2>
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <% @browse_series.each do |line| %>
             <%= render "product_lines/list_card", line: line, state: @browse_states[line.id],

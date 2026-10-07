@@ -6,13 +6,13 @@
     The links work as plain anchors; section_nav_controller only marks the section in view (aria-current). %>
 <% if items.size > 1 %>
   <nav aria-label="가이드 바로가기" data-controller="section-nav"
-    class="sticky top-[64px] z-40 -mx-2.5 mt-3 border-b border-white/10 bg-[#0e1014] px-2.5 sm:-mx-7 sm:mt-6 sm:px-7 md:top-[62px]">
+    class="sticky top-[64px] z-40 -mx-2.5 mt-3 border-b border-line/10 bg-page px-2.5 sm:-mx-7 sm:mt-6 sm:px-7 md:top-[62px]">
     <%# 0094 A9 -- 16px at every width, a bit less padding on phones. %>
     <ul class="flex gap-6 text-base font-semibold">
       <% items.each do |label, id| %>
         <li>
           <a href="#<%= id %>" data-section-nav-target="link"
-            class="inline-block border-b-2 border-transparent py-2 text-[#a8a39a] sm:py-2.5 transition hover:text-[#f2efe8] aria-[current=true]:border-[#f0a53c] aria-[current=true]:text-[#f2efe8]"><%= label %></a>
+            class="inline-block border-b-2 border-transparent py-2 text-ink-3 sm:py-2.5 transition hover:text-ink aria-[current=true]:border-accent-soft aria-[current=true]:text-ink"><%= label %></a>
         </li>
       <% end %>
     </ul>

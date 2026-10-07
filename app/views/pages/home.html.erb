@@ -13,7 +13,7 @@
   <%= render "shared/display_font" %>
 <% end %>
 
-<div class="min-h-screen bg-[#0e1014] text-[#f2efe8]">
+<div class="min-h-screen bg-page text-ink">
   <%= render "shared/header", dark: true %>
   <%= render "leedox_home/notice_line", notice_item: @home_notice if @home_notice %>
 
@@ -23,7 +23,7 @@
     <%# Handoff 0096 -- no "새로 공개 · 공개 예정" row any more (Tommy: dull on a phone). %>
     <%= render "leedox_home/track_rows" %>
     <p class="mx-auto max-w-6xl px-2.5 py-6 text-center text-sm sm:px-7" data-about-line>
-      <a href="<%= about_path %>" class="text-[#a8a39a] transition hover:text-[#f2efe8]">LEEDOX는 어떤 곳인가요? <span aria-hidden="true" class="text-[#f0a53c]">→</span></a>
+      <a href="<%= about_path %>" class="text-ink-3 transition hover:text-ink">LEEDOX는 어떤 곳인가요? <span aria-hidden="true" class="text-accent-ink">→</span></a>
     </p>
   </main>
 

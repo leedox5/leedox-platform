@@ -47,7 +47,7 @@ class SeriesSectionNavTest < ActionDispatch::IntegrationTest
     assert_includes classes, "sticky"
     assert_includes classes, "top-[64px]"    # header 65px on mobile, minus 1px under its border
     assert_includes classes, "md:top-[62px]" # header 63px from md up
-    assert_includes classes, "bg-[#0e1014]"
+    assert_includes classes, "bg-page"
     assert_equal "section-nav", nav["data-controller"]
     assert_includes css_select("#intro").first["class"].split, "scroll-mt-28"
     assert_includes css_select("#episodes").first["class"].split, "scroll-mt-28"

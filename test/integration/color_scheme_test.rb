@@ -4,7 +4,7 @@ require "test_helper"
 # they are dark: <meta name="color-scheme" content="dark"> in <head> and a dark, color-scheme:dark <body>. Every
 # other page keeps the light body it always had and no declaration. Per page, not per controller.
 class ColorSchemeTest < ActionDispatch::IntegrationTest
-  DARK_BODY = %w[bg-[#0e1014] text-slate-900 antialiased [color-scheme:dark]].freeze
+  DARK_BODY = %w[bg-page text-slate-900 antialiased [color-scheme:dark]].freeze
   LIGHT_BODY = %w[bg-slate-50 text-slate-900 antialiased].freeze
 
   setup do

@@ -18,18 +18,18 @@
 <% label = if !free then (next_episode ? "구매하고 이어 보기" : "구매하기")
            elsif signed_in then (next_episode ? "이용하고 이어 보기" : "이용하기")
            else (next_episode ? "로그인하고 이어 보기" : "이용하기") end %>
-<section aria-label="이어 보기" id="continue-box" class="mt-8 rounded-2xl border border-white/10 bg-[#15181e] p-5">
-  <p class="break-keep text-sm leading-6 text-[#c9c4ba]"><%= message %></p>
+<section aria-label="이어 보기" id="continue-box" class="mt-8 rounded-2xl border border-line/10 bg-card p-5">
+  <p class="break-keep text-sm leading-6 text-ink-2"><%= message %></p>
   <% if next_episode %>
-    <p class="mt-2 truncate text-xs text-[#a8a39a]">다음 편 · <%= next_episode.customer_title.presence || "(제목 없음)" %></p>
+    <p class="mt-2 truncate text-xs text-ink-3">다음 편 · <%= next_episode.customer_title.presence || "(제목 없음)" %></p>
   <% end %>
   <div class="mt-4">
     <% if free && signed_in %>
       <%= button_to label, product_continue_path(product_line.slug, to: to), method: :post,
-        class: "inline-flex items-center justify-center whitespace-nowrap rounded-xl bg-[#7dd3a8] px-6 py-3 text-sm font-bold text-[#0e1014] hover:bg-[#9be0bd]" %>
+        class: "inline-flex items-center justify-center whitespace-nowrap rounded-xl bg-ok px-6 py-3 text-sm font-bold text-on-accent hover:bg-ok-hover" %>
     <% else %>
       <%= link_to label, product_continue_path(product_line.slug, to: to), data: { turbo_prefetch: false },
-        class: "inline-flex items-center justify-center whitespace-nowrap rounded-xl bg-[#f0a53c] px-6 py-3 text-sm font-bold text-[#0e1014] hover:bg-[#f5b85e]" %>
+        class: "inline-flex items-center justify-center whitespace-nowrap rounded-xl bg-accent px-6 py-3 text-sm font-bold text-on-accent hover:bg-accent-hover" %>
     <% end %>
   </div>
 </section>
