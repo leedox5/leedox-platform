@@ -1,0 +1,27 @@
+<%# Handoff 0105 -- the 길잡이 줄 of a long episode (three or more body h2s -- EpisodePage::TOC_MIN_SECTIONS): sticky
+    right under the header, the body's width. "4 / 25 · the heading you're reading · ▾" (just "목차" before the first
+    heading), a line along its bottom that fills as the page scrolls, and a press opens the list -- 처음으로 and every
+    h2 (EpisodePage#with_section_ids gives them their ids). episode_toc_controller.js does all of that; without
+    JavaScript the bar stays hidden (the body reads the same without it). Same-page jumps are scrolls, never visits,
+    so they are never counted as views. z-40 keeps it under the header and its phone menu (z-50). Colors are tokens. %>
+<div data-controller="episode-toc" data-episode-toc hidden
+  class="sticky top-[65px] z-40 border-b border-line/12 bg-page/96 backdrop-blur">
+  <div class="relative mx-auto max-w-3xl px-2.5 sm:px-7">
+    <button type="button" aria-expanded="false" aria-controls="episode-toc-list" data-episode-toc-target="button" data-action="episode-toc#toggle"
+      class="flex h-[38px] w-full items-center gap-2 text-left text-[13px] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-soft">
+      <span data-episode-toc-target="counter" hidden class="shrink-0 font-semibold tabular-nums text-accent-ink"></span>
+      <span data-episode-toc-target="current" class="min-w-0 flex-1 truncate text-ink">목차</span>
+      <span aria-hidden="true" class="shrink-0 text-ink-3">▾</span>
+    </button>
+    <nav id="episode-toc-list" aria-label="이 편의 목차" hidden data-episode-toc-target="list"
+      class="absolute inset-x-2.5 top-full max-h-[60vh] overflow-y-auto rounded-b-xl border border-t-0 border-line/12 bg-card py-1 shadow-xl sm:inset-x-7">
+      <a href="#" data-action="episode-toc#jump" data-episode-toc-target="item"
+        class="block px-3.5 py-2 text-[13px] text-ink-2 hover:text-ink">처음으로</a>
+      <% sections.each do |id, text| %>
+        <a href="#<%= id %>" data-action="episode-toc#jump" data-episode-toc-target="item" data-section-id="<%= id %>"
+          class="block break-keep px-3.5 py-2 text-[13px] text-ink-2 hover:text-ink aria-[current=true]:font-bold aria-[current=true]:text-accent-ink"><%= text %></a>
+      <% end %>
+    </nav>
+  </div>
+  <div aria-hidden="true" data-episode-toc-target="progress" class="absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-accent"></div>
+</div>

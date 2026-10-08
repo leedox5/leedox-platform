@@ -222,3 +222,112 @@
 .doc-content-dark td {
 	@apply border-line/10;
 }
+
+/* Handoff 0105 -- the customer body (.doc-content-dark: episode bodies and 실전 자료, the guide introduction; the name
+   is old, it is the light mode's body too) reads as a tighter document. Every width: words stay whole (keep-all --
+   a code block keeps its own rules) and h2 / h3 are the display face. The anchors the 길잡이 줄 jumps to land under the
+   header (65px) and the bar (38px). The light .doc-content (notices, admin preview, legacy, refs) is untouched. */
+.doc-content-dark {
+	word-break: keep-all;
+	overflow-wrap: break-word;
+}
+
+.doc-content-dark pre {
+	word-break: normal;
+}
+
+.doc-content-dark h1,
+.doc-content-dark h2,
+.doc-content-dark h3 {
+	font-family: var(--font-display);
+	letter-spacing: -0.02em;
+}
+
+.doc-content-dark h2[id] {
+	scroll-margin-top: 112px;
+}
+
+/* Phones (below sm): HQ's mock values -- paragraphs 15/24 with 10px between, closer code blocks, quotes, rules and
+   headings, 13px code and tables; list items 4px apart (lists sit 10px from what's around them, like a paragraph).
+   Unlayered like the rules above, and after them, so these win; sm and up keep the values above. The guide intro's
+   first element still loses its top margin (.guide-intro, 0094 -- a more specific rule). */
+@media (width < 40rem) {
+	.doc-content-dark p,
+	.doc-content-dark li {
+		font-size: 15px;
+		line-height: 24px;
+	}
+
+	.doc-content-dark p {
+		margin-bottom: 10px;
+	}
+
+	.doc-content-dark ul,
+	.doc-content-dark ol {
+		margin-top: 10px;
+		margin-bottom: 10px;
+	}
+
+	.doc-content-dark li {
+		margin-bottom: 4px;
+	}
+
+	.doc-content-dark code {
+		font-size: 13px;
+	}
+
+	.doc-content-dark pre {
+		margin-top: 10px;
+		margin-bottom: 10px;
+		padding: 9px 12px;
+		font-size: 13px;
+		line-height: 20px;
+	}
+
+	.doc-content-dark pre code {
+		line-height: 20px;
+	}
+
+	.doc-content-dark blockquote {
+		margin-top: 12px;
+		margin-bottom: 12px;
+		padding: 8px 12px;
+	}
+
+	.doc-content-dark blockquote p {
+		margin-bottom: 0;
+	}
+
+	.doc-content-dark hr {
+		margin-top: 22px;
+		margin-bottom: 0;
+	}
+
+	/* HQ R1 -- a "# heading" inside the body stays smaller than the page title (22px). */
+	.doc-content-dark h1 {
+		margin-top: 20px;
+		margin-bottom: 8px;
+		font-size: 21px;
+		line-height: 28px;
+	}
+
+	.doc-content-dark h2 {
+		margin-top: 18px;
+		margin-bottom: 8px;
+		font-size: 19px;
+		line-height: 26px;
+	}
+
+	.doc-content-dark h3 {
+		margin-top: 16px;
+		margin-bottom: 6px;
+		font-size: 16px;
+		line-height: 24px;
+	}
+
+	.doc-content-dark table,
+	.doc-content-dark th,
+	.doc-content-dark td {
+		font-size: 13px;
+	}
+}

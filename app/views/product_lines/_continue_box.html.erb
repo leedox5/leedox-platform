@@ -18,7 +18,7 @@
 <% label = if !free then (next_episode ? "구매하고 이어 보기" : "구매하기")
            elsif signed_in then (next_episode ? "이용하고 이어 보기" : "이용하기")
            else (next_episode ? "로그인하고 이어 보기" : "이용하기") end %>
-<section aria-label="이어 보기" id="continue-box" class="mt-8 rounded-2xl border border-line/10 bg-card p-5">
+<section aria-label="이어 보기" id="continue-box" class="mt-6 rounded-2xl border border-line/10 bg-card p-5 sm:mt-8">
   <p class="break-keep text-sm leading-6 text-ink-2"><%= message %></p>
   <% if next_episode %>
     <p class="mt-2 truncate text-xs text-ink-3">다음 편 · <%= next_episode.customer_title.presence || "(제목 없음)" %></p>

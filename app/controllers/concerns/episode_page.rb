@@ -5,13 +5,17 @@
 module EpisodePage
   extend ActiveSupport::Concern
 
+  # Handoff 0105 -- the 길잡이 줄 (sticky table of contents) shows from this many body h2s up.
+  TOC_MIN_SECTIONS = 3
+
   private
 
   def prepare_episode_page
     index = @episodes.index(@current_episode)
     @prev_episode = index.positive? ? @episodes[index - 1] : nil
     @next_episode = @episodes[index + 1]
-    @content_html = ContentMarkdown.render(strip_leading_heading(@current_episode.body.to_s), parent: @current_episode)
+    @content_html, @episode_sections = with_section_ids(
+      ContentMarkdown.render(strip_leading_heading(@current_episode.body.to_s), parent: @current_episode))
     @takeaways = @current_episode.content_takeaways.ordered.map do |takeaway|
       { kind: takeaway.kind, body_html: ContentMarkdown.render(takeaway.body.to_s, parent: @current_episode) }
     end
@@ -20,6 +24,22 @@ module EpisodePage
     # (the view), and only the comment count is shown.
     @full_episode_access = full_episode_access?
     load_episode_comments
+  end
+
+  # Handoff 0105 -- every top-level h2 of the body gets id="section-N" (its order, not its words, so editing a heading
+  # doesn't break a link to it), and [[id, heading text], ...] feeds the 길잡이 줄. Only the customer episode page does
+  # this -- ContentMarkdown (shared with the guide introduction, the admin preview and notices) still drops ids.
+  # Takeaways are rendered separately, so their headings are never counted.
+  def with_section_ids(html)
+    fragment = Nokogiri::HTML5.fragment(html)
+    headings = fragment.children.select { |node| node.element? && node.name == "h2" }
+    return [ html, [] ] if headings.empty?
+
+    sections = headings.each_with_index.map do |heading, index|
+      heading["id"] = "section-#{index + 1}"
+      [ heading["id"], heading.text.squish ]
+    end
+    [ fragment.to_html.html_safe, sections ]
   end
 
   # The comment thread: top-level comments oldest first, each with its replies oldest first,

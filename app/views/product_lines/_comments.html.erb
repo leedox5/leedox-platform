@@ -8,7 +8,8 @@
 <% reply_targets = @comment_threads.filter_map { |comment, _| comment.id if comment.visible? } %>
 <% top_rejected = rejected if rejected && !reply_targets.include?(rejected.parent_id) %>
 <%# Handoff 0084 R2 (D-010) -- dark like the episode page around it; content and behavior unchanged. %>
-<section id="comments" class="mt-12 scroll-mt-24 border-t border-line/10 pt-8">
+<%# Handoff 0105 -- closer on phones (28px above, 24px inside the rule); sm and up as before. %>
+<section id="comments" class="mt-7 scroll-mt-24 border-t border-line/10 pt-6 sm:mt-12 sm:pt-8">
   <h2 class="text-lg font-bold text-ink">댓글 <span class="text-ink-3"><%= @comment_count %></span></h2>
 
   <% if user_signed_in? %>
