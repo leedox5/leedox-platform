@@ -39,9 +39,10 @@ class EpisodePageDensityTest < ActionDispatch::IntegrationTest
     %w[text-xs font-bold text-accent-ink].each { |k| assert_includes classes(guide), k }
     assert_equal "h1", title.name
     %w[mt-1 break-keep break-words font-display text-[22px] leading-[30px] sm:text-3xl sm:leading-9].each { |k| assert_includes classes(title), k } # HQ R1: 36px from sm
-    %w[mb-3.5 pb-2.5 border-b sm:mb-8 sm:pb-4].each { |k| assert_includes classes(block), k }
+    %w[mb-3.5 pb-2.5 border-b sm:mb-5 sm:pb-3].each { |k| assert_includes classes(block), k } # 0106: sm 20px / 12px
     assert_not_includes block.text, "최종 업데이트"
-    %w[px-2.5 pt-3 sm:px-7 sm:py-10 max-w-3xl].each { |k| assert_includes classes(main), k }
+    %w[px-2.5 pt-3 pb-10 sm:px-7 sm:pt-6 max-w-3xl].each { |k| assert_includes classes(main), k } # 0106: sm 24px above, 40px below as before
+    assert_not_includes classes(main), "sm:py-10"
   end
 
   # --- (라) ------------------------------------------------------------------------------------------------------
@@ -150,6 +151,34 @@ class EpisodePageDensityTest < ActionDispatch::IntegrationTest
     assert_match(/\.doc-content-dark\{word-break:keep-all;overflow-wrap:break-word\}/, css)
     assert_match(/\.doc-content-dark h1,\.doc-content-dark h2,\.doc-content-dark h3\{font-family:var\(--font-display\);letter-spacing:-\.02em\}/, css)
     assert_match(/\.doc-content-dark h2\[id\]\{scroll-margin-top:112px\}/, css)
+  end
+
+  # Handoff 0106 -- sm and up: tighter with the 16px text kept; the phone block above is unchanged.
+  test "the sm-and-up body values are in the built CSS for .doc-content-dark only, with no font size for text" do
+    css = Dir.mktmpdir do |dir|
+      out = File.join(dir, "t.css")
+      _o, err, status = Open3.capture3(Tailwindcss::Ruby.executable, "-i", Rails.root.join("app/assets/tailwind/application.css").to_s,
+        "-o", out, "--minify", chdir: Rails.root.to_s)
+      assert status.success?, err
+      File.read(out)
+    end
+    pc = css[/@media \(min-width:40rem\)\{\.doc-content-dark p,\.doc-content-dark li\{line-height:26px\}.*?\.doc-content-dark h3\{[^}]*\}\}/m]
+    assert pc, "the sm-and-up block"
+    {
+      ".doc-content-dark p{" => "margin-bottom:14px",
+      ".doc-content-dark ul,.doc-content-dark ol{" => "margin-top:14px;margin-bottom:14px",
+      ".doc-content-dark li{" => "margin-bottom:6px",
+      ".doc-content-dark pre{" => "margin-top:12px;margin-bottom:12px;padding:12px 16px",
+      ".doc-content-dark blockquote{" => "margin-top:14px;margin-bottom:14px;padding:10px 16px",
+      ".doc-content-dark blockquote p{" => "margin-bottom:0",
+      ".doc-content-dark hr{" => "margin-top:28px;margin-bottom:0",
+      ".doc-content-dark h1{" => "margin-top:28px;margin-bottom:10px;font-size:26px;line-height:34px",
+      ".doc-content-dark h2{" => "margin-top:24px;margin-bottom:10px;font-size:22px;line-height:30px",
+      ".doc-content-dark h3{" => "margin-top:20px;margin-bottom:6px;font-size:18px;line-height:26px"
+    }.each { |selector, decls| assert_includes pc, "#{selector}#{decls}}", selector }
+    assert_no_match(/\.doc-content-dark (p|li|pre|code|blockquote)[^{]*\{[^}]*font-size/, pc, "text sizes stay as they are (16px, the 14px box)")
+    assert_no_match(/\.doc-content (p|h2|pre)\{/, pc, "the light .doc-content isn't touched")
+    assert_includes css, ".doc-content-dark p{margin-bottom:10px}", "the phone block (0105) is still there"
   end
 
   test "pages with only the light body keep it: a notice and the admin preview" do

@@ -331,3 +331,71 @@
 		font-size: 13px;
 	}
 }
+
+/* Handoff 0106 -- sm and up get a tighter body too, with the 16px text kept (a PC line is long, so the phone's
+   15/24 isn't reused): paragraphs 26px apart by line with 14px between, closer code blocks, quotes, rules and
+   headings (page title 30 > body h1 26 > h2 22 > h3 18). Lists follow the phone's proportions: items 6px apart
+   (0.4 x the paragraph gap, like 4 / 10), lists 14px from what's around them. Font sizes aren't set here, so a
+   14px box (실전 자료, text-sm) stays 14px. Tables keep 14px / 20px. */
+@media (width >= 40rem) {
+	.doc-content-dark p,
+	.doc-content-dark li {
+		line-height: 26px;
+	}
+
+	.doc-content-dark p {
+		margin-bottom: 14px;
+	}
+
+	.doc-content-dark ul,
+	.doc-content-dark ol {
+		margin-top: 14px;
+		margin-bottom: 14px;
+	}
+
+	.doc-content-dark li {
+		margin-bottom: 6px;
+	}
+
+	.doc-content-dark pre {
+		margin-top: 12px;
+		margin-bottom: 12px;
+		padding: 12px 16px;
+	}
+
+	.doc-content-dark blockquote {
+		margin-top: 14px;
+		margin-bottom: 14px;
+		padding: 10px 16px;
+	}
+
+	.doc-content-dark blockquote p {
+		margin-bottom: 0;
+	}
+
+	.doc-content-dark hr {
+		margin-top: 28px;
+		margin-bottom: 0;
+	}
+
+	.doc-content-dark h1 {
+		margin-top: 28px;
+		margin-bottom: 10px;
+		font-size: 26px;
+		line-height: 34px;
+	}
+
+	.doc-content-dark h2 {
+		margin-top: 24px;
+		margin-bottom: 10px;
+		font-size: 22px;
+		line-height: 30px;
+	}
+
+	.doc-content-dark h3 {
+		margin-top: 20px;
+		margin-bottom: 6px;
+		font-size: 18px;
+		line-height: 26px;
+	}
+}
