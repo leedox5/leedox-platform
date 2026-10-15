@@ -67,7 +67,7 @@ group :development do
   gem "letter_opener"
 end
 
-gem "pg", "~> 1.6"
+gem "pg", "~> 1.7"
 
 gem "devise", "~> 5.0"
 
